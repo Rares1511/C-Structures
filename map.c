@@ -1,9 +1,5 @@
 #include "map.h"
 
-size_t pair_size ( pair* p ) {
-    return 2 * sizeof ( size_t ) + p->dim1 + p->dim2;
-}
-
 pair *get_pair ( map *m, size_t pos ) {
     pair *p = malloc ( PAIR_SIZE );
     memcpy ( &p->dim1, m->vec + pos, sizeof ( size_t ) );
@@ -18,11 +14,13 @@ pair *get_pair ( map *m, size_t pos ) {
     return p;
 }
 
-size_t get_starting_point ( map *m ) {
+size_t get_starting_point ( map *m, void *key, size_t dim ) {
     size_t pos = 0, aux1, aux2;
     for ( size_t i = 0; i < m->size; i++ ) {
         memcpy ( &aux1, m->vec + pos, sizeof ( size_t ) );
         memcpy ( &aux2, m->vec + pos + sizeof ( size_t ), sizeof ( size_t ) );
+        if ( aux1 == dim && universal_compare ( m->vec + 2 * sizeof ( size_t ), key, dim ) == 0 )
+            return -1;
         pos += 2 * sizeof ( size_t ) + aux1 + aux2;
     }
     return pos;
@@ -50,7 +48,8 @@ enum return_codes map_pair_insert ( map *m, pair *p ) {
         }
         m->cap += INIT_CAPACITY;
     }
-    size_t pos = get_starting_point ( m );
+    size_t pos = get_starting_point ( m, p->first, p->dim1 );
+    if ( pos == -1 ) return WRONG_ELEMENT;
     memcpy ( m->vec + pos, &p->dim1, sizeof ( size_t ) );
     memcpy ( m->vec + pos + sizeof ( size_t ), &p->dim2, sizeof ( size_t ) );
     memcpy ( m->vec + pos + 2 * sizeof ( size_t ), p->first, p->dim1 );
@@ -58,6 +57,16 @@ enum return_codes map_pair_insert ( map *m, pair *p ) {
     m->size++;
     m->used_cap += pair_size ( p );
     return SUCCESSFUL_ADDITION;
+}
+
+/* makes a pair using the values given, must give dimension in case of pointer carrying arrays */
+pair *map_make_pair ( void *key, size_t key_dim, void *value, size_t val_dim ) {
+    pair *p = malloc ( PAIR_SIZE );
+    p->dim1 = key_dim;
+    p->dim2 = val_dim;
+    memcpy ( p->first, key, p->dim1 );
+    memcpy ( p->second, value, p->dim2 );
+    return p;
 }
 
 /* returns the pair in which the key is the one given, or NULL if there is no value with the key */
