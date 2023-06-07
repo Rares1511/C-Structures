@@ -34,16 +34,16 @@ map *map_initiate ( ) {
     map *m = malloc ( MAP_SIZE );
     if ( !m ) return NULL;
     m->size = 0;
-    m->cap = INIT_CAPACITY;
+    m->cap = INIT_CAPACITY * PAIR_SIZE;
     m->used_cap = 0;
-    m->vec = malloc ( PAIR_SIZE * INIT_CAPACITY );
+    m->vec = malloc ( m->cap );
     return m;
 }
 
 /* inserts the given pair in the map or returns an error if the key already exists */
 enum return_codes map_pair_insert ( map *m, pair *p ) {
     if ( m->cap + pair_size ( p ) > m->cap ) {
-        m->vec = realloc ( m->vec, ( m->cap + INIT_CAPACITY ) * PAIR_SIZE );
+        m->vec = realloc ( m->vec, ( m->cap + INIT_CAPACITY ) );
         if ( !m->vec ) {
             free ( m );
             return MEMORY_PROBLEM;
@@ -90,10 +90,30 @@ enum return_codes map_erase ( map *m, void *key, size_t dim ) {
 }
 
 /* updates the value of the given key with the new value */
-enum return_codes map_updae ( map *m, void *key, size_t dim, void *val ) {
-
+enum return_codes map_update ( map *m, void *key, size_t key_dim, void *val, size_t val_dim ) {
+    size_t pos = 0;
+    pair *p;
+    for ( size_t i = 0; i < m->size; i++ ) {
+        p = get_pair ( m, pos );
+        if ( p->dim1 == key_dim && universal_compare ( p->first, key, key_dim ) == 0 ) {
+            if ( m->used_cap - p->dim2 + val_dim > m->cap ) {
+                m->vec = realloc ( m->vec, ( m->cap + INIT_CAPACITY ) );
+                if ( !m->vec ) {
+                    free ( m );
+                    return MEMORY_PROBLEM;
+                }
+                m->cap += INIT_CAPACITY;
+            }
+            memcpy ( m->vec + pos + pair_size ( p ) - p->dim2 + val_dim, m->vec + pos + pair_size ( p ), m->used_cap - pos );
+            memcpy ( m->vec + pos + pair_size ( p ) - p->dim2, val, val_dim );
+            return SUCCESSFUL_REPLACEMENT;
+        }
+        pos += pair_size ( p );
+    }
+    return WRONG_ELEMENT;
 }
 
+/* empty the map */
 enum return_codes map_clear ( map *m ) {
     size_t pos = 0, aux1, aux2;
     for ( size_t i = 0; i < m->size; i++ ) {
@@ -106,6 +126,7 @@ enum return_codes map_clear ( map *m ) {
     m->used_cap = 0;
 }
 
+/* frees the memory the map uses */
 void map_free ( map *m ) {
     free ( m->vec );
     free ( m );

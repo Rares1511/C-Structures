@@ -9,7 +9,7 @@ typedef struct pair {
 } pair;
 
 typedef struct map {
-    pair *vec;
+    void *vec;
     size_t cap, size, used_cap;
 } map;
 
@@ -20,6 +20,7 @@ map *map_initiate ( );
 enum return_codes map_pair_insert ( map *m, pair *p );
 enum return_codes map_clear ( map *m );
 enum return_codes map_erase ( map *m, void *key, size_t dim );
+enum return_codes map_update ( map *m, void *key, size_t key_dim, void *val, size_t val_dim );
 pair *map_get_value ( map *m, void *key, size_t dim );
 void map_print ( map *m, printer print );
 void map_free ( map *m );
