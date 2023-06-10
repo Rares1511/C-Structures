@@ -1,7 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include "universal.h"
+#include "..\universal\universal.h"
 
 typedef struct queue {
     void* vec;

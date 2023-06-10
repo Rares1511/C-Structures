@@ -1,11 +1,15 @@
 C-structures: deque
 
-deque_initiate:
-deque_push_back:
-deque_push_front:
-deque_pop_front:
-deque_pop_back:
-deque_front:
-deque_back:
-deque_free:
-deque_print:
+deque_initiate: -> returns a pointer for a empty deque structure, upon initializing the size of the elements
+that will be pushed in deque must be offered
+deque_push_back: -> pushes the element offered at the back of the deque structure offered, if the realloc for
+the deque fails it will free the memory of the deque and return MEMORY_PROBLEM
+deque_push_front: -> same as the push back but it will insert the element at the front of the deque
+deque_pop_front: -> deletes the first element of the deque, returns EMPTY if the deque is empty
+deque_pop_back: -> same as the pop front, but deletes the last element
+deque_front: -> returns a pointer with the size of the elements of the deque with the value of the
+element at the front of the deque or NULL if the deque is empty
+deque_back: -> same as the front but offers the information for the last element
+deque_free: -> frees the memory that the deque used
+deque_print: -> prints the elements of the deque using the printer function offered for printing the 
+individual elements of the deque

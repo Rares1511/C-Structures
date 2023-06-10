@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "universal.h"
+#include "..\universal\universal.h"
 
 typedef struct stack {
     void* vec;

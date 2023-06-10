@@ -1,7 +1,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "vector.h"
+#include "..\vector\vector.h"
 
 typedef int (*hash_function) ( void* );
 

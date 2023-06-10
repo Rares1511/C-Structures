@@ -1,7 +1,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "universal.h"
+#include "..\universal\universal.h"
 
 typedef struct heap {
     void* vec;

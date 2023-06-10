@@ -1,7 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "universal.h"
+#include "..\universal\universal.h"
 
 typedef struct list_type {
     void *data;

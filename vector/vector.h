@@ -1,7 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include "universal.h"
+#include "..\universal\universal.h"
 
 typedef struct vector {
     void* vec;
