@@ -1,0 +1,11 @@
+C-structures: deque
+
+deque_initiate:
+deque_push_back:
+deque_push_front:
+deque_pop_front:
+deque_pop_back:
+deque_front:
+deque_back:
+deque_free:
+deque_print:
