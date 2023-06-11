@@ -5,11 +5,13 @@
 
 typedef struct list_type {
     void *data;
-    size_t dim;
+    size_t dim, size;
     struct list_type *next, *prev;
 } list, *AL;
 
 #define LIST_SIZE sizeof ( list )
+
+#define list_empty(l) l->size == 0
 
 list *list_initiate ( size_t dim );
 enum return_codes list_push_front ( AL *l, void *el );

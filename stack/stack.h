@@ -10,8 +10,9 @@ typedef struct stack {
 
 #define STACK_SIZE sizeof ( stack )
 
+#define stack_empty(s) s->size == 0
+
 stack *stack_initiate ( size_t dim );
-int stack_empty ( stack *s );
 void *stack_top ( stack *s );
 enum return_codes stack_push ( stack *s, void *el );
 enum return_codes stack_pop ( stack *s );

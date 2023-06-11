@@ -8,7 +8,13 @@ list *list_initiate ( size_t dim ) {
     l->prev = l;
     l->data = NULL;
     l->dim = dim;
+    l->size = 0;
     return l;
+}
+
+void list_node_free ( list *l ) {
+    free ( l->data );
+    free ( l );
 }
 
 /* frees the memory that the list uses */
@@ -17,11 +23,9 @@ void list_free ( list *l ) {
     while ( aux != l ) {
         freer = aux;
         aux = aux->next;
-        free ( freer->data );
-        free ( freer );
+        list_node_free ( freer );
     }
-    free ( l->data );
-    free ( l );
+    list_node_free ( l );
 }
 
 void list_import_data ( list *l, void *el ) {
@@ -31,8 +35,9 @@ void list_import_data ( list *l, void *el ) {
 
 /* pushes the element at the front of the list */
 enum return_codes list_push_front ( AL *l, void *el ) {
-    if ( (*l)->data == NULL ) {
+    if ( list_empty ( (*l) ) ) {
         list_import_data ( *l, el );
+        (*l)->size++;
         return SUCCESSFUL_ADDITION;
     }
     list *aux = list_initiate ( (*l)->dim );
@@ -42,14 +47,17 @@ enum return_codes list_push_front ( AL *l, void *el ) {
     aux->prev = (*l)->prev;
     (*l)->prev->next = aux;
     (*l)->prev = aux;
+    aux->size = (*l)->size;
     (*l) = aux;
+    (*l)->size++;
     return SUCCESSFUL_ADDITION;
 }
 
 /* pushes the element at the back of the list */
 enum return_codes list_push_back ( AL *l, void *el ) {
-    if ( (*l)->data == NULL ) {
+    if ( list_empty ( (*l) ) ) {
         list_import_data ( *l, el );
+        (*l)->size++;
         return SUCCESSFUL_ADDITION;
     }
     list *aux = list_initiate ( (*l)->dim );
@@ -59,55 +67,56 @@ enum return_codes list_push_back ( AL *l, void *el ) {
     (*l)->prev = aux;
     aux->next = (*l);
     aux->prev = (*l)->prev;
+    (*l)->size++;
     return SUCCESSFUL_ADDITION;
 }
 
 /* pops the element at the front of the list */
 enum return_codes list_pop_front ( AL *l ) {
-    if ( (*l)->data == NULL ) return EMPTY;
+    if ( list_empty ( (*l) ) ) return EMPTY;
     list *aux = *l;
     (*l)->next->prev = (*l)->prev;
     (*l)->prev->next = (*l)->next;
     (*l) = (*l)->next;
-    aux->next = aux;
-    aux->prev = aux;
-    list_free ( aux );
+    list_node_free ( aux );
+    (*l)->size--;
     return SUCCESSFUL_DELETION;
 }
 
 /* pops the element at the back of the list */
 enum return_codes list_pop_back ( AL *l ) {
-    if ( (*l)->data == NULL ) return EMPTY;
+    if ( list_empty ( (*l) ) ) return EMPTY;
     list *aux = (*l)->prev;
     (*l)->prev = (*l)->prev->prev;
     (*l)->prev->next = (*l);
-    aux->next = aux;
-    aux->prev = aux;
-    list_free ( aux );
+    list_node_free ( aux );
+    (*l)->size--;
     return SUCCESSFUL_DELETION;
 }
 
 /* returns the element at the front of the list */
 void *list_front ( list *l ) {
-    return l->data;
+    if ( list_empty ( l ) ) return NULL;
+    void *ptr = malloc ( l->dim );
+    memcpy ( ptr, l->data, l->dim );
+    return ptr;
 }
 
 /* returns the element at the back of the list */
 void *list_back ( list *l ) {
-    return l->prev->data;
+    if ( list_empty ( l ) ) return NULL;
+    void *ptr = malloc ( l->dim );
+    memcpy ( ptr, l->prev->data, l->dim );
+    return ptr;
 }
 
 /* prints the list with the printer function given */
 void list_print ( list *l, printer print ) {
-    if ( l->data == NULL ) {
-        printf ( "\n" );
-        return;
-    }
+    if ( list_empty ( l ) ) return;
     list *aux = l->next;
     print ( l->data );
     while ( aux != l ) {
         print ( aux->data );
         aux = aux->next;
     }
-    printf ( "\n" );
 }

@@ -11,12 +11,13 @@ typedef struct heap {
 
 #define HEAP_SIZE sizeof ( heap )
 
-heap *heap_initiate ( size_t dim, comparer compare );
-heap *heap_sort ( heap *h, comparer compare );
+#define heap_empty(h) h->size == 0
+
+heap *heap_initiate ( size_t dim );
 enum return_codes heap_push ( heap *h, void *el );
 enum return_codes heap_pop ( heap *h );
 void heap_swap ( heap *h1, heap *h2 );
-int heap_empty ( heap *h );
+void heap_set_compare ( heap *h, comparer compare );
 void *heap_top ( heap *h );
 void heap_free ( heap *h );
 void heap_print ( heap *h, printer print );

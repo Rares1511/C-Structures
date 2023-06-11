@@ -10,15 +10,12 @@ stack *stack_initiate ( size_t dim ) {
     return s;
 }
 
-/* returns 1 if the stack is empty or 0 otherwise */
-int stack_empty ( stack *s ) {
-    return s->size == 0;
-}
-
 /* returns a reference to the top of the stack or NULL if empty */
 void *stack_top ( stack *s ) {
     if ( stack_empty ( s ) ) return NULL;
-    return s->vec + ( s->size - 1 ) * s->dim;
+    void *ptr = malloc ( s->dim );
+    memcpy ( ptr, s->vec + ( s->size - 1 ) * s->dim, s->dim );
+    return ptr;
 }
 
 /* pushes the element in the given stack */
@@ -55,5 +52,4 @@ void stack_free ( stack *s ) {
 void stack_print ( stack *s, printer print ) {
     for ( int i = s->size - 1; i >= 0; i-- )
         print ( s->vec + i * s->dim );
-    printf ( "\n" );
 }

@@ -10,6 +10,8 @@ typedef struct vector {
 
 #define VECTOR_SIZE sizeof ( vector )
 
+#define vector_empty(v) v->size == 0
+
 vector *vector_initiate ( size_t elem_size );
 enum return_codes vector_insert_at ( vector *vec, void* el, size_t pos );
 enum return_codes vector_push_back ( vector *vec, void *el );

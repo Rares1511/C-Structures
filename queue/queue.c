@@ -11,21 +11,20 @@ queue *queue_initiate ( size_t dim ) {
     return q;
 }
 
-/* returns 1 if the queue is empty, and 0 otherwise */
-int queue_empty ( queue *q ) {
-    return q->size == 0;
-}
-
 /* returns a reference to the first element of the queue */
 void *queue_front ( queue *q ) {
-    if ( queue_empty ( q ) ) return queue_empty;
-    return q->vec;
+    if ( queue_empty ( q ) ) return EMPTY;
+    void *ptr = malloc ( q->dim );
+    memcpy ( ptr, q->vec, q->dim );
+    return ptr;
 }
 
 /* returns a reference to the last element of the queue */
 void *queue_back ( queue *q ) {
-    if ( queue_empty ( q ) ) return queue_empty;
-    return q->vec + q->size * q->dim;
+    if ( queue_empty ( q ) ) return EMPTY;
+    void *ptr = malloc ( q->dim );
+    memcpy ( ptr, q->vec + ( q->size - 1 ) * q->dim, q->dim );
+    return ptr;
 }
 
 /* adds the element at the back of the queue */
@@ -64,5 +63,4 @@ void queue_free ( queue *q ) {
 void queue_print ( queue *q, printer print ) {
     for ( size_t i = 0; i < q->size; i++ ) 
         print ( q->vec + i * q->dim );
-    printf ( "\n" );
 }

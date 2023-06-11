@@ -83,5 +83,4 @@ void deque_free ( deque *dq ) {
 void deque_print ( deque *dq, printer print ) {
     for ( size_t i = 0; i < dq->size; i++ )
         print ( dq->vec + i * dq->dim );
-    printf ( "\n" );
 }

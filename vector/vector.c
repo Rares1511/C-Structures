@@ -35,7 +35,7 @@ enum return_codes vector_push_back ( vector *vec, void *el ) {
 operation has been done correctly, WRONG_POSITION if pos is higher than the size, EMPTY
 if the vector is empty*/
 enum return_codes vector_erase ( vector *vec, size_t pos ) {
-    if ( vec->size == 0 ) return EMPTY;
+    if ( vector_empty ( vec ) ) return EMPTY;
     if ( pos > vec->size ) return WRONG_POSITION;
     memcpy ( vec->vec + vec->dim * pos, vec->vec + vec->dim * ( pos + 1 ), ( vec->size - pos ) * vec->dim );
     vec->size--;
@@ -45,15 +45,17 @@ enum return_codes vector_erase ( vector *vec, size_t pos ) {
 /* returns a reference to the element at the position pos in the vector, or NULL if it
 doesn't exist */
 void *vector_at ( vector *vec, size_t pos ) {
-    if ( pos > vec->size || vec->size == 0 ) return NULL;
-    return vec->vec + vec->dim * pos;
+    if ( pos > vec->size || vector_empty ( vec ) ) return NULL;
+    void *ptr = malloc ( vec->dim );
+    memcpy ( ptr, vec->vec + vec->dim * pos, vec->dim );
+    return ptr;
 }
 
 /* replaces the element at pos with the element offered, returns SUCCESSFUL_REPLACE upon
 a successful replacement, EMPTY if the vector is empty, WRONG_POSITION if the position
 offered is higher than the size of the vector */
 enum return_codes vector_replace ( vector *vec, void *el, size_t pos ) {
-    if ( vec->size == 0 ) return EMPTY;
+    if ( vector_empty ( vec ) ) return EMPTY;
     if ( pos > vec->size ) return WRONG_POSITION;
     memcpy ( vec->vec + vec->dim * pos, el, vec->dim );
     return SUCCESSFUL_REPLACEMENT;
@@ -92,5 +94,4 @@ void vector_free ( vector* vec ) {
 void vector_print ( vector *vec, printer print ) { 
     for ( size_t i = 0; i < vec->size; i++ ) 
         print ( vec->vec + i * vec->dim );
-    printf ( "\n" );
 }
