@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "..\universal\universal.h"
+#include "../universal/universal.h"
 
 typedef struct map_node {
     void *data;

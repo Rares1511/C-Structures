@@ -13,7 +13,7 @@ int check_size ( deque *dq ) {
 }
 
 /* initializes the deque structure with the elements having dim size */
-deque *deque_initiate ( size_t dim ) {
+deque *deque_init ( size_t dim ) {
     deque *dq = malloc ( DEQUE_SIZE );
     if ( !dq ) return NULL;
     dq->size = 0;
@@ -55,22 +55,33 @@ enum return_codes deque_pop_front ( deque *dq ) {
 enum return_codes deque_pop_back ( deque *dq ) {
     if ( dq->size == 0 ) return EMPTY;
     dq->size--;
+    memset ( dq->vec + dq->size * dq->dim, 0, dq->dim );
+    return SUCCESSFUL_DELETION;
+}
+
+/* clears the deque */
+enum return_codes deque_clear ( deque *dq ) {
+    if ( dq->size == 0 ) return EMPTY;
+    memset ( dq->vec, 0, dq->size * dq->dim );
+    dq->size = 0;
+    return SUCCESSFUL_DELETION;
 }
 
 /* returns a reference to the first element of the deque, or NULL if the deque is empty */
 void *deque_front ( deque *dq ) {
     if ( dq->size == 0 ) return NULL;
-    void *ptr = malloc ( dq->size );
-    memcpy ( ptr, dq->vec, dq->size );
-    return ptr;
+    return dq->vec;
 }
 
 /* returns a reference to the back element of the deque, or NULL if the deque is empty */
 void *deque_back ( deque *dq ) {
     if ( dq->size == 0 ) return NULL;
-    void *ptr = malloc ( dq->size );
-    memcpy ( ptr, dq->vec + ( dq->size - 1 ) * dq->dim, dq->size );
-    return ptr;
+    return dq->vec + ( dq->size - 1 ) * dq->dim;
+}
+
+/* swaps the 2 given deques */
+void deque_swap ( deque *dq1, deque *dq2 ) {
+    universal_swap ( dq1, dq2, DEQUE_SIZE );
 }
 
 /* frees the memory that the structure uses */

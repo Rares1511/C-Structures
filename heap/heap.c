@@ -8,7 +8,7 @@ int heap_compare ( heap *h, void *el1, void *el2 ) {
 
 /* initializes the heap knowing the dimension of the elements it will hold and the 
 compare function between them */
-heap *heap_initiate ( size_t dim ) {
+heap *heap_init ( size_t dim ) {
     heap *h = malloc ( HEAP_SIZE );
     if ( !h ) return NULL;
     h->dim = dim;
@@ -23,7 +23,7 @@ heap *heap_initiate ( size_t dim ) {
 void heap_set_compare ( heap *h, comparer compare ) {
     h->compare = compare;
     if ( heap_empty ( h ) ) return;
-    heap *haux = heap_initiate ( h->dim );
+    heap *haux = heap_init ( h->dim );
     haux->compare = compare;
     for ( size_t i = 0; i < h->size; i++ )
         heap_push ( haux, h->vec + i * h->dim );
@@ -42,10 +42,9 @@ enum return_codes heap_push ( heap *h, void *el ) {
         h->cap += INIT_CAPACITY;
     }
     memcpy ( h->vec + h->size * h->dim, el, h->dim );
-    h->size++;
-    size_t pos = h->size;
-    while ( pos > 1 && heap_compare ( h, h->vec + h->dim * ( pos - 1 ), h->vec + h->dim * ( pos / 2 - 1 ) ) < 0 ) {
-        universal_swap ( h->vec + h->dim * ( pos / 2 - 1 ), h->vec + h->dim * ( pos - 1 ), h->dim );
+    size_t pos = h->size++;
+    while ( pos > 0 && heap_compare ( h, h->vec + h->dim * pos, h->vec + h->dim * pos / 2 ) < 0 ) {
+        universal_swap ( h->vec + h->dim * pos / 2, h->vec + h->dim * pos, h->dim );
         pos /= 2;
     }
     return SUCCESSFUL_ADDITION;
@@ -72,6 +71,14 @@ enum return_codes heap_pop ( heap *h ) {
     return SUCCESSFUL_DELETION;
 }
 
+/* clears the heap */
+enum return_codes heap_clear ( heap *h ) {
+    if ( heap_empty ( h ) ) return EMPTY;
+    memset ( h->vec, 0, h->size * h->dim );
+    h->size = 0;
+    return SUCCESSFUL_DELETION;
+}
+
 /* returns a reference to the top element of the heap, or NULL if the heap is empty */
 void *heap_top ( heap *h ) {
     if ( heap_empty ( h ) ) return NULL;
@@ -82,9 +89,7 @@ void *heap_top ( heap *h ) {
 
 /* swaps the two heaps, return UNMATCHING DATA if the given heaps contains different data types, 
 or SUCCESSFUL REPLACEMENT upon a successful swap */
-void heap_swap ( heap *h1, heap *h2 ) {
-    universal_swap ( h1, h2, HEAP_SIZE );
-}
+void heap_swap ( heap *h1, heap *h2 ) { universal_swap ( h1, h2, HEAP_SIZE ); }
 
 /* frees the memory used for the heap */
 void heap_free ( heap *h ) {

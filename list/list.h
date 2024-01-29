@@ -1,7 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "..\universal\universal.h"
+#include "../universal/universal.h"
 
 typedef struct list_type {
     void *data;
@@ -13,7 +13,7 @@ typedef struct list_type {
 
 #define list_empty(l) l->size == 0
 
-list *list_initiate ( size_t dim );
+list *list_init ( size_t dim );
 enum return_codes list_push_front ( AL *l, void *el );
 enum return_codes list_push_back ( AL *l, void *el );
 enum return_codes list_pop_front ( AL *l );

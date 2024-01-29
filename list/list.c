@@ -1,7 +1,7 @@
 #include "list.h"
 
 /* initializes the list with the elements having a sizeof dim */
-list *list_initiate ( size_t dim ) {
+list *list_init ( size_t dim ) {
     list *l = malloc ( LIST_SIZE );
     if ( !l ) return NULL;
     l->next = l;
@@ -40,7 +40,7 @@ enum return_codes list_push_front ( AL *l, void *el ) {
         (*l)->size++;
         return SUCCESSFUL_ADDITION;
     }
-    list *aux = list_initiate ( (*l)->dim );
+    list *aux = list_init ( (*l)->dim );
     if ( !aux ) return MEMORY_PROBLEM;
     list_import_data ( aux, el );
     aux->next = (*l);
@@ -60,7 +60,7 @@ enum return_codes list_push_back ( AL *l, void *el ) {
         (*l)->size++;
         return SUCCESSFUL_ADDITION;
     }
-    list *aux = list_initiate ( (*l)->dim );
+    list *aux = list_init ( (*l)->dim );
     if ( !aux ) return MEMORY_PROBLEM;
     list_import_data ( aux, el );
     (*l)->prev->next = aux;
