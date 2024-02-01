@@ -1,23 +1,17 @@
-#include "universal.h"
-
-/* swaps two memory zones considering they are both of size len */
-void universal_swap ( void *el1, void *el2, size_t len ) {
+void universal_swap ( void *el1, void *el2, int len ) {
     unsigned char *p = el1, *q = el2, tmp;
-    for ( size_t i = 0; i != len; i++ ) {
+    for ( int i = 0; i != len; i++ ) {
         tmp = p[i];
         p[i] = q[i];
         q[i] = tmp;
     }
 }
 
-/* compares two memory zones bytes by bytes considering they are both of size len */
-int universal_compare ( const void *el1, const void *el2, size_t len ) {
+int universal_compare ( const void *el1, const void *el2, int len ) {
     const unsigned char *p = el1, *q = el2;
-    for ( size_t i = 0; i != len; i++ ) {
-        if ( p[i] < q[i] ) 
-            return 1;
-        else if ( p[i] > q[i] )
-            return -1;
+    for ( int i = 0; i != len; i++ ) {
+        if ( q[i] != p[i] )
+            return p[i] - q[i];
     }
     return 0;
 }
