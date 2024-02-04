@@ -19,8 +19,14 @@ typedef struct univ_attr_t {
     int      size;   /*!< size of the datatype */
     freer    fr;     /*!< freer function for the datatype */
     printer  print;  /*!< printer function for the datatype */
-    comparer comp;   /*!< compare function for the datatype */
 } univ_attr_t;
+
+typedef struct xuniv_attr_t {
+    int      size;   /*!< size of the datatype */
+    freer    fr;     /*!< freer function for the datatype */
+    printer  print;  /*!< printer function for the datatype */
+    comparer comp;   /*!< compare function for the datatype */
+} xuniv_attr_t;
 
 /*! 
  * Swaps two memory zones considering they are both of size len 

@@ -3,7 +3,7 @@
 
 #include "universal.h"
 
-typedef univ_attr_t pair_attr_t;
+typedef xuniv_attr_t pair_attr_t;
 
 typedef struct pair_type {
     void *fst;              /*!< pointer with the values of the first element of the pair */

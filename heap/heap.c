@@ -1,104 +1,124 @@
-#include "heap.h"
+#include "../include/heap.h"
 
-int heap_compare ( heap *h, void *el1, void *el2 ) {
-    if ( h->compare == NULL )
-        return universal_compare ( el1, el2, h->dim );
-    return h->compare ( el1, el2 );
+#include <string.h>
+#include <stdlib.h>
+
+int heap_compare ( heap h, void *el1, void *el2 ) {
+    if ( h.attr.comp ) {
+        return h.attr.comp ( el1, el2 );
+    }
+    return universal_compare ( el1, el2, h.attr.size );
 }
 
-/* initializes the heap knowing the dimension of the elements it will hold and the 
-compare function between them */
-heap *heap_init ( size_t dim ) {
-    heap *h = malloc ( HEAP_SIZE );
-    if ( !h ) return NULL;
-    h->dim = dim;
-    h->size = 0;
+cs_codes heap_init ( heap *h, heap_attr_t attr ) {
+    if ( attr.size < 0 || attr.size > SIZE_TH ) return CS_SIZE;
+    h->attr = attr;
     h->cap = INIT_CAPACITY;
-    h->vec = malloc ( h->dim * h->cap );
-    h->compare = NULL;
-    return h;
+    h->size = 0;
+    h->vec = malloc ( h->attr.size * h->cap );
+    if ( !h->vec ) return CS_MEM;
+    return CS_SUCCESS;
 }
 
-/* sets the function for the heap and sorts the heap if it's not empty */
-void heap_set_compare ( heap *h, comparer compare ) {
-    h->compare = compare;
-    if ( heap_empty ( h ) ) return;
-    heap *haux = heap_init ( h->dim );
-    haux->compare = compare;
-    for ( size_t i = 0; i < h->size; i++ )
-        heap_push ( haux, h->vec + i * h->dim );
-    universal_swap ( h, haux, HEAP_SIZE );
-    heap_free ( haux );
-}
-
-/* add the element given in the given heap */
-enum return_codes heap_push ( heap *h, void *el ) {
+cs_codes heap_push ( heap *h, void *el ) {
     if ( h->size == h->cap ) {
-        h->vec = realloc ( h->vec, ( h->cap + INIT_CAPACITY ) * h->dim );
-        if ( !h->vec ) {
-            free ( h );
-            return MEMORY_PROBLEM;
-        }
+        h->vec = realloc ( h->vec, ( h->cap + INIT_CAPACITY ) * h->attr.size );
+        if ( !h->vec ) return CS_MEM;
         h->cap += INIT_CAPACITY;
     }
-    memcpy ( h->vec + h->size * h->dim, el, h->dim );
-    size_t pos = h->size++;
-    while ( pos > 0 && heap_compare ( h, h->vec + h->dim * pos, h->vec + h->dim * pos / 2 ) < 0 ) {
-        universal_swap ( h->vec + h->dim * pos / 2, h->vec + h->dim * pos, h->dim );
+    memcpy ( h->vec + h->size * h->attr.size, el, h->attr.size );
+    h->size++;
+    int pos = h->size;
+    while ( pos > 1 && heap_compare ( *h, h->vec + h->attr.size * ( pos / 2 - 1 ), h->vec + h->attr.size * ( pos - 1 ) ) < 0 ) {
+        universal_swap ( h->vec + h->attr.size * ( pos / 2 - 1 ), h->vec + h->attr.size * ( pos - 1 ), h->attr.size );
         pos /= 2;
     }
-    return SUCCESSFUL_ADDITION;
+    return CS_SUCCESS;
 }
 
-/* deletes the first element of the heap, or returns EMPTY if offered an empty heap */
-enum return_codes heap_pop ( heap *h ) {
-    if ( heap_empty ( h ) ) return EMPTY;
+cs_codes heap_pop ( heap *h ) {
+    if ( h->size == 0 ) return CS_EMPTY;
     h->size--;
-    universal_swap ( h->vec, h->vec + h->size * h->dim, h->dim );
-    size_t pos = 1;
-    while ( 2 * pos - 1 < h->size ) {
-        if ( 2 * pos < h->size ) {
-            if ( heap_compare ( h, h->vec + ( 2 * pos - 1 ) * h->dim, h->vec + 2 * pos * h->dim ) < 0 )
-                pos = 2 * pos;
-            else
-                pos = 2 * pos + 1;
+    if ( h->size != 0 )
+        universal_swap ( h->vec, h->vec + h->size * h->attr.size, h->attr.size );
+    if ( h->attr.fr ) h->attr.fr ( h->vec + h->attr.size * h->size );
+    if ( h->size == 0 ) return CS_SUCCESS;
+    int pos = 1;
+    while ( 2 * pos < h->size + 1 ) {
+        int next_pos = 2 * pos;
+        void *comp_ptr = comp_ptr = h->vec + h->attr.size * ( 2 * pos - 1 );;
+        if ( 2 * pos < h->size && heap_compare ( *h, h->vec + h->attr.size * ( 2 * pos - 1 ), h->vec + h->attr.size * ( 2 * pos ) ) < 0 ) {
+            comp_ptr = h->vec + h->attr.size * ( 2 * pos );
+            next_pos++;
         }
-        else
-            pos = 2 * pos;
-        if ( heap_compare ( h, h->vec + ( pos / 2 - 1 ) * h->dim, h->vec + ( pos - 1 ) * h->dim ) <= 0 ) break;
-        universal_swap ( h->vec + ( pos / 2 - 1 ) * h->dim, h->vec + ( pos - 1 ) * h->dim, h->dim );
+        if ( heap_compare ( *h, h->vec + h->attr.size * ( pos - 1 ), comp_ptr ) < 0 ) {
+            universal_swap ( h->vec + h->attr.size * ( pos - 1 ), comp_ptr, h->attr.size );
+            pos = next_pos;
+        }
+        else break;
     }
-    return SUCCESSFUL_DELETION;
+    return CS_SUCCESS;
 }
 
-/* clears the heap */
-enum return_codes heap_clear ( heap *h ) {
-    if ( heap_empty ( h ) ) return EMPTY;
-    memset ( h->vec, 0, h->size * h->dim );
+int heap_empty ( heap h ) { if ( h.size == 0 ) return 1; return 0; }
+
+void *heap_top ( heap h ) {
+    if ( h.size == 0 ) return NULL;
+    return h.vec;
+}
+
+void heap_set_free ( heap *h, freer fr ) { h->attr.fr = fr; }
+
+void heap_set_print ( heap *h, printer print ) { h->attr.print = print; }
+
+void heap_set_comp ( heap *h, comparer comp ) { 
+    h->attr.comp = comp;
+    heap haux;
+    int rc = heap_init ( &haux, h->attr );
+    if ( rc == CS_SIZE ) return;
+
+    while ( h->size > 0 ) {
+        void *top = heap_top ( *h );
+        heap_pop ( h );
+        heap_push ( &haux, top );
+    }
+
+    heap_swap ( h, &haux );
+    free ( haux.vec );
+}
+
+void heap_swap ( heap *h1, heap *h2 ) { 
+    heap_attr_t attr = h1->attr;
+    int cap = h1->cap;
+    int size = h1->size;
+    void *vec = h1->vec;
+
+    h1->attr = h2->attr;
+    h1->cap = h2->cap;
+    h1->size = h2->size;
+    h1->vec = h2->vec;
+
+    h2->attr = attr;
+    h2->cap = cap;
+    h2->size = size;
+    h2->vec = vec;
+}
+
+void heap_clear ( heap *h ) {
+    if ( h->attr.fr )
+        for ( int i = 0; i < h->size; i++ )
+            h->attr.fr ( h->vec + i * h->attr.size );
     h->size = 0;
-    return SUCCESSFUL_DELETION;
 }
 
-/* returns a reference to the top element of the heap, or NULL if the heap is empty */
-void *heap_top ( heap *h ) {
-    if ( heap_empty ( h ) ) return NULL;
-    void *ptr = malloc ( h->dim );
-    memcpy ( ptr, h->vec, h->dim );
-    return ptr;
-}
-
-/* swaps the two heaps, return UNMATCHING DATA if the given heaps contains different data types, 
-or SUCCESSFUL REPLACEMENT upon a successful swap */
-void heap_swap ( heap *h1, heap *h2 ) { universal_swap ( h1, h2, HEAP_SIZE ); }
-
-/* frees the memory used for the heap */
 void heap_free ( heap *h ) {
+    if ( h->attr.fr )
+        for ( int i = 0; i < h->size; i++ )
+            h->attr.fr ( h->vec + i * h->attr.size );
     free ( h->vec );
-    free ( h );
 }
 
-/* prints the heap with the given printer function */
-void heap_print ( heap *h, printer print ) {
-    for ( size_t i = 0; i < h->size; i++ ) 
-        print ( h->vec + h->dim * i );
+void heap_print ( heap h ) {
+    for ( int i = 0; i < h.size; i++ ) 
+        h.attr.print ( h.vec + h.attr.size * i );
 }

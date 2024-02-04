@@ -59,7 +59,7 @@ void stack_swap ( stack *s1, stack *s2 ) {
     s2->vec = vec;
 }
 
-void stack_clean ( stack *s ) {
+void stack_clear ( stack *s ) {
     if ( s->attr.fr )
         for ( int i = 0; i < s->size; i++ )
             s->attr.fr ( s->vec + i * s->attr.size );

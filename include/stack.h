@@ -3,11 +3,7 @@
 
 #include "universal.h"
 
-typedef struct stack_attr_t {
-    int      size;   /*!< size of the datatype stocked in the stack */
-    printer  print;  /*!< print function for the datatype stocked in the stack */
-    freer    fr;     /*!< free function for the datatype stocked in the stack */
-} stack_attr_t;
+typedef univ_attr_t stack_attr_t;
 
 typedef struct stack {
     void*        vec;   /*!< array of elements of the stack */
@@ -71,7 +67,7 @@ void stack_swap ( stack *s1, stack *s2 );
  * Cleans the stack for further use
  * @param[in] s The stack that will be cleaned
  */
-void stack_clean ( stack *s );
+void stack_clear ( stack *s );
 
 /*!
  * Stack whose memory will be freed

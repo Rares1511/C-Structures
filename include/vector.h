@@ -3,7 +3,7 @@
 
 #include "universal.h"
 
-typedef univ_attr_t vector_attr_t;
+typedef xuniv_attr_t vector_attr_t;
 
 typedef struct vector {
     void*          vec;    /*!< size of the datatype */

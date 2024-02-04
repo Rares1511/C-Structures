@@ -29,7 +29,7 @@ cs_codes queue_push ( queue *q, void *el ) {
     queue_node *node = malloc ( sizeof ( queue_node ) );
     if ( !node ) return CS_MEM;
     node->data = malloc ( q->attr.size );
-    if ( !node->data ) return CS_MEM;
+    if ( !node->data ) { free ( node ); return CS_MEM; }
     memcpy ( node->data, el, q->attr.size );
     node->next = NULL;
     if ( q->size == 0 ) 
@@ -53,6 +53,10 @@ cs_codes queue_pop ( queue *q ) {
     return CS_SUCCESS;
 }
 
+void queue_set_free ( queue *q, freer fr ) { q->attr.fr = fr; }
+
+void queue_set_print ( queue *q, printer print ) { q->attr.print = print; }
+
 void queue_swap ( queue *q1, queue *q2 ) { 
     queue_node* aux1 = q1->start;
     queue_node* aux2 = q1->end;
@@ -70,7 +74,7 @@ void queue_swap ( queue *q1, queue *q2 ) {
     q2->size = size;
 }
 
-void queue_clean ( queue *q ) {
+void queue_clear ( queue *q ) {
     while ( q->start != NULL ) {
         queue_node *aux = q->start;
         q->start = q->start->next;

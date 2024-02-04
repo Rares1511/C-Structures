@@ -66,13 +66,27 @@ void *queue_back ( queue q );
  * Cleans the queue and frees any memory that was used in it
  * @param[in] q The queue which will be cleaned
  */
-void queue_clean ( queue *q );
+void queue_clear ( queue *q );
 
 /*!
  * Cleans the queue and frees any memory that was used in it
  * @param[in] q The queue whose memory will be freed
  */
 void queue_free ( queue *q );
+
+/*!
+ * Sets the new free function for the queue
+ * @param[out] q   Queue whose free function will be changed
+ * @param[in]  fr  New free function for the datatype inside the queue
+ */
+void queue_set_free ( queue *q, freer fr );
+
+/*!
+ * Sets the new print function for the queue
+ * @param[out] q      Queue whose print function will be changed
+ * @param[in]  print  New print function for the datatype inside the queue
+ */
+void queue_set_print ( queue *q, printer print );
 
 /*!
  * Swaps the two queues
