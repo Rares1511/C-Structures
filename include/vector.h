@@ -99,7 +99,7 @@ void vector_set_comp ( vector *vec, comparer comp );
  * Empties the vector and frees any memory that was used in any of its elements
  * @param[out] vec Vector which will have its contet emptied
  */
-void vector_clean ( vector *vec );
+void vector_clear ( vector *vec );
 
 /*! 
  * Swaps the two given vector structures.

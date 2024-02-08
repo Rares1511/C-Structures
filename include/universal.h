@@ -8,7 +8,7 @@
 #define SIZE_TH 1000
 
 typedef enum cs_codes {
-    CS_MEM, CS_SUCCESS, CS_SIZE, CS_POS, CS_EMPTY
+    CS_MEM, CS_SUCCESS, CS_SIZE, CS_POS, CS_EMPTY, CS_FUNC
 } cs_codes;
 
 typedef void (*printer)  ( void* );

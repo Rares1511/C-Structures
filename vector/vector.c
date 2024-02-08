@@ -76,7 +76,7 @@ void vector_set_print ( vector *vec, printer print ) { vec->attr.print = print; 
 
 void vector_set_comp ( vector *vec, comparer comp ) { vec->attr.comp = comp; }
 
-void vector_clean ( vector *vec ) {
+void vector_clear ( vector *vec ) {
     if ( vec->attr.fr )
         for ( int i = 0; i < vec->size; i++ )
             vec->attr.fr ( vec->vec + vec->attr.size * i );
