@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "universal.h": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "vector": "c",
+        "mpi.h": "c",
+        "mpi_portable_platform.h": "c",
+        "pair.h": "c",
+        "pair_internal.h": "c",
+        "stdio.h": "c",
+        "queue.h": "c",
+        "stddef.h": "c",
+        "stdlib.h": "c",
+        "large_number.h": "c",
+        "map_internal.h": "c",
+        "map.h": "c",
+        "typeinfo": "c",
+        "chrono": "c"
+    }
+}
