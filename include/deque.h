@@ -72,6 +72,13 @@ void *deque_front(deque dq);
 void *deque_back(deque dq);
 
 /*!
+ * Sets the new attributes for the deque
+ * @param[out] dq    Deque whose attributes will be changed
+ * @param[in]  attr  New attributes of the deque
+ */
+void deque_set_attr(deque *dq, deque_attr_t attr);
+
+/*!
  * Sets the new free function for the deque
  * @param[out] dq  Deque whose free function will be changed
  * @param[in]  fr  New free function for the datatype inside of the deque
@@ -84,6 +91,13 @@ void deque_set_free(deque *dq, freer fr);
  * @param[in]  print  New print function for the datatype inside of the deque
  */
 void deque_set_print(deque *dq, printer print);
+
+/*!
+ * Sets the new copy function for the deque
+ * @param[out] dq  Deque whose copy function will be set or changed
+ * @param[in]  cp  New copy function used in copying the elements in the deque
+ */
+void deque_set_copy(deque *dq, deepcopy cp);
 
 /*!
  * Clears the deque, frees the memory that it was used in it and empties for a next use
