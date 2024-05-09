@@ -5,11 +5,12 @@
 
 typedef univ_attr_t stack_attr_t;
 
-typedef struct stack {
-    void*        vec;   /*!< array of elements of the stack */
-    int          size;  /*!< current size of the stack */
-    int          cap;   /*!< current maximum capacity of the stack */
-    stack_attr_t attr;  /*!< attributes for the elements inside the stack */
+typedef struct stack
+{
+    void *vec;         /*!< array of elements of the stack */
+    int size;          /*!< current size of the stack */
+    int cap;           /*!< current maximum capacity of the stack */
+    stack_attr_t attr; /*!< attributes for the elements inside the stack */
 } stack;
 
 /*!
@@ -19,14 +20,14 @@ typedef struct stack {
  * @return CS_SIZE if the size for the elements is negative or too big otherwise CS_SUCCESS upon
  * a successful initialization
  */
-cs_codes stack_init ( stack *s, stack_attr_t el_attr );
+cs_codes stack_init(stack *s, stack_attr_t el_attr);
 
 /*!
  * Gives a pointer to the top element of the stack
  * @param[in] s The stack whose element will be accessed
  * @return Pointer to the top element
  */
-void* stack_top ( stack s );
+void *stack_top(stack s);
 
 /*!
  * Pushes the element at the top of the stack
@@ -34,51 +35,65 @@ void* stack_top ( stack s );
  * @param[in]  el The element which will be added
  * @return CS_MEM if a memory problem occured or CS_SUCCESS for a successful addition
  */
-cs_codes stack_push ( stack *s, void *el );
+cs_codes stack_push(stack *s, void *el);
 
 /*!
  * Pops the element at the top of the stack if there is any
  * @param[in] s The stack whose last element will be popped
  * @return CS_EMPTY if the stack is empty otherwise CS_SUCCESS for a successful deletion
  */
-cs_codes stack_pop ( stack *s );
+cs_codes stack_pop(stack *s);
+
+/*!
+ * Sets the new attrbiutes for the elements of the stack
+ * @param[out] s     The stack whose attributes will be changed
+ * @param[in]  attr  The new attributes for the elements of the stack
+ */
+void stack_set_attr(stack *s, stack_attr_t attr);
 
 /*!
  * Sets the new free function for the elements of the stack
  * @param[out] s   The stack whose free function will be changed
  * @param[in]  fr  The new free function for the elements of the stack
  */
-void stack_set_free ( stack *s, freer fr );
+void stack_set_free(stack *s, freer fr);
 
 /*!
  * Sets the new print function for the elements of the stack
  * @param[out] s      The stack whose print function will be changed
  * @param[in]  print  The new print function for the elements of the stack
  */
-void stack_set_print ( stack *s, printer print );
+void stack_set_print(stack *s, printer print);
+
+/*!
+ * Sets the new copy function for the elements of the stack
+ * @param[out] s   The stack whose copy function will be changed
+ * @param[in]  cp  The new copy function for the elements of the stack
+ */
+void stack_set_copy(stack *s, deepcopy cp);
 
 /*!
  * Swaps the two given stacks
  * @param[in] s1,s2 The stacks that will be swapped
  */
-void stack_swap ( stack *s1, stack *s2 );
+void stack_swap(stack *s1, stack *s2);
 
 /*!
  * Cleans the stack for further use
  * @param[in] s The stack that will be cleaned
  */
-void stack_clear ( stack *s );
+void stack_clear(stack *s);
 
 /*!
  * Stack whose memory will be freed
  * @param[in] s The stack whose memory will be freed
  */
-void stack_free ( stack *s );
+void stack_free(void *s_p);
 
 /*!
  * Prints the elements of the stack
- * @param[in] s The stack whose items will be printed 
+ * @param[in] s The stack whose items will be printed
  */
-void stack_print ( stack s );
+void stack_print(void *s_p);
 
 #endif
