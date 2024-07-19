@@ -17,6 +17,7 @@
         "map_internal.h": "c",
         "map.h": "c",
         "typeinfo": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "large_number_internal.h": "c"
     }
 }

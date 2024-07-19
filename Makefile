@@ -34,7 +34,9 @@ stack.o: stack/stack.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 string.o: string/string.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-large_number.o: large_number/large_number.c
+large_number_internal.o: large_number/large_number_internal.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+large_number.o: large_number/large_number.c 
 	$(CC) -c -o $@ $< $(CFLAGS)
 main.o: main.c
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -42,5 +44,5 @@ main.o: main.c
 zip:
 	zip CS.zip deque/* hash_table/* heap/* include/* list/* map/* pair/* queue/* stack/* string/* universal/* vector/* large_number/*
 
-main: main.o universal.o vector.o
+main: main.o universal.o large_number.o large_number_internal.o
 	$(CC) -o $@ $^ $(CFLAGS)
