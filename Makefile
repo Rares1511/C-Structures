@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -lpthread
 BFLAGS = -I include
 LFLAGS = -Luniversal -luniversal.h
 
