@@ -18,6 +18,23 @@
         "map.h": "c",
         "typeinfo": "c",
         "chrono": "c",
-        "large_number_internal.h": "c"
+        "large_number_internal.h": "c",
+        "numbers": "c",
+        "bitset": "c",
+        "algorithm": "c",
+        "format": "c",
+        "__bit_reference": "c",
+        "map": "c",
+        "set": "c",
+        "unordered_map": "c",
+        "span": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "deque": "c",
+        "queue": "c",
+        "random": "c",
+        "string": "c",
+        "utility": "c"
     }
 }
