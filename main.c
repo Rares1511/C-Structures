@@ -37,12 +37,18 @@ int main()
 
     start = clock();
 
-    large_number_assign(&ln1, LN_CHAR, "24.25");
-    large_number_assign(&ln2, LN_CHAR, "89.96");
-
-    large_number_add(&ln1, ln1, ln2);
+    large_number_assign(&ln1, LN_CHAR, "245");
+    large_number_assign(&ln2, LN_CHAR, "16");
 
     large_number_print(ln1);
+    large_number_print(ln2);
+
+    large_number_div_num(ln1, ln2, 5, LN_QUOTIENT, &ln1);
+
+    printf("Quotient: ");
+    large_number_print(ln1);
+    printf("Rest:     ");
+    large_number_print(ln2);
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("Seriable programm: %f\n", time_taken);

@@ -7,7 +7,7 @@ static inline cs_codes large_number_check_memory(large_number *ln, int cap)
     if (cap > ln->cap)
     {
         int old_cap = ln->cap;
-        ln->cap = cap + INIT_CAPACITY;
+        ln->cap = cap + _LN_INIT_CAPACITY;
         ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
         if (!ln->vec)
             return CS_MEM;
@@ -48,8 +48,8 @@ cs_codes large_number_add_helper(large_number *ln1, large_number ln2)
                 return rc;
         }
         ln1->vec[i] += ln2.vec[i - exponent_diff] + temp;
-        temp = ln1->vec[i] / 10;
-        ln1->vec[i] %= 10;
+        temp = ln1->vec[i] / ln1->base;
+        ln1->vec[i] %= ln1->base;
     }
     for (; i - exponent_diff < ln2.size; i++)
     {
@@ -60,8 +60,8 @@ cs_codes large_number_add_helper(large_number *ln1, large_number ln2)
                 return rc;
         }
         ln1->vec[i] = ln2.vec[i - exponent_diff] + temp;
-        temp = ln1->vec[i] / 10;
-        ln1->vec[i] %= 10;
+        temp = ln1->vec[i] / ln1->base;
+        ln1->vec[i] %= ln1->base;
     }
     for (; temp > 0 || i < ln1->size; i++)
     {
@@ -72,8 +72,8 @@ cs_codes large_number_add_helper(large_number *ln1, large_number ln2)
                 return rc;
         }
         ln1->vec[i] += temp;
-        temp = ln1->vec[i] / 10;
-        ln1->vec[i] %= 10;
+        temp = ln1->vec[i] / ln1->base;
+        ln1->vec[i] %= ln1->base;
     }
     ln1->size = i;
 
@@ -110,7 +110,7 @@ cs_codes large_number_minus_helper(large_number *ln1, large_number ln2)
             if (ln1->vec[i] < 0)
             {
                 temp = 1;
-                ln1->vec[i] += 10;
+                ln1->vec[i] += ln1->base;
             }
         }
         for (; temp > 0; i++)
@@ -120,7 +120,7 @@ cs_codes large_number_minus_helper(large_number *ln1, large_number ln2)
             if (ln1->vec[i] < 0)
             {
                 temp = 1;
-                ln1->vec[i] += 10;
+                ln1->vec[i] += ln1->base;
             }
         }
     }
@@ -134,7 +134,7 @@ cs_codes large_number_minus_helper(large_number *ln1, large_number ln2)
             if (ln1->vec[i] < 0)
             {
                 temp = 1;
-                ln1->vec[i] += 10;
+                ln1->vec[i] += ln1->base;
             }
         }
         for (i = exponent_diff; i < ln2.size + exponent_diff; i++)
@@ -144,7 +144,7 @@ cs_codes large_number_minus_helper(large_number *ln1, large_number ln2)
             if (ln1->vec[i] < 0)
             {
                 temp = 1;
-                ln1->vec[i] += 10;
+                ln1->vec[i] += ln1->base;
             }
         }
     }
@@ -206,7 +206,7 @@ cs_codes large_number_mul_helper(large_number *ln1, large_number ln2)
     }
     if (ln1->aux1->cap < ln1->size + ln2.size)
     {
-        ln1->aux1->cap = ln1->size + ln2.size + LARGE_NUMBER_INIT_CAPACITY;
+        ln1->aux1->cap = ln1->size + ln2.size + _LN_INIT_CAPACITY;
         ln1->aux1->vec = realloc(ln1->aux1->vec, sizeof(long) * ln1->aux1->cap);
         if (!ln1->aux1)
             return CS_MEM;
@@ -233,11 +233,11 @@ cs_codes large_number_mul_helper(large_number *ln1, large_number ln2)
     for (temp = 0, i = 0; temp > 0 || i < ln1->aux1->size; i++)
     {
         ln1->aux1->vec[i] += temp;
-        temp = ln1->aux1->vec[i] / 10;
-        ln1->aux1->vec[i] %= 10;
+        temp = ln1->aux1->vec[i] / ln1->base;
+        ln1->aux1->vec[i] %= ln1->base;
         if (i == ln1->aux1->cap)
         {
-            ln1->aux1->cap = ln1->aux1->size + LARGE_NUMBER_INIT_CAPACITY;
+            ln1->aux1->cap = ln1->aux1->size + _LN_INIT_CAPACITY;
             ln1->aux1 = realloc(ln1->aux1, sizeof(long) * ln1->aux1->cap);
             if (!ln1->aux1)
                 return CS_MEM;
@@ -254,12 +254,14 @@ cs_codes large_number_mul_helper(large_number *ln1, large_number ln2)
     return CS_SUCCESS;
 }
 
-cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accuracy)
+cs_codes large_number_div_helper(large_number *ln1, large_number *rest, large_number ln2, int accuracy)
 {
     int rc, i, comp, exponent_started;
 
     if (ln2.size == 0 && ln2.vec[0] == 0)
         return CS_ELEM;
+
+    ///////////////////////////////// LN1->AUX1 INIT /////////////////////////////////
 
     if (!ln1->aux1)
     {
@@ -268,14 +270,22 @@ cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accura
             return CS_MEM;
         large_number_init(ln1->aux1, LN_NULL);
     }
-    if (ln1->aux1->cap < ln1->size + ln2.size)
+    if (ln1->aux1->cap < ln2.size)
     {
-        ln1->aux1->cap = ln1->size + ln2.size + LARGE_NUMBER_INIT_CAPACITY;
+        ln1->aux1->cap = ln2.size + _LN_INIT_CAPACITY;
         ln1->aux1->vec = realloc(ln1->aux1->vec, sizeof(long) * ln1->aux1->cap);
         if (!ln1->aux1->vec)
             return CS_MEM;
     }
-    large_number_assign(ln1->aux1, LN_NULL);
+    for (i = 0; i < ln2.size; i++)
+    {
+        ln1->aux1->vec[ln2.size - 1 - i] = ln1->vec[ln1->size - 1];
+        ln1->size--;
+    }
+    ln1->aux1->size = ln2.size;
+    ln1->aux1->exponent = 0;
+
+    ///////////////////////////////// LN1->AUX2 INIT /////////////////////////////////
 
     if (!ln1->aux2)
     {
@@ -286,30 +296,25 @@ cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accura
     }
     if (ln1->aux2->cap < ln1->size + ln2.size)
     {
-        ln1->aux2->cap = ln1->size + ln2.size + LARGE_NUMBER_INIT_CAPACITY;
+        ln1->aux2->cap = ln1->size + ln2.size + _LN_INIT_CAPACITY;
         ln1->aux2->vec = realloc(ln1->aux2->vec, sizeof(long) * ln1->aux2->cap);
         if (!ln1->aux2->vec)
             return CS_MEM;
     }
 
-    if (!ln1->quotient)
+    ///////////////////////////////// LN1->QUOTIENT INIT /////////////////////////////////
+
+    if (!ln1->aux3)
     {
-        ln1->quotient = malloc(sizeof(large_number));
-        if (!ln1->quotient)
+        ln1->aux3 = malloc(sizeof(large_number));
+        if (!ln1->aux3)
             return CS_MEM;
-        large_number_init(ln1->quotient, LN_NULL);
+        large_number_init(ln1->aux3, LN_NULL);
     }
     else
-        large_number_assign(ln1->quotient, LN_NULL);
+        large_number_assign(ln1->aux3, LN_NULL);
 
-    for (i = 0; i < ln2.size; i++)
-    {
-        ln1->aux1->vec[ln2.size - 1 - i] = ln1->vec[ln1->size - 1];
-        ln1->size--;
-    }
-    ln1->aux1->size = ln2.size;
-    ln1->aux1->exponent = 0;
-    ln1->aux1->sign = ln1->sign * ln2.sign;
+    ///////////////////////////////// DIVISION ALGORITHM /////////////////////////////////
 
     exponent_started = 0;
     while (accuracy > 0 && (ln1->aux1->size > 0 || ln1->size > 0))
@@ -319,25 +324,34 @@ cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accura
         {
             rc = large_number_assign(ln1->aux2, LN_NUM, ln2);
             if (rc != CS_SUCCESS)
+            {
                 return rc;
-            for (i = 0; large_number_compare(*ln1->aux1, *ln1->aux2) > 0; i++)
+            }
+            for (i = 0; large_number_compare(*ln1->aux1, *ln1->aux2) >= 0 && i < ln1->base; i++)
             {
                 rc = large_number_add(ln1->aux2, *ln1->aux2, ln2);
                 if (rc != CS_SUCCESS)
+                {
                     return rc;
+                }
             }
-            large_number_append(ln1->quotient, LN_SCALE, i);
             if (exponent_started)
             {
-                ln1->quotient->exponent++;
+                ln1->aux3->exponent++;
                 accuracy--;
             }
+            large_number_append(ln1->aux3, LN_SCALE, i);
             large_number_minus(ln1->aux2, *ln1->aux2, ln2);
             large_number_minus(ln1->aux1, *ln1->aux1, *ln1->aux2);
         }
         else if (ln1->size > 0)
         {
             large_number_append(ln1->aux1, LN_SCALE, ln1->vec[--ln1->size]);
+        }
+        else if (rest)
+        {
+            large_number_assign(rest, LN_NUM, *ln1->aux1);
+            break;
         }
         else
         {
@@ -346,8 +360,8 @@ cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accura
         }
     }
 
-    large_number_swap(ln1, ln1->quotient);
-    memset(ln1->quotient->vec, 0, sizeof(long) * ln1->aux1->cap);
+    large_number_swap(ln1, ln1->aux3);
+    memset(ln1->aux3->vec, 0, sizeof(long) * ln1->aux3->cap);
 
     return CS_SUCCESS;
 }

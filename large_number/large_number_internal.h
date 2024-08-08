@@ -4,6 +4,9 @@
 #define _XOPEN_SOURCE 600 /* Or higher */
 #define FLOATING_ERR 1e-5
 
+#define _LN_ASSIGN_ARGS_CNT 1
+#define _LN_APPEND_ARGS_CNT 1
+
 #include "../include/large_number.h"
 
 ///////////////////// LIBRARIES /////////////////////
@@ -49,8 +52,14 @@ cs_codes large_number_minus_helper(large_number *ln1, large_number ln2);
  */
 cs_codes large_number_mul_helper(large_number *ln1, large_number ln2);
 
-cs_codes large_number_div_helper(large_number *ln1, large_number ln2, int accuracy);
-
-cs_codes large_number_exp_helper(large_number *base, large_number power);
+/*!
+ * Divides the first number by the second with an accuracy number of digits calculated if a rest large number is not given
+ * @param[in] ln1        Destination for the quotient and the dividend in the division
+ * @param[in] rest       Destination for the rest of the division
+ * @param[in] ln2        The number by which the first one is divided
+ * @param[in] accuracy   The number of digits to be calculated in the division if a large numbers for rest is not given
+ * @return CS_SUCCESS for a successful divison or CS_MEM if a memory problem occured during reallocation of memory
+ */
+cs_codes large_number_div_helper(large_number *ln1, large_number *rest, large_number ln2, int accuracy);
 
 #endif
