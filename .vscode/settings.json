@@ -35,6 +35,11 @@
         "queue": "c",
         "random": "c",
         "string": "c",
-        "utility": "c"
-    }
+        "utility": "c",
+        "string.h": "c",
+        "unittest.h": "c"
+    },
+    "prettier.bracketSameLine": false,
+    "prettier.useTabs": true,
+    "prettier.arrowParens": "always"
 }

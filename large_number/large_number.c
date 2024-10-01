@@ -333,7 +333,7 @@ cs_codes large_number_mul(large_number *dest, large_number ln1, large_number ln2
     return large_number_mul_helper(dest, ln2);
 }
 
-cs_codes large_number_div_num(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...)
+cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...)
 {
     va_list arg;
     int rc;
@@ -352,37 +352,6 @@ cs_codes large_number_div_num(large_number ln1, large_number ln2, int accuracy, 
     case LN_REST:
         large_number *rest = va_arg(arg, large_number *);
         rc = large_number_div_helper(quotient, rest, ln2, accuracy);
-        break;
-    default:
-        return CS_ELEM;
-        break;
-    }
-
-    va_end(arg);
-
-    return rc;
-}
-
-cs_codes large_number_div_scale(large_number ln, long scale, int accuracy, ln_div_type type, ...)
-{
-    va_list arg;
-    int rc;
-
-    va_start(arg, type);
-    large_number *quotient = va_arg(arg, large_number *);
-    rc = large_number_assign(quotient, LN_NUM, ln);
-    if (rc != CS_SUCCESS)
-        return rc;
-
-    switch (type)
-    {
-    case LN_QUOTIENT:
-        rc = large_number_div_helper(quotient, NULL, ln, accuracy);
-        break;
-    case LN_REST:
-        long *rest_scale = va_arg(arg, long *);
-        large_number rest;
-        rc = large_number_div_helper(quotient, &rest, ln, accuracy);
         break;
     default:
         return CS_ELEM;
@@ -450,6 +419,8 @@ cs_codes large_number_fraction(large_number *dest, large_number ln)
 
 cs_codes large_number_set_base(large_number *ln, int base)
 {
+    long rest;
+
     if (base == ln->base)
         return CS_SUCCESS;
 
@@ -486,6 +457,15 @@ cs_codes large_number_set_base(large_number *ln, int base)
     }
 
     ///////////////////////////////// BASE CHANGE ALGORITHM /////////////////////////////////
+
+    large_number_fraction(ln->aux1, *ln);
+    large_number_assign(ln->aux2, LN_SCALE, base);
+
+    while (ln->aux1->size > 0)
+    {
+        large_number_div_helper(ln->aux1, ln->aux3, *ln->aux2, 0);
+        large_number_convert(*ln->aux3, &rest, LN_CONV_LONG);
+    }
 
     return CS_SUCCESS;
 }

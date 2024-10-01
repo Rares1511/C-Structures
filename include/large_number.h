@@ -43,6 +43,8 @@ typedef struct large_number
     struct large_number *aux1; /*!< auxiliar large number */
     struct large_number *aux2; /*!< auxiliar large number */
     struct large_number *aux3; /*!< auxiliar large number structure for saving the result of division*/
+    struct large_number *aux4; /*!< auxiliar large number */
+    struct large_number *aux5; /*!< auxiliar large number */
 } large_number;
 
 ///////////////////// FUNCTIONS /////////////////////
@@ -123,9 +125,7 @@ cs_codes large_number_mul(large_number *dest, large_number ln1, large_number ln2
  * @param[in]  ln2   The second number in the division
  * @return CS_SUCCESS for a successful division or CS_MEM for a problem in allocating memory
  */
-cs_codes large_number_div_num(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...);
-
-cs_codes large_number_div_scale(large_number ln, long scale, int accuracy, ln_div_type, ...);
+cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...);
 
 /*!
  * Changes the base in which the number is stored and transforms it

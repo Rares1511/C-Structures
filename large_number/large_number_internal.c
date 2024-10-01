@@ -302,7 +302,7 @@ cs_codes large_number_div_helper(large_number *ln1, large_number *rest, large_nu
             return CS_MEM;
     }
 
-    ///////////////////////////////// LN1->QUOTIENT INIT /////////////////////////////////
+    ///////////////////////////////// LN1->AUX3 INIT /////////////////////////////////
 
     if (!ln1->aux3)
     {

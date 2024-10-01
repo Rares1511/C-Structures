@@ -3,17 +3,23 @@ CFLAGS = -Wall -Wextra -lpthread
 BFLAGS = -I include
 LFLAGS = -Luniversal -luniversal.h
 
-all: main
+all: map/map_unittest
 
 run:
-	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./main
+	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(arg)/$(arg)_unittest
 
 clean:
-	rm *.o
-	rm main
+	rm -r */*.o
+	rm -r */*_unittest
 
-universal.o: universal/universal.c
+################# UNIVERSAL #################
+############ START OF UNIVERSAL ############
+universal/universal.o: universal/universal.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+unittest/unittest.o: unittest/unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+############# END OF UNIVERSAL #############
+
 vector.o: vector/vector.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 deque.o: deque/deque.c
@@ -24,8 +30,19 @@ heap.o: heap/heap.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 list.o: list/list.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-map.o: map/map.c
+
+################# MAP #################
+############ START OF MAP ############
+map/map.o: map/map.c map/map_internal.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+map/map_internal.o: map/map_internal.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+map/map_unittest.o: map/map_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+map/map_unittest: map/map_unittest.o map/map.o map/map_internal.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
+############# END OF MAP #############
+
 pair.o: pair/pair.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 queue.o: queue/queue.c
@@ -40,9 +57,3 @@ large_number.o: large_number/large_number.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 main.o: main.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-
-zip:
-	zip CS.zip deque/* hash_table/* heap/* include/* list/* map/* pair/* queue/* stack/* string/* universal/* vector/* large_number/*
-
-main: main.o universal.o large_number.o large_number_internal.o
-	$(CC) -o $@ $^ $(CFLAGS)

@@ -7,6 +7,8 @@
 
 #define SIZE_TH 1000
 
+#define NULL ((void *)0)
+
 typedef enum cs_codes
 {
     CS_MEM = -1,
@@ -28,7 +30,7 @@ typedef struct univ_attr_t
 {
     int size;      /*!< size of the datatype */
     freer fr;      /*!< freer function for the datatype */
-    deepcopy cp;   /*!< function to deepcopy data if a separate function is needed */
+    deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     printer print; /*!< printer function for the datatype */
 } univ_attr_t;
 
@@ -37,7 +39,7 @@ typedef struct xuniv_attr_t
     int size;      /*!< size of the datatype */
     freer fr;      /*!< freer function for the datatype */
     printer print; /*!< printer function for the datatype */
-    deepcopy cp;   /*!< function to deepcopy data if a separate function is needed */
+    deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     comparer comp; /*!< compare function for the datatype */
 } xuniv_attr_t;
 
