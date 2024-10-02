@@ -25,6 +25,8 @@ typedef struct map_node
 
 cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
 cs_codes map_insert(map *m, void *key, void *val);
+cs_codes map_get(map m, void *key, void *value);
+cs_codes map_delete(map *m, void *key);
 void map_print(map m);
 void map_free(void *m);
 

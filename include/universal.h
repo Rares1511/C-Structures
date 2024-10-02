@@ -11,14 +11,14 @@
 
 typedef enum cs_codes
 {
+    CS_SUCCESS = 0,
     CS_MEM = -1,
-    CS_SUCCESS = -2,
-    CS_SIZE = -3,
-    CS_POS = -4,
-    CS_EMPTY = -5,
-    CS_FUNC = -6,
-    CS_ELEM = -7,
-    CS_COMP = -8
+    CS_SIZE = -2,
+    CS_POS = -3,
+    CS_EMPTY = -4,
+    CS_FUNC = -5,
+    CS_ELEM = -6,
+    CS_COMP = -7
 } cs_codes;
 
 typedef void (*printer)(void *);
