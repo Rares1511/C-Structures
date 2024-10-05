@@ -5,19 +5,19 @@
 
 typedef univ_attr_t deque_attr_t;
 
-typedef struct deque_node
+typedef struct deque_node_t
 {
-    void *data;              /*!< data inside the deque node */
-    struct deque_node *next; /*!< next element in the deque */
-    struct deque_node *prev; /*!< previous element in the deque */
-} deque_node;
+    void *data;                /*!< data inside the deque node */
+    struct deque_node_t *next; /*!< next element in the deque */
+    struct deque_node_t *prev; /*!< previous element in the deque */
+} deque_node_t;
 
 typedef struct deque
 {
-    int size;          /*!< current size of the deque */
-    deque_node *front; /*!< first element in the deque */
-    deque_node *back;  /*!< last element in the deque */
-    deque_attr_t attr; /*!< attributes for the elements inside the deque */
+    int size;            /*!< current size of the deque */
+    deque_node_t *front; /*!< first element in the deque */
+    deque_node_t *back;  /*!< last element in the deque */
+    deque_attr_t attr;   /*!< attributes for the elements inside the deque */
 } deque;
 
 /*!

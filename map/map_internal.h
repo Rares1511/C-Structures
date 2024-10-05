@@ -7,15 +7,16 @@
 #define RED 1
 
 map_node *map_node_init(void *key, int key_size, void *val, int val_size);
-static inline void map_node_free(map *m, map_node *node)
+map_node *map_node_find(map m, void *key);
+static inline void map_node_free(map m, map_node *node)
 {
-    if (m->key_attr.fr)
+    if (m.key_attr.fr)
     {
-        m->key_attr.fr(node->key);
+        m.key_attr.fr(node->key);
     }
-    if (m->val_attr.fr)
+    if (m.val_attr.fr)
     {
-        m->val_attr.fr(node->val);
+        m.val_attr.fr(node->val);
     }
     free(node->key);
     free(node->val);

@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -lpthread -lm
 BFLAGS = -I include
 LFLAGS = -Luniversal -luniversal.h
 
-all: map/map_unittest
+all: map/map_unittest deque/deque_unittest
 
 run:
 	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(arg)/$(arg)_unittest
@@ -28,8 +28,12 @@ vector.o: vector/vector.c
 
 ################# DEQUE #################
 ############ START OF DEQUE ############
-deque.o: deque/deque.c
+deque/deque.o: deque/deque.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+deque/deque_unittest.o: deque/deque_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+deque/deque_unittest: deque/deque_unittest.o deque/deque.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
 ############# END OF DEQUE #############
 
 ################# HASH TABLE #################

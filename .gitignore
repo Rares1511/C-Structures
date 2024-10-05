@@ -52,5 +52,5 @@ Mkfile.old
 dkms.conf
 
 # Testing Members
-main.c
 Makefile
+*_unittest

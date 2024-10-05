@@ -18,7 +18,8 @@ typedef enum cs_codes
     CS_EMPTY = -4,
     CS_FUNC = -5,
     CS_ELEM = -6,
-    CS_COMP = -7
+    CS_COMP = -7,
+    CS_UNKNOWN = -8
 } cs_codes;
 
 typedef void (*printer)(void *);

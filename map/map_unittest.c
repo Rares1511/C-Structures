@@ -25,7 +25,7 @@ bool validate_map_tree(map_node *node, int black_count, int *black_height)
         }
         else if (black_count != *black_height)
         {
-            printf("Black height mismatch at a leaf\n");
+            // printf("Black height mismatch at a leaf\n");
             return false;
         }
         return true;
@@ -35,7 +35,7 @@ bool validate_map_tree(map_node *node, int black_count, int *black_height)
     {
         if ((node->left_child && node->left_child->color != BLACK) || (node->right_child && node->right_child->color != BLACK))
         {
-            printf("Red node has a red child\n");
+            // printf("Red node has a red child\n");
             return false;
         }
     }
@@ -53,9 +53,6 @@ bool validate_map_tree(map_node *node, int black_count, int *black_height)
 
 bool check_map_validity(map m)
 {
-    if (m.root == NULL || m.root->color == BLACK)
-        return true;
-
     if (m.root && m.root->color != BLACK)
         return false;
 
@@ -77,8 +74,7 @@ test_res test_map_create_free_empty()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -95,6 +91,7 @@ test_res test_map_create_free_empty()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -102,12 +99,19 @@ test_res test_map_create_free_empty()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is empty and invalid");
         res.return_code = CS_FUNC;
         map_free(&m);
         return res;
     }
 
     map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -116,12 +120,12 @@ test_res test_map_create_free_empty()
     return res;
 }
 
-test_res test_map_insert_one_elem()
+test_res test_map_insert_1_elem()
 {
     clock_t start = clock();
     double time_taken;
     test_res res;
-    char test_name[] = "MAP_INSERT_ONE_ELEM";
+    char test_name[] = "MAP_INSERT_1_ELEM";
     map m;
     map_attr_t key_attr;
     map_attr_t val_attr;
@@ -129,8 +133,7 @@ test_res test_map_insert_one_elem()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -147,6 +150,7 @@ test_res test_map_insert_one_elem()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -156,6 +160,7 @@ test_res test_map_insert_one_elem()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "An error occured during inserting the first element");
         map_free(&m);
         res.return_code = rc;
         return res;
@@ -164,6 +169,7 @@ test_res test_map_insert_one_elem()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is not valid with only one element");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
@@ -172,6 +178,12 @@ test_res test_map_insert_one_elem()
     map_print(m);
 
     map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -180,12 +192,12 @@ test_res test_map_insert_one_elem()
     return res;
 }
 
-test_res test_map_insert_two_elem()
+test_res test_map_insert_2_elem()
 {
     clock_t start = clock();
     double time_taken;
     test_res res;
-    char test_name[] = "MAP_INSERT_TWO_ELEM";
+    char test_name[] = "MAP_INSERT_2_ELEM";
     map m;
     map_attr_t key_attr;
     map_attr_t val_attr;
@@ -193,8 +205,7 @@ test_res test_map_insert_two_elem()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -211,6 +222,7 @@ test_res test_map_insert_two_elem()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -220,6 +232,7 @@ test_res test_map_insert_two_elem()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "An error occured during inserting the first element");
         res.return_code = rc;
         return res;
     }
@@ -229,6 +242,7 @@ test_res test_map_insert_two_elem()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "An error occured during inserting the second element");
         map_free(&m);
         res.return_code = rc;
         return res;
@@ -237,6 +251,7 @@ test_res test_map_insert_two_elem()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is not valid with two elements");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
@@ -245,6 +260,12 @@ test_res test_map_insert_two_elem()
     map_print(m);
 
     map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -253,12 +274,12 @@ test_res test_map_insert_two_elem()
     return res;
 }
 
-test_res test_map_insert_five_elem()
+test_res test_map_insert_5_elem()
 {
     clock_t start = clock();
     double time_taken;
     test_res res;
-    char test_name[] = "MAP_INSERT_FIVE_ELEM";
+    char test_name[] = "MAP_INSERT_5_ELEM";
     map m;
     map_attr_t key_attr;
     map_attr_t val_attr;
@@ -266,8 +287,7 @@ test_res test_map_insert_five_elem()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -284,6 +304,7 @@ test_res test_map_insert_five_elem()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -295,6 +316,7 @@ test_res test_map_insert_five_elem()
         rc = map_insert(&m, &key, &val);
         if (rc != CS_SUCCESS)
         {
+            strcpy(res.reason, "An error occured during inserting one of the elements");
             map_free(&m);
             res.return_code = rc;
             return res;
@@ -304,6 +326,7 @@ test_res test_map_insert_five_elem()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is invalid with 5 elements");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
@@ -314,7 +337,86 @@ test_res test_map_insert_five_elem()
     map_free(&m);
     if (m.root != NULL)
     {
-        res.return_code = CS_MEM;
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_insert_10_elem()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_INSERT_10_ELEM";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {8, 2, 4, 5, 10, 3, 1, 6, 7, 9};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    map_print(m);
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
         return res;
     }
 
@@ -338,8 +440,7 @@ test_res test_map_insert_1000_elem()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -356,7 +457,7 @@ test_res test_map_insert_1000_elem()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
-        printf("WOW %d\n", rc);
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -368,7 +469,7 @@ test_res test_map_insert_1000_elem()
         rc = map_insert(&m, &key, &val);
         if (rc != CS_SUCCESS)
         {
-            printf("WTFFFFFF %d\n", rc);
+            strcpy(res.reason, "An error occured during inserting one of the elements");
             res.return_code = rc;
             map_free(&m);
             return res;
@@ -378,536 +479,19 @@ test_res test_map_insert_1000_elem()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is invalid with 1000 elements");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
     }
 
     map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_1_1()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_1_1";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
+    if (m.root != NULL)
     {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 3;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 7;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 4;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
+        strcpy(res.reason, "Map memory was not freed successfully");
         res.return_code = CS_FUNC;
         return res;
     }
-
-    map_print(m);
-
-    map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_1_2_1()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_1_2_1";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
-    {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 3;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 4;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
-        res.return_code = CS_FUNC;
-        return res;
-    }
-
-    map_print(m);
-
-    map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_1_2_2()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_1_2_2";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
-    {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 3;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 2;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
-        res.return_code = CS_FUNC;
-        return res;
-    }
-
-    map_print(m);
-
-    map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_2_1()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_2_1";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
-    {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 3;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 7;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 6;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
-        res.return_code = CS_FUNC;
-        return res;
-    }
-
-    map_print(m);
-
-    map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_2_2_1()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_2_2_1";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
-    {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 7;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 6;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
-        res.return_code = CS_FUNC;
-        return res;
-    }
-
-    map_print(m);
-
-    map_free(&m);
-
-    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
-    printf("%s time: %f\n", test_name, time_taken);
-    res.return_code = CS_SUCCESS;
-
-    return res;
-}
-
-test_res test_map_insert_fixup_case_2_2_2()
-{
-    clock_t start = clock();
-    double time_taken;
-    test_res res;
-    char test_name[] = "MAP_INSERT_FIXUP_CASE_2_2_2";
-    map m;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
-    int rc, key = 6, val = 9;
-    bool valid_tree;
-
-    // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
-
-    key_attr.comp = NULL;
-    key_attr.fr = NULL;
-    key_attr.print = print_int;
-    key_attr.copy = NULL;
-    key_attr.size = sizeof(int);
-
-    val_attr.comp = NULL;
-    val_attr.fr = NULL;
-    val_attr.print = print_int;
-    val_attr.copy = NULL;
-    val_attr.size = sizeof(int);
-
-    rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS)
-    {
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 5;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 7;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    key = 8;
-    val = 9;
-    rc = map_insert(&m, &key, &val);
-    if (rc != CS_SUCCESS)
-    {
-        map_free(&m);
-        res.return_code = rc;
-        return res;
-    }
-
-    valid_tree = check_map_validity(m);
-    if (!valid_tree)
-    {
-        map_free(&m);
-        res.return_code = CS_FUNC;
-        return res;
-    }
-
-    map_print(m);
-
-    map_free(&m);
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -929,8 +513,7 @@ test_res test_map_insert_same_key_twice()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -947,6 +530,7 @@ test_res test_map_insert_same_key_twice()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -956,6 +540,7 @@ test_res test_map_insert_same_key_twice()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "An error occured during inserting the first element");
         res.return_code = rc;
         return res;
     }
@@ -965,6 +550,7 @@ test_res test_map_insert_same_key_twice()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_ELEM || m.root->left_child != NULL || m.root->right_child != NULL)
     {
+        strcpy(res.reason, "Inserting the same key twice did not return CS_ELEM");
         map_free(&m);
         res.return_code = rc;
         return res;
@@ -973,6 +559,7 @@ test_res test_map_insert_same_key_twice()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is not valid after inserting the same key twice");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
@@ -981,6 +568,12 @@ test_res test_map_insert_same_key_twice()
     map_print(m);
 
     map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -1002,8 +595,7 @@ test_res test_map_get()
     bool valid_tree;
 
     // Initialise test result
-    res.test_name = malloc(sizeof(test_name) + 1);
-    strcpy(res.test_name, test_name);
+    test_res_init(&res, test_name);
 
     key_attr.comp = NULL;
     key_attr.fr = NULL;
@@ -1020,6 +612,7 @@ test_res test_map_get()
     rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "Map initialization was not completed successfully");
         res.return_code = rc;
         return res;
     }
@@ -1029,6 +622,7 @@ test_res test_map_get()
     rc = map_insert(&m, &key, &val);
     if (rc != CS_SUCCESS)
     {
+        strcpy(res.reason, "An error occured during inserting the first element");
         map_free(&m);
         res.return_code = rc;
         return res;
@@ -1037,6 +631,7 @@ test_res test_map_get()
     valid_tree = check_map_validity(m);
     if (!valid_tree)
     {
+        strcpy(res.reason, "Map is invalid after inserting the first element");
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
@@ -1045,6 +640,7 @@ test_res test_map_get()
     rc = map_get(m, &key, read_val);
     if (rc != CS_SUCCESS || *read_val != val)
     {
+        strcpy(res.reason, "An error occured during reading the value");
         free(read_val);
         map_free(&m);
         res.return_code = CS_FUNC;
@@ -1058,6 +654,12 @@ test_res test_map_get()
     map_print(m);
 
     map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
 
     time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
     printf("%s time: %f\n", test_name, time_taken);
@@ -1076,6 +678,480 @@ test_res test_map_get_wrong_key()
     map_attr_t key_attr;
     map_attr_t val_attr;
     int rc, key = 6, val = 9, *read_val = malloc(sizeof(int));
+    bool valid_tree;
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    key = 6;
+    val = 9;
+    rc = map_insert(&m, &key, &val);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during inserting the first element");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is invalid after inserting the first element");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    key = 7;
+    rc = map_get(m, &key, read_val);
+    if (rc != CS_ELEM)
+    {
+        strcpy(res.reason, "Insert function did not return correct error return code");
+        free(read_val);
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+    free(read_val);
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_delete_root_solo()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_ROOT_SOLO";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {1};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    key = 1;
+    rc = map_delete(&m, &key);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during deletion of the root");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree || m.root != NULL)
+    {
+        strcpy(res.reason, "Deletion has made the map invalid");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_MEM;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_delete_root_only_right_child()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_ROOT_ONLY_RIGHT_CHILD";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {1, 2};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    key = 1;
+    rc = map_delete(&m, &key);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during deletion of the root");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Deletion has made the map invalid");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_MEM;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_delete_root_only_left_child()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_ROOT_ONLY_LEFT_CHILD";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {1, 0};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    key = 1;
+    rc = map_delete(&m, &key);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during deletion of the root");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Deletion has made the map invalid");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_MEM;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_delete_root()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_ROOT";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {8, 2, 4, 5, 10, 3, 1, 6, 7, 9};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    map_print(m);
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    key = 1;
+    rc = map_delete(&m, &key);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during deletion of the root");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Deletion has made the map invalid");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_MEM;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
+test_res test_map_delete_wrong_key()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_WRONG_KEY";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key = 6, val = 9;
     bool valid_tree;
 
     // Initialise test result
@@ -1120,15 +1196,13 @@ test_res test_map_get_wrong_key()
     }
 
     key = 7;
-    rc = map_get(m, &key, read_val);
+    rc = map_delete(&m, &key);
     if (rc != CS_ELEM)
     {
-        free(read_val);
         map_free(&m);
         res.return_code = CS_FUNC;
         return res;
     }
-    free(read_val);
 
     map_print(m);
 
@@ -1141,10 +1215,120 @@ test_res test_map_get_wrong_key()
     return res;
 }
 
+test_res test_map_delete_1()
+{
+    clock_t start = clock();
+    double time_taken;
+    test_res res;
+    char test_name[] = "MAP_DELETE_1";
+    map m;
+    map_attr_t key_attr;
+    map_attr_t val_attr;
+    int rc, key, val, i;
+    bool valid_tree;
+    int key_values[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // Initialise test result
+    test_res_init(&res, test_name);
+
+    key_attr.comp = NULL;
+    key_attr.fr = NULL;
+    key_attr.print = print_int;
+    key_attr.copy = NULL;
+    key_attr.size = sizeof(int);
+
+    val_attr.comp = NULL;
+    val_attr.fr = NULL;
+    val_attr.print = print_int;
+    val_attr.copy = NULL;
+    val_attr.size = sizeof(int);
+
+    rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "Map initialization was not completed successfully");
+        res.return_code = rc;
+        return res;
+    }
+
+    for (i = 0; i < (int)(sizeof(key_values) / sizeof(int)); i++)
+    {
+        key = key_values[i];
+        val = 5;
+        rc = map_insert(&m, &key, &val);
+        if (rc != CS_SUCCESS)
+        {
+            strcpy(res.reason, "Failed in inserting elements in map");
+            map_free(&m);
+            res.return_code = rc;
+            return res;
+        }
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Map is not valid after inserting elements");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    key = 6;
+    rc = map_delete(&m, &key);
+    if (rc != CS_SUCCESS)
+    {
+        strcpy(res.reason, "An error occured during deletion and was not completed successfully");
+        map_free(&m);
+        res.return_code = rc;
+        return res;
+    }
+
+    valid_tree = check_map_validity(m);
+    if (!valid_tree)
+    {
+        strcpy(res.reason, "Deletion has made the map invalid");
+        map_free(&m);
+        res.return_code = CS_FUNC;
+        return res;
+    }
+
+    map_print(m);
+
+    map_free(&m);
+    if (m.root != NULL)
+    {
+        strcpy(res.reason, "Map memory was not freed successfully");
+        res.return_code = CS_MEM;
+        return res;
+    }
+
+    time_taken = 0.1 * (clock() - start) / CLOCKS_PER_SEC;
+    printf("%s time: %f\n", test_name, time_taken);
+    res.return_code = CS_SUCCESS;
+
+    return res;
+}
+
 int main()
 {
     int i;
-    test tests[] = {test_map_get_wrong_key};
+    test tests[] = {
+        test_map_create_free_empty,
+        test_map_insert_1_elem,
+        test_map_insert_2_elem,
+        test_map_insert_5_elem,
+        test_map_insert_10_elem,
+        test_map_insert_1000_elem,
+        test_map_insert_same_key_twice,
+        test_map_get,
+        test_map_get_wrong_key,
+        test_map_delete_root_solo,
+        test_map_delete_root_only_left_child,
+        test_map_delete_root_only_right_child,
+        test_map_delete_root};
     test_res res;
 
     for (i = 0; i < MAP_TEST_SIZE && i < (int)(sizeof(tests) / sizeof(test)); i++)
@@ -1152,15 +1336,15 @@ int main()
         res = tests[i]();
         if (res.return_code != CS_SUCCESS)
         {
-            printf("%s....................FAILED\n", res.test_name);
-            free_test_res(&res);
+            printf("%s....................FAILED: %s\n", res.test_name, res.reason);
+            test_res_free(&res);
             exit(-(int)(sizeof(tests) / sizeof(test) - i));
         }
         else
         {
             printf("%s....................SUCCESS: %d/%d\n", res.test_name, i + 1, (int)(sizeof(tests) / sizeof(test)));
         }
-        free_test_res(&res);
+        test_res_free(&res);
     }
 
     return 0;

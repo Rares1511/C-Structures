@@ -32,64 +32,83 @@ map_node *map_node_init(void *key, int key_size, void *val, int val_size)
     return node;
 }
 
-void map_rotate_left(map *m, map_node *node)
+map_node *map_node_find(map m, void *key)
 {
-    map_node *right_child = node->right_child;
+    map_node *node = m.root;
+    int comp_res;
 
-    node->right_child = node->right_child->left_child;
-    if (node->right_child)
+    while (node != NULL)
     {
-        node->right_child->father = node;
-    }
-    right_child->left_child = NULL;
-
-    if (!node->father)
-    {
-        m->root = right_child;
-    }
-    else
-    {
-        if (node->father->left_child == node)
+        if (m.key_attr.comp)
         {
-            node->father->left_child = right_child;
+            comp_res = m.key_attr.comp(node->key, key);
         }
         else
         {
-            node->father->right_child = right_child;
+            comp_res = universal_compare(node->key, key, m.key_attr.size);
         }
+
+        if (comp_res == 0)
+        {
+            return node;
+        }
+        else if (comp_res > 0)
+        {
+            node = node->left_child;
+        }
+        else
+            node = node->right_child;
+    }
+
+    return NULL;
+}
+
+void map_rotate_left(map *m, map_node *node)
+{
+    map_node *right_child = node->right_child;
+    node->right_child = right_child->left_child;
+    if (right_child->left_child != NULL)
+    {
+        right_child->left_child->father = node;
+    }
+    right_child->father = node->father;
+    if (node->father == NULL)
+    {
+        m->root = right_child;
+    }
+    else if (node == node->father->left_child)
+    {
+        node->father->left_child = right_child;
+    }
+    else
+    {
+        node->father->right_child = right_child;
     }
     right_child->left_child = node;
-    right_child->father = node->father;
     node->father = right_child;
 }
 
 void map_rotate_right(map *m, map_node *node)
 {
     map_node *left_child = node->left_child;
-
-    node->left_child = node->left_child->right_child;
-    if (node->left_child)
+    node->left_child = left_child->right_child;
+    if (left_child->right_child != NULL)
     {
-        node->left_child->father = node;
+        left_child->right_child->father = node;
     }
-    left_child->right_child = NULL;
-
-    if (!node->father)
+    left_child->father = node->father;
+    if (node->father == NULL)
     {
         m->root = left_child;
     }
+    else if (node == node->father->right_child)
+    {
+        node->father->right_child = left_child;
+    }
     else
     {
-        if (node->father->left_child == node)
-        {
-            node->father->left_child = left_child;
-        }
-        else
-        {
-            node->father->right_child = left_child;
-        }
+        node->father->left_child = left_child;
     }
     left_child->right_child = node;
-    left_child->father = node->father;
     node->father = left_child;
 }
