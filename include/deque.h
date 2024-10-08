@@ -5,15 +5,13 @@
 
 typedef univ_attr_t deque_attr_t;
 
-typedef struct deque_node_t
-{
+typedef struct deque_node_t {
     void *data;                /*!< data inside the deque node */
     struct deque_node_t *next; /*!< next element in the deque */
     struct deque_node_t *prev; /*!< previous element in the deque */
 } deque_node_t;
 
-typedef struct deque
-{
+typedef struct deque {
     int size;            /*!< current size of the deque */
     deque_node_t *front; /*!< first element in the deque */
     deque_node_t *back;  /*!< last element in the deque */
@@ -60,16 +58,26 @@ cs_codes deque_pop_front(deque *dq);
 cs_codes deque_pop_back(deque *dq);
 
 /*!
- * Gives a pointer to the element at the front of the deque
- * @param[in] dq Deque whose element will be accessed
+ * Copies the elements from the source deque to the destination deque
+ * @param[out] dest  The deque that will be copied to
+ * @param[in]  src   The deque that will be copied from
+ * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful copy
  */
-void *deque_front(deque dq);
+cs_codes deque_clone(deque *dest, deque src);
 
 /*!
- * Gives a pointer to the element at the back of the deque
+ * Returns the element at the front of the deque
  * @param[in] dq Deque whose element will be accessed
+ * @param[out] el Pointer to the element at the front of the deque
  */
-void *deque_back(deque dq);
+void deque_front(deque dq, void *el);
+
+/*!
+ * Returns the element at the back of the deque
+ * @param[in] dq Deque whose element will be accessed
+ * @param[out] el Pointer to the element at the back of the deque
+ */
+void deque_back(deque dq, void *el);
 
 /*!
  * Sets the new attributes for the deque

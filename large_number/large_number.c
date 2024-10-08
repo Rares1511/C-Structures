@@ -1,12 +1,11 @@
 #include "large_number_internal.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 
-cs_codes large_number_init(large_number *ln, ln_type type, ...)
-{
+cs_codes large_number_init(large_number *ln, ln_type type, ...) {
     int rc;
 
     ln->size = 0;
@@ -24,8 +23,7 @@ cs_codes large_number_init(large_number *ln, ln_type type, ...)
     va_list arg;
     va_start(arg, 1);
 
-    switch (type)
-    {
+    switch (type) {
     case LN_SCALE:
         double scale = va_arg(arg, double);
         rc = large_number_assign(ln, type, scale);
@@ -47,10 +45,8 @@ cs_codes large_number_init(large_number *ln, ln_type type, ...)
     return rc;
 }
 
-cs_codes large_number_assign(large_number *ln, ln_type type, ...)
-{
-    if (type == LN_NULL)
-    {
+cs_codes large_number_assign(large_number *ln, ln_type type, ...) {
+    if (type == LN_NULL) {
         memset(ln->vec, 0, sizeof(long) * ln->cap);
         ln->size = 0;
         ln->exponent = 0;
@@ -62,15 +58,12 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
     int i;
     va_start(arg, _LN_ASSIGN_ARGS_CNT);
 
-    if (type == LN_SCALE)
-    {
+    if (type == LN_SCALE) {
         double scale = va_arg(arg, double);
-        if (scale < 0)
-        {
+        if (scale < 0) {
             ln->sign = NEGATIVE;
             scale *= -1;
-        }
-        else
+        } else
             ln->sign = POSITIVE;
         long supraunitary, subunitary, copy;
         int count;
@@ -82,20 +75,17 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
         subunitary = (long)scale;
         count = 0;
         copy = subunitary;
-        while (copy > 0)
-        {
+        while (copy > 0) {
             count++;
             copy /= 10;
         }
         copy = supraunitary;
-        while (copy > 0)
-        {
+        while (copy > 0) {
             count++;
             copy /= 10;
         }
 
-        if (ln->cap < count)
-        {
+        if (ln->cap < count) {
             ln->cap = count + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
@@ -104,23 +94,18 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
 
         memset(ln->vec + count, 0, sizeof(long) * (ln->cap - count));
 
-        while (subunitary > 0)
-        {
+        while (subunitary > 0) {
             ln->vec[ln->size++] = subunitary % 10;
             subunitary /= 10;
         }
         ln->exponent = ln->size;
-        while (supraunitary > 0)
-        {
+        while (supraunitary > 0) {
             ln->vec[ln->size++] = supraunitary % 10;
             supraunitary /= 10;
         }
-    }
-    else if (type == LN_NUM)
-    {
+    } else if (type == LN_NUM) {
         large_number src = va_arg(arg, large_number);
-        if (ln->cap < src.size)
-        {
+        if (ln->cap < src.size) {
             ln->cap = src.size + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
@@ -132,27 +117,21 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
         ln->sign = src.sign;
         for (i = 0; i < src.size; i++)
             ln->vec[i] = src.vec[i];
-    }
-    else if (type == LN_CHAR)
-    {
+    } else if (type == LN_CHAR) {
         char *str = va_arg(arg, char *);
         int start = 0;
         ln->sign = POSITIVE;
         ln->size = strlen(str);
-        if (str[0] == '-')
-        {
+        if (str[0] == '-') {
             ln->sign = NEGATIVE;
             ln->size = strlen(str) - 1;
             start = 1;
-        }
-        else if (str[0] == '+')
-        {
+        } else if (str[0] == '+') {
             start = 1;
             ln->size = strlen(str) - 1;
         }
 
-        if (ln->cap < ln->size)
-        {
+        if (ln->cap < ln->size) {
             ln->cap = ln->size + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
@@ -160,20 +139,17 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
         }
         memset(ln->vec + strlen(str), 0, sizeof(long) * (ln->cap - strlen(str)));
 
-        for (i = strlen(str) - 1; i >= start && str[i] != '.'; i--)
-        {
+        for (i = strlen(str) - 1; i >= start && str[i] != '.'; i--) {
             if (!(str[i] >= '0' && str[i] <= '9'))
                 return CS_ELEM;
             ln->vec[ln->size - i - 1 + start] = str[i] - '0';
         }
-        if (i >= 0)
-        {
+        if (i >= 0) {
             ln->size--;
             ln->exponent = ln->size - i + start;
             i--;
         }
-        for (; i >= start; i--)
-        {
+        for (; i >= start; i--) {
             if (!(str[i] >= '0' && str[i] <= '9'))
                 return CS_ELEM;
             ln->vec[ln->size - i - 1 + start] = str[i] - '0';
@@ -183,19 +159,16 @@ cs_codes large_number_assign(large_number *ln, ln_type type, ...)
     return CS_SUCCESS;
 }
 
-cs_codes large_number_append(large_number *ln, ln_type type, ...)
-{
+cs_codes large_number_append(large_number *ln, ln_type type, ...) {
     va_list arg;
     int i;
 
     va_start(arg, _LN_APPEND_ARGS_CNT);
 
-    switch (type)
-    {
+    switch (type) {
     case LN_NUM:
         large_number aux = va_arg(arg, large_number);
-        if (ln->cap < ln->size + aux.size)
-        {
+        if (ln->cap < ln->size + aux.size) {
             ln->cap = ln->size + aux.size + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
@@ -207,16 +180,14 @@ cs_codes large_number_append(large_number *ln, ln_type type, ...)
         break;
     case LN_CHAR:
         char *str = va_arg(arg, char *);
-        if (ln->cap < ln->size + strlen(str))
-        {
+        if (ln->cap < ln->size + strlen(str)) {
             ln->cap = ln->size + strlen(str) + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
                 return CS_MEM;
         }
         memcpy(ln->vec + strlen(str), ln->vec, sizeof(long) * ln->size);
-        for (i = 0; i < strlen(str); i++)
-        {
+        for (i = 0; i < strlen(str); i++) {
             if (!(str[i] >= '0' && str[i] <= '9'))
                 return CS_ELEM;
             ln->vec[i] = str[i] - '0';
@@ -227,21 +198,18 @@ cs_codes large_number_append(large_number *ln, ln_type type, ...)
         long scale = va_arg(arg, long);
         long copy = scale;
         int count = 0;
-        while (copy > 0)
-        {
+        while (copy > 0) {
             count++;
             copy /= 10;
         }
-        if (ln->cap < ln->size + count)
-        {
+        if (ln->cap < ln->size + count) {
             ln->cap = ln->size + count + INIT_CAPACITY;
             ln->vec = realloc(ln->vec, sizeof(long) * ln->cap);
             if (!ln->vec)
                 return CS_MEM;
         }
         memcpy(ln->vec + count, ln->vec, sizeof(long) * ln->size);
-        for (i = 0; scale > 0; scale /= 10, i++)
-        {
+        for (i = 0; scale > 0; scale /= 10, i++) {
             ln->vec[i] = scale % 10;
         }
         ln->size += count;
@@ -256,15 +224,13 @@ cs_codes large_number_append(large_number *ln, ln_type type, ...)
     return CS_SUCCESS;
 }
 
-cs_codes large_number_convert(large_number ln, void *ptr, ln_conversion_type type)
-{
+cs_codes large_number_convert(large_number ln, void *ptr, ln_conversion_type type) {
     int i, rc;
 
     if (ln.size > 20)
         return CS_SIZE;
 
-    switch (type)
-    {
+    switch (type) {
     case LN_CONV_LONG:
         long *scale = malloc(sizeof(long));
         for (i = ln.exponent; i < ln.size; i++)
@@ -286,8 +252,7 @@ cs_codes large_number_convert(large_number ln, void *ptr, ln_conversion_type typ
         char *str = malloc(ln.size + 1 + has_comma);
         for (i = ln.size - 1; i >= ln.exponent; i--)
             str[ln.size - 1 - i + has_comma] = ln.vec[i] + '0';
-        if (has_comma)
-        {
+        if (has_comma) {
             str[ln.exponent] = '.';
             for (i = ln.exponent - 1; i >= 0; i--)
                 str[ln.size - 1 - i] = ln.vec[i] + '0';
@@ -301,8 +266,7 @@ cs_codes large_number_convert(large_number ln, void *ptr, ln_conversion_type typ
     return rc;
 }
 
-cs_codes large_number_add(large_number *dest, large_number ln1, large_number ln2)
-{
+cs_codes large_number_add(large_number *dest, large_number ln1, large_number ln2) {
     int rc = large_number_assign(dest, LN_NUM, ln1);
     if (rc != CS_SUCCESS)
         return rc;
@@ -313,8 +277,7 @@ cs_codes large_number_add(large_number *dest, large_number ln1, large_number ln2
     return large_number_add_helper(dest, ln2);
 }
 
-cs_codes large_number_minus(large_number *dest, large_number ln1, large_number ln2)
-{
+cs_codes large_number_minus(large_number *dest, large_number ln1, large_number ln2) {
     int rc = large_number_assign(dest, LN_NUM, ln1);
     if (rc != CS_SUCCESS)
         return rc;
@@ -324,8 +287,7 @@ cs_codes large_number_minus(large_number *dest, large_number ln1, large_number l
     return large_number_minus_helper(dest, ln2);
 }
 
-cs_codes large_number_mul(large_number *dest, large_number ln1, large_number ln2)
-{
+cs_codes large_number_mul(large_number *dest, large_number ln1, large_number ln2) {
     int rc = large_number_assign(dest, LN_NUM, ln1);
     if (rc != CS_SUCCESS)
         return rc;
@@ -333,8 +295,7 @@ cs_codes large_number_mul(large_number *dest, large_number ln1, large_number ln2
     return large_number_mul_helper(dest, ln2);
 }
 
-cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...)
-{
+cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_div_type type, ...) {
     va_list arg;
     int rc;
 
@@ -344,8 +305,7 @@ cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_d
     if (rc != CS_SUCCESS)
         return rc;
 
-    switch (type)
-    {
+    switch (type) {
     case LN_QUOTIENT:
         rc = large_number_div_helper(quotient, NULL, ln2, accuracy);
         break;
@@ -363,13 +323,11 @@ cs_codes large_number_div(large_number ln1, large_number ln2, int accuracy, ln_d
     return rc;
 }
 
-cs_codes large_number_int(large_number *dest, large_number ln)
-{
+cs_codes large_number_int(large_number *dest, large_number ln) {
     int i;
     long *ptr;
 
-    if (dest->cap < ln.size - ln.exponent)
-    {
+    if (dest->cap < ln.size - ln.exponent) {
         dest->cap = ln.size - ln.exponent + _LN_INIT_CAPACITY;
         ptr = realloc(dest->vec, sizeof(long) * dest->cap);
         if (!ptr)
@@ -377,12 +335,12 @@ cs_codes large_number_int(large_number *dest, large_number ln)
         dest->vec = ptr;
     }
 
-    for (int i = ln.exponent; i < ln.size; i++)
-    {
+    for (int i = ln.exponent; i < ln.size; i++) {
         dest->vec[i - ln.exponent] = ln.vec[i];
     }
     if (dest->size > ln.size - ln.exponent)
-        memset(dest->vec + ln.size - ln.exponent, 0, sizeof(long) * (dest->size - ln.size + ln.exponent));
+        memset(dest->vec + ln.size - ln.exponent, 0,
+               sizeof(long) * (dest->size - ln.size + ln.exponent));
     dest->size = ln.size - ln.exponent;
     dest->sign = ln.sign;
     dest->exponent = 0;
@@ -391,13 +349,11 @@ cs_codes large_number_int(large_number *dest, large_number ln)
     return CS_SUCCESS;
 }
 
-cs_codes large_number_fraction(large_number *dest, large_number ln)
-{
+cs_codes large_number_fraction(large_number *dest, large_number ln) {
     int i;
     long *ptr;
 
-    if (dest->cap < ln.exponent)
-    {
+    if (dest->cap < ln.exponent) {
         dest->cap = ln.exponent + _LN_INIT_CAPACITY;
         ptr = realloc(dest->vec, sizeof(long) * dest->cap);
         if (!ptr)
@@ -417,8 +373,7 @@ cs_codes large_number_fraction(large_number *dest, large_number ln)
     return CS_SUCCESS;
 }
 
-cs_codes large_number_set_base(large_number *ln, int base)
-{
+cs_codes large_number_set_base(large_number *ln, int base) {
     long rest;
 
     if (base == ln->base)
@@ -426,8 +381,7 @@ cs_codes large_number_set_base(large_number *ln, int base)
 
     ///////////////////////////////// LN1->AUX1 INIT /////////////////////////////////
 
-    if (!ln->aux1)
-    {
+    if (!ln->aux1) {
         ln->aux1 = malloc(sizeof(large_number));
         if (!ln->aux1)
             return CS_MEM;
@@ -437,8 +391,7 @@ cs_codes large_number_set_base(large_number *ln, int base)
 
     ///////////////////////////////// LN1->AUX2 INIT /////////////////////////////////
 
-    if (!ln->aux2)
-    {
+    if (!ln->aux2) {
         ln->aux2 = malloc(sizeof(large_number));
         if (!ln->aux2)
             return CS_MEM;
@@ -448,8 +401,7 @@ cs_codes large_number_set_base(large_number *ln, int base)
 
     ///////////////////////////////// LN1->AUX3 INIT /////////////////////////////////
 
-    if (!ln->aux3)
-    {
+    if (!ln->aux3) {
         ln->aux3 = malloc(sizeof(large_number));
         if (!ln->aux3)
             return CS_MEM;
@@ -461,8 +413,7 @@ cs_codes large_number_set_base(large_number *ln, int base)
     large_number_fraction(ln->aux1, *ln);
     large_number_assign(ln->aux2, LN_SCALE, base);
 
-    while (ln->aux1->size > 0)
-    {
+    while (ln->aux1->size > 0) {
         large_number_div_helper(ln->aux1, ln->aux3, *ln->aux2, 0);
         large_number_convert(*ln->aux3, &rest, LN_CONV_LONG);
     }
@@ -470,31 +421,25 @@ cs_codes large_number_set_base(large_number *ln, int base)
     return CS_SUCCESS;
 }
 
-int large_number_compare(large_number ln1, large_number ln2)
-{
+int large_number_compare(large_number ln1, large_number ln2) {
     int exponent_diff;
 
     if ((ln1.size - ln1.exponent) - (ln2.size - ln2.exponent) != 0)
         return (ln1.size - ln1.exponent) - (ln2.size - ln2.exponent);
 
-    if (ln2.exponent > ln1.exponent)
-    {
+    if (ln2.exponent > ln1.exponent) {
         exponent_diff = ln2.exponent - ln1.exponent;
         for (int i = ln1.size - 1; i >= 0; i--)
             if (ln1.vec[i] != ln2.vec[i + exponent_diff])
                 return ln1.vec[i] - ln2.vec[i + exponent_diff];
         return -ln2.vec[exponent_diff - 1];
-    }
-    else if (ln1.exponent > ln2.exponent)
-    {
+    } else if (ln1.exponent > ln2.exponent) {
         exponent_diff = ln1.exponent - ln2.exponent;
         for (int i = ln1.size - 1; i >= 0; i--)
             if (ln1.vec[i + exponent_diff] != ln2.vec[i])
                 return ln1.vec[i + exponent_diff] - ln2.vec[i];
         return ln1.vec[exponent_diff - 1];
-    }
-    else
-    {
+    } else {
         for (int i = ln1.size - 1; i >= 0; i--)
             if (ln1.vec[i] != ln2.vec[i])
                 return ln1.vec[i] - ln2.vec[i];
@@ -505,8 +450,7 @@ int large_number_compare(large_number ln1, large_number ln2)
 
 void large_number_negative(large_number *ln1) { ln1->sign *= NEGATIVE; }
 
-void large_number_swap(large_number *ln1, large_number *ln2)
-{
+void large_number_swap(large_number *ln1, large_number *ln2) {
     int cap = ln1->cap;
     int size = ln1->size;
     int exponent = ln1->exponent;
@@ -529,42 +473,34 @@ void large_number_swap(large_number *ln1, large_number *ln2)
     ln2->vec = vec;
 }
 
-void large_number_free(large_number *ln)
-{
-    if (ln->aux1)
-    {
+void large_number_free(large_number *ln) {
+    if (ln->aux1) {
         free(ln->aux1->vec);
         free(ln->aux1);
     }
-    if (ln->aux2)
-    {
+    if (ln->aux2) {
         free(ln->aux2->vec);
         free(ln->aux2);
     }
-    if (ln->aux3)
-    {
+    if (ln->aux3) {
         free(ln->aux3->vec);
         free(ln->aux3);
     }
     free(ln->vec);
 }
 
-void large_number_print(large_number ln)
-{
+void large_number_print(large_number ln) {
     int i;
     if (ln.sign == NEGATIVE)
         printf("-");
-    for (i = ln.size - 1; i >= ln.exponent; i--)
-    {
+    for (i = ln.size - 1; i >= ln.exponent; i--) {
         printf("%ld", ln.vec[i]);
         if ((ln.exponent - i) % 3 == 0 && (ln.exponent - i) != 0)
             printf(",");
     }
-    if (ln.exponent > 0)
-    {
+    if (ln.exponent > 0) {
         printf(".");
-        for (i = ln.exponent - 1; i >= 0; i--)
-        {
+        for (i = ln.exponent - 1; i >= 0; i--) {
             printf("%ld", ln.vec[i]);
         }
     }

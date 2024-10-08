@@ -30,9 +30,11 @@ vector.o: vector/vector.c
 ############ START OF DEQUE ############
 deque/deque.o: deque/deque.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+deque/deque_internal.o: deque/deque_internal.c
+	$(CC) -c -o $@ $< $(CFLAGS)
 deque/deque_unittest.o: deque/deque_unittest.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-deque/deque_unittest: deque/deque_unittest.o deque/deque.o universal/universal.o unittest/unittest.o
+deque/deque_unittest: deque/deque_unittest.o deque/deque.o deque/deque_internal.o universal/universal.o unittest/unittest.o
 	$(CC) -o $@ $^ $(CFLAGS)
 ############# END OF DEQUE #############
 

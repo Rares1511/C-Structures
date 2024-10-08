@@ -4,8 +4,7 @@
 #define MAP_TEST_SIZE 20
 #define DEQUE_TEST_SIZE 20
 
-typedef struct test_res
-{
+typedef struct test_res {
     char *test_name;
     char *reason;
     int return_code;
