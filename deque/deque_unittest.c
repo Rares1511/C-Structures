@@ -298,8 +298,9 @@ test_res test_deque_front() {
                           .reason = "values were not pushed back correctly",
                           .return_code = CS_UNKNOWN};
     }
-    int *front = deque_front(dq);
-    if (front == NULL || *front != deque_values[0]) {
+    int front;
+    deque_front(dq, &front);
+    if (front != deque_values[0]) {
         return (test_res){.test_name = "TEST_DEQUE_FRONT",
                           .reason = "deque_front failed",
                           .return_code = CS_UNKNOWN};
@@ -338,8 +339,9 @@ test_res test_deque_back() {
                           .reason = "values were not pushed back correctly",
                           .return_code = CS_UNKNOWN};
     }
-    int *back = deque_back(dq);
-    if (back == NULL || *back != deque_values[(int)(sizeof(deque_values) / sizeof(int)) - 1]) {
+    int back;
+    deque_back(dq, &back);
+    if (back != deque_values[(int)(sizeof(deque_values) / sizeof(int)) - 1]) {
         return (test_res){.test_name = "TEST_DEQUE_BACK",
                           .reason = "deque_back failed",
                           .return_code = CS_UNKNOWN};
@@ -462,9 +464,10 @@ test_res test_deque_copy() {
     }
 
     // Compare the struct in dq and the struct p
-    struct painting *p_f = (struct painting *)deque_front(dq);
-    if (strcmp(p_f->name, p.name) != 0 || p_f->year != p.year || p_f->noPaints != p.noPaints ||
-        memcmp(p_f->paints, p.paints, p.noPaints * sizeof(int))) {
+    struct painting p_f;
+    deque_front(dq, &p_f);
+    if (strcmp(p_f.name, p.name) != 0 || p_f.year != p.year || p_f.noPaints != p.noPaints ||
+        memcmp(p_f.paints, p.paints, p.noPaints * sizeof(int))) {
         return (test_res){.test_name = "TEST_DEQUE_COPY",
                           .reason = "struct was not copied correctly",
                           .return_code = CS_UNKNOWN};
@@ -580,9 +583,10 @@ test_res test_deque_set_free() {
     }
 
     // Compare the struct in dq and the struct p
-    struct painting *p_f = (struct painting *)deque_front(dq);
-    if (strcmp(p_f->name, p.name) != 0 || p_f->year != p.year || p_f->noPaints != p.noPaints ||
-        memcmp(p_f->paints, p.paints, p.noPaints * sizeof(int))) {
+    struct painting p_f;
+    deque_front(dq, &p_f);
+    if (strcmp(p_f.name, p.name) != 0 || p_f.year != p.year || p_f.noPaints != p.noPaints ||
+        memcmp(p_f.paints, p.paints, p.noPaints * sizeof(int))) {
         return (test_res){.test_name = "TEST_DEQUE_COPY",
                           .reason = "struct was not copied correctly",
                           .return_code = CS_UNKNOWN};
@@ -631,9 +635,10 @@ test_res test_deque_set_print() {
     }
 
     // Compare the struct in dq and the struct p
-    struct painting *p_f = (struct painting *)deque_front(dq);
-    if (strcmp(p_f->name, p.name) != 0 || p_f->year != p.year || p_f->noPaints != p.noPaints ||
-        memcmp(p_f->paints, p.paints, p.noPaints * sizeof(int))) {
+    struct painting p_f;
+    deque_front(dq, &p_f);
+    if (strcmp(p_f.name, p.name) != 0 || p_f.year != p.year || p_f.noPaints != p.noPaints ||
+        memcmp(p_f.paints, p.paints, p.noPaints * sizeof(int))) {
         return (test_res){.test_name = "TEST_DEQUE_COPY",
                           .reason = "struct was not copied correctly",
                           .return_code = CS_UNKNOWN};
@@ -690,9 +695,10 @@ test_res test_deque_set_copy() {
     }
 
     // Compare the struct in dq and the struct p
-    struct painting *p_f = (struct painting *)deque_front(dq);
-    if (strcmp(p_f->name, p.name) != 0 || p_f->year != p.year || p_f->noPaints != p.noPaints ||
-        memcmp(p_f->paints, p.paints, p.noPaints * sizeof(int))) {
+    struct painting p_f;
+    deque_front(dq, &p_f);
+    if (strcmp(p_f.name, p.name) != 0 || p_f.year != p.year || p_f.noPaints != p.noPaints ||
+        memcmp(p_f.paints, p.paints, p.noPaints * sizeof(int))) {
         return (test_res){.test_name = "TEST_DEQUE_COPY",
                           .reason = "struct was not copied correctly",
                           .return_code = CS_UNKNOWN};
@@ -734,9 +740,10 @@ test_res test_deque_set_copy_wrong() {
     }
 
     // Compare the struct in dq and the struct p
-    struct painting *p_f = (struct painting *)deque_front(dq);
-    if (strcmp(p_f->name, p.name) != 0 || p_f->year != p.year || p_f->noPaints != p.noPaints ||
-        memcmp(p_f->paints, p.paints, p.noPaints * sizeof(int))) {
+    struct painting p_f;
+    deque_front(dq, &p_f);
+    if (strcmp(p_f.name, p.name) != 0 || p_f.year != p.year || p_f.noPaints != p.noPaints ||
+        memcmp(p_f.paints, p.paints, p.noPaints * sizeof(int))) {
         return (test_res){.test_name = "TEST_DEQUE_COPY",
                           .reason = "struct was not copied correctly",
                           .return_code = CS_UNKNOWN};
@@ -803,11 +810,12 @@ test_res test_deque_clone() {
 
     // Compare the struct in dq and the struct p
     while (dq.size > 0) {
-        struct painting *p_f = (struct painting *)deque_front(dq);
-        struct painting *p_f_clone = (struct painting *)deque_front(dq_clone);
-        if (strcmp(p_f->name, p_f_clone->name) != 0 || p_f->year != p_f_clone->year ||
-            p_f->noPaints != p_f_clone->noPaints ||
-            memcmp(p_f->paints, p_f_clone->paints, p_f->noPaints * sizeof(int))) {
+        struct painting p_f, p_f_clone;
+        deque_front(dq, &p_f);
+        deque_front(dq_clone, &p_f_clone);
+        if (strcmp(p_f.name, p_f_clone.name) != 0 || p_f.year != p_f_clone.year ||
+            p_f.noPaints != p_f_clone.noPaints ||
+            memcmp(p_f.paints, p_f_clone.paints, p_f.noPaints * sizeof(int))) {
             return (test_res){.test_name = "TEST_DEQUE_CLONE",
                               .reason = "struct was not cloned correctly",
                               .return_code = CS_UNKNOWN};
@@ -867,8 +875,7 @@ int main() {
         char buffer[1024];
         strcpy(buffer, res.test_name);
         strncat(buffer,
-                ".................................................................................."
-                "................",
+                "..........................................................................",
                 MAX_PRINT_SIZE - strlen(res.test_name));
         if (res.return_code != CS_SUCCESS) {
             printf("%sFAILED: %s\n", buffer, res.reason);
