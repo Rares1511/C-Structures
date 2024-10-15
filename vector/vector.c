@@ -127,6 +127,7 @@ void vector_free(void *v_vec) {
         for (int i = 0; i < vec->size; i++)
             vec->attr.fr(vec->vec + i * vec->attr.size);
     free(vec->vec);
+    vec->vec = NULL;
 }
 
 void vector_print(void *v_vec) {
