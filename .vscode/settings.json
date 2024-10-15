@@ -38,7 +38,8 @@
         "utility": "c",
         "string.h": "c",
         "unittest.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "matrix.h": "c"
     },
     "prettier.bracketSameLine": false,
     "prettier.useTabs": true,
