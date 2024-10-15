@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MATRIX_H
 #define MATRXI_H
 
@@ -12,8 +13,7 @@ typedef struct matrix_t {
     matrix_attr_t attr; /*!< attributes for the datatype inside the matrix */
 } matrix_t;
 
-matrix_attr_t MATRIX_ATTR = {sizeof(matrix_t), NULL, NULL, NULL, NULL};
-
 cs_codes matrix_init(matrix_t *m, int dimensions, matrix_attr_t attr);
+void matrix_free(void *v_m);
 
 #endif

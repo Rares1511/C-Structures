@@ -5,6 +5,7 @@
 #define DEQUE_TEST_SIZE 20
 #define HASH_TABLE_TEST_SIZE 20
 #define HEAP_TEST_SIZE 20
+#define MATRIX_TEST_SIZE 20
 
 typedef struct test_res {
     char *test_name;

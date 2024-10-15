@@ -3,7 +3,7 @@
 #ifndef UNIVERSAL_H
 #define UNIVERSAL_H
 
-#define INIT_CAPACITY 1024
+#define INIT_CAPACITY 256
 
 #define SIZE_TH 1000
 

@@ -5,26 +5,32 @@
 #include <string.h>
 #include <time.h>
 
-#include "../include/matrix.h"
 #include "../include/unittest.h"
+#include "../include/vector.h"
 
-test_res test_matrix_init() {
-    matrix_t m;
-    matrix_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
+test_res test_vector_init() {
+    vector v;
+    vector_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
 
-    cs_codes rc = matrix_init(&m, 2, attr);
+    cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_matrix_init", .reason = "matrix_init failed", .return_code = rc};
+            .test_name = "test_vector_init", .reason = "vector_init failed", .return_code = rc};
     }
 
-    matrix_free(&m);
-    return (test_res){.test_name = "test_matrix_init", .reason = "none", .return_code = CS_SUCCESS};
+    vector_free(&v);
+    if (v.vec != NULL) {
+        return (test_res){.test_name = "test_vector_init",
+                          .reason = "vector_free failed",
+                          .return_code = CS_UNKNOWN};
+    }
+
+    return (test_res){.test_name = "test_vector_init", .reason = "none", .return_code = CS_SUCCESS};
 }
 
 int main() {
     int i;
-    test tests[] = {test_matrix_init};
+    test tests[] = {};
     test_res res;
 
     for (i = 0; i < MATRIX_TEST_SIZE && i < (int)(sizeof(tests) / sizeof(test)); i++) {

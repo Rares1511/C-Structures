@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -lpthread -lm
 BFLAGS = -I include
 LFLAGS = -Luniversal -luniversal.h
 
-all: map/map_unittest deque/deque_unittest heap/heap_unittest
+all: map/map_unittest deque/deque_unittest heap/heap_unittest matrix/matrix_unittest vector/vector_unittest
 
 run:
 	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(arg)/$(arg)_unittest
@@ -24,7 +24,21 @@ unittest/unittest.o: unittest/unittest.c
 ############ START OF VECTOR ############
 vector/vector.o: vector/vector.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+vector/vector_unittest.o: vector/vector_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+vector/vector_unittest: vector/vector_unittest.o vector/vector.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
 ############# END OF VECTOR #############
+
+################# MATRIX #################
+############ START OF MATRIX ############
+matrix/matrix.o: matrix/matrix.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+matrix/matrix_unittest.o: matrix/matrix_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+matrix/matrix_unittest: matrix/matrix_unittest.o matrix/matrix.o vector/vector.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
+############# END OF MATRIX #############
 
 ################# DEQUE #################
 ############ START OF DEQUE ############
