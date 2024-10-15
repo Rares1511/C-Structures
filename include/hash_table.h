@@ -6,8 +6,7 @@
 typedef int (*hash_function)(void *);
 typedef xuniv_attr_t hash_table_attr_t;
 
-typedef struct hash_table
-{
+typedef struct hash_table {
     hash_function hf;       /*!< hash function for the hash table */
     vector *table;          /*!< table of the hash table that holds the elements */
     int size;               /*!< maximum number of lines of the hash table */

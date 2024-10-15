@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -lpthread -lm
 BFLAGS = -I include
 LFLAGS = -Luniversal -luniversal.h
 
-all: map/map_unittest deque/deque_unittest
+all: map/map_unittest deque/deque_unittest heap/heap_unittest
 
 run:
 	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(arg)/$(arg)_unittest
@@ -22,7 +22,7 @@ unittest/unittest.o: unittest/unittest.c
 
 ################# VECTOR #################
 ############ START OF VECTOR ############
-vector.o: vector/vector.c
+vector/vector.o: vector/vector.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 ############# END OF VECTOR #############
 
@@ -40,14 +40,22 @@ deque/deque_unittest: deque/deque_unittest.o deque/deque.o deque/deque_internal.
 
 ################# HASH TABLE #################
 ############ START OF HASH TABLE ############
-hash_table.o: hash_table/hash_table.c
+hash_table/hash_table.o: hash_table/hash_table.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+hash_table/hash_table_unittest.o: hash_table/hash_table_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+hash_table/hash_table_unittest: hash_table/hash_table_unittest.o vector/vector.o hash_table/hash_table.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
 ############# END OF HASH TABLE #############
 
 ################# HEAP #################
 ############ START OF HEAP ############
-heap.o: heap/heap.c
+heap/heap.o: heap/heap.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+heap/heap_unittest.o: heap/heap_unittest.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+heap/heap_unittest: heap/heap_unittest.o heap/heap.o universal/universal.o unittest/unittest.o
+	$(CC) -o $@ $^ $(CFLAGS)
 ############# END OF HEAP #############
 
 ################# LIST #################

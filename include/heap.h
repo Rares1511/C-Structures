@@ -5,8 +5,7 @@
 
 typedef xuniv_attr_t heap_attr_t;
 
-typedef struct heap
-{
+typedef struct heap {
     void *vec;        /*!< vector holing the elements of the heap */
     int size;         /*!< current size of the heap */
     int cap;          /*!< current capacity of the heap */
@@ -47,8 +46,9 @@ int heap_empty(heap h);
 /*!
  * Gives a pointer to the top element inside the heap
  * @param[in] h  Heap whose top element will be accessed
+ * @param[out] el  Pointer to the top element
  */
-void *heap_top(heap h);
+void heap_top(heap h, void *el);
 
 /*!
  * Sets the new attributes for the heap
