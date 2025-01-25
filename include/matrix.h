@@ -17,6 +17,8 @@ typedef struct matrix_t {
 cs_codes matrix_init(matrix_t *m, int dimensions, matrix_attr_t attr);
 cs_codes matrix_insert_at(matrix_t *m, int *position, void *el);
 cs_codes matrix_push_back(matrix_t *m, int *position, void *el);
+cs_codes matrix_insert_at_line(matrix_t *m, int dimension, int *position);
+cs_codes matrix_push_back_line(matrix_t *m, int dimension, int *position);
 int matrix_empty(matrix_t m);
 void *matrix_at(matrix_t m, int *position);
 void matrix_print(void *v_m);

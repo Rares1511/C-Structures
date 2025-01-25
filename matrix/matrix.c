@@ -67,6 +67,32 @@ cs_codes matrix_push_back(matrix_t *m, int *position, void *el) {
     }
 }
 
+cs_codes matrix_insert_at_line(matrix_t *m, int dimension, int *position) {
+    if (dimension < 2 || dimension > m->dimensions)
+        return CS_SIZE;
+
+    if (dimension > 2) {
+        return matrix_insert_at_line((matrix_t *)vector_at(*m->vec, position[0]), dimension - 1,
+                                     position + 1);
+    } else {
+        matrix_t aux;
+        return vector_insert_at(m->vec, &aux, position[0]);
+    }
+}
+
+cs_codes matrix_push_back_line(matrix_t *m, int dimension, int *position) {
+    if (dimension < 2 || dimension > m->dimensions)
+        return CS_SIZE;
+
+    if (dimension > 2) {
+        return matrix_push_back_line((matrix_t *)vector_at(*m->vec, position[0]), dimension - 1,
+                                     position + 1);
+    } else {
+        matrix_t aux;
+        return vector_push_back(m->vec, &aux);
+    }
+}
+
 int matrix_empty(matrix_t m) {
     /* Matrix has more dimensions so we look in its submatrix for elements until reaching a 1-d
      * matrix*/

@@ -1,4 +1,5 @@
 #include "../include/vector.h"
+#include "../include/cs_global.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,9 @@ cs_codes vector_init(vector *vec, vector_attr_t attr) {
     vec->vec = malloc(vec->attr.size * vec->cap);
     if (!vec->cap)
         return CS_MEM;
+    int rc = cs_global_add_entry(CS_VECTOR, vec);
+    if (rc != CS_SUCCESS)
+        return rc;
     return CS_SUCCESS;
 }
 

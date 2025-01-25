@@ -1,123 +1,29 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -lpthread -lm
-BFLAGS = -I include
-LFLAGS = -Luniversal -luniversal.h
+# Top-level Makefile
 
-all: map/map_unittest deque/deque_unittest heap/heap_unittest matrix/matrix_unittest vector/vector_unittest
+# Define the path to the library and include directories
+LIBDIR = /usr/local/lib
+PATH_INCLUDEDIR = /usr/local/include/cs
+LOCAL_INCLUDEDIR = ../include
 
-run:
-	valgrind -s --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(arg)/$(arg)_unittest
+export PATH_INCLUDEDIR
+export LOCAL_INCLUDEDIR
+export LIBDIR
 
+# Path to each submodule
+SUBDIRS = universal vector
+
+all: install
+
+# Install all libraries
+install:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir install; \
+	done
+
+# Clean all submodules
 clean:
-	rm -r */*.o
-	rm -r */*_unittest
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 
-################# UNIVERSAL #################
-############ START OF UNIVERSAL ############
-universal/universal.o: universal/universal.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-unittest/unittest.o: unittest/unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF UNIVERSAL #############
-
-################# VECTOR #################
-############ START OF VECTOR ############
-vector/vector.o: vector/vector.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-vector/vector_unittest.o: vector/vector_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-vector/vector_unittest: vector/vector_unittest.o vector/vector.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF VECTOR #############
-
-################# MATRIX #################
-############ START OF MATRIX ############
-matrix/matrix.o: matrix/matrix.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-matrix/matrix_unittest.o: matrix/matrix_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-matrix/matrix_unittest: matrix/matrix_unittest.o matrix/matrix.o vector/vector.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF MATRIX #############
-
-################# DEQUE #################
-############ START OF DEQUE ############
-deque/deque.o: deque/deque.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-deque/deque_internal.o: deque/deque_internal.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-deque/deque_unittest.o: deque/deque_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-deque/deque_unittest: deque/deque_unittest.o deque/deque.o deque/deque_internal.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF DEQUE #############
-
-################# HASH TABLE #################
-############ START OF HASH TABLE ############
-hash_table/hash_table.o: hash_table/hash_table.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-hash_table/hash_table_unittest.o: hash_table/hash_table_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-hash_table/hash_table_unittest: hash_table/hash_table_unittest.o vector/vector.o hash_table/hash_table.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF HASH TABLE #############
-
-################# HEAP #################
-############ START OF HEAP ############
-heap/heap.o: heap/heap.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-heap/heap_unittest.o: heap/heap_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-heap/heap_unittest: heap/heap_unittest.o heap/heap.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF HEAP #############
-
-################# LIST #################
-############ START OF LIST ############
-list.o: list/list.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF LIST #############
-
-################# MAP #################
-############ START OF MAP ############
-map/map.o: map/map.c map/map_internal.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-map/map_internal.o: map/map_internal.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-map/map_unittest.o: map/map_unittest.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-map/map_unittest: map/map_unittest.o map/map.o map/map_internal.o universal/universal.o unittest/unittest.o
-	$(CC) -o $@ $^ $(CFLAGS)
-############# END OF MAP #############
-
-################# PAIR #################
-############ START OF PAIR ############
-pair.o: pair/pair.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF PAIR #############
-
-################# QUEUE #################
-############ START OF QUEUE ############
-queue.o: queue/queue.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF QUEUE #############
-
-################# STACK #################
-############ START OF STACK ############
-stack.o: stack/stack.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF STACK #############
-
-################# STRING #################
-############ START OF STRING ############
-string.o: string/string.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF STRING #############
-
-################# LARGE NUMBER #################
-############ START OF LARGE NUMBER ############
-large_number_internal.o: large_number/large_number_internal.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-large_number.o: large_number/large_number.c 
-	$(CC) -c -o $@ $< $(CFLAGS)
-############# END OF LARGE NUMBER #############
+.PHONY: install clean

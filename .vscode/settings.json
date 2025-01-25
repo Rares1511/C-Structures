@@ -40,9 +40,8 @@
         "unittest.h": "c",
         "time.h": "c",
         "matrix.h": "c",
-        "vector.h": "c"
+        "vector.h": "c",
+        "mutex": "c",
+        "shared_mutex": "c"
     },
-    "prettier.bracketSameLine": false,
-    "prettier.useTabs": true,
-    "prettier.arrowParens": "always"
 }

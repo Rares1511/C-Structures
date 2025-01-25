@@ -1,12 +1,11 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include "universal.h"
+#include <cs/universal.h>
 
 typedef xuniv_attr_t vector_attr_t;
 
-typedef struct vector
-{
+typedef struct vector {
     void *vec;          /*!< size of the datatype */
     int cap;            /*!< current maximum capacity of the vector */
     int size;           /*!< current size of the vector */
