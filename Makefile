@@ -2,22 +2,39 @@
 
 # Define the path to the library and include directories
 LIBDIR = /usr/local/lib
-PATH_INCLUDEDIR = /usr/local/include/cs
+PATH_INCLUDEDIR = /usr/local/include
 LOCAL_INCLUDEDIR = ../include
+CFLAGS = -Wall -Werror -fPIC
+CC = gcc
+AR = ar
 
-export PATH_INCLUDEDIR
-export LOCAL_INCLUDEDIR
+export CFLAGS
 export LIBDIR
 
 # Path to each submodule
-SUBDIRS = universal vector
+SUBDIRS = cs_global
 
 all: install
 
 # Install all libraries
-install:
+install: install_headers install_libs
+
+install_headers:
+	mkdir -p $(PATH_INCLUDEDIR)
+	cp include/universal.h $(PATH_INCLUDEDIR)
+	@for dir in $(SUBDIRS); do \
+		cp include/$$dir.h $(PATH_INCLUDEDIR); \
+	done
+
+install_libs:
+	mkdir -p $(LIBDIR)
 	@for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir install; \
+	done
+
+unittest:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir unittest; \
 	done
 
 # Clean all submodules
@@ -26,4 +43,4 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	done
 
-.PHONY: install clean
+.PHONY: install clean unittest

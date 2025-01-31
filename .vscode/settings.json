@@ -42,6 +42,10 @@
         "matrix.h": "c",
         "vector.h": "c",
         "mutex": "c",
-        "shared_mutex": "c"
+        "shared_mutex": "c",
+        "cs_global.h": "c",
+        "signal.h": "c",
+        "unistd.h": "c",
+        "fcntl.h": "c"
     },
 }

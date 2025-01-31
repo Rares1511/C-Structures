@@ -1,3 +1,4 @@
+#include <cs/vector.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -6,7 +7,6 @@
 #include <time.h>
 
 #include "../include/unittest.h"
-#include "../include/vector.h"
 
 test_res test_vector_init() {
     vector v;

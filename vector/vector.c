@@ -1,8 +1,8 @@
-#include "../include/vector.h"
-#include "../include/cs_global.h"
-
+#include <cs/cs_global.h>
+#include <cs/vector.h>
 #include <stdlib.h>
 #include <string.h>
+
 
 cs_codes vector_init(vector *vec, vector_attr_t attr) {
     if (attr.size < 0 || attr.size > SIZE_TH)

@@ -1,8 +1,8 @@
 #ifndef CS_GLOBAL_H
 #define CS_GLOBAL_H
 
-#include "../include/universal.h"
 #include <pthread.h>
+#include <universal.h>
 
 #define SHARED_MEMORY_NAME "/cs_global"
 
