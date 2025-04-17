@@ -81,9 +81,6 @@ test_res test_vector_insert_at() {
         }
     }
 
-    vector_print(&v);
-    printf("\n");
-
     for (int i = 0; i < 5; i++) {
         if (*(int *)vector_at(v, i) != correct_elements[i]) {
             return (test_res){.test_name = "test_vector_insert_at",

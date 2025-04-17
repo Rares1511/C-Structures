@@ -51,3 +51,24 @@ void free_painting(void *v_p) {
 }
 
 void print_int(void *el) { printf("%d ", *(int *)el); }
+
+void unittest(test *tests, int size) {
+    int i, success = 0;
+    test_res res;
+
+    for (i = 0; i < size; i++) {
+        res = tests[i]();
+        char buffer[1024];
+        strcpy(buffer, res.test_name);
+        strncat(buffer,
+                "..........................................................................",
+                MAX_PRINT_SIZE - strlen(res.test_name));
+        if (res.return_code != CS_SUCCESS) {
+            printf("%sFAILED: %s\n", buffer, res.reason);
+        } else {
+            success++;
+            printf("%sSUCCESS\n", buffer);
+        }
+    }
+    printf("Total: %d/%d\n", success, i);
+}

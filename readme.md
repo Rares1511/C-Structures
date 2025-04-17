@@ -10,3 +10,16 @@ include the file .h corresponding to the data structure and follow the individua
 
 Example: Upon wanting to use the vector data structure, extract the archive, copy the folders vector and universal into your
 working directory, and in the desired file add #include "C-structures\vector.h"
+
+
+TODO: Unittesturi
+    - vector
+    - pair
+    - queue
+    - deque
+    - stack
+    - heap
+    - hash_table
+    - string
+    - list
+    - large_number

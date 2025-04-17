@@ -2,7 +2,7 @@
 
 # Define the path to the library and include directories
 LIBDIR = /usr/local/lib
-PATH_INCLUDEDIR = /usr/local/include
+PATH_INCLUDEDIR = /usr/local/include/cs
 LOCAL_INCLUDEDIR = ../include
 CFLAGS = -Wall -Werror -fPIC
 CC = gcc
@@ -12,7 +12,7 @@ export CFLAGS
 export LIBDIR
 
 # Path to each submodule
-SUBDIRS = cs_global
+SUBDIRS = vector
 
 all: install
 
@@ -31,6 +31,7 @@ install_libs:
 	@for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir install; \
 	done
+	ldconfig
 
 unittest:
 	@for dir in $(SUBDIRS); do \

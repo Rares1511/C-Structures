@@ -22,8 +22,8 @@ cs_codes pair_set_fst_value(pair *p, void *el)
         p->fst = malloc(p->fst_attr.size);
         if (!p->fst)
             return CS_MEM;
-        if (p->fst_attr.cp)
-            p->fst_attr.cp(p->fst, el);
+        if (p->fst_attr.copy)
+            p->fst_attr.copy(p->fst, el);
         else
             memcpy(p->fst, el, p->fst_attr.size);
         return CS_SUCCESS;
@@ -31,8 +31,8 @@ cs_codes pair_set_fst_value(pair *p, void *el)
     if (p->fst_attr.fr)
         p->fst_attr.fr(p->fst);
 
-    if (p->fst_attr.cp)
-        p->fst_attr.cp(p->fst, el);
+    if (p->fst_attr.copy)
+        p->fst_attr.copy(p->fst, el);
     else
         memcpy(p->fst, el, p->fst_attr.size);
     return CS_SUCCESS;
@@ -45,8 +45,8 @@ cs_codes pair_set_snd_value(pair *p, void *el)
         p->snd = malloc(p->snd_attr.size);
         if (!p->snd)
             return CS_MEM;
-        if (p->snd_attr.cp)
-            p->snd_attr.cp(p->snd, el);
+        if (p->snd_attr.copy)
+            p->snd_attr.copy(p->snd, el);
         else
             memcpy(p->snd, el, p->snd_attr.size);
         return CS_SUCCESS;
@@ -54,8 +54,8 @@ cs_codes pair_set_snd_value(pair *p, void *el)
     if (p->snd_attr.fr)
         p->snd_attr.fr(p->snd);
 
-    if (p->snd_attr.cp)
-        p->snd_attr.cp(p->snd, el);
+    if (p->snd_attr.copy)
+        p->snd_attr.copy(p->snd, el);
     else
         memcpy(p->snd, el, p->snd_attr.size);
     return CS_SUCCESS;
@@ -102,14 +102,14 @@ void pair_set_both_print(pair *p, printer fst_print, printer snd_print)
     p->snd_attr.print = snd_print;
 }
 
-void pair_set_fst_copy(pair *p, deepcopy fst_cp) { p->fst_attr.cp = fst_cp; }
+void pair_set_fst_copy(pair *p, deepcopy fst_cp) { p->fst_attr.copy = fst_cp; }
 
-void pair_set_snd_copy(pair *p, deepcopy snd_cp) { p->snd_attr.cp = snd_cp; }
+void pair_set_snd_copy(pair *p, deepcopy snd_cp) { p->snd_attr.copy = snd_cp; }
 
 void pair_set_both_copy(pair *p, deepcopy fst_cp, deepcopy snd_cp)
 {
-    p->fst_attr.cp = fst_cp;
-    p->snd_attr.cp = snd_cp;
+    p->fst_attr.copy = fst_cp;
+    p->snd_attr.copy = snd_cp;
 }
 
 void pair_set_fst_comp(pair *p, comparer fst_comp) { p->fst_attr.comp = fst_comp; }

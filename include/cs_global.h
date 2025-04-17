@@ -33,6 +33,7 @@ typedef struct cs_global_t {
     pthread_mutex_t lock;
     cs_global_entry_t *entries;
     int size;
+    int cap;
     int is_initialized;
 } cs_global_t;
 
@@ -46,5 +47,7 @@ typedef struct cs_global_t {
  * CS_MEM - if there was an error allocating memory for the new entry
  */
 cs_codes cs_global_add_entry(cs_data_structure data_structure, void *data);
+
+int cs_global_size();
 
 #endif // CS_GLOBAL_H

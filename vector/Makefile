@@ -6,30 +6,33 @@ FILE = vector
 SRC = $(FILE).c
 OBJ = $(FILE).o
 UNITTEST = $(FILE)_unittest.c
-LIB = ../lib/lib$(FILE).a
+LIB = ../lib/lib$(FILE).so
 
 # Compiler flags
 CFLAGS = -Wall -Werror
 
 # Compile the object file
 $(OBJ): $(SRC)
-	$(CC) -c -o $@ $^ $(CFLAGS) -lcs_global
+	$(CC) -c -o $@ $^ $(CFLAGS)
 
 # Create the static library
 $(LIB): $(OBJ)
-	$(AR) rcs $@ $^
+	$(CC) -shared -o $@ $^ $(CFLAGS)
 
 # Install the library
 install: $(LIB)
-	sudo install -d $(PATH_INCLUDEDIR)
-	sudo install -m 644 $(LOCAL_INCLUDEDIR)/$(FILE).h $(PATH_INCLUDEDIR)
-	sudo install -m 644 $^ $(LIBDIR)
+	@echo "Installing Vector library..."
+	@cp $(LIB) /usr/local/lib
 
 unittest: 
-	$(CC) -o unittest $(UNITTEST) $(CFLAGS)
+	$(CC) -o unittest $(UNITTEST) $(CFLAGS) -lvector
+	@echo "Running unit tests..."
+	@valgrind --leak-check=full ./unittest
+	@echo "Unit tests completed."
+	@rm -f unittest
 
 # Clean up
 clean:
-	rm -f $(OBJ) $(LIB) unittest
+	rm -f $(OBJ) $(LIB)
 
 .PHONY: install clean
