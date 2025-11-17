@@ -4,7 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* HELPER FUNCTIONS */
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 /*!
  * Compares a map node's key with a given key using the map's key comparison function
@@ -75,10 +77,9 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     map_node *node = m->root;
     map_node *prev = NULL;
 
-    printf("Standard inserting node with key: ");
-
     while (node != NULL) {
         int cmp = map_node_compare(m, node->key, new_node->key);
+        prev = node;
         if (cmp == 0) {
             return CS_ELEM;
         } else if (cmp < 0) {
@@ -86,10 +87,7 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
         } else {
             node = node->right_child;
         }
-        prev = node;
     }
-
-    printf("Inserting node with key: ");
 
     if (m->size == 0) {
         m->root = new_node;
@@ -218,7 +216,11 @@ void map_node_print(map_node *node, map_attr_t key_attr, map_attr_t val_attr, in
     map_node_print(node->right_child, key_attr, val_attr, tab_size + 2);
 }
 
-/* END OF HELPER FUNCTIONS */
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
 
 cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
     m->key_attr = key_attr;
@@ -242,8 +244,6 @@ cs_codes map_insert(map *m, void *key, void *value) {
     if (rc != CS_SUCCESS) {
         return rc;
     }
-
-    printf("After standard insert:\n");
 
     rc = map_insert_fixup(m, new_node);
     if (rc != CS_SUCCESS) {
@@ -282,6 +282,39 @@ void map_print(void *v_m) {
 
 void map_free(void *v_m) {
     map *m = (map *)v_m;
+    map_node *node = m->root, *next;
+
+    while (node != NULL) {
+        if (node->left_child != NULL) {
+            node = node->left_child;
+        } else if (node->right_child != NULL) {
+            node = node->right_child;
+        } else {
+            next = node->father;
+            
+            if (m->key_attr.fr != NULL) {
+                m->key_attr.fr(node->key);
+            }
+            free(node->key);
+
+            if (m->val_attr.fr != NULL) {
+                m->val_attr.fr(node->val);
+            }
+            free(node->val);
+
+            if (next != NULL) {
+                if (next->left_child == node) {
+                    next->left_child = NULL;
+                } else if (next->right_child == node) {
+                    next->right_child = NULL;
+                }
+            }
+
+            free(node);
+
+            node = next;
+        }
+    }
 
     m->root = NULL;
     m->size = 0;

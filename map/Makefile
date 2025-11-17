@@ -28,10 +28,11 @@ uninstall:
 	@echo "Uninstalling Map library..."
 	@rm -f /usr/local/lib/lib$(FILE).so
 
-unittest: 
+unittest: uninstall install
 	$(CC) -o unittest $(UNITTEST) $(CFLAGS) -lmap
 	@echo "Running unit tests..."
 	@valgrind --leak-check=full ./unittest
+# 	@./unittest
 	@echo "Unit tests completed."
 	@rm -f unittest
 

@@ -14,7 +14,7 @@ export LIBDIR
 # Path to each submodule
 SUBDIRS = map
 
-all: install
+all: uninstall install unittest
 
 # Install all libraries
 install: install_headers install_libs
