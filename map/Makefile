@@ -8,9 +8,6 @@ OBJ = $(FILE).o
 UNITTEST = $(FILE)_unittest.c
 LIB = ../lib/lib$(FILE).so
 
-# Compiler flags
-CFLAGS = -Wall -Werror
-
 # Compile the object file
 $(OBJ): $(SRC)
 	$(CC) -c -o $@ $^ $(CFLAGS)
@@ -31,13 +28,12 @@ uninstall:
 unittest: uninstall install
 	$(CC) -o unittest $(UNITTEST) $(CFLAGS) -lmap
 	@echo "Running unit tests..."
-	@valgrind --leak-check=full ./unittest
-# 	@./unittest
+	@$(TEST_CMD)
 	@echo "Unit tests completed."
 	@rm -f unittest
 
 # Clean up
 clean:
-	rm -f $(OBJ) $(LIB) unittest
+	rm -f $(OBJ) $(LIB) unittest $(UNITTEST_LOG)
 
 .PHONY: install clean

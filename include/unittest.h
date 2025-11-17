@@ -8,6 +8,23 @@
 #define MATRIX_TEST_SIZE 20
 #define VECTOR_TEST_SIZE 20
 
+#pragma once
+#include <stdio.h>
+
+extern FILE *DEBUG_OUT;
+
+#ifdef DEBUG
+#define DEBUG_PRINT(...) do { \
+    if (DEBUG_OUT) { \
+        fprintf(DEBUG_OUT, "[%s:%d:%s] ", __FILE__, __LINE__, __func__); \
+        fprintf(DEBUG_OUT, __VA_ARGS__); \
+        fflush(DEBUG_OUT); \
+    } \
+} while (0)
+#else
+#define DEBUG_PRINT(...) do {} while (0)
+#endif
+
 typedef struct test_res {
     char *test_name;
     char *reason;
@@ -48,7 +65,7 @@ void free_painting(void *v_p) {
     free(p->paints);
 }
 
-void print_int(void *el) { printf("%d ", *(int *)el); }
+void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
 
 void unittest(test *tests, int size) {
     int i, success = 0;
@@ -62,12 +79,12 @@ void unittest(test *tests, int size) {
                 "..........................................................................",
                 MAX_PRINT_SIZE - strlen(res.test_name));
         if (res.return_code != CS_SUCCESS) {
-            printf("%sFAILED: %s\n", buffer, res.reason);
+            fprintf(DEBUG_OUT, "%sFAILED: %s\n", buffer, res.reason);
             exit(-(int)(size / sizeof(test) - i));
         } else {
-            printf("%sSUCCESS: %d/%d\n", buffer, i + 1, size);
+            fprintf(DEBUG_OUT, "%sSUCCESS: %d/%d\n", buffer, i + 1, size);
             success++;
         }
     }
-    printf("Total: %d/%d\n", success, i);
+    fprintf(DEBUG_OUT, "Total: %d/%d\n", success, i);
 }

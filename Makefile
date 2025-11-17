@@ -8,8 +8,23 @@ CFLAGS = -Wall -Werror -fPIC
 CC = gcc
 AR = ar
 
+UNITTEST_LOG = unittest_log
+SEED ?= 42
+
+ifeq ($(memcheck),true)
+  TEST_CMD = valgrind --leak-check=full ./unittest ${UNITTEST_LOG} ${SEED}
+else
+  TEST_CMD = ./unittest ${UNITTEST_LOG} ${SEED}
+endif
+
+ifeq ($(debug),true)
+	CFLAGS += -DDEBUG
+endif
+
 export CFLAGS
 export LIBDIR
+export TEST_CMD
+export UNITTEST_LOG
 
 # Path to each submodule
 SUBDIRS = map

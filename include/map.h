@@ -8,16 +8,14 @@ typedef xuniv_attr_t map_attr_t;
 #define RED 0
 #define BLACK 1
 
-typedef struct map
-{
+typedef struct map {
     struct map_node *root; /*!< size of the datatype */
     int size;              /*!< size of the datatype */
     map_attr_t key_attr;   /*!< size of the datatype */
     map_attr_t val_attr;   /*!< size of the datatype */
 } map;
 
-typedef struct map_node
-{
+typedef struct map_node {
     char color;                   /*!< size of the datatype */
     void *key;                    /*!< size of the datatype */
     void *val;                    /*!< size of the datatype */

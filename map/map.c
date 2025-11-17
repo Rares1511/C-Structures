@@ -4,9 +4,49 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "../include/unittest.h"
+
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                      START OF HELPER STRUCT SECTION                                        ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+typedef struct {
+    map_node *node;
+    int tab_size;
+} map_print_stack_item;
+
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                       END OF HELPER STRUCT SECTION                                         ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+/*! 
+ * Frees a map node and its associated key and value data
+ * @param[in] m - pointer to the map containing the node
+ * @param[in] node - pointer to the map node to be freed
+ */
+void map_node_free(map *m, map_node *node) {
+    if (m->key_attr.fr != NULL) {
+        m->key_attr.fr(node->key);
+    }
+    free(node->key);
+
+    if (m->val_attr.fr != NULL) {
+        m->val_attr.fr(node->val);
+    }
+    free(node->val);
+
+    free(node);
+}
 
 /*!
  * Compares a map node's key with a given key using the map's key comparison function
@@ -78,13 +118,16 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     map_node *prev = NULL;
 
     while (node != NULL) {
-        int cmp = map_node_compare(m, node->key, new_node->key);
+        int cmp = map_node_compare(m, new_node->key, node->key);
+        DEBUG_PRINT("Comparing keys: %d and %d\n", *(int *)new_node->key, *(int *)node->key);
         prev = node;
         if (cmp == 0) {
             return CS_ELEM;
         } else if (cmp < 0) {
+            DEBUG_PRINT("Going left from key: %d\n", *(int *)node->key);
             node = node->left_child;
         } else {
+            DEBUG_PRINT("Going right from key: %d\n", *(int *)node->key);
             node = node->right_child;
         }
     }
@@ -92,7 +135,7 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     if (m->size == 0) {
         m->root = new_node;
     } else {
-        int cmp = map_node_compare(m, prev->key, new_node->key);
+        int cmp = map_node_compare(m, new_node->key, prev->key);
         if (cmp < 0) {
             prev->left_child = new_node;
         } else {
@@ -106,6 +149,11 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     return CS_SUCCESS;
 }
 
+/*!
+ * Performs a left rotation around the given node
+ * @param[in] m - pointer to the map
+ * @param[in] x - pointer to the node around which to perform the rotation
+ */
 void map_left_rotate(map *m, map_node *x) {
     map_node *y = x->right_child;
     x->right_child = y->left_child;
@@ -124,6 +172,11 @@ void map_left_rotate(map *m, map_node *x) {
     x->father = y;
 }
 
+/*!
+ * Performs a right rotation around the given node
+ * @param[in] m - pointer to the map
+ * @param[in] x - pointer to the node around which to perform the rotation
+ */
 void map_right_rotate(map *m, map_node *x) {
     map_node *y = x->left_child;
     x->left_child = y->right_child;
@@ -142,6 +195,12 @@ void map_right_rotate(map *m, map_node *x) {
     x->father = y;
 }
 
+/*! 
+ * Fixes the red-black tree properties after insertion
+ * @param[in] m - pointer to the map
+ * @param[in] node - pointer to the newly inserted node
+ * @return CS_SUCCESS on success
+ */
 cs_codes map_insert_fixup(map *m, map_node *node) {
     map_node *uncle;
 
@@ -198,24 +257,6 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
     return CS_SUCCESS;
 }
 
-void map_node_print(map_node *node, map_attr_t key_attr, map_attr_t val_attr, int tab_size) {
-    if (node == NULL) {
-        return;
-    }
-
-    for (int i = 0; i < tab_size; i++) {
-        printf(" ");
-    }
-    printf("Key: ");
-    key_attr.print(node->key);
-    printf(", Value: ");
-    val_attr.print(node->val);
-    printf(", Color: %s\n", node->color == RED ? "RED" : "BLACK");
-
-    map_node_print(node->left_child, key_attr, val_attr, tab_size + 2);
-    map_node_print(node->right_child, key_attr, val_attr, tab_size + 2);
-}
-
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
@@ -223,6 +264,7 @@ void map_node_print(map_node *node, map_attr_t key_attr, map_attr_t val_attr, in
 
 
 cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
+    DEBUG_PRINT("Initializing map\n");
     m->key_attr = key_attr;
     m->val_attr = val_attr;
     m->root = NULL;
@@ -242,6 +284,7 @@ cs_codes map_insert(map *m, void *key, void *value) {
 
     rc = map_insert_standard(m, new_node);
     if (rc != CS_SUCCESS) {
+        map_node_free(m, new_node);
         return rc;
     }
 
@@ -257,7 +300,7 @@ cs_codes map_get(map m, void *key, void *value) {
     map_node *node = m.root;
 
     while (node != NULL) {
-        int cmp = map_node_compare(&m, node->key, key);
+        int cmp = map_node_compare(&m, key, node->key);
         if (cmp == 0) {
             if (m.val_attr.copy != NULL) {
                 m.val_attr.copy(value, node->val);
@@ -277,7 +320,42 @@ cs_codes map_get(map m, void *key, void *value) {
 
 void map_print(void *v_m) {
     map *m = (map *)v_m;
-    map_node_print(m->root, m->key_attr, m->val_attr, 0);
+    
+    map_print_stack_item *stack = malloc(sizeof(map_print_stack_item) * m->size);
+    int stack_size = 0;
+
+    stack[stack_size++] = (map_print_stack_item){m->root, 0};
+
+    while (stack_size > 0) {
+        map_print_stack_item item = stack[--stack_size];
+        map_node *node = item.node;
+        int tab_size = item.tab_size;
+
+        for (int i = 0; i < tab_size; i++) {
+            fprintf(m->key_attr.stream, "  ");
+        }
+
+        fprintf(m->key_attr.stream, "Key: ");
+        if (m->key_attr.print) {
+            m->key_attr.print(m->key_attr.stream, node->key);
+        }
+
+        fprintf(m->key_attr.stream, ", Value: ");
+        if (m->val_attr.print) {
+            m->val_attr.print(m->val_attr.stream, node->val);
+        }
+
+        fprintf(m->key_attr.stream, " -> Color: %s", node->color == RED ? "RED" : "BLACK");
+
+        fprintf(m->key_attr.stream, "\n");
+
+        if (node->right_child != NULL)
+            stack[stack_size++] = (map_print_stack_item){node->right_child, tab_size + 1};
+        if (node->left_child != NULL)
+            stack[stack_size++] = (map_print_stack_item){node->left_child, tab_size + 1};
+    }
+
+    free(stack);
 }
 
 void map_free(void *v_m) {
@@ -291,27 +369,14 @@ void map_free(void *v_m) {
             node = node->right_child;
         } else {
             next = node->father;
-            
-            if (m->key_attr.fr != NULL) {
-                m->key_attr.fr(node->key);
-            }
-            free(node->key);
-
-            if (m->val_attr.fr != NULL) {
-                m->val_attr.fr(node->val);
-            }
-            free(node->val);
-
+            map_node_free(m, node);
             if (next != NULL) {
                 if (next->left_child == node) {
                     next->left_child = NULL;
-                } else if (next->right_child == node) {
+                } else {
                     next->right_child = NULL;
                 }
             }
-
-            free(node);
-
             node = next;
         }
     }

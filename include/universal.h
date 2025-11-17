@@ -1,7 +1,8 @@
 #pragma once
-
 #ifndef UNIVERSAL_H
 #define UNIVERSAL_H
+
+#include <stdio.h>
 
 #define INIT_CAPACITY 256
 
@@ -22,7 +23,7 @@ typedef enum cs_codes {
     CS_FILE = -9
 } cs_codes;
 
-typedef void (*printer)(void *);
+typedef void (*printer)(FILE *stream, void *);
 typedef void (*freer)(void *);
 typedef int (*comparer)(const void *, const void *);
 typedef void (*deepcopy)(void *, const void *);
@@ -32,6 +33,7 @@ typedef struct univ_attr_t {
     freer fr;      /*!< freer function for the datatype */
     deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     printer print; /*!< printer function for the datatype */
+    FILE *stream;  /*!< output stream for the printer function */
 } univ_attr_t;
 
 typedef struct xuniv_attr_t {
@@ -40,6 +42,7 @@ typedef struct xuniv_attr_t {
     printer print; /*!< printer function for the datatype */
     deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     comparer comp; /*!< compare function for the datatype */
+    FILE *stream;  /*!< output stream for the printer function */
 } xuniv_attr_t;
 
 /*!
