@@ -1,6 +1,6 @@
-# Vector Makefile
+# Map Makefile
 
-FILE = vector
+FILE = map
 
 # Correct path to the source file
 SRC = $(FILE).c
@@ -21,15 +21,15 @@ $(LIB): $(OBJ)
 
 # Install the library
 install: $(LIB)
-	@echo "Installing Vector library..."
+	@echo "Installing Map library..."
 	@cp $(LIB) /usr/local/lib
 
 uninstall:
-	@echo "Uninstalling Vector library..."
+	@echo "Uninstalling Map library..."
 	@rm -f /usr/local/lib/lib$(FILE).so
 
 unittest: 
-	$(CC) -o unittest $(UNITTEST) $(CFLAGS) -lvector
+	$(CC) -o unittest $(UNITTEST) $(CFLAGS) -lmap
 	@echo "Running unit tests..."
 	@valgrind --leak-check=full ./unittest
 	@echo "Unit tests completed."
@@ -37,6 +37,6 @@ unittest:
 
 # Clean up
 clean:
-	rm -f $(OBJ) $(LIB)
+	rm -f $(OBJ) $(LIB) unittest
 
 .PHONY: install clean

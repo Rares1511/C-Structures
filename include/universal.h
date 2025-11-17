@@ -48,7 +48,17 @@ typedef struct xuniv_attr_t {
  * @param[in] el2 - starting point of the second memory zone
  * @param[in] len - the length in bytes of the memeory zone that will be swapped
  */
-void universal_swap(void *el1, void *el2, int len);
+void universal_swap(void *el1, void *el2, int len) {
+    unsigned char *p1 = (unsigned char *)el1;
+    unsigned char *p2 = (unsigned char *)el2;
+    unsigned char tmp;
+
+    for (int i = 0; i < len; i++) {
+        tmp = p1[i];
+        p1[i] = p2[i];
+        p2[i] = tmp;
+    }
+}
 
 /*!
  * Compares two memory zones bytes by bytes considering they are both of size len
@@ -57,6 +67,17 @@ void universal_swap(void *el1, void *el2, int len);
  * @param[in] len - length of the memory zones
  * @return The difference between the first two different bytes or 0 otherwise
  */
-int universal_compare(const void *el1, const void *el2, int dim);
+int universal_compare(const void *el1, const void *el2, int dim) {
+    const unsigned char *p1 = (const unsigned char *)el1;
+    const unsigned char *p2 = (const unsigned char *)el2;
+
+    for (int i = 0; i < dim; i++) {
+        if (p1[i] != p2[i]) {
+            return p1[i] - p2[i];
+        }
+    }
+
+    return 0;
+}
 
 #endif

@@ -1,8 +1,224 @@
-#include "map_internal.h"
+#include <cs/map.h>
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
+/* HELPER FUNCTIONS */
+
+/*!
+ * Compares a map node's key with a given key using the map's key comparison function
+ * or the universal comparison if no custom function is provided
+ * @param[in] m - pointer to the map containing the node
+ * @param[in] node - pointer to the map node
+ * @param[in] key - pointer to the key data to compare
+ * @return Negative value if node's key is less than the given key,
+ *         positive value if node's key is greater than the given key,
+ *         zero if they are equal
+ */
+int map_node_compare(map *m, void *key1, void *key2) {
+    if (m->key_attr.comp == NULL) {
+        return universal_compare(key1, key2, m->key_attr.size);
+    }
+    return m->key_attr.comp(key1, key2);
+}
+
+/*!
+ * Initializes a new map node with the given key and value
+ * @param[in] key - pointer to the key data
+ * @param[in] value - pointer to the value data
+ * @param[in] key_attr - attributes of the key datatype
+ * @param[in] val_attr - attributes of the value datatype
+ * @return Pointer to the newly created map node or NULL on memory allocation failure
+ */
+map_node *map_node_init(void *key, void *value, map_attr_t key_attr, map_attr_t val_attr) {
+    map_node *node = (map_node *)malloc(sizeof(map_node));
+    if (node == NULL) {
+        return NULL;
+    }
+    node->color = RED;
+    node->key = malloc(key_attr.size);
+    if (node->key == NULL) {
+        free(node);
+        return NULL;
+    }
+    if (key_attr.copy != NULL) {
+        key_attr.copy(node->key, key);
+    } else {
+        memcpy(node->key, key, key_attr.size);
+    }
+    node->val = malloc(val_attr.size);
+    if (node->val == NULL) {
+        free(node->key);
+        free(node);
+        return NULL;
+    }
+    if (val_attr.copy != NULL) {
+        val_attr.copy(node->val, value);
+    } else {
+        memcpy(node->val, value, val_attr.size);
+    }
+    node->left_child = NULL;
+    node->right_child = NULL;
+    node->father = NULL;
+    return node;
+}
+
+/*!
+ * Inserts a new key-value pair into the map using standard binary search tree insertion
+ * @param[in] m - pointer to the map
+ * @param[in] key - pointer to the key data
+ * @param[in] value - pointer to the value data
+ * @return CS_SUCCESS on success, CS_ELEM if the key already exists, CS_MEM on memory allocation failure
+ */
+cs_codes map_insert_standard(map *m, map_node *new_node) {
+    map_node *node = m->root;
+    map_node *prev = NULL;
+
+    printf("Standard inserting node with key: ");
+
+    while (node != NULL) {
+        int cmp = map_node_compare(m, node->key, new_node->key);
+        if (cmp == 0) {
+            return CS_ELEM;
+        } else if (cmp < 0) {
+            node = node->left_child;
+        } else {
+            node = node->right_child;
+        }
+        prev = node;
+    }
+
+    printf("Inserting node with key: ");
+
+    if (m->size == 0) {
+        m->root = new_node;
+    } else {
+        int cmp = map_node_compare(m, prev->key, new_node->key);
+        if (cmp < 0) {
+            prev->left_child = new_node;
+        } else {
+            prev->right_child = new_node;
+        }
+        new_node->father = prev;
+    }
+
+    m->size++;
+
+    return CS_SUCCESS;
+}
+
+void map_left_rotate(map *m, map_node *x) {
+    map_node *y = x->right_child;
+    x->right_child = y->left_child;
+    if (y->left_child != NULL) {
+        y->left_child->father = x;
+    }
+    y->father = x->father;
+    if (x->father == NULL) {
+        m->root = y;
+    } else if (x == x->father->left_child) {
+        x->father->left_child = y;
+    } else {
+        x->father->right_child = y;
+    }
+    y->left_child = x;
+    x->father = y;
+}
+
+void map_right_rotate(map *m, map_node *x) {
+    map_node *y = x->left_child;
+    x->left_child = y->right_child;
+    if (y->right_child != NULL) {
+        y->right_child->father = x;
+    }
+    y->father = x->father;
+    if (x->father == NULL) {
+        m->root = y;
+    } else if (x == x->father->right_child) {
+        x->father->right_child = y;
+    } else {
+        x->father->left_child = y;
+    }
+    y->right_child = x;
+    x->father = y;
+}
+
+cs_codes map_insert_fixup(map *m, map_node *node) {
+    map_node *uncle;
+
+    while (node->father && node->father->color == RED) {
+        if (node->father->father && node->father == node->father->father->left_child) {
+            uncle = node->father->father->right_child;
+
+            // Case 1: Uncle is red -> recolor
+            if (uncle && uncle->color == RED) {
+                node->father->color = BLACK;
+                uncle->color = BLACK;
+                node->father->father->color = RED;
+                node = node->father->father;
+            }
+            // Case 2: Uncle is black and node is right child -> rotate
+            else {
+                if (node == node->father->right_child) {
+                    node = node->father;
+                    map_left_rotate(m, node);
+                }
+
+                // Case 3: Uncle is black and node is left child -> rotate and recolor
+                node->father->color = BLACK;
+                node->father->father->color = RED;
+                map_right_rotate(m, node->father->father);
+            }
+        } else {
+            uncle = node->father->father->left_child;
+
+            // Case 1: Uncle is red -> recolor
+            if (uncle && uncle->color == RED) {
+                node->father->color = BLACK;
+                uncle->color = BLACK;
+                node->father->father->color = RED;
+                node = node->father->father;
+            }
+            // Case 2: Uncle is black and node is left child -> rotate
+            else {
+                if (node == node->father->left_child) {
+                    node = node->father;
+                    map_right_rotate(m, node);
+                }
+
+                // Case 3: Uncle is black and node is right child -> rotate and recolor
+                node->father->color = BLACK;
+                node->father->father->color = RED;
+                map_left_rotate(m, node->father->father);
+            }
+        }
+    }
+
+    m->root->color = BLACK;
+
+    return CS_SUCCESS;
+}
+
+void map_node_print(map_node *node, map_attr_t key_attr, map_attr_t val_attr, int tab_size) {
+    if (node == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < tab_size; i++) {
+        printf(" ");
+    }
+    printf("Key: ");
+    key_attr.print(node->key);
+    printf(", Value: ");
+    val_attr.print(node->val);
+    printf(", Color: %s\n", node->color == RED ? "RED" : "BLACK");
+
+    map_node_print(node->left_child, key_attr, val_attr, tab_size + 2);
+    map_node_print(node->right_child, key_attr, val_attr, tab_size + 2);
+}
+
+/* END OF HELPER FUNCTIONS */
 
 cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
     m->key_attr = key_attr;
@@ -13,315 +229,60 @@ cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
     return CS_SUCCESS;
 }
 
-cs_codes map_insert(map *m, void *key, void *val) {
-    /************************* STANDARD BST INSERT *************************/
-    map_node *node = m->root, *father, *grandfather, *uncle;
-    map_node *insert_node = map_node_init(key, m->key_attr.size, val, m->val_attr.size);
-    int comp_res;
+cs_codes map_insert(map *m, void *key, void *value) {
+    int rc;
+    map_node *new_node;
 
-    if (!insert_node) {
+    new_node = map_node_init(key, value, m->key_attr, m->val_attr);
+    if (new_node == NULL) {
         return CS_MEM;
     }
 
-    // Check for first node to be inserted in map
-    if (!m->root) {
-        m->root = insert_node;
-        insert_node->color = BLACK;
-        return CS_SUCCESS;
+    rc = map_insert_standard(m, new_node);
+    if (rc != CS_SUCCESS) {
+        return rc;
     }
 
-    // Find location to insert new node
-    while (1 > 0) {
-        // Compare the node key and the inserted node key and save result
-        comp_res = 0;
-        if (!m->key_attr.comp) {
-            comp_res = universal_compare(node->key, insert_node->key, m->key_attr.size);
-        } else {
-            comp_res = m->key_attr.comp(node->key, insert_node->key);
-        }
+    printf("After standard insert:\n");
 
-        // Check if an item with the same key exists
-        if (comp_res == 0) {
-            map_node_free(*m, insert_node);
-            return CS_ELEM;
-        }
-
-        // Check correct direction to go in the binary tree
-        if (comp_res > 0) {
-            // Location found for insertion
-            if (!node->left_child)
-                break;
-            node = node->left_child;
-        } else {
-            // Location found for insertion
-            if (!node->right_child)
-                break;
-            node = node->right_child;
-        }
+    rc = map_insert_fixup(m, new_node);
+    if (rc != CS_SUCCESS) {
+        return rc;
     }
-
-    // Insert the node in the correct location
-    if (comp_res > 0) {
-        node->left_child = insert_node;
-    } else if (comp_res < 0) {
-        node->right_child = insert_node;
-    } else
-        return CS_ELEM;
-
-    insert_node->father = node;
-
-    /************************* FIX RED-BLACK TREE PROPERTIES *************************/
-
-    node = insert_node;
-    while (node != m->root && node->father->color == RED) {
-        father = node->father;
-        grandfather = node->father->father;
-
-        // Case 1: Father is the left child of grandfather
-        if (father == grandfather->left_child) {
-            uncle = grandfather->right_child;
-            // Case 1.1: Uncle is RED
-            if (uncle != NULL && uncle->color == RED) {
-                father->color = BLACK;
-                uncle->color = BLACK;
-                grandfather->color = RED;
-                node = grandfather;
-            } else {
-                // Case 1.2: Node is the right child of father
-                if (node == father->right_child) {
-                    node = father;
-                    map_rotate_left(m, node);
-                    father = node->father;
-                    grandfather = node->father->father;
-                }
-                // Case 1.3: Node is the left child of father
-                father->color = BLACK;
-                grandfather->color = RED;
-                map_rotate_right(m, grandfather);
-            }
-        }
-        // Case 2: Father is the right child of grandfather
-        else {
-            uncle = grandfather->left_child;
-            // Case 2.1: Uncle is RED
-            if (uncle != NULL && uncle->color == RED) {
-                father->color = BLACK;
-                uncle->color = BLACK;
-                grandfather->color = RED;
-                node = grandfather;
-            } else {
-                // Case 2.2: Node is the left child of father
-                if (node == father->left_child) {
-                    node = father;
-                    map_rotate_right(m, node);
-                    father = node->father;
-                    grandfather = node->father->father;
-                }
-                // Case 2.3: Node is the right child of father
-                father->color = BLACK;
-                grandfather->color = RED;
-                map_rotate_left(m, grandfather);
-            }
-        }
-    }
-
-    m->root->color = BLACK;
 
     return CS_SUCCESS;
 }
 
 cs_codes map_get(map m, void *key, void *value) {
-    map_node *node = map_node_find(m, key);
-    if (node == NULL) {
-        return CS_ELEM;
-    }
-    memcpy(value, node->val, m.val_attr.size);
-    return CS_SUCCESS;
-}
+    map_node *node = m.root;
 
-cs_codes map_delete(map *m, void *key) {
-    /************************* STANDARD BST DELETE *************************/
-    map_node *delete_node = map_node_find(*m, key);
-    if (delete_node->left_child != NULL && delete_node->right_child != NULL) {
-        map_node *successor = delete_node->right_child;
-        while (successor->left_child != NULL) {
-            successor = successor->left_child;
-        }
-        delete_node->key = successor->key;
-        delete_node->val = successor->val;
-        delete_node = successor;
-    }
-
-    map_node *child =
-        (delete_node->right_child != NULL) ? delete_node->right_child : delete_node->left_child;
-
-    /************************* FIXUP RED BLACK TREE PROPERTIES *************************/
-
-    // Case 1: Either delete node or his replacement child is RED
-    if (delete_node->color == RED || (child != NULL && child->color == RED)) {
-        child->color = BLACK;
-        if (delete_node->father != NULL) {
-            if (delete_node->father->left_child == delete_node) {
-                delete_node->father->left_child = child;
+    while (node != NULL) {
+        int cmp = map_node_compare(&m, node->key, key);
+        if (cmp == 0) {
+            if (m.val_attr.copy != NULL) {
+                m.val_attr.copy(value, node->val);
             } else {
-                delete_node->father->right_child = child;
+                memcpy(value, node->val, m.val_attr.size);
             }
-            child->father = delete_node->father;
+            return CS_SUCCESS;
+        } else if (cmp < 0) {
+            node = node->left_child;
         } else {
-            m->root = child;
+            node = node->right_child;
         }
     }
-    // Case 2: Both delete node and his replacement child are BLACK and node is not root
-    else if (delete_node->father != NULL) {
-        if (child == NULL) {
-            child = delete_node;
-        }
-        map_node *father = delete_node->father;
-        map_node *brother = (father != NULL && father->left_child == delete_node)
-                                ? father->right_child
-                                : father->left_child;
 
-        // Case 2.1: Brother is BLACK and at least one of his children is RED
-        if (brother != NULL &&
-            ((brother->left_child != NULL && brother->left_child->color == RED) ||
-             (brother->right_child != NULL && brother->right_child->color == RED))) {
-            // Case 2.1.1: Brother is the left child of his father and his left child is the red one
-            if (brother == father->left_child && brother->left_child != NULL &&
-                brother->left_child->color == RED) {
-                brother->left_child->color = BLACK;
-                brother->color = father->color;
-                father->color = BLACK;
-                map_rotate_right(m, father);
-            }
-            // Case 2.1.2: Brother is the left child of his father and his right child is the red
-            // one
-            else if (brother == father->left_child && brother->right_child != NULL &&
-                     brother->right_child->color == RED) {
-                brother->right_child->color = BLACK;
-                brother->color = RED;
-                map_rotate_left(m, brother);
-                map_rotate_right(m, father);
-            }
-            // Case 2.1.3: Brother is the right child of his father and his right child is the red
-            // one
-            else if (brother == father->right_child && brother->right_child != NULL &&
-                     brother->right_child->color == RED) {
-                brother->right_child->color = BLACK;
-                brother->color = father->color;
-                father->color = BLACK;
-                map_rotate_left(m, father);
-            }
-            // Case 2.1.4: Brother is the right child of his father and his left child is the red
-            // one
-            else if (brother == father->right_child && brother->left_child != NULL &&
-                     brother->left_child->color == RED) {
-                brother->left_child->color = BLACK;
-                brother->color = RED;
-                map_rotate_right(m, brother);
-                map_rotate_left(m, father);
-            }
-        }
-        // Case 2.2: Brother is BLACK and both his children are BLACK
-        else if (brother != NULL &&
-                 ((brother->left_child == NULL || brother->left_child->color == BLACK) &&
-                  (brother->right_child == NULL || brother->right_child->color == BLACK))) {
-            brother->color = RED;
-            if (father->color == RED) {
-                father->color = BLACK;
-            } else {
-                map_node *uncle = (father->father != NULL && father->father->left_child == father)
-                                      ? father->father->right_child
-                                      : father->father->left_child;
-                if (uncle != NULL && uncle->color == RED) {
-                    uncle->color = BLACK;
-                    father->color = BLACK;
-                    father->father->color = RED;
-                    delete_node = father->father;
-                } else {
-                    map_node *grandfather = father->father;
-                    if (grandfather != NULL) {
-                        if (grandfather->left_child == father) {
-                            grandfather->left_child = NULL;
-                        } else {
-                            grandfather->right_child = NULL;
-                        }
-                    }
-                    map_node_free(*m, father);
-                    father = NULL;
-                    map_delete(m, grandfather->key);
-                }
-            }
-        }
-    }
-    // Case 3: Delete node is root
-    else {
-        m->root = NULL;
-    }
-
-    // Free memory of delete node
-    map_node_free(*m, delete_node);
-    delete_node = NULL;
-
-    return CS_SUCCESS;
+    return CS_ELEM;
 }
 
-void map_print_helper(map_node node, char tab[], printer key_print, printer val_print) {
-    printf("(");
-    key_print(node.key);
-    printf(", ");
-    val_print(node.val);
-    printf(", ");
-    if (node.color == RED)
-        printf("R)\n");
-    else
-        printf("B)\n");
-    strcat(tab, "  ");
-    if (node.left_child) {
-        printf("%sl: ", tab);
-        map_print_helper(*node.left_child, tab, key_print, val_print);
-        tab[strlen(tab) - 2] = 0;
-    }
-    if (node.right_child) {
-        printf("%sr: ", tab);
-        map_print_helper(*node.right_child, tab, key_print, val_print);
-        tab[strlen(tab) - 2] = 0;
-    }
-}
-
-void map_print(map m) {
-    if (m.root == NULL) {
-        return;
-    }
-    map_node node = *m.root;
-    char tab[1000] = "";
-    map_print_helper(node, tab, m.key_attr.print, m.val_attr.print);
+void map_print(void *v_m) {
+    map *m = (map *)v_m;
+    map_node_print(m->root, m->key_attr, m->val_attr, 0);
 }
 
 void map_free(void *v_m) {
     map *m = (map *)v_m;
-    map_node *node = m->root, *aux;
-
-    while (node != NULL) {
-        if (node->left_child == NULL && node->right_child == NULL) {
-            aux = node;
-            node = node->father;
-            if (m->key_attr.fr) {
-                m->key_attr.fr(aux->key);
-            }
-            if (m->val_attr.fr) {
-                m->val_attr.fr(aux->val);
-            }
-            free(aux->val);
-            free(aux->key);
-            free(aux);
-        } else if (node->left_child == NULL) {
-            node = node->right_child;
-            node->father->right_child = NULL;
-        } else {
-            node = node->left_child;
-            node->father->left_child = NULL;
-        }
-    }
 
     m->root = NULL;
+    m->size = 0;
 }

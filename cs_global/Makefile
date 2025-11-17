@@ -20,6 +20,10 @@ install: $(LIB_NAME)
 	cp $(LIB_NAME) $(LIBDIR)
 	ldconfig
 
+uninstall:
+	rm -f $(LIBDIR)/lib$(FILE).a
+	ldconfig
+
 unittest:
 	$(CC) $(CFLAGS) -o $(FILE)_unittest $(FILE)_unittest.c -lcs_global
 	./$(FILE)_unittest

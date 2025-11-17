@@ -6,6 +6,7 @@
 #define HASH_TABLE_TEST_SIZE 20
 #define HEAP_TEST_SIZE 20
 #define MATRIX_TEST_SIZE 20
+#define VECTOR_TEST_SIZE 20
 
 typedef struct test_res {
     char *test_name;
@@ -20,9 +21,6 @@ struct painting {
 };
 
 typedef struct test_res (*test)();
-
-int test_res_init(test_res *res, char test_name[]);
-void test_res_free(void *v_res);
 
 void print_painting(void *v_p) {
     struct painting *p = (struct painting *)v_p;
@@ -65,9 +63,10 @@ void unittest(test *tests, int size) {
                 MAX_PRINT_SIZE - strlen(res.test_name));
         if (res.return_code != CS_SUCCESS) {
             printf("%sFAILED: %s\n", buffer, res.reason);
+            exit(-(int)(size / sizeof(test) - i));
         } else {
+            printf("%sSUCCESS: %d/%d\n", buffer, i + 1, size);
             success++;
-            printf("%sSUCCESS\n", buffer);
         }
     }
     printf("Total: %d/%d\n", success, i);

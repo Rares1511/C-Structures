@@ -45,6 +45,7 @@
 *.mod*
 *.cmd
 .tmp_versions/
+.vscode
 modules.order
 Module.symvers
 Mkfile.old
@@ -52,3 +53,4 @@ dkms.conf
 
 # Testing files
 *_unittest
+*_unittest.c

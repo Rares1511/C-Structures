@@ -2,7 +2,7 @@
 #define CS_GLOBAL_H
 
 #include <pthread.h>
-#include <universal.h>
+#include <cs/universal.h>
 
 #define SHARED_MEMORY_NAME "/cs_global"
 

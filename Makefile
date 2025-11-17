@@ -12,12 +12,13 @@ export CFLAGS
 export LIBDIR
 
 # Path to each submodule
-SUBDIRS = vector
+SUBDIRS = map
 
 all: install
 
 # Install all libraries
 install: install_headers install_libs
+uninstall: uninstall_headers uninstall_libs
 
 install_headers:
 	mkdir -p $(PATH_INCLUDEDIR)
@@ -30,6 +31,19 @@ install_libs:
 	mkdir -p $(LIBDIR)
 	@for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir install; \
+	done
+	ldconfig
+
+uninstall_headers:
+	@for dir in $(SUBDIRS); do \
+		rm -f $(PATH_INCLUDEDIR)/$$dir.h; \
+	done
+	rm -f $(PATH_INCLUDEDIR)/universal.h
+	rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR)
+
+uninstall_libs:
+	@for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir uninstall; \
 	done
 	ldconfig
 
