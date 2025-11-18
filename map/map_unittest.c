@@ -442,7 +442,6 @@ int main(int argc, char **argv) {
     }
 
     int seed = atoi(argv[2]);
-    fprintf(DEBUG_OUT, "Using seed: %d\n", seed);
     srand(seed);
 
     unittest(tests, sizeof(tests) / sizeof(test));
