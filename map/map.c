@@ -58,11 +58,11 @@ void map_node_free(map *m, map_node *node) {
  *         positive value if node's key is greater than the given key,
  *         zero if they are equal
  */
-int map_node_compare(map *m, void *key1, void *key2) {
-    if (m->key_attr.comp == NULL) {
-        return universal_compare(key1, key2, m->key_attr.size);
+int map_node_compare(map m, void *key1, void *key2) {
+    if (m.key_attr.comp == NULL) {
+        return universal_compare(key1, key2, m.key_attr.size);
     }
-    return m->key_attr.comp(key1, key2);
+    return m.key_attr.comp(key1, key2);
 }
 
 /*!
@@ -107,6 +107,41 @@ map_node *map_node_init(void *key, void *value, map_attr_t key_attr, map_attr_t 
 }
 
 /*!
+ * Finds a map node by its key using standard binary search tree search
+ * @param[in] m - pointer to the map
+ * @param[in] key - pointer to the key data
+ * @return Pointer to the found map node or NULL if not found
+ */
+map_node *map_node_find(map m, void *key) {
+    map_node *node = m.root;
+
+    while (node != NULL) {
+        int cmp = map_node_compare(m, key, node->key);
+        if (cmp == 0) {
+            return node;
+        } else if (cmp < 0) {
+            node = node->left_child;
+        } else {
+            node = node->right_child;
+        }
+    }
+
+    return NULL;
+}
+
+/*!
+ * Finds the minimum node in a subtree rooted at the given node
+ * @param[in] node - pointer to the root of the subtree
+ * @return Pointer to the minimum map node in the subtree
+ */
+map_node *map_node_minimum(map_node *node) {
+    while (node->left_child != NULL) {
+        node = node->left_child;
+    }
+    return node;
+}
+
+/*!
  * Inserts a new key-value pair into the map using standard binary search tree insertion
  * @param[in] m - pointer to the map
  * @param[in] key - pointer to the key data
@@ -118,7 +153,7 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     map_node *prev = NULL;
 
     while (node != NULL) {
-        int cmp = map_node_compare(m, new_node->key, node->key);
+        int cmp = map_node_compare(*m, new_node->key, node->key);
         prev = node;
         if (cmp == 0) {
             return CS_ELEM;
@@ -132,7 +167,7 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
     if (m->size == 0) {
         m->root = new_node;
     } else {
-        int cmp = map_node_compare(m, new_node->key, prev->key);
+        int cmp = map_node_compare(*m, new_node->key, prev->key);
         if (cmp < 0) {
             prev->left_child = new_node;
         } else {
@@ -147,33 +182,22 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
 }
 
 /*!
- * Deletes a key-value pair from the map using standard binary search tree deletion
+ * Transplants one subtree in place of another in the map
  * @param[in] m - pointer to the map
- * @param[in] key - pointer to the key data
- * @param[out] delete_node - pointer to the map node to be deleted
- * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
+ * @param[in] u - pointer to the subtree to be replaced
+ * @param[in] v - pointer to the subtree to replace with
  */
-cs_codes map_delete_standard(map *m, void *key, map_node **delete_node) {
-    map_node *node = m->root;
-
-    *delete_node = NULL;
-    while (node != NULL) {
-        int cmp = map_node_compare(m, key, node->key);
-        if (cmp == 0) {
-            *delete_node = node;
-            break;
-        } else if (cmp < 0) {
-            node = node->left_child;
-        } else {
-            node = node->right_child;
-        }
+void map_transplant(map *m, map_node *u, map_node *v) {
+    if (u->father == NULL) {
+        m->root = v;
+    } else if (u == u->father->left_child) {
+        u->father->left_child = v;
+    } else {
+        u->father->right_child = v;
     }
-
-    if (*delete_node == NULL) {
-        return CS_ELEM;
+    if (v != NULL) {
+        v->father = u->father;
     }
-    
-    return CS_SUCCESS;
 }
 
 /*!
@@ -284,8 +308,149 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
     return CS_SUCCESS;
 }
 
-cs_codes map_delete_fixup(map *m, map_node *delete_node) {
-    // To be implemented
+/*!
+ * Fixes the red-black tree properties after deletion
+ * @param[in] m - pointer to the map
+ * @param[in] x - pointer to the node that replaced the deleted node
+ * @param[in] x_father - pointer to the father of node x
+ * @return CS_SUCCESS on success
+ */
+cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
+    map_node *w;
+    
+    while (x != m->root && (x == NULL || x->color == BLACK)) {
+        if (x == x->father->left_child) {
+            w = x_father->right_child;
+
+            // Case 1: Sibling is red
+            if (w != NULL && w->color == RED) {
+                w->color = BLACK;
+                x_father->color = RED;
+                map_left_rotate(m, x_father);
+                w = x_father->right_child;
+            }
+
+            if (w != NULL && ((w->left_child == NULL || w->left_child->color == BLACK) &&
+                (w->right_child == NULL || w->right_child->color == BLACK))) {
+                // Case 2: Sibling is black with two black children
+                w->color = RED;
+                x = x_father;
+                x_father = x->father;
+            } else {
+                if (w != NULL && (w->right_child == NULL || w->right_child->color == BLACK)) {
+                    // Case 3: Sibling is black with left red child and right black child
+                    if (w->left_child != NULL) {
+                        w->left_child->color = BLACK;
+                    }
+                    w->color = RED;
+                    map_right_rotate(m, w);
+                    w = x_father->right_child;
+                }
+
+                // Case 4: Sibling is black with right red child
+                if (w != NULL) {
+                    w->color = x_father->color;
+                    if (w->right_child != NULL) {
+                        w->right_child->color = BLACK;
+                    }
+                }
+                x_father->color = BLACK;
+                map_left_rotate(m, x_father);
+                x = m->root;
+            }
+        } else {
+            w = x_father->left_child;
+
+            // Case 1: Sibling is red
+            if (w != NULL && w->color == RED) {
+                w->color = BLACK;
+                x_father->color = RED;
+                map_right_rotate(m, x_father);
+                w = x_father->left_child;
+            }
+
+            if (w != NULL && ((w->right_child == NULL || w->right_child->color == BLACK) &&
+                (w->left_child == NULL || w->left_child->color == BLACK))) {
+                // Case 2: Sibling is black with two black children
+                w->color = RED;
+                x = x_father;
+                x_father = x->father;
+            } else {
+                if (w != NULL && (w->left_child == NULL || w->left_child->color == BLACK)) {
+                    // Case 3: Sibling is black with right red child and left black child
+                    if (w->right_child != NULL) {
+                        w->right_child->color = BLACK;
+                    }
+                    w->color = RED;
+                    map_left_rotate(m, w);
+                    w = x_father->left_child;
+                }
+
+                // Case 4: Sibling is black with left red child
+                if (w != NULL) {
+                    w->color = x_father->color;
+                    if (w->left_child != NULL) {
+                        w->left_child->color = BLACK;
+                    }
+                }
+                x_father->color = BLACK;
+                map_right_rotate(m, x_father);
+                x = m->root;
+            }
+        }
+    }
+
+    if (x != NULL) {
+        x->color = BLACK;
+    }
+
+    return CS_SUCCESS;
+}
+
+/*! 
+ * Deletes a map node from the map using standard binary search tree deletion
+ * @param[in] m - pointer to the map
+ * @param[in] delete_node - pointer to the map node to be deleted
+ * @return CS_SUCCESS on success
+ */
+cs_codes map_delete_standard(map *m, map_node *delete_node) {
+    map_node *y = delete_node, *x, *x_father;
+    char original_color = y->color;
+
+    if (delete_node->left_child == NULL) {
+        x = delete_node->right_child;
+        x_father = delete_node->father;
+        map_transplant(m, delete_node, delete_node->right_child);
+    } else if (delete_node->right_child == NULL) {
+        x = delete_node->left_child;
+        x_father = delete_node->father;
+        map_transplant(m, delete_node, delete_node->left_child);
+    } else {
+        y = map_node_minimum(delete_node->right_child);
+        original_color = y->color;
+        x = y->right_child;
+        x_father = y->father;
+
+        if (y->father == delete_node) {
+            x_father = y;
+        } else {
+            map_transplant(m, y, y->right_child);
+            y->right_child = delete_node->right_child;
+            y->right_child->father = y;
+        }
+        map_transplant(m, delete_node, y);
+        y->left_child = delete_node->left_child;
+        y->left_child->father = y;
+        y->color = delete_node->color;
+    }
+
+    map_node_free(m, delete_node);
+    m->size--;
+
+    if (original_color == BLACK) {
+        return map_delete_fixup(m, x, x_father);
+    }
+
     return CS_SUCCESS;
 }
 
@@ -328,22 +493,17 @@ cs_codes map_insert(map *m, void *key, void *value) {
 }
 
 cs_codes map_get(map m, void *key, void *value) {
-    map_node *node = m.root;
-
-    while (node != NULL) {
-        int cmp = map_node_compare(&m, key, node->key);
-        if (cmp == 0) {
-            if (m.val_attr.copy != NULL) {
-                m.val_attr.copy(value, node->val);
-            } else {
-                memcpy(value, node->val, m.val_attr.size);
-            }
+    map_node *node = map_node_find(m, key);
+    if (node != NULL) {
+        if (value == NULL) {
             return CS_SUCCESS;
-        } else if (cmp < 0) {
-            node = node->left_child;
-        } else {
-            node = node->right_child;
         }
+        if (m.val_attr.copy != NULL) {
+            m.val_attr.copy(value, node->val);
+        } else {
+            memcpy(value, node->val, m.val_attr.size);
+        }
+        return CS_SUCCESS;
     }
 
     return CS_ELEM;
@@ -351,21 +511,61 @@ cs_codes map_get(map m, void *key, void *value) {
 
 cs_codes map_delete(map *m, void *key) {
     int rc;
-    map_node *delete_node = NULL;
+    map_node *delete_node = map_node_find(*m, key);
 
-    rc = map_delete_standard(m, key, &delete_node);
-    if (rc != CS_SUCCESS) {
-        return rc;
+    if (delete_node == NULL) {
+        return CS_ELEM;
     }
-    DEBUG_PRINT("Found node to delete with key: %p\n", delete_node);
-    DEBUG_PRINT("Deleting node with key: %d\n", *(int *)delete_node->key);
 
-    rc = map_delete_fixup(m, delete_node);
+    rc = map_delete_standard(m, delete_node);
     if (rc != CS_SUCCESS) {
         return rc;
     }
 
     return CS_SUCCESS;
+}
+
+void map_swap(map *m1, map *m2) {
+    map_node *temp_root = m1->root;
+    size_t temp_size = m1->size;
+    map_attr_t temp_key_attr = m1->key_attr;
+    map_attr_t temp_val_attr = m1->val_attr;
+
+    m1->root = m2->root;
+    m1->size = m2->size;
+    m1->key_attr = m2->key_attr;
+    m1->val_attr = m2->val_attr;
+
+    m2->root = temp_root;
+    m2->size = temp_size;
+    m2->key_attr = temp_key_attr;
+    m2->val_attr = temp_val_attr;
+}
+
+void map_clear(map *m) {
+    map_node *node = m->root, *next;
+
+    while (node != NULL) {
+        if (node->left_child != NULL) {
+            node = node->left_child;
+        } else if (node->right_child != NULL) {
+            node = node->right_child;
+        } else {
+            next = node->father;
+            map_node_free(m, node);
+            if (next != NULL) {
+                if (next->left_child == node) {
+                    next->left_child = NULL;
+                } else {
+                    next->right_child = NULL;
+                }
+            }
+            node = next;
+        }
+    }
+
+    m->root = NULL;
+    m->size = 0;
 }
 
 void map_set_attr(map *m, map_attr_t key_attr, map_attr_t val_attr) {

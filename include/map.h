@@ -42,7 +42,6 @@ cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
  */
 cs_codes map_insert(map *m, void *key, void *val);
 
-
 /*!
  * Retrieves the value associated with a given key in the map
  * @param[in] m - the map
@@ -59,6 +58,19 @@ cs_codes map_get(map m, void *key, void *value);
  * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
  */
 cs_codes map_delete(map *m, void *key);
+
+/*!
+ * Swaps the contents of two maps
+ * @param[in] m1 - pointer to the first map
+ * @param[in] m2 - pointer to the second map
+ */
+void map_swap(map *m1, map *m2);
+
+/*!
+ * Clears all key-value pairs from the map
+ * @param[in] m - pointer to the map
+ */
+void map_clear(map *m);
 
 /*!
  * Sets various attributes of the map
