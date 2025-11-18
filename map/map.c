@@ -119,15 +119,12 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
 
     while (node != NULL) {
         int cmp = map_node_compare(m, new_node->key, node->key);
-        DEBUG_PRINT("Comparing keys: %d and %d\n", *(int *)new_node->key, *(int *)node->key);
         prev = node;
         if (cmp == 0) {
             return CS_ELEM;
         } else if (cmp < 0) {
-            DEBUG_PRINT("Going left from key: %d\n", *(int *)node->key);
             node = node->left_child;
         } else {
-            DEBUG_PRINT("Going right from key: %d\n", *(int *)node->key);
             node = node->right_child;
         }
     }
@@ -146,6 +143,36 @@ cs_codes map_insert_standard(map *m, map_node *new_node) {
 
     m->size++;
 
+    return CS_SUCCESS;
+}
+
+/*!
+ * Deletes a key-value pair from the map using standard binary search tree deletion
+ * @param[in] m - pointer to the map
+ * @param[in] key - pointer to the key data
+ * @param[out] delete_node - pointer to the map node to be deleted
+ * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
+ */
+cs_codes map_delete_standard(map *m, void *key, map_node **delete_node) {
+    map_node *node = m->root;
+
+    *delete_node = NULL;
+    while (node != NULL) {
+        int cmp = map_node_compare(m, key, node->key);
+        if (cmp == 0) {
+            *delete_node = node;
+            break;
+        } else if (cmp < 0) {
+            node = node->left_child;
+        } else {
+            node = node->right_child;
+        }
+    }
+
+    if (*delete_node == NULL) {
+        return CS_ELEM;
+    }
+    
     return CS_SUCCESS;
 }
 
@@ -257,6 +284,11 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
     return CS_SUCCESS;
 }
 
+cs_codes map_delete_fixup(map *m, map_node *delete_node) {
+    // To be implemented
+    return CS_SUCCESS;
+}
+
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
@@ -264,7 +296,6 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
 
 
 cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
-    DEBUG_PRINT("Initializing map\n");
     m->key_attr = key_attr;
     m->val_attr = val_attr;
     m->root = NULL;
@@ -316,6 +347,103 @@ cs_codes map_get(map m, void *key, void *value) {
     }
 
     return CS_ELEM;
+}
+
+cs_codes map_delete(map *m, void *key) {
+    int rc;
+    map_node *delete_node = NULL;
+
+    rc = map_delete_standard(m, key, &delete_node);
+    if (rc != CS_SUCCESS) {
+        return rc;
+    }
+    DEBUG_PRINT("Found node to delete with key: %p\n", delete_node);
+    DEBUG_PRINT("Deleting node with key: %d\n", *(int *)delete_node->key);
+
+    rc = map_delete_fixup(m, delete_node);
+    if (rc != CS_SUCCESS) {
+        return rc;
+    }
+
+    return CS_SUCCESS;
+}
+
+void map_set_attr(map *m, map_attr_t key_attr, map_attr_t val_attr) {
+    m->key_attr = key_attr;
+    m->val_attr = val_attr;
+}
+
+void map_set_free(map *m, freer key_fr, freer val_fr) {
+    m->key_attr.fr = key_fr;
+    m->val_attr.fr = val_fr;
+}
+
+void map_set_comp(map *m, comparer key_comp, comparer val_comp) {
+    m->key_attr.comp = key_comp;
+    m->val_attr.comp = val_comp;
+}
+
+void map_set_print(map *m, printer key_print, printer val_print) {
+    m->key_attr.print = key_print;
+    m->val_attr.print = val_print;
+}
+
+void map_set_copy(map *m, deepcopy key_copy, deepcopy val_copy) {
+    m->key_attr.copy = key_copy;
+    m->val_attr.copy = val_copy;
+}
+
+void map_set_stream(map *m, FILE *key_stream, FILE *val_stream) {
+    m->key_attr.stream = key_stream;
+    m->val_attr.stream = val_stream;
+}
+
+void map_key_set_attr(map *m, map_attr_t key_attr) {
+    m->key_attr = key_attr;
+}
+
+void map_key_set_free(map *m, freer key_fr) {
+    m->key_attr.fr = key_fr;
+}
+
+void map_key_set_comp(map *m, comparer key_comp) {
+    m->key_attr.comp = key_comp;
+}
+
+void map_key_set_print(map *m, printer key_print) {
+    m->key_attr.print = key_print;
+}
+
+void map_key_set_copy(map *m, deepcopy key_copy) {
+    m->key_attr.copy = key_copy;
+}
+
+void map_key_set_stream(map *m, FILE *key_stream) {
+    m->key_attr.stream = key_stream;
+}
+
+void map_val_set_attr(map *m, map_attr_t val_attr) {
+    m->val_attr = val_attr;
+}
+
+void map_val_set_free(map *m, freer val_fr) {
+    m->val_attr.fr = val_fr;
+}
+
+void map_val_set_comp(map *m, comparer val_comp) {
+    m->val_attr.comp = val_comp;
+}
+
+void map_val_set_print(map *m, printer val_print) {
+    m->val_attr.print = val_print;
+}   
+
+void map_val_set_copy(map *m, deepcopy val_copy) {
+    m->val_attr.copy = val_copy;
+}
+
+void map_val_set_stream(map *m, FILE *val_stream) {
+    m->val_attr.stream = val_stream;
 }
 
 void map_print(void *v_m) {

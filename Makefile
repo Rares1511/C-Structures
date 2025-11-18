@@ -8,7 +8,7 @@ CFLAGS = -Wall -Werror -fPIC
 CC = gcc
 AR = ar
 
-UNITTEST_LOG = unittest_log
+UNITTEST_LOG = unittest_log.out
 SEED ?= 42
 
 ifeq ($(memcheck),true)

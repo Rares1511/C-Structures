@@ -81,20 +81,14 @@ int rbt_is_valid(map_node *root, map_attr_t key_attr) {
     if (root && root->color != BLACK)
         return 0;
 
-    DEBUG_PRINT("Root is black or tree is empty\n");
-
     // 2. BST property
     if (!rbt_check_bst(root, key_attr, NULL, NULL))
         return 0;
-
-    DEBUG_PRINT("BST property holds\n");
 
     // 3. Red–Black properties + black height
     int bh = rbt_check_black_height(root);
     if (bh == -1)
         return 0;
-
-    DEBUG_PRINT("Red-Black properties hold with black height: %d\n", bh);
 
     return 1;
 }
@@ -270,6 +264,47 @@ test_res test_map_get() {
     return (test_res){.test_name = "test_map_get", .reason = "none", .return_code = CS_SUCCESS};
 }
 
+test_res test_map_delete() {
+    map m;
+    map_attr_t key_attr = {sizeof(int), NULL, print_int, NULL, NULL, DEBUG_OUT};
+    map_attr_t val_attr = {sizeof(int), NULL, print_int, NULL, NULL, DEBUG_OUT};
+    int test_size = 100, key_save, key_idx = rand() % test_size;
+
+    cs_codes rc = map_init(&m, key_attr, val_attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = "test_map_get", .reason = "map_init failed", .return_code = rc};
+    }
+
+    for (int i = 0; i < test_size; i++) {
+        int key = rand() % (test_size * 10);
+        int value = rand() % 100000;
+        if (i == key_idx) {
+            key_save = key;
+        }
+        rc = map_insert(&m, &key, &value);
+        if (rc != CS_SUCCESS && rc != CS_ELEM) {
+            return (test_res){
+                .test_name = "test_map_delete", .reason = "map_insert failed", .return_code = rc};
+        }
+    }
+
+    DEBUG_PRINT("Deleting key: %d\n", key_save);
+    rc = map_delete(&m, &key_save);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = "test_map_delete", .reason = "map_delete failed", .return_code = rc};
+    }
+
+    if (rbt_is_valid(m.root, key_attr) == 0) {
+        return (test_res){
+            .test_name = "test_map_delete", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+    }
+
+    map_free(&m);
+    return (test_res){.test_name = "test_map_delete", .reason = "none", .return_code = CS_SUCCESS};
+}
+
 int main(int argc, char **argv) {
     test tests[] = {
         test_map_init,
@@ -277,6 +312,7 @@ int main(int argc, char **argv) {
         test_map_insert_2,
         test_map_insert_3,
         test_map_get,
+        test_map_delete,
     };
 
     if (argc < 3) {
