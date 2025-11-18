@@ -54,3 +54,4 @@ dkms.conf
 # Testing files
 *_unittest
 *_unittest.c
+*.out
