@@ -72,11 +72,23 @@ void free_painting(void *v_p) {
 
 void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
 
-void unittest(test *tests, int size) {
-    int i;
-    int success = 0;
-    int failed = 0;
+void unittest(test *tests, int size, int argc, char **argv) {
+    int i, seed, success = 0, failed = 0;
     test_res res;
+
+    if (argc < 3) {
+        printf("Usage: %s [debug_file] [seed]\n", argv[0]);
+        return;
+    } 
+
+    DEBUG_OUT = fopen(argv[1], "a");
+    if (DEBUG_OUT == NULL) {
+        fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", argv[1]);
+        return;
+    }
+
+    seed = atoi(argv[2]);
+    srand(seed);
 
     fprintf(DEBUG_OUT, "\n========================================\n");
     fprintf(DEBUG_OUT, "  UNITTEST RUN (total tests: %d)\n", size);
@@ -134,4 +146,6 @@ void unittest(test *tests, int size) {
     if (failed > 0) {
         exit(EXIT_FAILURE);
     }
+
+    fclose(DEBUG_OUT);
 }

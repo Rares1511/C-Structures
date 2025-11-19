@@ -1,4 +1,45 @@
-#include "deque_internal.h"
+#include <cs/deque.h>
+
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+/*!
+ * Initializes a deque node with the given data
+ * @param[in] data  Data that will be stored in the node
+ * @param[in] size  Size of the data that will be stored in the node
+ * @param[in] cp    Copy function used to copy the data into the node
+ * @return Pointer to the initialized node or NULL if a memory problem occurred
+ */
+deque_node_t *deque_node_init(void *data, int size, deepcopy cp) {
+    deque_node_t *node = malloc(sizeof(deque_node_t));
+    if (!node)
+        return NULL;
+    node->data = malloc(size);
+    if (!node->data) {
+        free(node);
+        return NULL;
+    }
+    if (cp)
+        cp(node->data, data);
+    else
+        memcpy(node->data, data, size);
+    node->next = NULL;
+    node->prev = NULL;
+    return node;
+}
+
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
 
 cs_codes deque_init(deque *dq, deque_attr_t attr) {
     if (attr.size < 0 || attr.size > SIZE_TH) {
@@ -175,7 +216,7 @@ void deque_print(deque dq) {
         return;
     deque_node_t *aux = dq.front;
     while (aux != NULL) {
-        dq.attr.print(aux->data);
+        dq.attr.print(dq.attr.stream, aux->data);
         aux = aux->next;
     }
 }

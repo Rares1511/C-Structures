@@ -251,22 +251,6 @@ int main(int argc, char **argv) {
         test_vector_replace
     };
 
-    if (argc < 3) {
-        printf("Usage: %s [debug_file] [seed]\n", argv[0]);
-        return EXIT_FAILURE;
-    } 
-
-    DEBUG_OUT = fopen(argv[1], "a");
-    if (DEBUG_OUT == NULL) {
-        fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", argv[1]);
-        return EXIT_FAILURE;
-    }
-
-    int seed = atoi(argv[2]);
-    srand(seed);
-
-    unittest(tests, sizeof(tests) / sizeof(test));
-
-    fclose(DEBUG_OUT);
+    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
     return 0;
 }
