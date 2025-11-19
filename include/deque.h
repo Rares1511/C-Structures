@@ -44,18 +44,18 @@ cs_codes deque_push_back(deque *dq, void *el);
 cs_codes deque_push_front(deque *dq, void *el);
 
 /*!
- * Pops the element at the front of the deque
- * @param[out] dq  The deque whose first element will be deleted
- * @return CS_SIZE if the deque given is empty or CS_SUCCESS for a successful deletion
- */
-cs_codes deque_pop_front(deque *dq);
-
-/*!
  * Pops the element at the back of the deque
  * @param[out] dq  The deque whose last element will be deleted
  * @return CS_SIZE if the deque given is empty or CS_SUCCESS for a successful deletion
  */
 cs_codes deque_pop_back(deque *dq);
+
+/*!
+ * Pops the element at the front of the deque
+ * @param[out] dq  The deque whose first element will be deleted
+ * @return CS_SIZE if the deque given is empty or CS_SUCCESS for a successful deletion
+ */
+cs_codes deque_pop_front(deque *dq);
 
 /*!
  * Copies the elements from the source deque to the destination deque
@@ -68,44 +68,49 @@ cs_codes deque_clone(deque *dest, deque src);
 /*!
  * Returns the element at the front of the deque
  * @param[in] dq Deque whose element will be accessed
- * @param[out] el Pointer to the element at the front of the deque
  */
-void deque_front(deque dq, void *el);
+void *deque_front(deque dq);
 
 /*!
  * Returns the element at the back of the deque
  * @param[in] dq Deque whose element will be accessed
- * @param[out] el Pointer to the element at the back of the deque
  */
-void deque_back(deque dq, void *el);
+void *deque_back(deque dq);
 
 /*!
  * Sets the new attributes for the deque
  * @param[out] dq    Deque whose attributes will be changed
  * @param[in]  attr  New attributes of the deque
  */
-void deque_set_attr(deque *dq, deque_attr_t attr);
+static inline void deque_set_attr(deque *dq, deque_attr_t attr) { dq->attr = attr; }
 
 /*!
  * Sets the new free function for the deque
  * @param[out] dq  Deque whose free function will be changed
  * @param[in]  fr  New free function for the datatype inside of the deque
  */
-void deque_set_free(deque *dq, freer fr);
+static inline void deque_set_free(deque *dq, freer fr) { dq->attr.fr = fr; }
 
 /*!
  * Sets the new print function for the deque
  * @param[out] dq     Deque whose print function will be changed
  * @param[in]  print  New print function for the datatype inside of the deque
  */
-void deque_set_print(deque *dq, printer print);
+static inline void deque_set_print(deque *dq, printer print) { dq->attr.print = print; }
 
 /*!
  * Sets the new copy function for the deque
  * @param[out] dq  Deque whose copy function will be set or changed
  * @param[in]  cp  New copy function used in copying the elements in the deque
  */
-void deque_set_copy(deque *dq, deepcopy cp);
+static inline void deque_set_copy(deque *dq, deepcopy cp) { dq->attr.copy = cp; }
+
+/*!
+ * Sets the new output stream for the deque
+ * @param[out] dq      Deque whose output stream will be changed
+ * @param[in]  stream  New output stream for the printer function
+ */
+static inline void deque_set_stream(deque *dq, FILE *stream) { dq->attr.stream = stream; }
 
 /*!
  * Clears the deque, frees the memory that it was used in it and empties for a next use
@@ -121,14 +126,14 @@ void deque_swap(deque *dq1, deque *dq2);
 
 /*!
  * Frees the memory that the deque used
- * @param dq  Deque whose memory will be freed
+ * @param v_dq Deque that will be freed
  */
-void deque_free(deque *dq);
+void deque_free(void *v_dq);
 
 /*!
  * Prints the elements inside of the deque
- * @param[in] dq  Deque whose elements will be printed
+ * @param[in] v_dq Deque that will be printed
  */
-void deque_print(deque dq);
+void deque_print(void *v_dq);
 
 #endif

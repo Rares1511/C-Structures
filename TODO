@@ -1,0 +1,8 @@
+1. Finish unittests for all data structures: hash_table, heap, list, pair, queue, stack, string
+2. Resolve matrix (use the implementation of tensor from C MLL)
+3. Resolve string 
+4. Resolve large number (Delete maybe)
+5. Implement the block method for deque then search how the others are implemented correctly in C++
+6. Start implementing hash_* structures from C++
+7. Start cs_global
+8. Parallelize code 
