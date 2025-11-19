@@ -9,19 +9,19 @@ typedef xuniv_attr_t map_attr_t;
 #define MAP_NODE_BLACK_COLOR 1
 
 typedef struct map {
-    struct map_node *root; /*!< size of the datatype */
-    int size;              /*!< size of the datatype */
-    map_attr_t key_attr;   /*!< size of the datatype */
-    map_attr_t val_attr;   /*!< size of the datatype */
+    struct map_node *root; /*!< root of the map */
+    int size;              /*!< number of elements in the map */
+    map_attr_t key_attr;   /*!< attributes of the key datatype */
+    map_attr_t val_attr;   /*!< attributes of the value datatype */
 } map;
 
 typedef struct map_node {
-    char color;                   /*!< size of the datatype */
-    void *key;                    /*!< size of the datatype */
-    void *val;                    /*!< size of the datatype */
-    struct map_node *left_child;  /*!< size of the datatype */
-    struct map_node *right_child; /*!< size of the datatype */
-    struct map_node *father;      /*!< size of the datatype */
+    char color;                   /*!< color of the node */
+    void *key;                    /*!< key of the node */
+    void *val;                    /*!< value of the node */
+    struct map_node *left_child;  /*!< left child of the node */
+    struct map_node *right_child; /*!< right child of the node */
+    struct map_node *father;      /*!< father of the node */
 } map_node;
 
 /*!
