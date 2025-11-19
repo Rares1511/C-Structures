@@ -10,6 +10,19 @@ Each structure relies on the shared universal/ module (universal.h + universal.c
 
 This project is ideal for learning, teaching, and building lightweight C software without external dependencies.
 
+## 🚀 Getting Started
+
+To use any data structure:
+1. Extract the archive.
+2. Run the makefile (recommended to use sudo): `sudo make`
+3. Include the header for the desired datastructure `eg. #include <cs/map.h>`
+
+## 📚 Documentation by Data Structure
+
+- [Vector](vector/README.md)
+- [Map](map/README.md)
+- [Deque](deque/README.md)
+
 ## Unit Tests - TODO
 Unit tests are being progressively added for all modules:  
 * vector  ✔
