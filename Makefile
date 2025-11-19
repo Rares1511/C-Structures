@@ -6,7 +6,7 @@ LOCAL_INCLUDEDIR = include
 CFLAGS           = -Wall -Werror -fPIC
 CC               = gcc
 
-UNITTEST_LOG = unittest_log.out
+UNITTEST_LOG = unittest_log.ansi
 SEED ?= 42
 
 ifeq ($(debug),true)
@@ -14,7 +14,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = map
+SUBDIRS   = map vector
 
 # Output directory for local libs
 LIBOUTDIR = lib
@@ -77,30 +77,41 @@ uninstall_libs:
 
 # ---------- Unit tests ----------
 
-# Per-module unittest target:
-#   unittest-map, unittest-foo, ...
+# Init log once before all module tests
+unittest-log-init:
+	@rm -f $(UNITTEST_LOG)
+	@touch $(UNITTEST_LOG)
+
 define MODULE_TEST_RULES
 unittest-$1: install $1/$1_unittest.c
 	@echo "Building unit tests for $1..."
 	$(CC) -o $1/unittest $1/$1_unittest.c $(CFLAGS) -l$1
 	@echo "Running unit tests for $1..."
+	@{ \
+	  echo ""; \
+	  echo "=================================================="; \
+	  echo "  MODULE: $1"; \
+	  echo "  Running unit tests..."; \
+	  echo "  Started at: `date +"%Y-%m-%d %H:%M:%S"`"; \
+	  echo "=================================================="; \
+	} >> $(UNITTEST_LOG)
 	@if [ "$(memcheck)" = "true" ]; then \
-	  /usr/bin/time -f "[${1}] Time: %E (real), %U (user), %S (sys)" \
+	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
 	    valgrind --leak-check=full $1/unittest $(UNITTEST_LOG) $(SEED) \
 	    >> $(UNITTEST_LOG) 2>&1 ; \
 	else \
-	  /usr/bin/time -f "[${1}] Time: %E (real), %U (user), %S (sys)" \
+	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
 	    $1/unittest $(UNITTEST_LOG) $(SEED) \
 	    >> $(UNITTEST_LOG) 2>&1 ; \
 	fi
-	@echo "Unit tests for $1 completed."
+	@echo "--------------------------------------------------" >> $(UNITTEST_LOG)
 	@rm -f $1/unittest
 endef
 
 $(foreach m,$(SUBDIRS),$(eval $(call MODULE_TEST_RULES,$(m))))
 
-# Aggregate unittest target
-unittest: $(SUBDIRS:%=unittest-%)
+# Aggregate unittest target: clear log once, then run all module tests
+unittest: unittest-log-init $(SUBDIRS:%=unittest-%)
 
 # ---------- Clean ----------
 

@@ -35,15 +35,15 @@ int rbt_check_black_height(map_node *node) {
         return -1;
 
     // Property: red node cannot have red children
-    if (node->color == RED) {
-        if ((node->left_child && node->left_child->color == RED) ||
-            (node->right_child && node->right_child->color == RED)) {
+    if (node->color == MAP_NODE_RED_COLOR) {
+        if ((node->left_child && node->left_child->color == MAP_NODE_RED_COLOR) ||
+            (node->right_child && node->right_child->color == MAP_NODE_RED_COLOR)) {
             return -1;
         }
     }
 
     // Add 1 if this node is black
-    return left_bh + (node->color == BLACK ? 1 : 0);
+    return left_bh + (node->color == MAP_NODE_BLACK_COLOR ? 1 : 0);
 }
 
 int rbt_check_bst(map_node *node, map_attr_t key_attr, void *min_key, void *max_key) {
@@ -78,7 +78,7 @@ int rbt_check_bst(map_node *node, map_attr_t key_attr, void *min_key, void *max_
 
 int rbt_is_valid(map_node *root, map_attr_t key_attr) {
     // 1. Root must be black (if non-empty)
-    if (root && root->color != BLACK)
+    if (root && root->color != MAP_NODE_BLACK_COLOR)
         return 0;
 
     // 2. BST property
@@ -435,7 +435,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     } 
 
-    DEBUG_OUT = fopen(argv[1], "w");
+    DEBUG_OUT = fopen(argv[1], "a");
     if (DEBUG_OUT == NULL) {
         fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", argv[1]);
         return EXIT_FAILURE;

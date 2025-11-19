@@ -8,6 +8,8 @@
 
 #include "../include/unittest.h"
 
+FILE *DEBUG_OUT = NULL;
+
 test_res test_vector_init() {
     vector v;
     vector_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
@@ -238,15 +240,33 @@ test_res test_vector_replace() {
         .test_name = "test_vector_replace", .reason = "none", .return_code = CS_SUCCESS};
 }
 
-int main() {
-    test tests[] = {test_vector_init,
-                    test_vector_init_neg_attr_size,
-                    test_vector_init_max_attr_size, 
-                    test_vector_insert_at, 
-                    test_vector_push_back,
-                    test_vector_erase,
-                    test_vector_replace};
+int main(int argc, char **argv) {
+    test tests[] = {
+        test_vector_init,
+        test_vector_init_neg_attr_size,
+        test_vector_init_max_attr_size, 
+        test_vector_insert_at, 
+        test_vector_push_back,
+        test_vector_erase,
+        test_vector_replace
+    };
+
+    if (argc < 3) {
+        printf("Usage: %s [debug_file] [seed]\n", argv[0]);
+        return EXIT_FAILURE;
+    } 
+
+    DEBUG_OUT = fopen(argv[1], "a");
+    if (DEBUG_OUT == NULL) {
+        fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
+    int seed = atoi(argv[2]);
+    srand(seed);
 
     unittest(tests, sizeof(tests) / sizeof(test));
+
+    fclose(DEBUG_OUT);
     return 0;
 }

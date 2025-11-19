@@ -78,7 +78,7 @@ map_node *map_node_init(void *key, void *value, map_attr_t key_attr, map_attr_t 
     if (node == NULL) {
         return NULL;
     }
-    node->color = RED;
+    node->color = MAP_NODE_RED_COLOR;
     node->key = malloc(key_attr.size);
     if (node->key == NULL) {
         free(node);
@@ -255,15 +255,15 @@ void map_right_rotate(map *m, map_node *x) {
 cs_codes map_insert_fixup(map *m, map_node *node) {
     map_node *uncle;
 
-    while (node->father && node->father->color == RED) {
+    while (node->father && node->father->color == MAP_NODE_RED_COLOR) {
         if (node->father->father && node->father == node->father->father->left_child) {
             uncle = node->father->father->right_child;
 
             // Case 1: Uncle is red -> recolor
-            if (uncle && uncle->color == RED) {
-                node->father->color = BLACK;
-                uncle->color = BLACK;
-                node->father->father->color = RED;
+            if (uncle && uncle->color == MAP_NODE_RED_COLOR) {
+                node->father->color = MAP_NODE_BLACK_COLOR;
+                uncle->color = MAP_NODE_BLACK_COLOR;
+                node->father->father->color = MAP_NODE_RED_COLOR;
                 node = node->father->father;
             }
             // Case 2: Uncle is black and node is right child -> rotate
@@ -274,18 +274,18 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
                 }
 
                 // Case 3: Uncle is black and node is left child -> rotate and recolor
-                node->father->color = BLACK;
-                node->father->father->color = RED;
+                node->father->color = MAP_NODE_BLACK_COLOR;
+                node->father->father->color = MAP_NODE_RED_COLOR;
                 map_right_rotate(m, node->father->father);
             }
         } else {
             uncle = node->father->father->left_child;
 
             // Case 1: Uncle is red -> recolor
-            if (uncle && uncle->color == RED) {
-                node->father->color = BLACK;
-                uncle->color = BLACK;
-                node->father->father->color = RED;
+            if (uncle && uncle->color == MAP_NODE_RED_COLOR) {
+                node->father->color = MAP_NODE_BLACK_COLOR;
+                uncle->color = MAP_NODE_BLACK_COLOR;
+                node->father->father->color = MAP_NODE_RED_COLOR;
                 node = node->father->father;
             }
             // Case 2: Uncle is black and node is left child -> rotate
@@ -296,14 +296,14 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
                 }
 
                 // Case 3: Uncle is black and node is right child -> rotate and recolor
-                node->father->color = BLACK;
-                node->father->father->color = RED;
+                node->father->color = MAP_NODE_BLACK_COLOR;
+                node->father->father->color = MAP_NODE_RED_COLOR;
                 map_left_rotate(m, node->father->father);
             }
         }
     }
 
-    m->root->color = BLACK;
+    m->root->color = MAP_NODE_BLACK_COLOR;
 
     return CS_SUCCESS;
 }
@@ -318,31 +318,31 @@ cs_codes map_insert_fixup(map *m, map_node *node) {
 cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
     map_node *w;
     
-    while (x != m->root && (x == NULL || x->color == BLACK)) {
+    while (x != m->root && (x == NULL || x->color == MAP_NODE_BLACK_COLOR)) {
         if (x == x->father->left_child) {
             w = x_father->right_child;
 
             // Case 1: Sibling is red
-            if (w != NULL && w->color == RED) {
-                w->color = BLACK;
-                x_father->color = RED;
+            if (w != NULL && w->color == MAP_NODE_RED_COLOR) {
+                w->color = MAP_NODE_BLACK_COLOR;
+                x_father->color = MAP_NODE_RED_COLOR;
                 map_left_rotate(m, x_father);
                 w = x_father->right_child;
             }
 
-            if (w != NULL && ((w->left_child == NULL || w->left_child->color == BLACK) &&
-                (w->right_child == NULL || w->right_child->color == BLACK))) {
+            if (w != NULL && ((w->left_child == NULL || w->left_child->color == MAP_NODE_BLACK_COLOR) &&
+                (w->right_child == NULL || w->right_child->color == MAP_NODE_BLACK_COLOR))) {
                 // Case 2: Sibling is black with two black children
-                w->color = RED;
+                w->color = MAP_NODE_RED_COLOR;
                 x = x_father;
                 x_father = x->father;
             } else {
-                if (w != NULL && (w->right_child == NULL || w->right_child->color == BLACK)) {
+                if (w != NULL && (w->right_child == NULL || w->right_child->color == MAP_NODE_BLACK_COLOR)) {
                     // Case 3: Sibling is black with left red child and right black child
                     if (w->left_child != NULL) {
-                        w->left_child->color = BLACK;
+                        w->left_child->color = MAP_NODE_BLACK_COLOR;
                     }
-                    w->color = RED;
+                    w->color = MAP_NODE_RED_COLOR;
                     map_right_rotate(m, w);
                     w = x_father->right_child;
                 }
@@ -351,10 +351,10 @@ cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
                 if (w != NULL) {
                     w->color = x_father->color;
                     if (w->right_child != NULL) {
-                        w->right_child->color = BLACK;
+                        w->right_child->color = MAP_NODE_BLACK_COLOR;
                     }
                 }
-                x_father->color = BLACK;
+                x_father->color = MAP_NODE_BLACK_COLOR;
                 map_left_rotate(m, x_father);
                 x = m->root;
             }
@@ -362,26 +362,26 @@ cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
             w = x_father->left_child;
 
             // Case 1: Sibling is red
-            if (w != NULL && w->color == RED) {
-                w->color = BLACK;
-                x_father->color = RED;
+            if (w != NULL && w->color == MAP_NODE_RED_COLOR) {
+                w->color = MAP_NODE_BLACK_COLOR;
+                x_father->color = MAP_NODE_RED_COLOR;
                 map_right_rotate(m, x_father);
                 w = x_father->left_child;
             }
 
-            if (w != NULL && ((w->right_child == NULL || w->right_child->color == BLACK) &&
-                (w->left_child == NULL || w->left_child->color == BLACK))) {
+            if (w != NULL && ((w->right_child == NULL || w->right_child->color == MAP_NODE_BLACK_COLOR) &&
+                (w->left_child == NULL || w->left_child->color == MAP_NODE_BLACK_COLOR))) {
                 // Case 2: Sibling is black with two black children
-                w->color = RED;
+                w->color = MAP_NODE_RED_COLOR;
                 x = x_father;
                 x_father = x->father;
             } else {
-                if (w != NULL && (w->left_child == NULL || w->left_child->color == BLACK)) {
+                if (w != NULL && (w->left_child == NULL || w->left_child->color == MAP_NODE_BLACK_COLOR)) {
                     // Case 3: Sibling is black with right red child and left black child
                     if (w->right_child != NULL) {
-                        w->right_child->color = BLACK;
+                        w->right_child->color = MAP_NODE_BLACK_COLOR;
                     }
-                    w->color = RED;
+                    w->color = MAP_NODE_RED_COLOR;
                     map_left_rotate(m, w);
                     w = x_father->left_child;
                 }
@@ -390,10 +390,10 @@ cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
                 if (w != NULL) {
                     w->color = x_father->color;
                     if (w->left_child != NULL) {
-                        w->left_child->color = BLACK;
+                        w->left_child->color = MAP_NODE_BLACK_COLOR;
                     }
                 }
-                x_father->color = BLACK;
+                x_father->color = MAP_NODE_BLACK_COLOR;
                 map_right_rotate(m, x_father);
                 x = m->root;
             }
@@ -401,7 +401,7 @@ cs_codes map_delete_fixup(map *m, map_node *x, map_node *x_father) {
     }
 
     if (x != NULL) {
-        x->color = BLACK;
+        x->color = MAP_NODE_BLACK_COLOR;
     }
 
     return CS_SUCCESS;
@@ -447,7 +447,7 @@ cs_codes map_delete_standard(map *m, map_node *delete_node) {
     map_node_free(m, delete_node);
     m->size--;
 
-    if (original_color == BLACK) {
+    if (original_color == MAP_NODE_BLACK_COLOR) {
         return map_delete_fixup(m, x, x_father);
     }
 
@@ -673,7 +673,7 @@ void map_print(void *v_m) {
             m->val_attr.print(m->val_attr.stream, node->val);
         }
 
-        fprintf(m->key_attr.stream, " -> Color: %s", node->color == RED ? "RED" : "BLACK");
+        fprintf(m->key_attr.stream, " -> Color: %s", node->color == MAP_NODE_RED_COLOR ? "RED" : "BLACK");
 
         fprintf(m->key_attr.stream, "\n");
 

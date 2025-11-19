@@ -5,8 +5,8 @@
 
 typedef xuniv_attr_t map_attr_t;
 
-#define RED 0
-#define BLACK 1
+#define MAP_NODE_RED_COLOR 0
+#define MAP_NODE_BLACK_COLOR 1
 
 typedef struct map {
     struct map_node *root; /*!< size of the datatype */

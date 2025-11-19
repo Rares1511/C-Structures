@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../include/unittest.h"
+
 cs_codes vector_init(vector *vec, vector_attr_t attr) {
     if (attr.size < 0 || attr.size > SIZE_TH)
         return CS_SIZE;
@@ -23,9 +25,14 @@ cs_codes vector_insert_at(vector *vec, void *el, int pos) {
             return CS_MEM;
         vec->cap += INIT_CAPACITY;
     }
-    if (pos != vec->size)
-        memcpy(vec->vec + vec->attr.size * (pos + 1), vec->vec + vec->attr.size * pos,
+    if (pos != vec->size) {
+        if (vec->attr.copy == NULL && vec->attr.fr != NULL)
+            for (int i = vec->size; i > pos; i--)
+                vec->attr.fr(vec->vec + vec->attr.size * i);
+        else
+            memcpy(vec->vec + vec->attr.size * (pos + 1), vec->vec + vec->attr.size * pos,
                (vec->size - pos) * vec->attr.size);
+    }
     if (vec->attr.copy)
         vec->attr.copy(vec->vec + vec->attr.size * pos, el);
     else
@@ -134,5 +141,5 @@ void vector_print(void *v_vec) {
     if (vec->attr.print == NULL)
         return;
     for (int i = 0; i < vec->size; i++)
-        vec->attr.print(vec->vec + i * vec->attr.size);
+        vec->attr.print(vec->attr.stream, vec->vec + i * vec->attr.size);
 }

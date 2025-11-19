@@ -13,6 +13,11 @@
 
 extern FILE *DEBUG_OUT;
 
+#define GREEN_UNITTEST  "\033[32m"
+#define RED_UNITTEST    "\033[31m"
+#define RESET_UNITTEST  "\033[0m"
+#define BOLD_UNITTEST   "\033[1m"
+
 #ifdef DEBUG
 #define DEBUG_PRINT(...) do { \
     if (DEBUG_OUT) { \
@@ -68,23 +73,65 @@ void free_painting(void *v_p) {
 void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
 
 void unittest(test *tests, int size) {
-    int i, success = 0;
+    int i;
+    int success = 0;
+    int failed = 0;
     test_res res;
+
+    fprintf(DEBUG_OUT, "\n========================================\n");
+    fprintf(DEBUG_OUT, "  UNITTEST RUN (total tests: %d)\n", size);
+    fprintf(DEBUG_OUT, "========================================\n");
 
     for (i = 0; i < size; i++) {
         res = tests[i]();
+
         char buffer[1024];
-        strcpy(buffer, res.test_name);
-        strncat(buffer,
-                "..........................................................................",
-                MAX_PRINT_SIZE - strlen(res.test_name));
+        const char *dots =
+            "..........................................................................";
+
+        strncpy(buffer, res.test_name, sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0';
+
+        size_t len = strlen(buffer);
+        size_t max_dots = (MAX_PRINT_SIZE > len) ? (MAX_PRINT_SIZE - len) : 0;
+        strncat(buffer, dots, max_dots);
+
         if (res.return_code != CS_SUCCESS) {
-            fprintf(DEBUG_OUT, "%sFAILED: %s\n", buffer, res.reason);
-            exit(-(int)(size / sizeof(test) - i));
+            /* FAILURE */
+            failed++;
+            fprintf(DEBUG_OUT,
+                    "[%2d/%2d] %s" RED_UNITTEST BOLD_UNITTEST "[FAIL]" RESET_UNITTEST
+                    "  reason: %s\n",
+                    i + 1, size, buffer,
+                    res.reason ? res.reason : "(no reason)");
+
         } else {
-            fprintf(DEBUG_OUT, "%sSUCCESS: %d/%d\n", buffer, i + 1, size);
+            /* SUCCESS */
             success++;
+            fprintf(DEBUG_OUT,
+                    "[%2d/%2d] %s" GREEN_UNITTEST "[ OK ]" RESET_UNITTEST
+                    "  SUCCESS: %d/%d\n",
+                    i + 1, size, buffer, success, size);
         }
     }
-    fprintf(DEBUG_OUT, "Total: %d/%d\n", success, i);
+
+    fprintf(DEBUG_OUT, "----------------------------------------\n");
+
+    /* Color summary depending on fail/success */
+    if (failed == 0) {
+        fprintf(DEBUG_OUT, GREEN_UNITTEST BOLD_UNITTEST
+                "SUMMARY: %d passed, %d failed (total %d)\n" RESET_UNITTEST,
+                success, failed, size);
+    } else {
+        fprintf(DEBUG_OUT, RED_UNITTEST BOLD_UNITTEST
+                "SUMMARY: %d passed, %d failed (total %d)\n" RESET_UNITTEST,
+                success, failed, size);
+    }
+
+    fprintf(DEBUG_OUT, "========================================\n\n");
+
+    /* Makefile sees non-zero = failing unittest */
+    if (failed > 0) {
+        exit(EXIT_FAILURE);
+    }
 }
