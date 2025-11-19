@@ -1,25 +1,32 @@
-C-structures
+# C-Structures Library
 
-Implementation of different data structures such as heap, hash_table, map, queue, etc, in C for an easier access. Every
-data structure uses access to a file universal.h and universal.c with functions that all data structures use in their
-implementation. For each individual implementation and explanations about using head to the README inside the corresponding
-data structure.
+A collection of efficient, modular, and reusable data structure implementations in C, designed to offer clean APIs for common containers such as vector, map, heap, queue, deque, stack, hash table, and more.
 
-As a general note of use extract the archive and copy the intended data structure files alongside universal, afterwards just
-include the file .h corresponding to the data structure and follow the individual README for exact use.
+Each structure relies on the shared universal/ module (universal.h + universal.c) which provides:
+* Generic copy/free/compare attribute handling
+* Unified error codes
+* Debugging utilities
+* Memory-safe operations
 
-Example: Upon wanting to use the vector data structure, extract the archive, copy the folders vector and universal into your
-working directory, and in the desired file add #include "C-structures\vector.h"
+This project is ideal for learning, teaching, and building lightweight C software without external dependencies.
 
+## Unit Tests - TODO
+Unit tests are being progressively added for all modules:  
+* vector  ✔
+* map ✔
+* deque ✔
+* pair ☐  
+* queue ☐ 
+* deque ☐ 
+* stack ☐ 
+* heap ☐ 
+* hash_table ☐ 
+* string ☐ 
+* list ☐ 
+* large_number ☐
 
-TODO: Unittesturi
-    - vector
-    - pair
-    - queue
-    - deque
-    - stack
-    - heap
-    - hash_table
-    - string
-    - list
-    - large_number
+### Each test suite includes:
+* Boundary checks
+* Randomized tests
+* Memory leak testing (valgrind-compatible)
+* Behavior certification for every API function
