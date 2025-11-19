@@ -41,7 +41,7 @@ cs_codes heap_pop(heap *h);
  * @param[in] h  Heap whose size will be checked
  * @return 1 if the heap is empty, or 0 otherwise
  */
-int heap_empty(heap h);
+static inline int heap_empty(heap h) { return h.size == 0; }
 
 /*!
  * Gives a pointer to the top element inside the heap
@@ -62,21 +62,21 @@ void heap_set_attr(heap *h, heap_attr_t attr);
  * @param[out] h   Heap whose free function will be changed
  * @param[in]  fr  New free function for the datatype inside the heap
  */
-void heap_set_free(heap *h, freer fr);
+static inline void heap_set_free(heap *h, freer fr) { h->attr.fr = fr; }
 
 /*!
  * Sets the new print function for the heap
  * @param[out] h      Heap whose print function will be changed
  * @param[in]  print  New print function for the datatype inside the heap
  */
-void heap_set_print(heap *h, printer print);
+static inline void heap_set_print(heap *h, printer print) { h->attr.print = print; }
 
 /*!
  * Sets the new copy function for the elements of the heap
  * @param[out] h   Heap whose copy function will be changed
  * @param[in]  cp  New copy function for copying the elements inside the heap
  */
-void heap_set_copy(heap *h, deepcopy cp);
+static inline void heap_set_copy(heap *h, deepcopy cp) { h->attr.copy = cp; }
 
 /*!
  * Sets the new compare function for the heap, additionally it will reorganize the heap
@@ -100,14 +100,14 @@ void heap_clear(heap *h);
 
 /*!
  * Frees the memory that the heap used
- * @param[in] h Heap that will be freed
+ * @param[in] v_h Heap that will be freed
  */
-void heap_free(heap *h);
+void heap_free(void *v_h);
 
 /*!
  * Prints the elements inide the vector of the heap
- * @param[in] h  Heap whose elements will be accesed
+ * @param[in] v_h Heap whose elements will be accesed
  */
-void heap_print(heap h);
+void heap_print(void *v_h);
 
 #endif

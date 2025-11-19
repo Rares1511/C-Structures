@@ -1,11 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <stdbool.h>
+#include <cs/map.h>
 
-#include "../include/map.h"
 #include "../include/unittest.h"
 
 FILE *DEBUG_OUT = NULL;

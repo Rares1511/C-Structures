@@ -22,6 +22,7 @@ To use any data structure:
 - [Vector](vector/README.md)
 - [Map](map/README.md)
 - [Deque](deque/README.md)
+- [Heap](heap/README.md)
 
 ## Unit Tests - TODO
 Unit tests are being progressively added for all modules:  

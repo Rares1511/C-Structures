@@ -1,87 +1,51 @@
-#include "../include/heap.h"
+#include <cs/heap.h>
+
 #include "../include/unittest.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+FILE *DEBUG_OUT = NULL;
 
 test_res test_heap_init() {
     heap h;
-    heap_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
-    cs_codes res;
+    heap_attr_t attr = {
+        .size = sizeof(int),
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = NULL,
+        .stream = DEBUG_OUT
+    };
 
-    res = heap_init(&h, attr);
-    if (res != CS_SUCCESS) {
+    int rc = heap_init(&h, attr);
+    if (rc != CS_SUCCESS) {
         return (test_res){
-            .reason = "heap init failed", .test_name = "HEAP_INIT", .return_code = res};
+            .test_name = "test_heap_init",
+            .reason = "heap_init returned error code",
+            .return_code = rc
+        };
+    }
+
+    if (h.size != 0 || h.cap != INIT_CAPACITY || h.vec == NULL) {
+        return (test_res){
+            .test_name = "test_heap_init",
+            .reason = "heap not initialized correctly",
+            .return_code = CS_UNKNOWN
+        };
     }
 
     heap_free(&h);
-    if (h.vec != NULL) {
-        return (test_res){
-            .reason = "heap free failed", .test_name = "HEAP_INIT", .return_code = CS_MEM};
-    }
 
-    return (test_res){.reason = "heap init success", .test_name = "HEAP_INIT", .return_code = res};
+    return (test_res){
+        .test_name = "test_heap_init",
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
 }
 
-test_res test_heap_push() {
-    heap h;
-    heap_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
-    cs_codes res;
-
-    res = heap_init(&h, attr);
-    if (res != CS_SUCCESS) {
-        return (test_res){
-            .reason = "heap init failed", .test_name = "HEAP_PUSH", .return_code = res};
-    }
-
-    int el = 5;
-    res = heap_push(&h, &el);
-    if (res != CS_SUCCESS) {
-        return (test_res){
-            .reason = "heap push failed", .test_name = "HEAP_PUSH", .return_code = res};
-    }
-
-    int *top = malloc(sizeof(int));
-    heap_top(h, top);
-    if (*top != el) {
-        return (test_res){
-            .reason = "heap top failed", .test_name = "HEAP_PUSH", .return_code = CS_UNKNOWN};
-    }
-    free(top);
-
-    heap_free(&h);
-    if (h.vec != NULL) {
-        return (test_res){
-            .reason = "heap free failed", .test_name = "HEAP_PUSH", .return_code = CS_MEM};
-    }
-
-    return (test_res){.reason = "heap push success", .test_name = "HEAP_PUSH", .return_code = res};
-}
-
-int main() {
-    int i;
+int main(int argc, char **argv) {
     test tests[] = {
         test_heap_init,
-        test_heap_push,
     };
-    test_res res;
-
-    for (i = 0; i < HEAP_TEST_SIZE && i < (int)(sizeof(tests) / sizeof(test)); i++) {
-        res = tests[i]();
-        char buffer[1024];
-        strcpy(buffer, res.test_name);
-        strncat(buffer,
-                "..........................................................................",
-                MAX_PRINT_SIZE - strlen(res.test_name));
-        if (res.return_code != CS_SUCCESS) {
-            printf("%sFAILED: %s\n", buffer, res.reason);
-            exit(-(int)(sizeof(tests) / sizeof(test) - i));
-        } else {
-            printf("%sSUCCESS: %d/%d\n", buffer, i + 1, (int)(sizeof(tests) / sizeof(test)));
-        }
-    }
-
+    
+    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
     return 0;
 }

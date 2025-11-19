@@ -14,7 +14,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = map vector deque
+SUBDIRS   = map vector deque heap
 
 # Output directory for local libs
 LIBOUTDIR = lib

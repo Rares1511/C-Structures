@@ -1,11 +1,5 @@
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cs/deque.h>
 
-#include "../include/deque.h"
 #include "../include/unittest.h"
 
 #define TEST_SIZE 1000

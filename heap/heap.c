@@ -3,11 +3,29 @@
 #include <stdlib.h>
 #include <string.h>
 
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+/*!
+ * Compares two elements inside the heap
+ * @param[in] h     Heap whose compare function will be used
+ * @param[in] el1  First element to be compared
+ * @param[in] el2  Second element to be compared
+ * @return A negative integer if el1 < el2, 0 if el1 == el2, or a positive integer if el1 > el2
+ */
 int heap_compare(heap h, void *el1, void *el2) {
     if (h.attr.comp)
         return h.attr.comp(el1, el2);
     return universal_compare(el1, el2, h.attr.size);
 }
+
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
 
 cs_codes heap_init(heap *h, heap_attr_t attr) {
     if (attr.size < 0 || attr.size > SIZE_TH)
@@ -72,12 +90,6 @@ cs_codes heap_pop(heap *h) {
     return CS_SUCCESS;
 }
 
-int heap_empty(heap h) {
-    if (h.size == 0)
-        return 1;
-    return 0;
-}
-
 void heap_top(heap h, void *el) {
     if (h.size == 0)
         return;
@@ -91,12 +103,6 @@ void heap_set_attr(heap *h, heap_attr_t attr) {
     h->attr = attr;
     heap_set_comp(h, attr.comp);
 }
-
-void heap_set_free(heap *h, freer fr) { h->attr.fr = fr; }
-
-void heap_set_print(heap *h, printer print) { h->attr.print = print; }
-
-void heap_set_copy(heap *h, deepcopy copy) { h->attr.copy = copy; }
 
 void heap_set_comp(heap *h, comparer comp) {
     h->attr.comp = comp;
@@ -141,7 +147,8 @@ void heap_clear(heap *h) {
     h->size = 0;
 }
 
-void heap_free(heap *h) {
+void heap_free(void *v_h) {
+    heap *h = (heap *)v_h;
     if (h->attr.fr)
         for (int i = 0; i < h->size; i++)
             h->attr.fr(h->vec + i * h->attr.size);
@@ -149,7 +156,8 @@ void heap_free(heap *h) {
     h->vec = NULL;
 }
 
-void heap_print(heap h) {
+void heap_print(void *v_h) {
+    heap h = *(heap *)v_h;
     for (int i = 0; i < h.size; i++)
-        h.attr.print(h.vec + h.attr.size * i);
+        h.attr.print(h.attr.stream, h.vec + h.attr.size * i);
 }
