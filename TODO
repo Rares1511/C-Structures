@@ -2,7 +2,7 @@ Sequence Containers:
     - Vector ✔
     - Deque
     - List ✔
-    - Forward_list
+    - Forward_list ✔
 
 Associative Containers:
     - Set
@@ -25,12 +25,4 @@ Container Adapters:
     - Flat Multiset
     - Flat Multimap
 
-1. Finish unittests for all data structures: hash_table, list
-2. Leave string, pair, large number, queue, stack for later
-3. Resolve matrix (use the implementation of tensor from C MLL)
-4. Resolve string 
-5. Resolve large number (Delete maybe)
-6. Implement the block method for deque then search how the others are implemented correctly in C++
-7. Start implementing hash_* structures from C++
-8. Start cs_global
-9. Parallelize code 
+1. FINISH SEQUENCE CONTAINERS

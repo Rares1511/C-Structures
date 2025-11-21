@@ -19,10 +19,13 @@ To use any data structure:
 
 ## 📚 Documentation by Data Structure
 
-- [Vector](vector/README.md)
-- [Map](map/README.md)
-- [Deque](deque/README.md)
-- [Heap](heap/README.md)
+- Sequence Containers 
+    * [Vector](vector/README.md)
+    * [List](list/README.md)
+    * [Forward List](forward_list/README.md)
+
+- Associative Containers
+    * [Map](map/README.md)
 
 ## Unit Tests - TODO
 Unit tests are being progressively added for all modules:  
