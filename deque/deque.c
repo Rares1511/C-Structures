@@ -10,44 +10,6 @@
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-/*!
- * Initializes a deque node with the given data
- * @param[in] data  Data that will be stored in the node
- * @param[in] size  Size of the data that will be stored in the node
- * @param[in] cp    Copy function used to copy the data into the node
- * @return Pointer to the initialized node or NULL if a memory problem occurred
- */
-deque_node_t *deque_node_init(void *data, int size, deepcopy cp) {
-    deque_node_t *node = malloc(sizeof(deque_node_t));
-    if (!node)
-        return NULL;
-    node->data = malloc(size);
-    if (!node->data) {
-        free(node);
-        return NULL;
-    }
-    if (cp)
-        cp(node->data, data);
-    else
-        memcpy(node->data, data, size);
-    node->next = NULL;
-    node->prev = NULL;
-    return node;
-}
-
-/*!
- * Frees a deque node and its data using the given free function
- * @param[in] node  Node that will be freed
- * @param[in] fr    Free function used to free the data inside of the node
- */
-void deque_node_free(deque_node_t *node, freer fr) {
-    if (fr)
-        fr(node->data);
-    free(node->data);
-    free(node);
-}
-
-
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -57,150 +19,76 @@ cs_codes deque_init(deque *dq, deque_attr_t attr) {
     if (attr.size < 0 || attr.size > SIZE_TH) {
         return CS_SIZE;
     }
-    dq->back = NULL;
-    dq->front = NULL;
+    dq->blocks = malloc(sizeof(deque_block_t) * DEQUE_INIT_BLOCKS);
+    if (dq->blocks == NULL) {
+        return CS_MEM;
+    }
+
     dq->attr = attr;
     dq->size = 0;
+    dq->front = DEQUE_INIT_BLOCKS / 2;
+    dq->back = DEQUE_INIT_BLOCKS / 2;
+
+    dq->blocks[dq->front].data = malloc(attr.size * DEQUE_BLOCK_SIZE);
+    if (dq->blocks[dq->front].data == NULL) {
+        free(dq->blocks);
+        return CS_MEM;
+    }
+    dq->blocks[dq->front].front = DEQUE_BLOCK_SIZE / 2;
+    dq->blocks[dq->front].back = DEQUE_BLOCK_SIZE / 2;
     return CS_SUCCESS;
 }
 
 cs_codes deque_push_back(deque *dq, void *el) {
-    deque_node_t *node = deque_node_init(el, dq->attr.size, dq->attr.copy);
-    if (!node)
-        return CS_MEM;
-    if (dq->size == 0) {
-        dq->front = node;
-        dq->back = node;
-    } else {
-        dq->back->next = node;
-        node->prev = dq->back;
-        dq->back = node;
+    if (!dq || !el) {
+        return CS_ELEM;
     }
+
+    if (dq->blocks[dq->back].back >= DEQUE_BLOCK_SIZE) {
+        dq->back++;
+        dq->blocks[dq->back].data = malloc(dq->attr.size * DEQUE_BLOCK_SIZE);
+        if (dq->blocks[dq->back].data == NULL) {
+            return CS_MEM;
+        }
+        dq->blocks[dq->back].front = 0;
+        dq->blocks[dq->back].back = 0;
+    }
+    memcpy((char *)dq->blocks[dq->back].data + (dq->blocks[dq->back].back * dq->attr.size), el, dq->attr.size);
+    dq->blocks[dq->back].back++;
     dq->size++;
     return CS_SUCCESS;
 }
 
 cs_codes deque_push_front(deque *dq, void *el) {
-    deque_node_t *node = deque_node_init(el, dq->attr.size, dq->attr.copy);
-    if (!node)
-        return CS_MEM;
-    if (dq->size == 0) {
-        dq->front = node;
-        dq->back = node;
-    } else {
-        node->next = dq->front;
-        dq->front->prev = node;
-        dq->front = node;
+    if (!dq || !el) {
+        return CS_ELEM;
     }
+
+    if (dq->blocks[dq->front].front <= 0) {
+        dq->front--;
+        dq->blocks[dq->front].data = malloc(dq->attr.size * DEQUE_BLOCK_SIZE);
+        if (dq->blocks[dq->front].data == NULL) {
+            return CS_MEM;
+        }
+        dq->blocks[dq->front].front = DEQUE_BLOCK_SIZE;
+        dq->blocks[dq->front].back = DEQUE_BLOCK_SIZE;
+    }
+    dq->blocks[dq->front].front--;
+    memcpy((char *)dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size), el, dq->attr.size);
     dq->size++;
     return CS_SUCCESS;
 }
 
-cs_codes deque_pop_back(deque *dq) {
-    if (dq->size == 0)
-        return CS_SIZE;
-    deque_node_t *aux = dq->back;
-    dq->size--;
-    dq->back = dq->back->prev;
-    if (dq->size != 0)
-        dq->back->next = NULL;
-    else
-        dq->front = NULL;
-    deque_node_free(aux, dq->attr.fr);
-    return CS_SUCCESS;
-}
-
-cs_codes deque_pop_front(deque *dq) {
-    if (dq->size == 0)
-        return CS_SIZE;
-    deque_node_t *aux = dq->front;
-    dq->size--;
-    dq->front = dq->front->next;
-    if (dq->size != 0)
-        dq->front->prev = NULL;
-    else
-        dq->back = NULL;
-    deque_node_free(aux, dq->attr.fr);
-    return CS_SUCCESS;
-}
-
-cs_codes deque_clone(deque *dest, deque src) {
-    deque_init(dest, src.attr);
-    if (src.size == 0) {
-        return CS_SUCCESS;
-    }
-    deque_node_t *aux = src.front;
-    while (aux != NULL) {
-        cs_codes res = deque_push_back(dest, aux->data);
-        if (res != CS_SUCCESS) {
-            deque_free(dest);
-            return res;
-        }
-        aux = aux->next;
-    }
-
-    return CS_SUCCESS;
-}
-
-void *deque_front(deque dq) {
-    if (dq.size == 0)
+void* deque_front(deque *dq) {
+    if (!dq || dq->size == 0) {
         return NULL;
-    return dq.front->data;
+    }
+    return (char *)dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size);
 }
 
-void *deque_back(deque dq) {
-    if (dq.size == 0)
+void* deque_back(deque *dq) {
+    if (!dq || dq->size == 0) {
         return NULL;
-    return dq.back->data;
-}
-
-void deque_clear(deque *dq) {
-    while (dq->front != NULL) {
-        deque_node_t *aux = dq->front;
-        dq->front = dq->front->next;
-        deque_node_free(aux, dq->attr.fr);
     }
-    dq->back = NULL;
-    dq->front = NULL;
-    dq->size = 0;
-}
-
-void deque_swap(deque *dq1, deque *dq2) {
-    deque_attr_t attr = dq1->attr;
-    deque_node_t *front = dq1->front;
-    deque_node_t *back = dq1->back;
-    int size = dq1->size;
-
-    dq1->attr = dq2->attr;
-    dq1->back = dq2->back;
-    dq1->front = dq2->front;
-    dq1->size = dq2->size;
-
-    dq2->attr = attr;
-    dq2->back = back;
-    dq2->front = front;
-    dq2->size = size;
-}
-
-void deque_free(void *v_dq) {
-    deque *dq = (deque *)v_dq;
-    while (dq->front != NULL) {
-        deque_node_t *aux = dq->front;
-        dq->front = dq->front->next;
-        deque_node_free(aux, dq->attr.fr);
-    }
-    dq->back = NULL;
-    dq->front = NULL;
-    dq->size = 0;
-}
-
-void deque_print(void *v_dq) {
-    deque dq = *(deque *)v_dq;
-    if (!dq.attr.print)
-        return;
-    deque_node_t *aux = dq.front;
-    while (aux != NULL) {
-        dq.attr.print(dq.attr.stream, aux->data);
-        aux = aux->next;
-    }
+    return (char *)dq->blocks[dq->back].data + ((dq->blocks[dq->back].back - 1) * dq->attr.size);
 }
