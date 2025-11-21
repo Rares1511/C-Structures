@@ -11,17 +11,17 @@ test_res test_vector_init() {
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_vector_init", .reason = "vector_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "vector_init failed", .return_code = rc};
     }
 
     vector_free(&v);
     if (v.vec != NULL) {
-        return (test_res){.test_name = "test_vector_init",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_free failed",
                           .return_code = CS_UNKNOWN};
     }
 
-    return (test_res){.test_name = "test_vector_init", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_vector_init_neg_attr_size() {
@@ -30,13 +30,13 @@ test_res test_vector_init_neg_attr_size() {
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SIZE) {
-        return (test_res){.test_name = "test_vector_init_wrong_attr",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_init failed",
                           .return_code = rc};
     }
 
     return (test_res){
-        .test_name = "test_vector_init_wrong_attr", .reason = "none", .return_code = CS_SUCCESS};
+        .test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_vector_init_max_attr_size() {
@@ -51,7 +51,7 @@ test_res test_vector_init_max_attr_size() {
     }
 
     return (test_res){
-        .test_name = "test_vector_init_wrong_attr", .reason = "none", .return_code = CS_SUCCESS};
+        .test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_vector_insert_at() {
@@ -63,7 +63,7 @@ test_res test_vector_insert_at() {
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_insert_at",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_init failed",
                           .return_code = rc};
     }
@@ -71,7 +71,7 @@ test_res test_vector_insert_at() {
     for (int i = 0; i < 5; i++) {
         rc = vector_insert_at(&v, &insert_elements[i], insert_positions[i]);
         if (rc != CS_SUCCESS) {
-            return (test_res){.test_name = "test_vector_insert_at",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "failed to insert elements",
                               .return_code = rc};
         }
@@ -79,7 +79,7 @@ test_res test_vector_insert_at() {
 
     for (int i = 0; i < 5; i++) {
         if (*(int *)vector_at(v, i) != correct_elements[i]) {
-            return (test_res){.test_name = "test_vector_insert_at",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "elements were not introduced correctly",
                               .return_code = CS_UNKNOWN};
         }
@@ -87,7 +87,7 @@ test_res test_vector_insert_at() {
 
     vector_free(&v);
     if (v.vec != NULL) {
-        return (test_res){.test_name = "test_vector_insert_at",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_free failed",
                           .return_code = CS_UNKNOWN};
     }
@@ -104,7 +104,7 @@ test_res test_vector_push_back() {
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_push_back",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_init failed",
                           .return_code = rc};
     }
@@ -112,7 +112,7 @@ test_res test_vector_push_back() {
     for (int i = 0; i < 5; i++) {
         rc = vector_push_back(&v, &insert_elements[i]);
         if (rc != CS_SUCCESS) {
-            return (test_res){.test_name = "test_vector_push_back",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "failed to insert elements",
                               .return_code = rc};
         }
@@ -120,7 +120,7 @@ test_res test_vector_push_back() {
 
     for (int i = 0; i < 5; i++) {
         if (*(int *)vector_at(v, i) != correct_elements[i]) {
-            return (test_res){.test_name = "test_vector_push_back",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "elements were not introduced correctly",
                               .return_code = CS_UNKNOWN};
         }
@@ -128,13 +128,13 @@ test_res test_vector_push_back() {
 
     vector_free(&v);
     if (v.vec != NULL) {
-        return (test_res){.test_name = "test_vector_push_back",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_free failed",
                           .return_code = CS_UNKNOWN};
     }
 
     return (test_res){
-        .test_name = "test_vector_push_back", .reason = "none", .return_code = CS_SUCCESS};
+        .test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_vector_erase() {
@@ -145,7 +145,7 @@ test_res test_vector_erase() {
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_erase",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_init failed",
                           .return_code = rc};
     }
@@ -153,7 +153,7 @@ test_res test_vector_erase() {
     for (int i = 0; i < 5; i++) {
         rc = vector_push_back(&v, &insert_elements[i]);
         if (rc != CS_SUCCESS) {
-            return (test_res){.test_name = "test_vector_erase",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "failed to insert elements",
                               .return_code = rc};
         }
@@ -161,14 +161,14 @@ test_res test_vector_erase() {
 
     rc = vector_erase(&v, 2);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_erase",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "failed to erase element",
                           .return_code = rc};
     }
 
     for (int i = 0; i < 4; i++) {
         if (*(int *)vector_at(v, i) != correct_elements[i]) {
-            return (test_res){.test_name = "test_vector_erase",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "elements were not erased correctly",
                               .return_code = CS_UNKNOWN};
         }
@@ -176,13 +176,13 @@ test_res test_vector_erase() {
 
     vector_free(&v);
     if (v.vec != NULL) {
-        return (test_res){.test_name = "test_vector_erase",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_free failed",
                           .return_code = CS_UNKNOWN};
     }
 
     return (test_res){
-        .test_name = "test_vector_erase", .reason = "none", .return_code = CS_SUCCESS};
+        .test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_vector_replace() {
@@ -193,7 +193,7 @@ test_res test_vector_replace() {
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_replace",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_init failed",
                           .return_code = rc};
     }
@@ -201,7 +201,7 @@ test_res test_vector_replace() {
     for (int i = 0; i < 5; i++) {
         rc = vector_push_back(&v, &insert_elements[i]);
         if (rc != CS_SUCCESS) {
-            return (test_res){.test_name = "test_vector_replace",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "failed to insert elements",
                               .return_code = rc};
         }
@@ -210,14 +210,14 @@ test_res test_vector_replace() {
     int new_element = 99;
     rc = vector_replace(&v, &new_element, 2);
     if (rc != CS_SUCCESS) {
-        return (test_res){.test_name = "test_vector_replace",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "failed to replace element",
                           .return_code = rc};
     }
 
     for (int i = 0; i < 5; i++) {
         if (*(int *)vector_at(v, i) != correct_elements[i]) {
-            return (test_res){.test_name = "test_vector_replace",
+            return (test_res){.test_name = (char *)__func__,
                               .reason = "elements were not replaced correctly",
                               .return_code = CS_UNKNOWN};
         }
@@ -225,13 +225,13 @@ test_res test_vector_replace() {
 
     vector_free(&v);
     if (v.vec != NULL) {
-        return (test_res){.test_name = "test_vector_replace",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "vector_free failed",
                           .return_code = CS_UNKNOWN};
     }
 
     return (test_res){
-        .test_name = "test_vector_replace", .reason = "none", .return_code = CS_SUCCESS};
+        .test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 int main(int argc, char **argv) {

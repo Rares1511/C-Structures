@@ -46,9 +46,8 @@ static inline int heap_empty(heap h) { return h.size == 0; }
 /*!
  * Gives a pointer to the top element inside the heap
  * @param[in] h  Heap whose top element will be accessed
- * @param[out] el  Pointer to the top element
  */
-void heap_top(heap h, void *el);
+void* heap_top(heap h);
 
 /*!
  * Sets the new attributes for the heap

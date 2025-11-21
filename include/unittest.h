@@ -74,6 +74,9 @@ void free_painting(void *v_p) {
 
 void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
 
+int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
+int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
+
 void unittest(test *tests, int size, int argc, char **argv) {
     int i, seed, success = 0, failed = 0;
     test_res res;

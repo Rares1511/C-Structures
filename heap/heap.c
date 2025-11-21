@@ -1,7 +1,9 @@
-#include "../include/heap.h"
+#include <cs/heap.h>
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "../include/unittest.h"
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
@@ -90,13 +92,10 @@ cs_codes heap_pop(heap *h) {
     return CS_SUCCESS;
 }
 
-void heap_top(heap h, void *el) {
+void* heap_top(heap h) {
     if (h.size == 0)
-        return;
-    if (h.attr.copy)
-        h.attr.copy(el, h.vec);
-    else
-        memcpy(el, h.vec, h.attr.size);
+        return NULL;
+    return h.vec;
 }
 
 void heap_set_attr(heap *h, heap_attr_t attr) {
@@ -105,22 +104,20 @@ void heap_set_attr(heap *h, heap_attr_t attr) {
 }
 
 void heap_set_comp(heap *h, comparer comp) {
-    h->attr.comp = comp;
-    heap haux;
-    int rc = heap_init(&haux, h->attr);
-    if (rc == CS_SIZE)
+    void *temp = malloc(h->attr.size);
+    if (!temp)
         return;
-
-    void *top = malloc(sizeof(h->attr.size));
-    while (h->size > 0) {
-        heap_top(*h, top);
-        heap_pop(h);
-        heap_push(&haux, top);
+    h->attr.comp = comp;
+    for (int i = h->size - 1; i >= 1; i--) {
+        int pos = i;
+        while (pos != 0 && heap_compare(*h, h->vec + h->attr.size * (pos / 2), h->vec + h->attr.size * pos) < 0) {
+            memcpy(temp, h->vec + h->attr.size * (pos / 2), h->attr.size);
+            memcpy(h->vec + h->attr.size * (pos / 2), h->vec + h->attr.size * pos, h->attr.size);
+            memcpy(h->vec + h->attr.size * pos, temp, h->attr.size);
+            pos /= 2;
+        }
     }
-    free(top);
-
-    heap_swap(h, &haux);
-    free(haux.vec);
+    free(temp);
 }
 
 void heap_swap(heap *h1, heap *h2) {
@@ -158,6 +155,10 @@ void heap_free(void *v_h) {
 
 void heap_print(void *v_h) {
     heap h = *(heap *)v_h;
-    for (int i = 0; i < h.size; i++)
+    if (!h.attr.print)
+        return;
+    for (int i = 0; i < h.size; i++) {
         h.attr.print(h.attr.stream, h.vec + h.attr.size * i);
+        fprintf(h.attr.stream, " ");
+    }
 }

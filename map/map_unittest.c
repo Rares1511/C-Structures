@@ -101,22 +101,22 @@ test_res test_map_init() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_init", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     map_free(&m);
     if (m.root != NULL) {
-        return (test_res){.test_name = "test_map_init",
+        return (test_res){.test_name = (char *)__func__,
                           .reason = "map_free failed",
                           .return_code = CS_UNKNOWN};
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_init", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
-    return (test_res){.test_name = "test_map_init", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 };
 
 test_res test_map_insert_1() {
@@ -128,7 +128,7 @@ test_res test_map_insert_1() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_insert_1", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -137,17 +137,17 @@ test_res test_map_insert_1() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_insert_1", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_insert_1", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_insert_1", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_insert_2() {
@@ -159,7 +159,7 @@ test_res test_map_insert_2() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_insert_2", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -168,17 +168,17 @@ test_res test_map_insert_2() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_insert_2", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_insert_2", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_insert_2", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_insert_3() {
@@ -190,7 +190,7 @@ test_res test_map_insert_3() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_insert_3", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -199,17 +199,17 @@ test_res test_map_insert_3() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_insert_3", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_insert_3", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_insert_3", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_get() {
@@ -221,7 +221,7 @@ test_res test_map_get() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_get", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -234,28 +234,28 @@ test_res test_map_get() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_get", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     rc = map_get(m, &key_save, &retrieved_value);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_get", .reason = "map_get failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_get failed", .return_code = rc};
     }
 
     if (retrieved_value !=  value_save) {
         return (test_res){
-            .test_name = "test_map_get", .reason = "retrieved value does not match inserted value", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "retrieved value does not match inserted value", .return_code = CS_UNKNOWN};
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_get", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_get", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_delete() {
@@ -267,7 +267,7 @@ test_res test_map_delete() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_get", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -279,29 +279,29 @@ test_res test_map_delete() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_delete", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     rc = map_delete(&m, &key_save);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_delete", .reason = "map_delete failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_delete failed", .return_code = rc};
     }
 
     rc = map_get(m, &key_save, NULL);
     if (rc != CS_ELEM) {
         return (test_res){
-            .test_name = "test_map_delete", .reason = "deleted key still found in map", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "deleted key still found in map", .return_code = CS_UNKNOWN};
     }
 
     if (rbt_is_valid(m.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_delete", .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_delete", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_clear() {
@@ -313,7 +313,7 @@ test_res test_map_clear() {
     cs_codes rc = map_init(&m, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_clear", .reason = "map_init failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -322,18 +322,18 @@ test_res test_map_clear() {
         rc = map_insert(&m, &key, &value);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_clear", .reason = "map_insert failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert failed", .return_code = rc};
         }
     }
 
     map_clear(&m);
     if (m.size != 0 || m.root != NULL) {
         return (test_res){
-            .test_name = "test_map_clear", .reason = "map_clear failed", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "map_clear failed", .return_code = CS_UNKNOWN};
     }
 
     map_free(&m);
-    return (test_res){.test_name = "test_map_clear", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 test_res test_map_swap() {
@@ -347,13 +347,13 @@ test_res test_map_swap() {
     cs_codes rc = map_init(&m1, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_swap", .reason = "map_init m1 failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init m1 failed", .return_code = rc};
     }
 
     rc = map_init(&m2, key_attr, val_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_map_swap", .reason = "map_init m2 failed", .return_code = rc};
+            .test_name = (char *)__func__, .reason = "map_init m2 failed", .return_code = rc};
     }
 
     for (int i = 0; i < test_size; i++) {
@@ -362,7 +362,7 @@ test_res test_map_swap() {
         rc = map_insert(&m1, &key1, &value1);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_swap", .reason = "map_insert m1 failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert m1 failed", .return_code = rc};
         }
         if (rc == CS_SUCCESS) {
             keys1[m1.size - 1] = key1;
@@ -374,7 +374,7 @@ test_res test_map_swap() {
         rc = map_insert(&m2, &key2, &value2);
         if (rc != CS_SUCCESS && rc != CS_ELEM) {
             return (test_res){
-                .test_name = "test_map_swap", .reason = "map_insert m2 failed", .return_code = rc};
+                .test_name = (char *)__func__, .reason = "map_insert m2 failed", .return_code = rc};
         }
         if (rc == CS_SUCCESS) {
             keys2[m2.size - 1] = key2;
@@ -386,7 +386,7 @@ test_res test_map_swap() {
 
     if (rbt_is_valid(m1.root, key_attr) == 0 || rbt_is_valid(m2.root, key_attr) == 0) {
         return (test_res){
-            .test_name = "test_map_swap", .reason = "RBT properties violated after swap", .return_code = CS_UNKNOWN};
+            .test_name = (char *)__func__, .reason = "RBT properties violated after swap", .return_code = CS_UNKNOWN};
     }
 
     for (int i = 0; i < m1.size; i++) {
@@ -394,7 +394,7 @@ test_res test_map_swap() {
         rc = map_get(m1, &keys2[i], &retrieved_value);
         if (rc != CS_SUCCESS || retrieved_value != values2[i]) {
             return (test_res){
-                .test_name = "test_map_swap", .reason = "m1 contents incorrect after swap", .return_code = CS_UNKNOWN};
+                .test_name = (char *)__func__, .reason = "m1 contents incorrect after swap", .return_code = CS_UNKNOWN};
         }
     }
 
@@ -403,13 +403,13 @@ test_res test_map_swap() {
         rc = map_get(m2, &keys1[i], &retrieved_value);
         if (rc != CS_SUCCESS || retrieved_value != values1[i]) {
             return (test_res){
-                .test_name = "test_map_swap", .reason = "m2 contents incorrect after swap", .return_code = CS_UNKNOWN};
+                .test_name = (char *)__func__, .reason = "m2 contents incorrect after swap", .return_code = CS_UNKNOWN};
         }
     }
 
     map_free(&m1);
     map_free(&m2);
-    return (test_res){.test_name = "test_map_swap", .reason = "none", .return_code = CS_SUCCESS};
+    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
 }
 
 int main(int argc, char **argv) {

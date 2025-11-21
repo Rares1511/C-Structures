@@ -19,20 +19,20 @@ test_res test_deque_init() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_init", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
     if (dq.size != 0 || dq.front != NULL || dq.back != NULL) {
         return (test_res){
-            .test_name = "test_deque_init", .reason = "Deque not initialized correctly", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Deque not initialized correctly", .return_code = CS_UNKNOWN
         };
     }
 
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_init", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -50,7 +50,7 @@ test_res test_deque_push_back() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_push_back", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -59,14 +59,14 @@ test_res test_deque_push_back() {
         rc = deque_push_back(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_push_back", .reason = "Failed to push back element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push back element", .return_code = rc
             };
         }
     }
 
     if (dq.size != TEST_SIZE) {
         return (test_res){
-            .test_name = "test_deque_push_back", .reason = "Deque size incorrect after pushes", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Deque size incorrect after pushes", .return_code = CS_UNKNOWN
         };
     }
 
@@ -74,7 +74,7 @@ test_res test_deque_push_back() {
     for (int i = 0; i < TEST_SIZE; i++) {
         if (*(int *)current->data != values[i]) {
             return (test_res){
-                .test_name = "test_deque_push_back", .reason = "Deque element mismatch", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Deque element mismatch", .return_code = CS_UNKNOWN
             };
         }
         current = current->next;
@@ -83,7 +83,7 @@ test_res test_deque_push_back() {
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_push_back", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -101,7 +101,7 @@ test_res test_deque_push_front() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_push_front", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -110,14 +110,14 @@ test_res test_deque_push_front() {
         rc = deque_push_front(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_push_front", .reason = "Failed to push front element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push front element", .return_code = rc
             };
         }
     }
 
     if (dq.size != TEST_SIZE) {
         return (test_res){
-            .test_name = "test_deque_push_front", .reason = "Deque size incorrect after pushes", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Deque size incorrect after pushes", .return_code = CS_UNKNOWN
         };
     }
 
@@ -125,7 +125,7 @@ test_res test_deque_push_front() {
     for (int i = TEST_SIZE - 1; i >= 0; i--) {
         if (*(int *)current->data != values[i]) {
             return (test_res){
-                .test_name = "test_deque_push_front", .reason = "Deque element mismatch", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Deque element mismatch", .return_code = CS_UNKNOWN
             };
         }
         current = current->next;
@@ -134,7 +134,7 @@ test_res test_deque_push_front() {
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_push_front", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -152,7 +152,7 @@ test_res test_deque_pop_back() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_pop_back", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -161,7 +161,7 @@ test_res test_deque_pop_back() {
         rc = deque_push_back(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_pop_back", .reason = "Failed to push back element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push back element", .return_code = rc
             };
         }
     }
@@ -170,27 +170,27 @@ test_res test_deque_pop_back() {
         int *back_value = (int *)deque_back(dq);
         if (*back_value != values[i]) {
             return (test_res){
-                .test_name = "test_deque_pop_back", .reason = "Back element mismatch before pop", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Back element mismatch before pop", .return_code = CS_UNKNOWN
             };
         }
         rc = deque_pop_back(&dq);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_pop_back", .reason = "Failed to pop back element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to pop back element", .return_code = rc
             };
         }
     }
 
     if (dq.size != 0) {
         return (test_res){
-            .test_name = "test_deque_pop_back", .reason = "Deque not empty after pops", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Deque not empty after pops", .return_code = CS_UNKNOWN
         };
     }
 
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_pop_back", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -208,7 +208,7 @@ test_res test_deque_pop_front() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_pop_front", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -217,7 +217,7 @@ test_res test_deque_pop_front() {
         rc = deque_push_back(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_pop_front", .reason = "Failed to push back element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push back element", .return_code = rc
             };
         }
     }
@@ -226,27 +226,27 @@ test_res test_deque_pop_front() {
         int *front_value = (int *)deque_front(dq);
         if (*front_value != values[i]) {
             return (test_res){
-                .test_name = "test_deque_pop_front", .reason = "Front element mismatch before pop", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Front element mismatch before pop", .return_code = CS_UNKNOWN
             };
         }
         rc = deque_pop_front(&dq);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_pop_front", .reason = "Failed to pop front element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to pop front element", .return_code = rc
             };
         }
     }
 
     if (dq.size != 0) {
         return (test_res){
-            .test_name = "test_deque_pop_front", .reason = "Deque not empty after pops", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Deque not empty after pops", .return_code = CS_UNKNOWN
         };
     }
 
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_pop_front", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -264,7 +264,7 @@ test_res test_deque_clone() {
     cs_codes rc = deque_init(&dq1, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_clone", .reason = "Failed to initialize source deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize source deque", .return_code = rc
         };
     }
 
@@ -273,7 +273,7 @@ test_res test_deque_clone() {
         rc = deque_push_back(&dq1, &values[i]);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_clone", .reason = "Failed to push back element to source deque", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push back element to source deque", .return_code = rc
             };
         }
     }
@@ -281,13 +281,13 @@ test_res test_deque_clone() {
     rc = deque_clone(&dq2, dq1);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_clone", .reason = "Failed to clone deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to clone deque", .return_code = rc
         };
     }
 
     if (dq2.size != dq1.size) {
         return (test_res){
-            .test_name = "test_deque_clone", .reason = "Cloned deque size mismatch", .return_code = CS_UNKNOWN
+            .test_name = (char *) __func__, .reason = "Cloned deque size mismatch", .return_code = CS_UNKNOWN
         };
     }
 
@@ -297,7 +297,7 @@ test_res test_deque_clone() {
     while (current1 != NULL && current2 != NULL) {
         if (*(int *)current1->data != *(int *)current2->data && *(int *)current2->data != values[index]) {
             return (test_res){
-                .test_name = "test_deque_clone", .reason = "Cloned deque element mismatch", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Cloned deque element mismatch", .return_code = CS_UNKNOWN
             };
         }
         current1 = current1->next;
@@ -309,7 +309,7 @@ test_res test_deque_clone() {
     deque_free(&dq2);
 
     return (test_res){
-        .test_name = "test_deque_clone", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -327,7 +327,7 @@ test_res test_deque_front() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_front", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -336,14 +336,14 @@ test_res test_deque_front() {
         rc = deque_push_front(&dq, &value);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_front", .reason = "Failed to push front element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push front element", .return_code = rc
             };
         }
 
         int value_at_front = *(int *)deque_front(dq);
         if (value_at_front != value) {
             return (test_res){
-                .test_name = "test_deque_front", .reason = "Front element mismatch after push", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Front element mismatch after push", .return_code = CS_UNKNOWN
             };
         }
     }
@@ -351,7 +351,7 @@ test_res test_deque_front() {
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_front", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -369,7 +369,7 @@ test_res test_deque_back() {
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_back", .reason = "Failed to initialize deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize deque", .return_code = rc
         };
     }
 
@@ -378,14 +378,14 @@ test_res test_deque_back() {
         rc = deque_push_back(&dq, &value);
         if (rc != CS_SUCCESS) {
             return (test_res){
-                .test_name = "test_deque_back", .reason = "Failed to push back element", .return_code = rc
+                .test_name = (char *) __func__, .reason = "Failed to push back element", .return_code = rc
             };
         }
 
         int value_at_back = *(int *)deque_back(dq);
         if (value_at_back != value) {
             return (test_res){
-                .test_name = "test_deque_back", .reason = "Back element mismatch after push", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Back element mismatch after push", .return_code = CS_UNKNOWN
             };
         }
     }
@@ -393,7 +393,7 @@ test_res test_deque_back() {
     deque_free(&dq);
 
     return (test_res){
-        .test_name = "test_deque_back", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
@@ -411,14 +411,14 @@ test_res test_deque_swap() {
     cs_codes rc = deque_init(&dq1, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_swap", .reason = "Failed to initialize first deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize first deque", .return_code = rc
         };
     }
 
     rc = deque_init(&dq2, attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
-            .test_name = "test_deque_swap", .reason = "Failed to initialize second deque", .return_code = rc
+            .test_name = (char *) __func__, .reason = "Failed to initialize second deque", .return_code = rc
         };
     }
 
@@ -436,7 +436,7 @@ test_res test_deque_swap() {
         int *val2 = (int *)deque_front(dq2);
         if (*val1 != values2[i] || *val2 != values1[i]) {
             return (test_res){
-                .test_name = "test_deque_swap", .reason = "Deque swap failed", .return_code = CS_UNKNOWN
+                .test_name = (char *) __func__, .reason = "Deque swap failed", .return_code = CS_UNKNOWN
             };
         }
         deque_pop_front(&dq1);
@@ -447,7 +447,7 @@ test_res test_deque_swap() {
     deque_free(&dq2);
 
     return (test_res){
-        .test_name = "test_deque_swap", .reason = NULL, .return_code = CS_SUCCESS
+        .test_name = (char *) __func__, .reason = NULL, .return_code = CS_SUCCESS
     };
 }
 
