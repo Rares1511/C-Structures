@@ -63,24 +63,4 @@ void universal_swap(void *el1, void *el2, int len) {
     }
 }
 
-/*!
- * Compares two memory zones bytes by bytes considering they are both of size len
- * @param[in] el1 - starting point of the second memory zone
- * @param[in] el2 - starting point of the first memory zone
- * @param[in] len - length of the memory zones
- * @return The difference between the first two different bytes or 0 otherwise
- */
-int universal_compare(const void *el1, const void *el2, int dim) {
-    const unsigned char *p1 = (const unsigned char *)el1;
-    const unsigned char *p2 = (const unsigned char *)el2;
-
-    for (int i = 0; i < dim; i++) {
-        if (p1[i] != p2[i]) {
-            return p1[i] - p2[i];
-        }
-    }
-
-    return 0;
-}
-
 #endif

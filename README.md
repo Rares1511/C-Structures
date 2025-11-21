@@ -30,10 +30,10 @@ Unit tests are being progressively added for all modules:
 * map ✔
 * deque ✔
 * pair ☐  
-* queue ☐ 
+* queue ✔ 
 * deque ☐ 
 * stack ☐ 
-* heap ☐ 
+* heap ✔ 
 * hash_table ☐ 
 * string ☐ 
 * list ☐ 

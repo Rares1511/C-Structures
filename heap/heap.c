@@ -20,7 +20,7 @@
 int heap_compare(heap h, void *el1, void *el2) {
     if (h.attr.comp)
         return h.attr.comp(el1, el2);
-    return universal_compare(el1, el2, h.attr.size);
+    return memcmp(el1, el2, h.attr.size);
 }
 
 

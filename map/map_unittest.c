@@ -47,7 +47,7 @@ int rbt_check_bst(map_node *node, map_attr_t key_attr, void *min_key, void *max_
     if (min_key) {
         if (key_attr.comp && key_attr.comp(node->key, min_key) <= 0)
             return 0;
-        else if (universal_compare(node->key, min_key, key_attr.size) <= 0)
+        else if (memcmp(node->key, min_key, key_attr.size) <= 0)
             return 0;
     }
 
@@ -55,7 +55,7 @@ int rbt_check_bst(map_node *node, map_attr_t key_attr, void *min_key, void *max_
     if (max_key) {
         if (key_attr.comp && key_attr.comp(node->key, max_key) >= 0)
             return 0;
-        else if (universal_compare(node->key, max_key, key_attr.size) >= 0)
+        else if (memcmp(node->key, max_key, key_attr.size) >= 0)
             return 0;
     }
 

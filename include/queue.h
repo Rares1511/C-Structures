@@ -5,14 +5,12 @@
 
 typedef univ_attr_t queue_attr_t;
 
-typedef struct queue_node
-{
+typedef struct queue_node {
     void *data;              /*!< data of the queue node */
     struct queue_node *next; /*!< next element in the queue */
 } queue_node;
 
-typedef struct queue
-{
+typedef struct queue {
     queue_node *start; /*!< start node of the queue */
     queue_node *end;   /*!< end node of the queue */
     int size;          /*!< current size of the queue */
@@ -33,7 +31,7 @@ cs_codes queue_init(queue *q, queue_attr_t el_attr);
  * @param[in] q The queue which will be analyzed if its empty
  * @return 1 if the queue is empty or 0 otherwise
  */
-int queue_empty(queue q);
+static inline int queue_empty(queue q) { return (q.size == 0); }
 
 /*!
  * Pushes the element at the back of the queue
@@ -65,6 +63,47 @@ void *queue_front(queue q);
 void *queue_back(queue q);
 
 /*!
+ * Sets the new attributes for the queue
+ * @param[out] q      Queue whose attributes will be changed
+ * @param[in]  attr   New attributes for the elements inside the queue
+ */
+static inline void queue_set_attr(queue *q, queue_attr_t attr) { q->attr = attr; }
+
+/*!
+ * Sets the new free function for the queue
+ * @param[out] q   Queue whose free function will be changed
+ * @param[in]  fr  New free function for the datatype inside the queue
+ */
+static inline void queue_set_free(queue *q, freer fr) { q->attr.fr = fr; }
+
+/*!
+ * Sets the new print function for the queue
+ * @param[out] q      Queue whose print function will be changed
+ * @param[in]  print  New print function for the datatype inside the queue
+ */
+static inline void queue_set_print(queue *q, printer print) { q->attr.print = print; }
+
+/*!
+ * Sets the new copy function for the queue
+ * @param[out] q     Queue whose copy function will be changed
+ * @param[in]  copy  New copy function for the elements inside the queue
+ */
+static inline void queue_set_copy(queue *q, deepcopy copy) { q->attr.copy = copy; }
+
+/*!
+ * Sets the new output stream for the queue
+ * @param[out] q       Queue whose output stream will be changed
+ * @param[in]  stream  New output stream for the print function
+ */
+static inline void queue_set_stream(queue *q, FILE *stream) { q->attr.stream = stream; }
+
+/*!
+ * Swaps the two queues
+ * @param[in] q1,q2 The two queues that will be swapped
+ */
+void queue_swap(queue *q1, queue *q2);
+
+/*!
  * Cleans the queue and frees any memory that was used in it
  * @param[in] q The queue which will be cleaned
  */
@@ -75,40 +114,6 @@ void queue_clear(queue *q);
  * @param[in] q The queue whose memory will be freed
  */
 void queue_free(void *q_p);
-
-/*!
- * Sets the new attributes for the queue
- * @param[out] q      Queue whose attributes will be changed
- * @param[in]  attr   New attributes for the elements inside the queue
- */
-void queue_set_attr(queue *q, queue_attr_t attr);
-
-/*!
- * Sets the new free function for the queue
- * @param[out] q   Queue whose free function will be changed
- * @param[in]  fr  New free function for the datatype inside the queue
- */
-void queue_set_free(queue *q, freer fr);
-
-/*!
- * Sets the new print function for the queue
- * @param[out] q      Queue whose print function will be changed
- * @param[in]  print  New print function for the datatype inside the queue
- */
-void queue_set_print(queue *q, printer print);
-
-/*!
- * Sets the new copy function for the queue
- * @param[out] q     Queue whose copy function will be changed
- * @param[in]  copy  New copy function for the elements inside the queue
- */
-void queue_set_copy(queue *q, deepcopy cp);
-
-/*!
- * Swaps the two queues
- * @param[in] q1,q2 The two queues that will be swapped
- */
-void queue_swap(queue *q1, queue *q2);
 
 /*!
  * Prints the elements of the queue
