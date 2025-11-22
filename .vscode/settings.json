@@ -49,4 +49,5 @@
         "fcntl.h": "c",
         "cstdlib": "c"
     },
+    "makefile.configureOnOpen": true,
 }

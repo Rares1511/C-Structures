@@ -1,5 +1,25 @@
 # Top-level Makefile
 
+# ---------- OS Detection ----------
+# Detect Windows (MSYS, MINGW, or Cygwin) vs Linux/Unix
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := windows
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        DETECTED_OS := linux
+    else ifeq ($(UNAME_S),Darwin)
+        DETECTED_OS := macos
+    else
+        DETECTED_OS := unknown
+    endif
+endif
+
+# Print which OS we detected (optional)
+$(info [OS] Detected: $(DETECTED_OS))
+
+RM := rm -f
+
 LIBDIR           = /usr/local/lib
 PATH_INCLUDEDIR  = /usr/local/include/cs
 LOCAL_INCLUDEDIR = include
@@ -64,14 +84,14 @@ install_libs: $(LIBS)
 
 uninstall_headers:
 	@for dir in $(SUBDIRS); do \
-		rm -f $(PATH_INCLUDEDIR)/$$dir.h; \
+		$(RM) $(PATH_INCLUDEDIR)/$$dir.h; \
 	done
-	rm -f $(PATH_INCLUDEDIR)/universal.h
+	$(RM) $(PATH_INCLUDEDIR)/universal.h
 	rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR)
 
 uninstall_libs:
 	@for dir in $(SUBDIRS); do \
-		rm -f $(LIBDIR)/lib$$dir.so; \
+		$(RM) $(LIBDIR)/lib$$dir.so; \
 	done
 	ldconfig
 
@@ -79,7 +99,7 @@ uninstall_libs:
 
 # Init log once before all module tests
 unittest-log-init:
-	@rm -f $(UNITTEST_LOG)
+	@$(RM) $(UNITTEST_LOG)
 	@touch $(UNITTEST_LOG)
 
 define MODULE_TEST_RULES
@@ -105,7 +125,7 @@ unittest-$1: install $1/$1_unittest.c
 	    >> $(UNITTEST_LOG) 2>&1 ; \
 	fi
 	@echo "--------------------------------------------------" >> $(UNITTEST_LOG)
-	@rm -f $1/unittest
+	@$(RM) $1/unittest
 endef
 
 $(foreach m,$(SUBDIRS),$(eval $(call MODULE_TEST_RULES,$(m))))
@@ -117,8 +137,8 @@ unittest: unittest-log-init $(SUBDIRS:%=unittest-%)
 
 clean:
 	@for dir in $(SUBDIRS); do \
-		rm -f $$dir/$$dir.o $$dir/unittest; \
+		$(RM) $$dir/$$dir.o $$dir/unittest; \
 	done
-	rm -f $(LIBS) $(UNITTEST_LOG)
+	$(RM) $(LIBS) $(UNITTEST_LOG)
 
 .PHONY: all install uninstall unittest clean
