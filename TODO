@@ -1,6 +1,6 @@
 Sequence Containers: 
     - Vector ✔
-    - Deque
+    - Deque ✔
     - List ✔
     - Forward_list ✔
 
@@ -25,4 +25,3 @@ Container Adapters:
     - Flat Multiset
     - Flat Multimap
 
-1. FINISH SEQUENCE CONTAINERS

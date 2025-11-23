@@ -47,7 +47,8 @@
         "signal.h": "c",
         "unistd.h": "c",
         "fcntl.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "type_traits": "c"
     },
     "makefile.configureOnOpen": true,
 }
