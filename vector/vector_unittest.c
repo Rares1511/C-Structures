@@ -6,7 +6,14 @@ FILE *DEBUG_OUT = NULL;
 
 test_res test_vector_init() {
     vector v;
-    vector_attr_t attr = {sizeof(int), NULL, NULL, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = sizeof(int),
+        .stream = DEBUG_OUT,
+    };
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SUCCESS) {
@@ -26,7 +33,14 @@ test_res test_vector_init() {
 
 test_res test_vector_init_neg_attr_size() {
     vector v;
-    vector_attr_t attr = {-1, NULL, NULL, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = -1,
+        .stream = DEBUG_OUT,
+    };
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SIZE) {
@@ -41,7 +55,14 @@ test_res test_vector_init_neg_attr_size() {
 
 test_res test_vector_init_max_attr_size() {
     vector v;
-    vector_attr_t attr = {SIZE_TH + 1, NULL, NULL, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = SIZE_TH + 1,
+        .stream = DEBUG_OUT,
+    };
 
     cs_codes rc = vector_init(&v, attr);
     if (rc != CS_SIZE) {
@@ -56,7 +77,14 @@ test_res test_vector_init_max_attr_size() {
 
 test_res test_vector_insert_at() {
     vector v;
-    vector_attr_t attr = {sizeof(int), NULL, print_int, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = sizeof(int),
+        .stream = DEBUG_OUT,
+    };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int insert_positions[] = {0, 0, 1, 1, 3};
     int correct_elements[] = {2, 4, 3, 5, 1};
@@ -98,7 +126,14 @@ test_res test_vector_insert_at() {
 
 test_res test_vector_push_back() {
     vector v;
-    vector_attr_t attr = {sizeof(int), NULL, print_int, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = sizeof(int),
+        .stream = DEBUG_OUT,
+    };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 3, 4, 5};
 
@@ -139,7 +174,14 @@ test_res test_vector_push_back() {
 
 test_res test_vector_erase() {
     vector v;
-    vector_attr_t attr = {sizeof(int), NULL, print_int, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = sizeof(int),
+        .stream = DEBUG_OUT,
+    };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 4, 5};
 
@@ -187,7 +229,14 @@ test_res test_vector_erase() {
 
 test_res test_vector_replace() {
     vector v;
-    vector_attr_t attr = {sizeof(int), NULL, print_int, NULL, NULL};
+    vector_attr_t attr = {
+        .comp = NULL,
+        .copy = NULL,
+        .fr = NULL,
+        .print = print_int,
+        .size = sizeof(int),
+        .stream = DEBUG_OUT,
+    };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 99, 4, 5};
 

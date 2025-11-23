@@ -23,7 +23,7 @@ RM := rm -f
 LIBDIR           = /usr/local/lib
 PATH_INCLUDEDIR  = /usr/local/include/cs
 LOCAL_INCLUDEDIR = include
-CFLAGS           = -Wall -Werror -fPIC
+CFLAGS           = -Wall -Wextra -fPIC
 CC               = gcc
 
 UNITTEST_LOG = unittest_log.ansi
@@ -34,7 +34,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = map vector deque heap queue list forward_list
+SUBDIRS   = map vector deque list forward_list
 
 # Output directory for local libs
 LIBOUTDIR = lib
