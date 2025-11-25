@@ -23,7 +23,7 @@ RM := rm -f
 LIBDIR           = /usr/local/lib
 PATH_INCLUDEDIR  = /usr/local/include/cs
 LOCAL_INCLUDEDIR = include
-CFLAGS           = -Wall -Wextra -fPIC
+CFLAGS           = -Wall -Wextra -fPIC -lm
 CC               = gcc
 
 UNITTEST_LOG = unittest_log.ansi
@@ -34,7 +34,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = map vector deque list forward_list
+SUBDIRS   = vector deque list forward_list map set
 
 # Output directory for local libs
 LIBOUTDIR = lib
@@ -58,6 +58,7 @@ $1/$1.o: $1/$1.c
 
 $(LIBOUTDIR)/lib$1.so: $1/$1.o | $(LIBOUTDIR)
 	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
+	$$(RM) $1/$1.o
 endef
 
 $(foreach m,$(SUBDIRS),$(eval $(call MODULE_BUILD_RULES,$(m))))

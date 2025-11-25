@@ -1,7 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "universal.h"
+#include <cs/universal.h>
 
 typedef xuniv_attr_t map_attr_t;
 

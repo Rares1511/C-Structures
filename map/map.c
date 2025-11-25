@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "../include/unittest.h"
 
@@ -60,7 +61,7 @@ void map_node_free(map *m, map_node *node) {
  */
 int map_node_compare(map m, void *key1, void *key2) {
     if (m.key_attr.comp == NULL) {
-        return universal_compare(key1, key2, m.key_attr.size);
+        return memcmp(key1, key2, m.key_attr.size);
     }
     return m.key_attr.comp(key1, key2);
 }
@@ -649,7 +650,7 @@ void map_val_set_stream(map *m, FILE *val_stream) {
 void map_print(void *v_m) {
     map *m = (map *)v_m;
     
-    map_print_stack_item *stack = malloc(sizeof(map_print_stack_item) * m->size);
+    map_print_stack_item *stack = malloc(sizeof(map_print_stack_item) * (int)ceil(log2(m->size + 1)));
     int stack_size = 0;
 
     stack[stack_size++] = (map_print_stack_item){m->root, 0};
