@@ -14,7 +14,6 @@ test_res test_forward_list_init() {
         .fr = NULL,
         .print = NULL,
         .comp = NULL,
-        .stream = DEBUG_OUT
     };
 
     cs_codes rc = forward_list_init(&list, attr);
@@ -43,7 +42,6 @@ test_res test_forward_list_push_front() {
         .fr = NULL,
         .print = NULL,
         .comp = NULL,
-        .stream = DEBUG_OUT
     };
     int value;
 
@@ -101,7 +99,6 @@ test_res test_forward_list_pop_front() {
         .fr = NULL,
         .print = NULL,
         .comp = NULL,
-        .stream = DEBUG_OUT
     };
     int values[TEST_SIZE];
 
@@ -162,7 +159,6 @@ test_res test_forward_list_swap() {
         .fr = NULL,
         .print = NULL,
         .comp = NULL,
-        .stream = DEBUG_OUT
     };
     int values1[TEST_SIZE], values2[TEST_SIZE];
 

@@ -13,7 +13,6 @@ test_res test_deque_init() {
         .fr = NULL,
         .copy = NULL,
         .print = print_int,
-        .stream = DEBUG_OUT
     };
 
     cs_codes rc = deque_init(&dq, attr);
@@ -37,7 +36,6 @@ test_res test_deque_push_pop_front() {
         .fr = NULL,
         .copy = NULL,
         .print = print_int,
-        .stream = DEBUG_OUT
     };
     int values[TEST_SIZE];
 
@@ -92,7 +90,6 @@ test_res test_deque_push_pop_back() {
         .fr = NULL,
         .print = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT
     };
     int values[TEST_SIZE];
 

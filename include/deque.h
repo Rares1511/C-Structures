@@ -92,15 +92,15 @@ void* deque_at(deque dq, int index);
 void deque_swap(deque *dq1, deque *dq2);
 
 /*! 
+ * Prints the contents of the deque.
+ * @param v_dq Pointer to the deque to print.
+ */
+void deque_print(FILE *stream, void *v_dq);
+
+/*! 
  * Frees the resources associated with the deque.
  * @param v_dq Pointer to the deque to free.
  */
 void deque_free(void *v_dq);
-
-/*! 
- * Prints the contents of the deque.
- * @param v_dq Pointer to the deque to print.
- */
-void deque_print(void *v_dq);
 
 #endif

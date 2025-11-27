@@ -1,8 +1,10 @@
-#include "../include/rbt.h"
+#include <cs/rbt.h>
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "../include/unittest.h"
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER STRUCT SECTION                                        ║
@@ -543,7 +545,7 @@ void rbt_clear(rbt *t) {
     t->size = 0;
 }
 
-void rbt_print(void *v_t) {
+void rbt_print(FILE *stream, void *v_t) {
     rbt *t = (rbt *)v_t;
     
     rbt_print_stack_item *stack = malloc(sizeof(rbt_print_stack_item) * (int)ceil(log2(t->size + 1)));
@@ -557,17 +559,17 @@ void rbt_print(void *v_t) {
         int tab_size = item.tab_size;
 
         for (int i = 0; i < tab_size; i++) {
-            fprintf(t->attr.stream, "  ");
+            fprintf(stream, "  ");
         }
 
-        fprintf(t->attr.stream, "Data: ");
+        fprintf(stream, "Data: ");
         if (t->attr.print) {
-            t->attr.print(t->attr.stream, node->data);
+            t->attr.print(stream, node->data);
         }
 
-        fprintf(t->attr.stream, " -> Color: %s", node->color == __RBT_NODE_RED_COLOR ? "RED" : "BLACK");
+        fprintf(stream, " -> Color: %s", node->color == __RBT_NODE_RED_COLOR ? "RED" : "BLACK");
 
-        fprintf(t->attr.stream, "\n");
+        fprintf(stream, "\n");
 
         if (node->right != NULL)
             stack[stack_size++] = (rbt_print_stack_item){node->right, tab_size + 1};

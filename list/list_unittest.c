@@ -14,7 +14,6 @@ test_res test_list_init() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
 
     cs_codes rc = list_init(&l, attr);
@@ -43,7 +42,6 @@ test_res test_list_push_front() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
     int value;
 
@@ -95,7 +93,6 @@ test_res test_list_push_back() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
     int value;
 
@@ -147,7 +144,6 @@ test_res test_list_pop_front() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
     int values[TEST_SIZE];
 
@@ -211,7 +207,6 @@ test_res test_list_pop_back() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
     int values[TEST_SIZE];
 
@@ -275,7 +270,6 @@ test_res test_list_erase() {
         .comp = NULL,
         .print = NULL,
         .fr = NULL,
-        .stream  = DEBUG_OUT
     };
     int values[TEST_SIZE], erase_pos;
 
@@ -350,7 +344,6 @@ test_res test_list_sort() {
         .comp = comp_int_max,
         .print = NULL,
         .fr = NULL,
-        .stream = DEBUG_OUT
     };
     int prev_value;
 

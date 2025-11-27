@@ -12,7 +12,6 @@ test_res test_vector_init() {
         .fr = NULL,
         .print = print_int,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
     };
 
     cs_codes rc = vector_init(&v, attr);
@@ -39,7 +38,6 @@ test_res test_vector_init_neg_attr_size() {
         .fr = NULL,
         .print = print_int,
         .size = -1,
-        .stream = DEBUG_OUT,
     };
 
     cs_codes rc = vector_init(&v, attr);
@@ -61,7 +59,6 @@ test_res test_vector_init_max_attr_size() {
         .fr = NULL,
         .print = print_int,
         .size = SIZE_TH + 1,
-        .stream = DEBUG_OUT,
     };
 
     cs_codes rc = vector_init(&v, attr);
@@ -83,7 +80,6 @@ test_res test_vector_insert_at() {
         .fr = NULL,
         .print = print_int,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
     };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int insert_positions[] = {0, 0, 1, 1, 3};
@@ -132,7 +128,6 @@ test_res test_vector_push_back() {
         .fr = NULL,
         .print = print_int,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
     };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 3, 4, 5};
@@ -180,7 +175,6 @@ test_res test_vector_erase() {
         .fr = NULL,
         .print = print_int,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
     };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 4, 5};
@@ -235,7 +229,6 @@ test_res test_vector_replace() {
         .fr = NULL,
         .print = print_int,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
     };
     int insert_elements[] = {1, 2, 3, 4, 5};
     int correct_elements[] = {1, 2, 99, 4, 5};

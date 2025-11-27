@@ -10,7 +10,6 @@ test_res test_pair_init() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .comp = NULL,
         .print = NULL
     };
@@ -18,7 +17,6 @@ test_res test_pair_init() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(double),
-        .stream = DEBUG_OUT,
         .comp = NULL,
         .print = NULL
     };
@@ -47,7 +45,6 @@ test_res test_pair_set_get() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .comp = NULL,
         .print = NULL
     };
@@ -55,7 +52,6 @@ test_res test_pair_set_get() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(double),
-        .stream = DEBUG_OUT,
         .comp = NULL,
         .print = NULL
     };

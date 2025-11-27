@@ -227,6 +227,18 @@ void list_clear(list *l) {
     l->size = 0;
 }
 
+void list_print(FILE *stream, void *l_p) {
+    list l = *(list *)l_p;
+    if (!l.attr.print || l.size == 0)
+        return;
+    l.attr.print(stream, l.front->data);
+    list_node *node = l.front->next;
+    while (node != l.front) {
+        l.attr.print(stream, node->data);
+        node = node->next;
+    }
+}
+
 void list_free(void *l_p) {
     list *l = (list *)l_p;
     if (l->size == 0)
@@ -238,16 +250,4 @@ void list_free(void *l_p) {
         list_node_free(aux, l->attr.fr);
     }
     list_node_free(l->front, l->attr.fr);
-}
-
-void list_print(void *l_p) {
-    list l = *(list *)l_p;
-    if (!l.attr.print || l.size == 0)
-        return;
-    l.attr.print(l.attr.stream, l.front->data);
-    list_node *node = l.front->next;
-    while (node != l.front) {
-        l.attr.print(l.attr.stream, node->data);
-        node = node->next;
-    }
 }

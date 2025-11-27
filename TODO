@@ -1,12 +1,12 @@
-Sequence Containers: 
+Sequence Containers (Arrays): 
     - Vector ✔
     - Deque ✔
     - List ✔
     - Forward_list ✔
 
-Associative Containers:
+Associative Containers (RBT):
     - Set ✔
-    - Map ✔
+    - Map 
     - Multiset
     - Multimap
 
@@ -25,3 +25,5 @@ Container Adapters:
     - Flat Multiset
     - Flat Multimap
 
+Extra Modules:
+    - Pair ✔

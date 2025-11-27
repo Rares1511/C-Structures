@@ -103,7 +103,6 @@ test_res test_set_init() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .print = NULL
     };
 
@@ -140,7 +139,6 @@ test_res test_set_insert() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .print = NULL
     };
     int fr[VALUE_RANGE];
@@ -225,7 +223,6 @@ test_res test_set_insert_duplicate() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .print = NULL
     };
     int fr[VALUE_RANGE], actual_size = 0;
@@ -309,7 +306,6 @@ test_res test_set_delete() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .print = NULL
     };
     int fr[VALUE_RANGE];
@@ -388,7 +384,6 @@ test_res test_set_swap() {
         .copy = NULL,
         .fr = NULL,
         .size = sizeof(int),
-        .stream = DEBUG_OUT,
         .print = NULL
     };
     int fr1[VALUE_RANGE], fr2[VALUE_RANGE];

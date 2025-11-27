@@ -107,16 +107,6 @@ static inline void forward_list_set_compare(forward_list* list, comparer cmp) {
 }
 
 /*! 
- * Sets the output stream for the forward list.
- * @param list Pointer to the forward list.
- * @param stream The output stream to set.
- */
-static inline void forward_list_set_stream(forward_list* list, FILE* stream) {
-    if (!list) return;
-    list->attr.stream = stream;
-}
-
-/*! 
  * Retrieves the data at the front of the forward list.
  * @param list The forward list.
  * @return Pointer to the data at the front of the list, or NULL if the list is empty.
@@ -137,15 +127,15 @@ void forward_list_swap(forward_list* list1, forward_list* list2);
 void forward_list_clear(forward_list* list);
 
 /*! 
+ * Prints the contents of the forward list.
+ * @param v_l Pointer to the forward list to print.
+ */
+void forward_list_print(FILE *stream, void *v_l);
+
+/*! 
  * Frees the forward list and its resources.
  * @param v_l Pointer to the forward list to free.
  */
 void forward_list_free(void *v_l);
-
-/*! 
- * Prints the contents of the forward list.
- * @param v_l Pointer to the forward list to print.
- */
-void forward_list_print(void *v_l);
 
 #endif

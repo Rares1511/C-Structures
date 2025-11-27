@@ -127,20 +127,20 @@ void forward_list_clear(forward_list* list){
     list->size = 0;
 }
 
-void forward_list_free(void *v_l) {
-    forward_list* list = (forward_list*)v_l;
-    if(!list) return;
-    forward_list_clear(list);
-}
-
-void forward_list_print(void *v_l) {
+void forward_list_print(FILE *stream, void *v_l) {
     forward_list* list = (forward_list*)v_l;
     if (!list) return;
     if (!list->attr.print) return;
 
     forward_list_node* current = list->head;
     while (current) {
-        list->attr.print(list->attr.stream, current->data);
+        list->attr.print(stream, current->data);
         current = current->next;
     }
+}
+
+void forward_list_free(void *v_l) {
+    forward_list* list = (forward_list*)v_l;
+    if(!list) return;
+    forward_list_clear(list);
 }

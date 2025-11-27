@@ -39,9 +39,9 @@ void set_clear(set *s) {
     rbt_clear(s->t);
 }
 
-void set_print(void *v_s) {
+void set_print(FILE *stream, void *v_s) {
     set *s = (set *)v_s;
-    rbt_print(s->t);
+    rbt_print(stream, s->t);
 }
 
 void set_free(void *v_s) {

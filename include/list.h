@@ -135,15 +135,15 @@ void list_swap(list *l1, list *l2);
 void list_clear(list *l);
 
 /*!
+ * Prints the elements of the list
+ * @param[in] l  List whose elements will be printed
+ */
+void list_print(FILE *stream, void *l_p);
+
+/*!
  * Frees the memory that the list uses
  * @param[out] l  List whose memory will be freed
  */
 void list_free(void *l_p);
-
-/*!
- * Prints the elements of the list
- * @param[in] l  List whose elements will be printed
- */
-void list_print(void *l_p);
 
 #endif

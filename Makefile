@@ -23,6 +23,8 @@ RM := rm -f
 # Internal RB-tree implementation (used by map, maybe set)
 RBT_SRC = rbt/rbt.c
 RBT_OBJ = rbt/rbt.o
+PAIR_SRC = pair/pair.c
+PAIR_OBJ = pair/pair.o
 
 LIBDIR           = /usr/local/lib
 PATH_INCLUDEDIR  = /usr/local/include/cs
@@ -38,7 +40,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = pair vector deque list forward_list set
+SUBDIRS   = pair vector deque list forward_list set map
 
 # Output directory for local libs
 LIBOUTDIR = lib
@@ -64,17 +66,14 @@ $1/$1.o: $1/$1.c
 	$$(CC) -c -o $$@ $$< $$(CFLAGS)
 
 ifeq ($1,map)
-$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) | $(LIBOUTDIR)
+$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) $(PAIR_OBJ) | $(LIBOUTDIR)
 	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-	$$(RM) $1/$1.o
 else ifeq ($1,set)
 $(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) | $(LIBOUTDIR)
 	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-	$$(RM) $1/$1.o
 else
 $(LIBOUTDIR)/lib$1.so: $1/$1.o | $(LIBOUTDIR)
 	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-	$$(RM) $1/$1.o
 endif
 endef
 

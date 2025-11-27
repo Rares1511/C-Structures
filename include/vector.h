@@ -129,16 +129,16 @@ void vector_swap(vector *vec1, vector *vec2);
 void vector_sort(vector *vec);
 
 /*!
+ * Prints the content of the vector if the print function of the attribute has been set
+ * @param[in] v_vec Void pointer to the vector structure
+ */
+void vector_print(FILE *stream, void *v_vec);
+
+/*!
  * Frees the memory that the vector uses and the memory of the elements if the free
  * function of the attribute has been set
  * @param[in] v_vec Void pointer to the vector structure
  */
 void vector_free(void *v_vec);
-
-/*!
- * Prints the content of the vector if the print function of the attribute has been set
- * @param[in] v_vec Void pointer to the vector structure
- */
-void vector_print(void *v_vec);
 
 #endif

@@ -127,6 +127,16 @@ void vector_sort(vector *vec) {
     qsort(vec->vec, vec->size, vec->attr.size, vec->attr.comp);
 }
 
+void vector_print(FILE *stream, void *v_vec) {
+    if (stream == NULL || v_vec == NULL)
+        return;
+    vector *vec = (vector *)v_vec;
+    if (vec->attr.print == NULL)
+        return;
+    for (int i = 0; i < vec->size; i++)
+        vec->attr.print(stream, vec->vec + i * vec->attr.size);
+}
+
 void vector_free(void *v_vec) {
     vector *vec = (vector *)v_vec;
     if (vec->attr.fr)
@@ -134,12 +144,4 @@ void vector_free(void *v_vec) {
             vec->attr.fr(vec->vec + i * vec->attr.size);
     free(vec->vec);
     vec->vec = NULL;
-}
-
-void vector_print(void *v_vec) {
-    vector *vec = (vector *)v_vec;
-    if (vec->attr.print == NULL)
-        return;
-    for (int i = 0; i < vec->size; i++)
-        vec->attr.print(vec->attr.stream, vec->vec + i * vec->attr.size);
 }

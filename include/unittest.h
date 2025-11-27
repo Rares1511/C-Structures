@@ -38,46 +38,14 @@ typedef struct test_res {
     int return_code;
 } test_res;
 
-struct painting {
-    char *name;
-    int year, noPaints;
-    int *paints;
-};
-
 typedef struct test_res (*test)();
 
-void print_painting(void *v_p) {
-    struct painting *p = (struct painting *)v_p;
-    printf("Name: %s, Year: %d, NoPaints: %d, Paints: ", p->name, p->year, p->noPaints);
-    for (int i = 0; i < p->noPaints; i++) {
-        printf("%d ", p->paints[i]);
-    }
-    printf("\n");
-}
+static inline void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
 
-void copy_painting(void *dest, const void *src) {
-    struct painting *p_dest = (struct painting *)dest;
-    struct painting *p_src = (struct painting *)src;
-    p_dest->name = malloc(strlen(p_src->name) + 1);
-    strcpy(p_dest->name, p_src->name);
-    p_dest->year = p_src->year;
-    p_dest->noPaints = p_src->noPaints;
-    p_dest->paints = malloc(p_src->noPaints * sizeof(int));
-    memcpy(p_dest->paints, p_src->paints, p_src->noPaints * sizeof(int));
-}
+static inline int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
+static inline int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
 
-void free_painting(void *v_p) {
-    struct painting *p = (struct painting *)v_p;
-    free(p->name);
-    free(p->paints);
-}
-
-void print_int(FILE *stream, void *el) { fprintf(stream, "%d", *(int *)el); }
-
-int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
-int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
-
-void unittest(test *tests, int size, int argc, char **argv) {
+static inline void unittest(test *tests, int size, int argc, char **argv) {
     int i, seed, success = 0, failed = 0;
     test_res res;
 

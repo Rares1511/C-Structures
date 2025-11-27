@@ -53,12 +53,16 @@ void* pair_second(pair p) {
     return p.second;
 }
 
-void pair_print(pair p) {
-    if (p.first_attr.stream && p.first_attr.print) {
-        p.first_attr.print(p.first, p.first_attr.stream);
+void pair_print(FILE *stream, void *v_p) {
+    if (v_p == NULL || stream == NULL) {
+        return;
     }
-    if (p.second_attr.stream && p.second_attr.print) {
-        p.second_attr.print(p.second, p.second_attr.stream);
+    pair p = *(pair*)v_p;
+    if (p.first_attr.print) {
+        p.first_attr.print(p.first, stream);
+    }
+    if (p.second_attr.print) {
+        p.second_attr.print(p.second, stream);
     }
 }
 

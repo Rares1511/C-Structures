@@ -69,7 +69,7 @@ void set_clear(set *s);
  * Prints the contents of the set.
  * @param v_s Void pointer to the set to be printed.
  */
-void set_print(void *v_s);
+void set_print(FILE *stream, void *v_s);
 
 /*!
  * Frees the memory allocated for the set and its elements.

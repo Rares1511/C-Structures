@@ -199,6 +199,21 @@ void deque_swap(deque *dq1, deque *dq2) {
     dq2->back = temp_back;
 }
 
+void deque_print(FILE *stream, void *v_dq) {
+    if (!v_dq || !stream) {
+        return;
+    }
+    deque *dq = (deque *)v_dq;
+    if (!dq || !dq->attr.print) {
+        return;
+    }
+    for (int i = dq->front; i <= dq->back; i++) {
+        for (int j = dq->blocks[i].front; j < dq->blocks[i].back; j++) {
+            dq->attr.print(stream, dq->blocks[i].data + (j * dq->attr.size));
+        }
+    }
+}
+
 void deque_free(void *v_dq) {
     if (!v_dq) {
         return;
@@ -216,19 +231,4 @@ void deque_free(void *v_dq) {
         free(dq->blocks[i].data);
     }
     free(dq->blocks);
-}
-
-void deque_print(void *v_dq) {
-    if (!v_dq) {
-        return;
-    }
-    deque *dq = (deque *)v_dq;
-    if (!dq || !dq->attr.print) {
-        return;
-    }
-    for (int i = dq->front; i <= dq->back; i++) {
-        for (int j = dq->blocks[i].front; j < dq->blocks[i].back; j++) {
-            dq->attr.print(dq->attr.stream, dq->blocks[i].data + (j * dq->attr.size));
-        }
-    }
 }

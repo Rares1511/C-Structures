@@ -28,7 +28,7 @@ cs_codes rbt_delete(rbt *t, void *data);
 void* rbt_find(rbt t, void *data);
 void rbt_swap(rbt *t1, rbt *t2);
 void rbt_clear(rbt *t);
-void rbt_print(void *v_t);
+void rbt_print(FILE *stream, void *v_t);
 void rbt_free(void *v_t);
 
 #endif

@@ -50,7 +50,7 @@ void* pair_second(pair p);
  * Prints the contents of the pair to the specified output streams.
  * @param p The pair structure to be printed.
  */
-void pair_print(pair p);
+void pair_print(FILE *stream, void *v_p);
 
 /*!
  * Frees the resources allocated for the pair.
