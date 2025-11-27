@@ -4,23 +4,11 @@
 #include <cs/universal.h>
 
 typedef xuniv_attr_t set_attr_t;
-
-#define SET_NODE_RED_COLOR 0
-#define SET_NODE_BLACK_COLOR 1
+typedef struct rbt rbt;
 
 typedef struct set {
-    struct set_node *root; /*!< root of the map */
-    int size;              /*!< number of elements in the map */
-    set_attr_t attr;       /*!< attributes of the set */
+    rbt *t;                /*!< red black tree containing the set data */
 } set;
-
-typedef struct set_node {
-    char color;                   /*!< color of the node */
-    void *data;                    /*!< data of the node */
-    struct set_node *left_child;  /*!< left child of the node */
-    struct set_node *right_child; /*!< right child of the node */
-    struct set_node *father;      /*!< father of the node */
-} set_node;
 
 /*!
  * Initializes a set with the given attributes.
@@ -48,6 +36,13 @@ cs_codes set_insert(set *s, void *data);
  * @return cs_codes Status code indicating success or type of error.
  */
 cs_codes set_delete(set *s, void *data);
+
+/*!
+ * Returns the number of elements in the set.
+ * @param s The set.
+ * @return The size of the set.
+ */
+int set_size(set s);
 
 /*!
  * Finds an element in the set.

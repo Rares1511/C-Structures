@@ -48,7 +48,8 @@
         "unistd.h": "c",
         "fcntl.h": "c",
         "cstdlib": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "rbt.h": "c"
     },
     "makefile.configureOnOpen": true,
 }

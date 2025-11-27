@@ -61,12 +61,16 @@ void list_sort_helper(list_attr_t attr, list_node *start, list_node *end) {
 
     for (list_node *node = start; node != end; node = node->next) {
         if (list_compare(node->data, pivot, attr.comp, attr.size) <= 0) {
-            universal_swap(pivot_node->data, node->data, attr.size);
+            void* temp = pivot_node->data;
+            pivot_node->data = node->data;
+            node->data = temp;
             pivot_node = pivot_node->next;
         }
     }
 
-    universal_swap(pivot_node->data, pivot, attr.size);
+    void* temp = pivot_node->data;
+    pivot_node->data = end->data;
+    end->data = temp;
 
     if (pivot_node != start)
         list_sort_helper(attr, start, pivot_node->prev);

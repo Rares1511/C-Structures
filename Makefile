@@ -20,6 +20,10 @@ $(info [OS] Detected: $(DETECTED_OS))
 
 RM := rm -f
 
+# Internal RB-tree implementation (used by map, maybe set)
+RBT_SRC = rbt/rbt.c
+RBT_OBJ = rbt/rbt.o
+
 LIBDIR           = /usr/local/lib
 PATH_INCLUDEDIR  = /usr/local/include/cs
 LOCAL_INCLUDEDIR = include
@@ -52,13 +56,26 @@ all: uninstall install unittest
 $(LIBOUTDIR):
 	mkdir -p $(LIBOUTDIR)
 
+$(RBT_OBJ): $(RBT_SRC)
+	$(CC) -fPIC -c -o $@ $< $(CFLAGS)
+
 define MODULE_BUILD_RULES
 $1/$1.o: $1/$1.c
-	$$(CC) -fPIC -c -o $$@ $$< $$(CFLAGS)
+	$$(CC) -c -o $$@ $$< $$(CFLAGS)
 
+ifeq ($1,map)
+$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) | $(LIBOUTDIR)
+	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
+	$$(RM) $1/$1.o
+else ifeq ($1,set)
+$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) | $(LIBOUTDIR)
+	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
+	$$(RM) $1/$1.o
+else
 $(LIBOUTDIR)/lib$1.so: $1/$1.o | $(LIBOUTDIR)
 	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
 	$$(RM) $1/$1.o
+endif
 endef
 
 $(foreach m,$(SUBDIRS),$(eval $(call MODULE_BUILD_RULES,$(m))))
@@ -75,6 +92,7 @@ install_headers:
 	@for dir in $(SUBDIRS); do \
 		cp $(LOCAL_INCLUDEDIR)/$$dir.h $(PATH_INCLUDEDIR); \
 	done
+	cp $(LOCAL_INCLUDEDIR)/rbt.h $(PATH_INCLUDEDIR)
 
 install_libs: $(LIBS)
 	mkdir -p $(LIBDIR)
@@ -140,6 +158,6 @@ clean:
 	@for dir in $(SUBDIRS); do \
 		$(RM) $$dir/$$dir.o $$dir/unittest; \
 	done
-	$(RM) $(LIBS) $(UNITTEST_LOG)
+	$(RM) $(LIBS) $(UNITTEST_LOG) $(RBT_OBJ)
 
 .PHONY: all install uninstall unittest clean

@@ -45,22 +45,4 @@ typedef struct xuniv_attr_t {
     FILE *stream;  /*!< output stream for the printer function */
 } xuniv_attr_t;
 
-/*!
- * Swaps two memory zones considering they are both of size len
- * @param[in] el1 - starting point of the first memory zone
- * @param[in] el2 - starting point of the second memory zone
- * @param[in] len - the length in bytes of the memeory zone that will be swapped
- */
-void universal_swap(void *el1, void *el2, int len) {
-    unsigned char *p1 = (unsigned char *)el1;
-    unsigned char *p2 = (unsigned char *)el2;
-    unsigned char tmp;
-
-    for (int i = 0; i < len; i++) {
-        tmp = p1[i];
-        p1[i] = p2[i];
-        p2[i] = tmp;
-    }
-}
-
 #endif
