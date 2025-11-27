@@ -38,7 +38,7 @@ ifeq ($(debug),true)
 endif
 
 # List your modules (directories) here
-SUBDIRS   = vector deque list forward_list map set
+SUBDIRS   = pair vector deque list forward_list set
 
 # Output directory for local libs
 LIBOUTDIR = lib
