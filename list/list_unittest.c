@@ -2,8 +2,6 @@
 
 #include "../include/unittest.h"
 
-#define TEST_SIZE 1000
-
 FILE *DEBUG_OUT = NULL;
 
 test_res test_list_init() {

@@ -3,9 +3,6 @@
 
 #include "../include/unittest.h"
 
-#define TEST_SIZE 2048
-#define VALUE_RANGE 10000
-
 FILE *DEBUG_OUT = NULL;
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -43,47 +40,47 @@ int rbt_check_black_height(rbt_node *node) {
     return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
 }
 
-int rbt_check_bst(rbt_node *node, rbt_attr_t key_attr, void *min_key, void *max_key) {
+int rbt_check_bst(rbt_node *node, rbt_attr_t attr, void *min_key, void *max_key) {
     if (!node) return 1;
 
     // If min_key != NULL, node->key must be > min_key
     if (min_key) {
-        if (key_attr.comp && key_attr.comp(node->data, min_key) <= 0)
+        if (attr.comp && attr.comp(node->data, min_key) <= 0)
             return 0;
-        else if (memcmp(node->data, min_key, key_attr.size) <= 0)
+        else if (memcmp(node->data, min_key, attr.size) <= 0)
             return 0;
     }
 
     // If max_key != NULL, node->key must be < max_key
     if (max_key) {
-        if (key_attr.comp && key_attr.comp(node->data, max_key) >= 0)
+        if (attr.comp && attr.comp(node->data, max_key) >= 0)
             return 0;
-        else if (memcmp(node->data, max_key, key_attr.size) >= 0)
+        else if (memcmp(node->data, max_key, attr.size) >= 0)
             return 0;
     }
 
     // Left: all keys < node->key
-    if (!rbt_check_bst(node->left, key_attr, min_key, node->data))
+    if (!rbt_check_bst(node->left, attr, min_key, node->data))
         return 0;
 
     // Right: all keys > node->key
-    if (!rbt_check_bst(node->right, key_attr, node->data, max_key))
+    if (!rbt_check_bst(node->right, attr, node->data, max_key))
         return 0;
 
     return 1;
 }
 
-int rbt_is_valid(rbt_node *root, rbt_attr_t key_attr) {
+int rbt_is_valid(rbt *t) {
     // 1. Root must be black (if non-empty)
-    if (root && root->color != __RBT_NODE_BLACK_COLOR)
+    if (t->root && t->root->color != __RBT_NODE_BLACK_COLOR)
         return 0;
 
     // 2. BST property
-    if (!rbt_check_bst(root, key_attr, NULL, NULL))
+    if (!rbt_check_bst(t->root, t->attr, NULL, NULL))
         return 0;
 
     // 3. Red–Black properties + black height
-    int bh = rbt_check_black_height(root);
+    int bh = rbt_check_black_height(t->root);
     if (bh == -1)
         return 0;
 
@@ -115,7 +112,7 @@ test_res test_set_init() {
         };
     }
 
-    if (!rbt_is_valid(s.t->root, s.t->attr)) {
+    if (!rbt_is_valid(s.t)) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "set structure invalid after initialization",
@@ -169,7 +166,7 @@ test_res test_set_insert() {
             };
         }
 
-        if (!rbt_is_valid(s.t->root, s.t->attr)) {
+        if (!rbt_is_valid(s.t)) {
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "set structure invalid after insertions",
@@ -199,7 +196,7 @@ test_res test_set_insert() {
         }
     }
 
-    if (!rbt_is_valid(s.t->root, s.t->attr)) {
+    if (!rbt_is_valid(s.t)) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "set structure invalid after insertions",
@@ -259,7 +256,7 @@ test_res test_set_insert_duplicate() {
                 };
             }
 
-            if (!rbt_is_valid(s.t->root, s.t->attr)) {
+            if (!rbt_is_valid(s.t)) {
                 return (test_res){
                     .test_name = (char *)__func__,
                     .reason = "set structure invalid after insertions",
@@ -358,7 +355,7 @@ test_res test_set_delete() {
                 };
             }
 
-            if (!rbt_is_valid(s.t->root, s.t->attr)) {
+            if (!rbt_is_valid(s.t)) {
                 return (test_res){
                     .test_name = (char *)__func__,
                     .reason = "set structure invalid after deletion",
@@ -430,7 +427,7 @@ test_res test_set_swap() {
             };
         }
 
-        if (!rbt_is_valid(s1.t->root, s1.t->attr)) {
+        if (!rbt_is_valid(s1.t)) {
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "set structure invalid after insertions in s1",
@@ -447,7 +444,7 @@ test_res test_set_swap() {
             };
         }
 
-        if (!rbt_is_valid(s2.t->root, s2.t->attr)) {
+        if (!rbt_is_valid(s2.t)) {
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "set structure invalid after insertions in s2",

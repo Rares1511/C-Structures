@@ -105,7 +105,9 @@ uninstall_headers:
 		$(RM) $(PATH_INCLUDEDIR)/$$dir.h; \
 	done
 	$(RM) $(PATH_INCLUDEDIR)/universal.h
-	rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR)
+	@if [ls $(PATH_INCLUDEDIR)]; then \
+		$rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR); \
+	fi
 
 uninstall_libs:
 	@for dir in $(SUBDIRS); do \

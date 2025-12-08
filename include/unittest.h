@@ -1,12 +1,8 @@
 #define MAX_REASON_SIZE 1024
 #define MAX_PRINT_SIZE 75
 
-#define MAP_TEST_SIZE 20
-#define DEQUE_TEST_SIZE 20
-#define HASH_TABLE_TEST_SIZE 20
-#define HEAP_TEST_SIZE 20
-#define MATRIX_TEST_SIZE 20
-#define VECTOR_TEST_SIZE 20
+#define TEST_SIZE 1000
+#define VALUE_RANGE 10000
 
 #pragma once
 #include <stdio.h>

@@ -561,6 +561,13 @@ void rbt_print(FILE *stream, void *v_t) {
         for (int i = 0; i < tab_size; i++) {
             fprintf(stream, "  ");
         }
+        if (node->father && node == node->father->left) {
+            fprintf(stream, "L-> ");
+        } else if (node->father && node == node->father->right) {
+            fprintf(stream, "R-> ");
+        } else {
+            fprintf(stream, "Root-> ");
+        }
 
         fprintf(stream, "Data: ");
         if (t->attr.print) {

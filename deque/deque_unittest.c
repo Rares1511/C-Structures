@@ -2,8 +2,6 @@
 
 #include "../include/unittest.h"
 
-#define TEST_SIZE DEQUE_BLOCK_SIZE * DEQUE_INIT_BLOCKS * 2
-
 FILE *DEBUG_OUT = NULL;
 
 test_res test_deque_init() {

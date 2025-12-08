@@ -23,9 +23,11 @@ To use any data structure:
     * [Vector](vector/README.md)
     * [List](list/README.md)
     * [Forward List](forward_list/README.md)
+    * [Deque](deque/README.md)
 
 - Associative Containers
     * [Map](map/README.md)
+    * [Set](set/README.md)
 
 ## Unit Tests - TODO
 Unit tests are being progressively added for all modules:  

@@ -8,8 +8,8 @@ typedef xuniv_attr_t pair_attr_t;
 typedef struct pair {
     void* first;
     void* second;
-    pair_attr_t first_attr;
-    pair_attr_t second_attr;
+    pair_attr_t* first_attr;
+    pair_attr_t* second_attr;
 } pair;
 
 /*!
@@ -21,7 +21,7 @@ typedef struct pair {
  * @param second_attr Attributes for the second element (size, copy, free functions).
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes pair_init(pair* p, pair_attr_t first_attr, pair_attr_t second_attr);
+cs_codes pair_init(pair* p, pair_attr_t* first_attr, pair_attr_t* second_attr);
 
 /*!
  * Sets the values of the pair's elements.

@@ -31,13 +31,20 @@ cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
 cs_codes map_insert(map *m, void *key, void *val);
 
 /*!
+ * Retrieves the number of key-value pairs in the map
+ * @param[in] m - the map
+ * @return number of key-value pairs in the map
+ */
+int map_size(map m);
+
+/*!
  * Retrieves the value associated with a given key in the map
  * @param[in] m - the map
  * @param[in] key - pointer to the key data
  * @param[out] value - pointer to the memory where the value will be copied
  * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
  */
-cs_codes map_get(map m, void *key, void *value);
+void* map_find(map m, void *key);
 
 /*!
  * Deletes a key-value pair from the map
@@ -196,7 +203,7 @@ void map_val_set_stream(map *m, FILE *val_stream);
  * Prints the map's contents
  * @param[in] v_m - pointer to the map
  */
-void map_print(void *v_m);
+void map_print(FILE *stream, void *v_m);
 
 /*!
  * Frees all resources associated with the map

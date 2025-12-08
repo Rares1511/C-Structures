@@ -21,7 +21,7 @@ test_res test_pair_init() {
         .print = NULL
     };
 
-    cs_codes rc = pair_init(&p, first_attr, second_attr);
+    cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = "test_pair_init",
@@ -56,7 +56,7 @@ test_res test_pair_set_get() {
         .print = NULL
     };
 
-    cs_codes rc = pair_init(&p, first_attr, second_attr);
+    cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = "test_pair_set_get",
