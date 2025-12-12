@@ -1,7 +1,6 @@
 # Top-level Makefile
 
-# ---------- OS Detection ----------
-# Detect Windows (MSYS, MINGW, or Cygwin) vs Linux/Unix
+# ---------------- OS detection (keep yours if you want) ----------------
 ifeq ($(OS),Windows_NT)
     DETECTED_OS := windows
 else
@@ -14,110 +13,121 @@ else
         DETECTED_OS := unknown
     endif
 endif
-
-# Print which OS we detected (optional)
 $(info [OS] Detected: $(DETECTED_OS))
 
-RM := rm -f
+# ---------------- Tooling ----------------
+CC      := gcc
+RM      := rm -f
+MKDIR_P := mkdir -p
 
-# Internal RB-tree implementation (used by map, maybe set)
-RBT_SRC = rbt/rbt.c
-RBT_OBJ = rbt/rbt.o
-PAIR_SRC = pair/pair.c
-PAIR_OBJ = pair/pair.o
+LIBOUTDIR := lib
 
-LIBDIR           = /usr/local/lib
-PATH_INCLUDEDIR  = /usr/local/include/cs
-LOCAL_INCLUDEDIR = include
-CFLAGS           = -Wall -Wextra -fPIC -lm
-CC               = gcc
+LIBDIR           := /usr/local/lib
+PATH_INCLUDEDIR  := /usr/local/include/cs
+LOCAL_INCLUDEDIR := include
 
-UNITTEST_LOG = unittest_log.ansi
+# Don't put -lm in CFLAGS; keep link libs in LDLIBS
+CFLAGS  := -Wall -Wextra -fPIC
+LDLIBS  := -lm
+
+UNITTEST_LOG := unittest_log.ansi
 SEED ?= 42
 
 ifeq ($(debug),true)
   CFLAGS += -DDEBUG
 endif
 
-# List your modules (directories) here
-SUBDIRS   = pair vector deque list forward_list set map
+# ---------------- Modules ----------------
+# All modules that exist in the repo
+SUBDIRS := cargs pair vector deque list forward_list set map unordered_set
 
-# Output directory for local libs
-LIBOUTDIR = lib
+# Only these are built/installed/tested as shared libs
+# (edit this list whenever you want to publish more)
+INSTALL_LIBS := vector deque list forward_list set map unordered_set
 
-# Per-module files
-MODULE_SRCS = $(SUBDIRS:%=%/%).c             # e.g. map/map.c
-MODULE_OBJS = $(SUBDIRS:%=%/%).o             # e.g. map/map.o
-LIBS        = $(SUBDIRS:%=$(LIBOUTDIR)/lib%.so)  # e.g. lib/libmap.so
+# ---------------- Core/Dependency objects ----------------
+# Any objects you want to be able to link into other libs (but not necessarily installed as libs)
+CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 
-# Default target: uninstall, install, test
+# Per-module extra object deps (link-time deps)
+DEPS_map          := rbt/rbt.o pair/pair.o
+DEPS_set          := rbt/rbt.o
+DEPS_unordered_set:= hash_table/hash_table.o vector/vector.o
+# Add more like:
+# DEPS_unordered_map := hash_table/hash_table.o pair/pair.o
+# DEPS_something     := vector/vector.o
+
+# ---------------- Derived paths ----------------
+# Main object for each module is module/module.o
+MOD_OBJ = $1/$1.o
+
+# Objects for all modules (compiled up-front)
+ALL_MOD_OBJS := $(foreach m,$(SUBDIRS),$(call MOD_OBJ,$(m)))
+
+# Shared libs we actually build/install
+LIBS := $(foreach m,$(INSTALL_LIBS),$(LIBOUTDIR)/lib$(m).so)
+
+# ---------------- Default target ----------------
 all: uninstall install unittest
 
-# ---------- Per-module build rules ----------
-
+# ---------------- Output dir ----------------
 $(LIBOUTDIR):
-	mkdir -p $(LIBOUTDIR)
+	$(MKDIR_P) $(LIBOUTDIR)
 
-$(RBT_OBJ): $(RBT_SRC)
-	$(CC) -fPIC -c -o $@ $< $(CFLAGS)
+# ---------------- Build ALL .o (once) ----------------
+# Generic rule: build module/module.o from module/module.c
+%/%.o: %/%.c
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-define MODULE_BUILD_RULES
-$1/$1.o: $1/$1.c
-	$$(CC) -c -o $$@ $$< $$(CFLAGS)
+# Build core objects (rbt/pair/hash_table) via the same pattern above
+# (No special rules needed as long as paths are <dir>/<dir>.c)
 
-ifeq ($1,map)
-$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) $(PAIR_OBJ) | $(LIBOUTDIR)
-	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-else ifeq ($1,set)
-$(LIBOUTDIR)/lib$1.so: $1/$1.o $(RBT_OBJ) | $(LIBOUTDIR)
-	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-else
-$(LIBOUTDIR)/lib$1.so: $1/$1.o | $(LIBOUTDIR)
-	$$(CC) -shared -o $$@ $$^ $$(CFLAGS)
-endif
+# Convenience target if you want just objects
+objects: $(ALL_MOD_OBJS) $(CORE_OBJS)
+
+# ---------------- Link only requested libs ----------------
+# Template to link lib<name>.so from <name>.o plus any DEPS_<name>
+define LINK_SO_RULE
+$(LIBOUTDIR)/lib$1.so: $(call MOD_OBJ,$1) $$(DEPS_$1) | $(LIBOUTDIR)
+	$$(CC) -shared -o $$@ $$^ $$(CFLAGS) $$(LDLIBS)
 endef
+$(foreach m,$(INSTALL_LIBS),$(eval $(call LINK_SO_RULE,$(m))))
 
-$(foreach m,$(SUBDIRS),$(eval $(call MODULE_BUILD_RULES,$(m))))
-
-# ---------- Install / Uninstall ----------
-
+# ---------------- Install / Uninstall ----------------
 install: install_headers install_libs
-
 uninstall: uninstall_headers uninstall_libs
 
 install_headers:
-	mkdir -p $(PATH_INCLUDEDIR)
+	$(MKDIR_P) $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/universal.h $(PATH_INCLUDEDIR)
-	@for dir in $(SUBDIRS); do \
-		cp $(LOCAL_INCLUDEDIR)/$$dir.h $(PATH_INCLUDEDIR); \
+	@for h in $(INSTALL_LIBS); do \
+		cp $(LOCAL_INCLUDEDIR)/$$h.h $(PATH_INCLUDEDIR); \
 	done
+	# Install extra public headers only if you really want them public:
 	cp $(LOCAL_INCLUDEDIR)/rbt.h $(PATH_INCLUDEDIR)
+	cp $(LOCAL_INCLUDEDIR)/hash_table.h $(PATH_INCLUDEDIR)
 
 install_libs: $(LIBS)
-	mkdir -p $(LIBDIR)
-	@for dir in $(SUBDIRS); do \
-		cp $(LIBOUTDIR)/lib$$dir.so $(LIBDIR); \
+	$(MKDIR_P) $(LIBDIR)
+	@for m in $(INSTALL_LIBS); do \
+		cp $(LIBOUTDIR)/lib$$m.so $(LIBDIR); \
 	done
 	ldconfig
 
 uninstall_headers:
-	@for dir in $(SUBDIRS); do \
-		$(RM) $(PATH_INCLUDEDIR)/$$dir.h; \
+	@for h in $(INSTALL_LIBS); do \
+		$(RM) $(PATH_INCLUDEDIR)/$$h.h; \
 	done
 	$(RM) $(PATH_INCLUDEDIR)/universal.h
-	@if [ls $(PATH_INCLUDEDIR)]; then \
-		$rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR); \
-	fi
+	rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR) || true
 
 uninstall_libs:
-	@for dir in $(SUBDIRS); do \
-		$(RM) $(LIBDIR)/lib$$dir.so; \
+	@for m in $(INSTALL_LIBS); do \
+		$(RM) $(LIBDIR)/lib$$m.so; \
 	done
 	ldconfig
 
-# ---------- Unit tests ----------
-
-# Init log once before all module tests
+# ---------------- Unit tests (only for installed libs) ----------------
 unittest-log-init:
 	@$(RM) $(UNITTEST_LOG)
 	@touch $(UNITTEST_LOG)
@@ -125,8 +135,7 @@ unittest-log-init:
 define MODULE_TEST_RULES
 unittest-$1: install $1/$1_unittest.c
 	@echo "Building unit tests for $1..."
-	$(CC) -o $1/unittest $1/$1_unittest.c $(CFLAGS) -l$1
-	@echo "Running unit tests for $1..."
+	$(CC) -o $1/unittest $1/$1_unittest.c $(CFLAGS) -l$1 $(LDLIBS)
 	@{ \
 	  echo ""; \
 	  echo "=================================================="; \
@@ -148,17 +157,19 @@ unittest-$1: install $1/$1_unittest.c
 	@$(RM) $1/unittest
 endef
 
-$(foreach m,$(SUBDIRS),$(eval $(call MODULE_TEST_RULES,$(m))))
+$(foreach m,$(INSTALL_LIBS),$(eval $(call MODULE_TEST_RULES,$(m))))
 
-# Aggregate unittest target: clear log once, then run all module tests
-unittest: unittest-log-init $(SUBDIRS:%=unittest-%)
+unittest: unittest-log-init $(INSTALL_LIBS:%=unittest-%)
 
-# ---------- Clean ----------
-
+# ---------------- Clean ----------------
 clean:
-	@for dir in $(SUBDIRS); do \
-		$(RM) $$dir/$$dir.o $$dir/unittest; \
+	$(RM) $(UNITTEST_LOG)
+	$(RM) $(LIBOUTDIR)/lib*.so
+	@for m in $(SUBDIRS); do \
+		$(RM) $$m/$$m.o $$m/unittest; \
 	done
-	$(RM) $(LIBS) $(UNITTEST_LOG) $(RBT_OBJ)
+	@for o in $(CORE_OBJS); do \
+		$(RM) $$o; \
+	done
 
-.PHONY: all install uninstall unittest clean
+.PHONY: all objects install uninstall unittest clean

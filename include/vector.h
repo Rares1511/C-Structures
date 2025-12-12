@@ -30,7 +30,7 @@ cs_codes vector_init(vector *vec, vector_attr_t elem_attr);
  * @param[in]  pos  The position at which the element will be inserted at
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_insert_at(vector *vec, void *el, int pos);
+cs_codes vector_insert_at(vector *vec, const void *el, int pos);
 
 /*!
  * Pushes the element at the back of the vector
@@ -38,7 +38,7 @@ cs_codes vector_insert_at(vector *vec, void *el, int pos);
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_push_back(vector *vec, void *el);
+cs_codes vector_push_back(vector *vec, const void *el);
 
 /*!
  * Erase the element at the position offered
@@ -57,7 +57,7 @@ cs_codes vector_erase(vector *vec, int pos);
  * @return CS_EMPTY if the vector is empty, CS_POS if given an incorrect position or
  * CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_replace(vector *vec, void *el, int pos);
+cs_codes vector_replace(vector *vec, const void *el, int pos);
 
 /*!
  * Find the element given in the vector
@@ -66,7 +66,7 @@ cs_codes vector_replace(vector *vec, void *el, int pos);
  * @return The position of the element, CS_COMP if no compare function has been assigned
  * or CS_ELEM if it's not in the vector
  */
-int vector_find(vector vec, void *el);
+int vector_find(vector vec, const void *el);
 
 /*!
  * Returns the reference at the position given
@@ -74,6 +74,15 @@ int vector_find(vector vec, void *el);
  * @param[in] pos  Position for the reference
  */
 void *vector_at(vector vec, int pos);
+
+/*!
+ * Counts how many times the given element appears in the vector
+ * @param[in] vec  The vector in which the count will be done
+ * @param[in] el   The element to be counted
+ * @return The number of times the element appears in the vector, CS_COMP if no compare function
+ * has been assigned
+ */
+int vector_count(vector vec, const void *el);
 
 /*!
  * Sets the new attributes for the vector

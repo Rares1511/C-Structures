@@ -16,7 +16,7 @@ cs_codes vector_init(vector *vec, vector_attr_t attr) {
     return CS_SUCCESS;
 }
 
-cs_codes vector_insert_at(vector *vec, void *el, int pos) {
+cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     if (pos > vec->size)
         return CS_POS;
     if (vec->size == vec->cap) {
@@ -41,7 +41,7 @@ cs_codes vector_insert_at(vector *vec, void *el, int pos) {
     return CS_SUCCESS;
 }
 
-cs_codes vector_push_back(vector *vec, void *el) { return vector_insert_at(vec, el, vec->size); }
+cs_codes vector_push_back(vector *vec, const void *el) { return vector_insert_at(vec, el, vec->size); }
 
 cs_codes vector_erase(vector *vec, int pos) {
     if (vec->size == 0)
@@ -63,7 +63,16 @@ void *vector_at(vector vec, int pos) {
     return vec.vec + vec.attr.size * pos;
 }
 
-cs_codes vector_replace(vector *vec, void *el, int pos) {
+int vector_count(vector vec, const void *el) {
+    int count = 0;
+    for (int i = 0; i < vec.size; i++) {
+        if ((vec.attr.comp && vec.attr.comp(vec.vec + i * vec.attr.size, el) == 0) || memcmp(vec.vec + i * vec.attr.size, el, vec.attr.size) == 0)
+            count++;
+    }
+    return count;
+}
+
+cs_codes vector_replace(vector *vec, const void *el, int pos) {
     if (vec->size == 0)
         return CS_EMPTY;
     if (pos >= vec->size)
@@ -77,11 +86,9 @@ cs_codes vector_replace(vector *vec, void *el, int pos) {
     return CS_SUCCESS;
 }
 
-int vector_find(vector vec, void *el) {
-    if (!vec.attr.comp)
-        return CS_COMP;
+int vector_find(vector vec, const void *el) {
     for (int i = 0; i < vec.size; i++) {
-        if (vec.attr.comp(vec.vec + i * vec.attr.size, el) == 0)
+        if ((vec.attr.comp && vec.attr.comp(vec.vec + i * vec.attr.size, el) == 0) || memcmp(vec.vec + i * vec.attr.size, el, vec.attr.size) == 0)
             return i;
     }
     return CS_ELEM;
