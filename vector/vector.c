@@ -57,6 +57,8 @@ cs_codes vector_erase(vector *vec, int pos) {
     return CS_SUCCESS;
 }
 
+cs_codes vector_pop_back(vector *vec) { return vector_erase(vec, vec->size - 1); }
+
 void *vector_at(vector vec, int pos) {
     if (pos >= vec.size || vec.size == 0)
         return NULL;

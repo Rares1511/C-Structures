@@ -50,6 +50,13 @@ cs_codes vector_push_back(vector *vec, const void *el);
 cs_codes vector_erase(vector *vec, int pos);
 
 /*!
+ * Pops the last element of the vector
+ * @param[out] vec  Vector from which the last element will be deleted
+ * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
+ */
+cs_codes vector_pop_back(vector *vec);
+
+/*!
  * Replaces the value at the position offered with the new value given
  * @param[out] vec  Vector in which the element will be replaced
  * @param[in]  el   The new value for the element
@@ -83,6 +90,20 @@ void *vector_at(vector vec, int pos);
  * has been assigned
  */
 int vector_count(vector vec, const void *el);
+
+/*!
+ * Checks if the vector is empty
+ * @param[in] vec  The vector to be checked
+ * @return 1 if the vector is empty, 0 otherwise
+ */
+static inline int vector_empty(vector vec) { return vec.size == 0; };
+
+/*!
+ * Returns the current size of the vector
+ * @param[in] vec  The vector whose size will be returned
+ * @return The size of the vector
+ */
+static inline int vector_size(vector vec) { return vec.size; };
 
 /*!
  * Sets the new attributes for the vector

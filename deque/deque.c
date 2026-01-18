@@ -41,7 +41,7 @@ cs_codes deque_init(deque *dq, deque_attr_t attr) {
     return CS_SUCCESS;
 }
 
-cs_codes deque_push_back(deque *dq, void *el) {
+cs_codes deque_push_back(deque *dq, const void* el) {
     if (!dq || !el) {
         return CS_ELEM;
     }
@@ -68,7 +68,7 @@ cs_codes deque_push_back(deque *dq, void *el) {
     return CS_SUCCESS;
 }
 
-cs_codes deque_push_front(deque *dq, void *el) {
+cs_codes deque_push_front(deque *dq, const void* el) {
     if (!dq || !el) {
         return CS_ELEM;
     }
@@ -199,7 +199,7 @@ void deque_swap(deque *dq1, deque *dq2) {
     dq2->back = temp_back;
 }
 
-void deque_print(FILE *stream, void *v_dq) {
+void deque_print(FILE *stream, const void* v_dq) {
     if (!v_dq || !stream) {
         return;
     }
@@ -214,11 +214,7 @@ void deque_print(FILE *stream, void *v_dq) {
     }
 }
 
-void deque_free(void *v_dq) {
-    if (!v_dq) {
-        return;
-    }
-    deque *dq = (deque *)v_dq;
+void deque_clear(deque *dq) {
     if (!dq) {
         return;
     }
@@ -229,6 +225,25 @@ void deque_free(void *v_dq) {
             }
         }
         free(dq->blocks[i].data);
+        dq->blocks[i].data = NULL;
+        dq->blocks[i].front = 0;
+        dq->blocks[i].back = 0;
     }
+    dq->size = 0;
+    dq->front = dq->block_cap / 2;
+    dq->back = dq->block_cap / 2;
+    dq->blocks[dq->front].data = malloc(dq->attr.size * dq->block_size);
+    if (dq->blocks[dq->front].data != NULL) {
+        dq->blocks[dq->front].front = dq->block_cap / 2;
+        dq->blocks[dq->front].back = dq->block_cap / 2;
+    }
+}
+
+void deque_free(void *v_dq) {
+    if (!v_dq) {
+        return;
+    }
+    deque *dq = (deque *)v_dq;
+    deque_clear(dq);
     free(dq->blocks);
 }

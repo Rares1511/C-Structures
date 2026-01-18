@@ -37,7 +37,7 @@ static inline int forward_list_empty(forward_list list) { return list.size == 0;
  * @param data Pointer to the data to insert.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes forward_list_push_front(forward_list* list, void* data);
+cs_codes forward_list_push_front(forward_list* list, const void* data);
 
 /*! 
  * Removes the element at the front of the forward list.
@@ -130,7 +130,7 @@ void forward_list_clear(forward_list* list);
  * Prints the contents of the forward list.
  * @param v_l Pointer to the forward list to print.
  */
-void forward_list_print(FILE *stream, void *v_l);
+void forward_list_print(FILE *stream, const void* v_l);
 
 /*! 
  * Frees the forward list and its resources.

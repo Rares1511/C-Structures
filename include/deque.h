@@ -9,7 +9,7 @@
 typedef xuniv_attr_t deque_attr_t;
 
 typedef struct deque_block_t {
-    void *data; /*!< Pointer to the block's data */
+    void* data; /*!< Pointer to the block's data */
     int front;  /*!< Index of the front element in the block, points to the first element */
     int back;   /*!< Index of the back element in the block, points to the next insertion position */
 } deque_block_t;
@@ -38,7 +38,7 @@ cs_codes deque_init(deque *dq, deque_attr_t attr);
  * @param el Pointer to the element to push.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_push_back(deque *dq, void *el);
+cs_codes deque_push_back(deque *dq, const void*  el);
 
 /*! 
  * Pushes an element to the front of the deque.
@@ -46,7 +46,7 @@ cs_codes deque_push_back(deque *dq, void *el);
  * @param el Pointer to the element to push.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_push_front(deque *dq, void *el);
+cs_codes deque_push_front(deque *dq, const void*  el);
 
 /*! 
  * Pops an element from the back of the deque.
@@ -85,6 +85,20 @@ void* deque_front(deque dq);
 void* deque_at(deque dq, int index);
 
 /*! 
+ * Checks if the deque is empty.
+ * @param dq The deque.
+ * @return 1 if the deque is empty, 0 otherwise.
+ */
+static inline int deque_empty(deque dq) { return dq.size == 0; }
+
+/*! 
+ * Returns the number of elements in the deque.
+ * @param dq The deque.
+ * @return The number of elements in the deque.
+ */
+static inline int deque_size(deque dq) { return dq.size; }
+
+/*! 
  * Swaps the contents of two deques.
  * @param dq1 Pointer to the first deque.
  * @param dq2 Pointer to the second deque.
@@ -92,15 +106,21 @@ void* deque_at(deque dq, int index);
 void deque_swap(deque *dq1, deque *dq2);
 
 /*! 
+ * Clears all elements from the deque.
+ * @param dq Pointer to the deque to clear.
+ */
+void deque_clear(deque *dq);
+
+/*! 
  * Prints the contents of the deque.
  * @param v_dq Pointer to the deque to print.
  */
-void deque_print(FILE *stream, void *v_dq);
+void deque_print(FILE *stream, const void*  v_dq);
 
 /*! 
  * Frees the resources associated with the deque.
  * @param v_dq Pointer to the deque to free.
  */
-void deque_free(void *v_dq);
+void deque_free(void* v_dq);
 
 #endif

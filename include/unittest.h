@@ -4,10 +4,21 @@
 #define TEST_SIZE 1000
 #define VALUE_RANGE 10000
 
+#define __UNITTEST_DEBUG_FILE_ARG_NAME "--debug-file"
+#define __UNITTEST_DEBUG_FILE_DEFAULT_VALUE "unittest_log.ansi"
+
+#define __UNITTEST_SEED_ARG_NAME "--seed"
+#define __UNITTEST_SEED_DEFAULT_VALUE 42
+
+#define __UNITTEST_MODULE_ARG_NAME "--module"
+
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <cs/universal.h>
+#include <cs/cargs.h>
 
 extern FILE *DEBUG_OUT;
 
@@ -44,22 +55,31 @@ static inline int comp_int_max(const void *a, const void *b) { return *(int *)a 
 static inline void unittest(test *tests, int size, int argc, char **argv) {
     int i, seed, success = 0, failed = 0;
     test_res res;
+    cparser parser;
 
-    if (argc < 3) {
-        printf("Usage: %s [debug_file] [seed]\n", argv[0]);
-        return;
-    } 
+    int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
 
-    DEBUG_OUT = fopen(argv[1], "a");
+    cargs_init(&parser, argc, argv);
+    cargs_add_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, __UNITTEST_DEBUG_FILE_DEFAULT_VALUE);
+    cargs_add_arg(&parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
+    cargs_add_arg(&parser, __UNITTEST_MODULE_ARG_NAME, "Module to run tests for", 1, CARG_TYPE_STRING, NULL);
+    cargs_parse(&parser);
+
+    const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
+    DEBUG_OUT = fopen(debug_file, "a");
     if (DEBUG_OUT == NULL) {
-        fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", argv[1]);
+        fprintf(DEBUG_OUT, "Failed to open debug file: %s\n", debug_file);
         return;
     }
 
-    seed = atoi(argv[2]);
+    seed = *(int*)cargs_get_arg(&parser, __UNITTEST_SEED_ARG_NAME);
     srand(seed);
 
-    fprintf(DEBUG_OUT, "\n========================================\n");
+    const char *module_name = (const char*)cargs_get_arg(&parser, __UNITTEST_MODULE_ARG_NAME);
+
+    fprintf(DEBUG_OUT, "========================================\n");
+    fprintf(DEBUG_OUT, "  MODULE: %s\n", module_name);
+    fprintf(DEBUG_OUT, "  SEED: %d\n", seed);
     fprintf(DEBUG_OUT, "  UNITTEST RUN (total tests: %d)\n", size);
     fprintf(DEBUG_OUT, "========================================\n");
 

@@ -33,17 +33,19 @@ LDLIBS  := -lm
 UNITTEST_LOG := unittest_log.ansi
 SEED ?= 42
 
+ARGS = --seed $(SEED) --debug-file $(UNITTEST_LOG)
+
 ifeq ($(debug),true)
   CFLAGS += -DDEBUG
 endif
 
 # ---------------- Modules ----------------
 # All modules that exist in the repo
-SUBDIRS := cargs pair vector deque list forward_list set map unordered_set
+SUBDIRS := cargs pair vector deque list forward_list set map unordered_set stack
 
 # Only these are built/installed/tested as shared libs
 # (edit this list whenever you want to publish more)
-INSTALL_LIBS := vector deque list forward_list set map unordered_set
+INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set stack
 
 # ---------------- Core/Dependency objects ----------------
 # Any objects you want to be able to link into other libs (but not necessarily installed as libs)
@@ -52,6 +54,7 @@ CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 # Per-module extra object deps (link-time deps)
 DEPS_map          := rbt/rbt.o pair/pair.o
 DEPS_set          := rbt/rbt.o
+DEPS_stack		  := vector/vector.o deque/deque.o list/list.o
 DEPS_unordered_set:= hash_table/hash_table.o vector/vector.o
 # Add more like:
 # DEPS_unordered_map := hash_table/hash_table.o pair/pair.o
@@ -128,37 +131,49 @@ uninstall_libs:
 	ldconfig
 
 # ---------------- Unit tests (only for installed libs) ----------------
+UNITTEST_SRC = $1/$1_unittest.c
+
+# Modules that actually have unit tests present
+TEST_MODULES := $(foreach m,$(INSTALL_LIBS),$(if $(wildcard $(call UNITTEST_SRC,$(m))),$(m),))
+
+# Modules without a unittest source (will be skipped)
+SKIP_MODULES := $(filter-out $(TEST_MODULES),$(INSTALL_LIBS))
+
 unittest-log-init:
 	@$(RM) $(UNITTEST_LOG)
 	@touch $(UNITTEST_LOG)
 
 define MODULE_TEST_RULES
-unittest-$1: install $1/$1_unittest.c
+unittest-$1: install $(call UNITTEST_SRC,$1)
 	@echo "Building unit tests for $1..."
-	$(CC) -o $1/unittest $1/$1_unittest.c $(CFLAGS) -l$1 $(LDLIBS)
-	@{ \
-	  echo ""; \
-	  echo "=================================================="; \
-	  echo "  MODULE: $1"; \
-	  echo "  Running unit tests..."; \
-	  echo "  Started at: `date +"%Y-%m-%d %H:%M:%S"`"; \
-	  echo "=================================================="; \
-	} >> $(UNITTEST_LOG)
-	@if [ "$(memcheck)" = "true" ]; then \
+	$(CC) -o $1/unittest $(call UNITTEST_SRC,$1) $(CFLAGS) -l$1 $(LDLIBS) -lcargs
+	@MODARGS="$(ARGS) --module $1"; \
+	if [ "$(memcheck)" = "true" ]; then \
+	  echo "[RUN][$1] valgrind --leak-check=full $1/unittest $$$$MODARGS"; \
 	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
-	    valgrind --leak-check=full $1/unittest $(UNITTEST_LOG) $(SEED) \
-	    >> $(UNITTEST_LOG) 2>&1 ; \
+	    valgrind --leak-check=full \
+	    $1/unittest $$$$MODARGS >> $(UNITTEST_LOG) 2>&1 ; \
 	else \
+	  echo "[RUN][$1] $1/unittest $$$$MODARGS"; \
 	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
-	    $1/unittest $(UNITTEST_LOG) $(SEED) \
-	    >> $(UNITTEST_LOG) 2>&1 ; \
+	    $1/unittest $$$$MODARGS >> $(UNITTEST_LOG) 2>&1 ; \
 	fi
 	@echo "--------------------------------------------------" >> $(UNITTEST_LOG)
 	@$(RM) $1/unittest
 endef
 
-$(foreach m,$(INSTALL_LIBS),$(eval $(call MODULE_TEST_RULES,$(m))))
+define MODULE_TEST_SKIP_RULES
+unittest-$1:
+	@echo "Skipping unit tests for $1 (no $(call UNITTEST_SRC,$1) found)."
+endef
 
+# Create real test rules only for modules that have the source file
+$(foreach m,$(TEST_MODULES),$(eval $(call MODULE_TEST_RULES,$(m))))
+
+# Create "skip" rules for modules without tests
+$(foreach m,$(SKIP_MODULES),$(eval $(call MODULE_TEST_SKIP_RULES,$(m))))
+
+# unittest target depends on all modules (some will run, some will skip)
 unittest: unittest-log-init $(INSTALL_LIBS:%=unittest-%)
 
 # ---------------- Clean ----------------
