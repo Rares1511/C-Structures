@@ -9,10 +9,7 @@
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64",
-            "compilerArgs": [
-                "-I /home/rares/Desktop/Projects/C-Structures/pair/pair.h"
-            ]
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

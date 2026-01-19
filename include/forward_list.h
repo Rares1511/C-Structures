@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t forward_list_attr_t;
+typedef univ_attr_t forward_list_attr_t;
 
 typedef struct forward_list_node{
     void* data;

@@ -244,6 +244,16 @@ void deque_free(void *v_dq) {
         return;
     }
     deque *dq = (deque *)v_dq;
-    deque_clear(dq);
+    for (int i = dq->front; i <= dq->back; i++) {
+        if (dq->attr.fr) {
+            for (int j = dq->blocks[i].front; j < dq->blocks[i].back; j++) {
+                dq->attr.fr(dq->blocks[i].data + (j * dq->attr.size));
+            }
+        }
+        free(dq->blocks[i].data);
+        dq->blocks[i].data = NULL;
+        dq->blocks[i].front = 0;
+        dq->blocks[i].back = 0;
+    }
     free(dq->blocks);
 }

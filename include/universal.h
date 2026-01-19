@@ -23,7 +23,7 @@ typedef enum cs_codes {
     CS_FILE = -9
 } cs_codes;
 
-typedef void (*printer)(FILE *stream, void *);
+typedef void (*printer)(FILE *, const void *);
 typedef void (*freer)(void *);
 typedef int (*comparer)(const void *, const void *);
 typedef void (*deepcopy)(void *, const void *);
@@ -33,14 +33,25 @@ typedef struct univ_attr_t {
     freer fr;      /*!< freer function for the datatype */
     deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     printer print; /*!< printer function for the datatype */
+    comparer comp; /*!< compare function for the datatype */
 } univ_attr_t;
 
-typedef struct xuniv_attr_t {
-    int size;      /*!< size of the datatype */
-    freer fr;      /*!< freer function for the datatype */
-    printer print; /*!< printer function for the datatype */
-    deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
-    comparer comp; /*!< compare function for the datatype */
-} xuniv_attr_t;
+/*!
+ * A simple universal hash function for byte arrays.
+ * @param[in] data Pointer to the data to hash.
+ * @param[in] size Size of the data in bytes.
+ * @return A size_t hash value.
+ */
+static size_t universal_hash_bytes(const void *data, size_t size) {
+    const unsigned char *bytes = (const unsigned char *)data;
+    size_t hash = 1469598103934665603ULL;  // FNV offset basis (64-bit)
+
+    for (size_t i = 0; i < size; ++i) {
+        hash ^= (size_t)bytes[i];
+        hash *= 1099511628211ULL;          // FNV prime (64-bit)
+    }
+
+    return hash;
+}
 
 #endif

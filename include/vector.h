@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t vector_attr_t;
+typedef univ_attr_t vector_attr_t;
 
 typedef struct vector {
     void *vec;          /*!< size of the datatype */
@@ -17,11 +17,11 @@ typedef struct vector {
 /*!
  * Initializes the given variable with the correct vector structure datatype
  * @param[out] vec        Variable that is initalized
- * @param[in]  elem_attr  Attributes decribing the elements that the vector will contain
+ * @param[in]  attr       Attributes decribing the elements that the vector will contain
  * @return CS_MEM if a memory problem ocurred, CS_SIZE in case a negative or too big size has been
  * entered or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_init(vector *vec, vector_attr_t elem_attr);
+cs_codes vector_init(vector *vec, vector_attr_t attr);
 
 /*!
  * Inserts the element at the given position in the offered vector

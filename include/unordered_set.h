@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t unordered_set_attr_t;
+typedef univ_attr_t unordered_set_attr_t;
 typedef struct hash_table hash_table;
 typedef size_t (*hash_func_t)(const void *key);
 

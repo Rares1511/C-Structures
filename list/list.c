@@ -15,7 +15,7 @@
  * @param[in] copy  Copy function for the datatype inside the list
  * @return Pointer to the initialized node or NULL if a memory problem occurred
  */
-list_node* list_node_init(void *el, int size, deepcopy copy) {
+list_node* list_node_init(const void *el, int size, deepcopy copy) {
     list_node *aux = malloc(sizeof(list_node));
     if (!aux)
         return NULL;
@@ -103,7 +103,7 @@ cs_codes list_init(list *l, list_attr_t attr) {
     return CS_SUCCESS;
 }
 
-cs_codes list_push_front(list *l, void *el) {
+cs_codes list_push_front(list *l, const void *el) {
     list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
     if (!aux)
         return CS_MEM;
@@ -118,7 +118,7 @@ cs_codes list_push_front(list *l, void *el) {
     return CS_SUCCESS;
 }
 
-cs_codes list_push_back(list *l, void *el) {
+cs_codes list_push_back(list *l, const void *el) {
     list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
     if (!aux)
         return CS_MEM;

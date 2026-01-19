@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t stack_attr;
+typedef univ_attr_t stack_attr;
 
 typedef enum stack_type {
     CS_STACK_ARRAY,

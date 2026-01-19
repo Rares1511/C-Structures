@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_pair_init() {
     pair p;

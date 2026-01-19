@@ -4,7 +4,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       START OF HELPER FUNCTIONS SECTION                                    ║
@@ -158,7 +158,7 @@ test_res test_map_insert() {
         .fr = NULL,
         .print = print_int,
     };
-    int frk[VALUE_RANGE], keys[TEST_SIZE], values[TEST_SIZE];
+    int frk[__VALUE_RANGE], keys[__TEST_SIZE], values[__TEST_SIZE];
     memset(frk, 0, sizeof(frk));
 
     cs_codes rc = map_init(&m, key_attr, val_attr);
@@ -167,13 +167,13 @@ test_res test_map_insert() {
             .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
-        keys[i] = rand() % VALUE_RANGE;
+    for (int i = 0; i < __TEST_SIZE; i++) {
+        keys[i] = rand() % __VALUE_RANGE;
         while (frk[keys[i]] == 1) {
-            keys[i] = rand() % VALUE_RANGE;
+            keys[i] = rand() % __VALUE_RANGE;
         }
         frk[keys[i]] = 1;
-        values[i] = rand() % VALUE_RANGE;
+        values[i] = rand() % __VALUE_RANGE;
         rc = map_insert(&m, &keys[i], &values[i]);
         if (rc != CS_SUCCESS) {
             map_free(&m);
@@ -193,7 +193,7 @@ test_res test_map_insert() {
         }
     }
 
-    if (map_size(m) != TEST_SIZE) {
+    if (map_size(m) != __TEST_SIZE) {
         map_free(&m);
         return (test_res){
             .test_name = (char *)__func__,
@@ -202,7 +202,7 @@ test_res test_map_insert() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         int *val = (int *)map_find(m, &keys[i]);
         if (val == NULL || *val != values[i]) {
             map_free(&m);

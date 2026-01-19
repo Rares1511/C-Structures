@@ -15,7 +15,7 @@
  * @param data_size Size of the data type.
  * @return Pointer to the initialized forward list node, or NULL on failure.
  */
-forward_list_node* forward_list_node_init(void* data, deepcopy copy, size_t data_size){
+forward_list_node* forward_list_node_init(const void* data, deepcopy copy, size_t data_size){
     forward_list_node* node = (forward_list_node*)malloc(sizeof(forward_list_node));
     if (!node) return NULL;
 
@@ -63,7 +63,7 @@ cs_codes forward_list_init(forward_list* list, forward_list_attr_t attr){
     return CS_SUCCESS;
 }
 
-cs_codes forward_list_push_front(forward_list* list, void* data){
+cs_codes forward_list_push_front(forward_list* list, const void* data){
     if (!list) return CS_ELEM;
     if (!data) return CS_ELEM;
 
@@ -127,7 +127,7 @@ void forward_list_clear(forward_list* list){
     list->size = 0;
 }
 
-void forward_list_print(FILE *stream, void *v_l) {
+void forward_list_print(FILE *stream, const void *v_l) {
     forward_list* list = (forward_list*)v_l;
     if (!list) return;
     if (!list->attr.print) return;

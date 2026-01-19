@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t rbt_attr_t;
+typedef univ_attr_t rbt_attr_t;
 
 #define __RBT_NODE_BLACK_COLOR 0
 #define __RBT_NODE_RED_COLOR   1

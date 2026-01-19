@@ -10,24 +10,6 @@
 
 
 /*!
- * A simple universal hash function for byte arrays.
- * @param[in] data Pointer to the data to hash.
- * @param[in] size Size of the data in bytes.
- * @return A size_t hash value.
- */
-size_t universal_hash_bytes(const void *data, size_t size) {
-    const unsigned char *bytes = (const unsigned char *)data;
-    size_t hash = 1469598103934665603ULL;  // FNV offset basis (64-bit)
-
-    for (size_t i = 0; i < size; ++i) {
-        hash ^= (size_t)bytes[i];
-        hash *= 1099511628211ULL;          // FNV prime (64-bit)
-    }
-
-    return hash;
-}
-
-/*!
  * Computes the bucket index for a given element in the hash table.
  * @param[in] ht The hash table.
  * @param[in] el Pointer to the element.

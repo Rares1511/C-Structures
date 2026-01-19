@@ -41,24 +41,21 @@ endif
 
 # ---------------- Modules ----------------
 # All modules that exist in the repo
-SUBDIRS := cargs pair vector deque list forward_list set map unordered_set stack
+SUBDIRS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
 
 # Only these are built/installed/tested as shared libs
 # (edit this list whenever you want to publish more)
-INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set stack
-
+INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
 # ---------------- Core/Dependency objects ----------------
 # Any objects you want to be able to link into other libs (but not necessarily installed as libs)
 CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 
 # Per-module extra object deps (link-time deps)
-DEPS_map          := rbt/rbt.o pair/pair.o
-DEPS_set          := rbt/rbt.o
-DEPS_stack		  := vector/vector.o deque/deque.o list/list.o
-DEPS_unordered_set:= hash_table/hash_table.o vector/vector.o
-# Add more like:
-# DEPS_unordered_map := hash_table/hash_table.o pair/pair.o
-# DEPS_something     := vector/vector.o
+DEPS_map           := rbt/rbt.o pair/pair.o
+DEPS_set           := rbt/rbt.o
+DEPS_stack		   := vector/vector.o deque/deque.o list/list.o
+DEPS_unordered_set := hash_table/hash_table.o vector/vector.o
+DEPS_unordered_map := hash_table/hash_table.o vector/vector.o pair/pair.o
 
 # ---------------- Derived paths ----------------
 # Main object for each module is module/module.o
@@ -106,7 +103,6 @@ install_headers:
 	@for h in $(INSTALL_LIBS); do \
 		cp $(LOCAL_INCLUDEDIR)/$$h.h $(PATH_INCLUDEDIR); \
 	done
-	# Install extra public headers only if you really want them public:
 	cp $(LOCAL_INCLUDEDIR)/rbt.h $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/hash_table.h $(PATH_INCLUDEDIR)
 
@@ -158,7 +154,6 @@ unittest-$1: install $(call UNITTEST_SRC,$1)
 	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
 	    $1/unittest $$$$MODARGS >> $(UNITTEST_LOG) 2>&1 ; \
 	fi
-	@echo "--------------------------------------------------" >> $(UNITTEST_LOG)
 	@$(RM) $1/unittest
 endef
 

@@ -1,23 +1,23 @@
 Sequence Containers (Arrays): 
-    - Vector ✔
-    - Deque ✔
-    - List ✔
-    - Forward_list ✔
+    - Vector ✔ (Implemented + Unittest)
+    - Deque ✔ (Implemented + Unittest)
+    - List ✔ (Implemented + Unittest)
+    - Forward_list ✔ (Implemented + Unittest)
 
 Associative Containers (RBT):
-    - Set ✔
-    - Map ✔
+    - Set ✔ (Implemented + Unittest)
+    - Map ✔ (Implemented + Unittest)
     - Multiset
     - Multimap
 
 Unordered associative containers (Hash Table):
-    - Unordered Set
+    - Unordered Set ✔ (Implemented)
     - Unordered Map
     - Unordered Multiset
     - Unordered Multimap
 
 Container Adapters:
-    - Stack
+    - Stack ✔ (Implemented)
     - Queue
     - Priority Queue
     - Flat Set
@@ -26,7 +26,5 @@ Container Adapters:
     - Flat Multimap
 
 Extra Modules:
-    - Pair ✔
-    - Cargs
-
-UPDATE void* to const void* 
+    - Pair ✔ (Implemented + Unittest)
+    - Cargs ✔ (Implemented)

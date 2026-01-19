@@ -3,7 +3,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       START OF HELPER FUNCTIONS SECTION                                    ║
@@ -138,7 +138,7 @@ test_res test_set_insert() {
         .size = sizeof(int),
         .print = NULL
     };
-    int fr[VALUE_RANGE];
+    int fr[__VALUE_RANGE];
     memset(fr, 0, sizeof(fr));
 
     int rc = set_init(&s, attr);
@@ -150,10 +150,10 @@ test_res test_set_insert() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
-        int value = rand() % VALUE_RANGE;
+    for (int i = 0; i < __TEST_SIZE; i++) {
+        int value = rand() % __VALUE_RANGE;
         while (fr[value]) {
-            value = rand() % VALUE_RANGE;
+            value = rand() % __VALUE_RANGE;
         }
         fr[value] = 1;
 
@@ -175,7 +175,7 @@ test_res test_set_insert() {
         }
     }
 
-    if (set_size(s) != TEST_SIZE) {
+    if (set_size(s) != __TEST_SIZE) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "set size mismatch after insertions",
@@ -183,7 +183,7 @@ test_res test_set_insert() {
         };
     }
 
-    for (int i = 0; i < VALUE_RANGE; i++) {
+    for (int i = 0; i < __VALUE_RANGE; i++) {
         if (fr[i]) {
             int *found = (int *)set_find(s, &i);
             if (found == NULL || *found != i) {
@@ -222,7 +222,7 @@ test_res test_set_insert_duplicate() {
         .size = sizeof(int),
         .print = NULL
     };
-    int fr[VALUE_RANGE], actual_size = 0;
+    int fr[__VALUE_RANGE], actual_size = 0;
     memset(fr, 0, sizeof(fr));
 
     int rc = set_init(&s, attr);
@@ -234,8 +234,8 @@ test_res test_set_insert_duplicate() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
-        int value = rand() % VALUE_RANGE;
+    for (int i = 0; i < __TEST_SIZE; i++) {
+        int value = rand() % __VALUE_RANGE;
         rc = set_insert(&s, &value);
         if (fr[value]) {
             if (rc != CS_ELEM) {
@@ -274,7 +274,7 @@ test_res test_set_insert_duplicate() {
         };
     }
 
-    for (int i = 0; i < VALUE_RANGE; i++) {
+    for (int i = 0; i < __VALUE_RANGE; i++) {
         if (fr[i]) {
             int *found = (int *)set_find(s, &i);
             if (found == NULL || *found != i) {
@@ -305,7 +305,7 @@ test_res test_set_delete() {
         .size = sizeof(int),
         .print = NULL
     };
-    int fr[VALUE_RANGE];
+    int fr[__VALUE_RANGE];
     memset(fr, 0, sizeof(fr));
 
     int rc = set_init(&s, attr);
@@ -317,10 +317,10 @@ test_res test_set_delete() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
-        int value = rand() % VALUE_RANGE;
+    for (int i = 0; i < __TEST_SIZE; i++) {
+        int value = rand() % __VALUE_RANGE;
         while (fr[value]) {
-            value = rand() % VALUE_RANGE;
+            value = rand() % __VALUE_RANGE;
         }
         fr[value] = 1;
 
@@ -334,7 +334,7 @@ test_res test_set_delete() {
         }
     }
 
-    for (int i = 0; i < VALUE_RANGE; i++) {
+    for (int i = 0; i < __VALUE_RANGE; i++) {
         if (fr[i]) {
             rc = set_delete(&s, &i);
             if (rc != CS_SUCCESS) {
@@ -383,7 +383,7 @@ test_res test_set_swap() {
         .size = sizeof(int),
         .print = NULL
     };
-    int fr1[VALUE_RANGE], fr2[VALUE_RANGE];
+    int fr1[__VALUE_RANGE], fr2[__VALUE_RANGE];
     memset(fr1, 0, sizeof(fr1));
     memset(fr2, 0, sizeof(fr2));
 
@@ -405,16 +405,16 @@ test_res test_set_swap() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
-        int value1 = rand() % VALUE_RANGE;
+    for (int i = 0; i < __TEST_SIZE; i++) {
+        int value1 = rand() % __VALUE_RANGE;
         while (fr1[value1]) {
-            value1 = rand() % VALUE_RANGE;
+            value1 = rand() % __VALUE_RANGE;
         }
         fr1[value1] = 1;
 
-        int value2 = rand() % VALUE_RANGE;
+        int value2 = rand() % __VALUE_RANGE;
         while (fr2[value2]) {
-            value2 = rand() % VALUE_RANGE;
+            value2 = rand() % __VALUE_RANGE;
         }
         fr2[value2] = 1;
 
@@ -455,7 +455,7 @@ test_res test_set_swap() {
 
     set_swap(&s1, &s2);
 
-    for (int i = 0; i < VALUE_RANGE; i++) {
+    for (int i = 0; i < __VALUE_RANGE; i++) {
         if (fr1[i]) {
             int *found = (int *)set_find(s2, &i);
             if (found == NULL || *found != i) {

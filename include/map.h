@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef xuniv_attr_t map_attr_t;
+typedef univ_attr_t map_attr_t;
 typedef struct rbt rbt;
 
 typedef struct map {

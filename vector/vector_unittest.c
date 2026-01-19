@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_vector_init() {
     vector v;

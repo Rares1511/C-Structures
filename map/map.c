@@ -20,8 +20,10 @@ void map_node_copy(void *dest, const void *src) {
     if (d == NULL || s == NULL) {
         return;
     }
-    pair_init(d, s->first_attr, s->second_attr);
-    pair_set(d, s->first, s->second);
+    d->first_attr = s->first_attr;
+    d->second_attr = s->second_attr;
+    d->first = s->first;
+    d->second = s->second;
 }
 
 int map_node_comp(const void *a, const void *b) {

@@ -52,4 +52,5 @@
         "rbt.h": "c"
     },
     "makefile.configureOnOpen": true,
+    "C_Cpp.errorSquiggles": "disabled",
 }

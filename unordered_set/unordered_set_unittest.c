@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_unordered_set_init() {
     unordered_set uset;
@@ -29,6 +29,8 @@ test_res test_unordered_set_init() {
             .return_code = CS_ELEM
         };
     }
+
+    unordered_set_free(&uset);
 
     return (test_res){
         .test_name = (char*) __func__,

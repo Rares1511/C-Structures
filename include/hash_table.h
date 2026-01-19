@@ -4,7 +4,7 @@
 #include <cs/universal.h>
 #include <cs/vector.h>
 
-typedef xuniv_attr_t hash_table_attr_t;
+typedef univ_attr_t hash_table_attr_t;
 
 typedef size_t (*hash_func_t)(const void *key);
 

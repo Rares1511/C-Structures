@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_forward_list_init() {
     forward_list list;
@@ -52,7 +52,7 @@ test_res test_forward_list_push_front() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         value = rand() % 10000;
         rc = forward_list_push_front(&list, &value);
         if (rc != CS_SUCCESS) {
@@ -72,7 +72,7 @@ test_res test_forward_list_push_front() {
         }
     }
 
-    if (list.size != TEST_SIZE) {
+    if (list.size != __TEST_SIZE) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size after push_front is incorrect",
@@ -98,7 +98,7 @@ test_res test_forward_list_pop_front() {
         .print = NULL,
         .comp = NULL,
     };
-    int values[TEST_SIZE];
+    int values[__TEST_SIZE];
 
     cs_codes rc = forward_list_init(&list, attr);
     if (rc != CS_SUCCESS) {
@@ -109,7 +109,7 @@ test_res test_forward_list_pop_front() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = forward_list_push_front(&list, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -121,7 +121,7 @@ test_res test_forward_list_pop_front() {
         }
     }
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         if (*(int *)forward_list_front(list) != values[i]) {
             return (test_res){
                 .test_name = (char *)__func__,
@@ -158,7 +158,7 @@ test_res test_forward_list_swap() {
         .print = NULL,
         .comp = NULL,
     };
-    int values1[TEST_SIZE], values2[TEST_SIZE];
+    int values1[__TEST_SIZE], values2[__TEST_SIZE];
 
     cs_codes rc = forward_list_init(&list1, attr);
     if (rc != CS_SUCCESS) {
@@ -179,7 +179,7 @@ test_res test_forward_list_swap() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values1[i] = rand() % 10000;
         values2[i] = rand() % 10000;
 
@@ -208,7 +208,7 @@ test_res test_forward_list_swap() {
 
     forward_list_swap(&list1, &list2);
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         if (*(int *)forward_list_front(list1) != values2[i]) {
             forward_list_free(&list1);
             forward_list_free(&list2);
@@ -221,7 +221,7 @@ test_res test_forward_list_swap() {
         forward_list_pop_front(&list1);
     }
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         if (*(int *)forward_list_front(list2) != values1[i]) {
             forward_list_free(&list1);
             forward_list_free(&list2);

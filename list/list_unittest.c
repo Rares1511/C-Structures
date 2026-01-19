@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_list_init() {
     list l;
@@ -52,7 +52,7 @@ test_res test_list_push_front() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         value = rand() % 10000;
         rc = list_push_front(&l, &value);
         if (rc != CS_SUCCESS) {
@@ -103,7 +103,7 @@ test_res test_list_push_back() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         value = rand() % 10000;
         rc = list_push_back(&l, &value);
         if (rc != CS_SUCCESS) {
@@ -143,7 +143,7 @@ test_res test_list_pop_front() {
         .print = NULL,
         .fr = NULL,
     };
-    int values[TEST_SIZE];
+    int values[__TEST_SIZE];
 
     cs_codes rc = list_init(&l, attr);
     if (rc != CS_SUCCESS) {
@@ -154,7 +154,7 @@ test_res test_list_pop_front() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = list_push_back(&l, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -167,7 +167,7 @@ test_res test_list_pop_front() {
         }
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         if (*(int *)list_front(l) != values[i]) {
             list_free(&l);
             return (test_res){
@@ -206,7 +206,7 @@ test_res test_list_pop_back() {
         .print = NULL,
         .fr = NULL,
     };
-    int values[TEST_SIZE];
+    int values[__TEST_SIZE];
 
     cs_codes rc = list_init(&l, attr);
     if (rc != CS_SUCCESS) {
@@ -217,7 +217,7 @@ test_res test_list_pop_back() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = list_push_back(&l, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -230,7 +230,7 @@ test_res test_list_pop_back() {
         }
     }
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         if (*(int *)list_back(l) != values[i]) {
             list_free(&l);
             return (test_res){
@@ -269,7 +269,7 @@ test_res test_list_erase() {
         .print = NULL,
         .fr = NULL,
     };
-    int values[TEST_SIZE], erase_pos;
+    int values[__TEST_SIZE], erase_pos;
 
     cs_codes rc = list_init(&l, attr);
     if (rc != CS_SUCCESS) {
@@ -280,7 +280,7 @@ test_res test_list_erase() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = list_push_back(&l, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -293,7 +293,7 @@ test_res test_list_erase() {
         }
     }
 
-    erase_pos = rand() % TEST_SIZE;
+    erase_pos = rand() % __TEST_SIZE;
     rc = list_erase(&l, erase_pos);
     if (rc != CS_SUCCESS) {
         list_free(&l);
@@ -354,7 +354,7 @@ test_res test_list_sort() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         int value = rand() % 10000;
         rc = list_push_back(&l, &value);
         if (rc != CS_SUCCESS) {

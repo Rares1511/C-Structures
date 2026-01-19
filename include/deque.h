@@ -6,7 +6,7 @@
 #define DEQUE_INIT_BLOCKS 64
 #define DEQUE_BLOCK_SIZE 64
 
-typedef xuniv_attr_t deque_attr_t;
+typedef univ_attr_t deque_attr_t;
 
 typedef struct deque_block_t {
     void* data; /*!< Pointer to the block's data */

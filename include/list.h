@@ -3,7 +3,7 @@
 
 #include "universal.h"
 
-typedef xuniv_attr_t list_attr_t;
+typedef univ_attr_t list_attr_t;
 
 typedef struct list_node {
     void *data;             /*!< information held inside the node */
@@ -32,7 +32,7 @@ cs_codes list_init(list *l, list_attr_t el_attr);
  * @param[in]  el  Element that will be added
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful addition
  */
-cs_codes list_push_front(list *l, void *el);
+cs_codes list_push_front(list *l, const void *el);
 
 /*!
  * Pushes the element at the back of the list
@@ -40,7 +40,7 @@ cs_codes list_push_front(list *l, void *el);
  * @param[in]  el  Element that will be added
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful addition
  */
-cs_codes list_push_back(list *l, void *el);
+cs_codes list_push_back(list *l, const void *el);
 
 /*!
  * Pops the element at the front list

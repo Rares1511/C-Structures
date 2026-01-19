@@ -2,7 +2,7 @@
 
 #include "../include/unittest.h"
 
-FILE *DEBUG_OUT = NULL;
+FILE *__DEBUG_OUT = NULL;
 
 test_res test_deque_init() {
     deque dq;
@@ -35,7 +35,7 @@ test_res test_deque_push_pop_front() {
         .copy = NULL,
         .print = print_int,
     };
-    int values[TEST_SIZE];
+    int values[__TEST_SIZE];
 
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
@@ -44,7 +44,7 @@ test_res test_deque_push_pop_front() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = deque_push_front(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -55,7 +55,7 @@ test_res test_deque_push_pop_front() {
         }
     }
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         int *front = (int *)deque_front(dq);
         if (!front || *front != values[i]) {
             deque_free(&dq);
@@ -89,7 +89,7 @@ test_res test_deque_push_pop_back() {
         .print = NULL,
         .size = sizeof(int),
     };
-    int values[TEST_SIZE];
+    int values[__TEST_SIZE];
 
     cs_codes rc = deque_init(&dq, attr);
     if (rc != CS_SUCCESS) {
@@ -98,7 +98,7 @@ test_res test_deque_push_pop_back() {
         };
     }
 
-    for (int i = 0; i < TEST_SIZE; i++) {
+    for (int i = 0; i < __TEST_SIZE; i++) {
         values[i] = rand() % 10000;
         rc = deque_push_back(&dq, &values[i]);
         if (rc != CS_SUCCESS) {
@@ -109,7 +109,7 @@ test_res test_deque_push_pop_back() {
         }
     }
 
-    for (int i = TEST_SIZE - 1; i >= 0; i--) {
+    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
         int *front = (int *)deque_back(dq);
         if (!front || *front != values[i]) {
             deque_free(&dq);

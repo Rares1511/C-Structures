@@ -53,7 +53,7 @@ void* pair_second(pair p) {
     return p.second;
 }
 
-void pair_print(FILE *stream, void *v_p) {
+void pair_print(FILE *stream, const void *v_p) {
     if (v_p == NULL || stream == NULL) {
         return;
     }
