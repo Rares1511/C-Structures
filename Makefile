@@ -68,7 +68,7 @@ ALL_MOD_OBJS := $(foreach m,$(SUBDIRS),$(call MOD_OBJ,$(m)))
 LIBS := $(foreach m,$(INSTALL_LIBS),$(LIBOUTDIR)/lib$(m).so)
 
 # ---------------- Default target ----------------
-all: uninstall install unittest
+all: clean uninstall install unittest
 
 # ---------------- Output dir ----------------
 $(LIBOUTDIR):

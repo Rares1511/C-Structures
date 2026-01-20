@@ -1,6 +1,6 @@
 #pragma once
-#ifndef UNIVERSAL_H
-#define UNIVERSAL_H
+#ifndef __CS_UNIVERSAL_H__
+#define __CS_UNIVERSAL_H__
 
 #include <stdio.h>
 
@@ -20,7 +20,8 @@ typedef enum cs_codes {
     CS_ELEM = -6,
     CS_COMP = -7,
     CS_UNKNOWN = -8,
-    CS_FILE = -9
+    CS_FILE = -9,
+    CS_NULL = -10
 } cs_codes;
 
 typedef void (*printer)(FILE *, const void *);
@@ -35,6 +36,32 @@ typedef struct univ_attr_t {
     printer print; /*!< printer function for the datatype */
     comparer comp; /*!< compare function for the datatype */
 } univ_attr_t;
+
+typedef struct metadata_t {
+    char is_init; /*!< flag to indicate if the structure is initialized */
+    int size;    /*!< number of elements in the structure */
+} metadata_t;
+
+/*!
+ * Increases the size stored in the metadata by the given increment
+ * @param[in,out] meta  Metadata whose size will be increased
+ * @param[in]     inc   The increment value (can be negative to decrease size)
+ */
+static void metadata_size_inc(metadata_t *meta, int inc) { meta->size += inc; }
+
+/*!
+ * Initializes the metadata structure
+ * @param[out] meta     Metadata structure to be initialized
+ * @param[in]  is_init  Flag to indicate if the structure is initialized
+ */
+static void metadata_init(metadata_t *meta, int is_init) { meta->size = 0; meta->is_init = is_init; }
+
+/*!
+ * Checks if the metadata structure is initialized
+ * @param[in] meta  Metadata structure to be checked
+ * @return 1 if initialized, 0 otherwise
+ */
+static int metadata_is_init(metadata_t meta) { return meta.is_init; }
 
 /*!
  * A simple universal hash function for byte arrays.

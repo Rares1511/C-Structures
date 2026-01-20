@@ -1,5 +1,5 @@
-#ifndef CS_GLOBAL_H
-#define CS_GLOBAL_H
+#ifndef __CS_GLOBAL_H__
+#define __CS_GLOBAL_H__
 
 #include <pthread.h>
 #include <cs/universal.h>

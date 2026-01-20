@@ -1,5 +1,5 @@
-#ifndef SET_H
-#define SET_H
+#ifndef __CS_SET_H__
+#define __CS_SET_H__
 
 #include <cs/universal.h>
 

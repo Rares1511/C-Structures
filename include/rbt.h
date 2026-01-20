@@ -1,5 +1,5 @@
-#ifndef RBTREE_H
-#define RBTREE_H
+#ifndef __CS_RBTREE_H__
+#define __CS_RBTREE_H__
 
 #include <cs/universal.h>
 

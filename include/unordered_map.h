@@ -19,7 +19,13 @@ cs_codes unordered_map_init(unordered_map *umap,
                                  unordered_map_attr_t value_attr,
                                  hash_func_t hash_func,
                                  int initial_capacity);
-
+cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value);
+cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key);
+void *unordered_map_get_entry(unordered_map umap, const void *key);
+int unordered_map_count(unordered_map umap, const void *key);
+void unordered_map_swap(unordered_map *umap1, unordered_map *umap2);
+void unordered_map_clear(unordered_map *umap);
+void unordered_map_print(FILE *stream, void *v_umap);
 void unordered_map_free(void *v_umap);
 
 #endif

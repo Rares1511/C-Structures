@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef __CS_VECTOR_H__
+#define __CS_VECTOR_H__
 
 #include <cs/universal.h>
 
@@ -8,7 +8,7 @@ typedef univ_attr_t vector_attr_t;
 typedef struct vector {
     void *vec;          /*!< size of the datatype */
     int cap;            /*!< current maximum capacity of the vector */
-    int size;           /*!< current size of the vector */
+    metadata_t meta;    /*!< metadata of the vector */
     vector_attr_t attr; /*!< attributes of the elements inside the vector */
 } vector;
 
@@ -96,49 +96,49 @@ int vector_count(vector vec, const void *el);
  * @param[in] vec  The vector to be checked
  * @return 1 if the vector is empty, 0 otherwise
  */
-static inline int vector_empty(vector vec) { return vec.size == 0; };
+static inline int vector_empty(vector vec) { return vec.meta.size == 0; };
 
 /*!
  * Returns the current size of the vector
  * @param[in] vec  The vector whose size will be returned
  * @return The size of the vector
  */
-static inline int vector_size(vector vec) { return vec.size; };
+static inline int vector_size(vector vec) { return vec.meta.size; };
 
 /*!
  * Sets the new attributes for the vector
  * @param[out] vec  Vector whose attributes will be changed
  * @param[in]  attr The new attributes
  */
-void vector_set_attr(vector *vec, vector_attr_t attr);
+static inline void vector_set_attr(vector *vec, vector_attr_t attr) { if (vec != NULL) vec->attr = attr; }
 
 /*!
  * Sets the new function to free the elements inside the vector
  * @param[out] vec Vector which will have its free function changed
  * @param[in]  fr  The new free function
  */
-void vector_set_free(vector *vec, freer fr);
+static inline void vector_set_free(vector *vec, freer fr) { if (vec != NULL) vec->attr.fr = fr; }
 
 /*!
  * Sets the new function to print the elements inside the vector
  * @param[out] vec    Vector which will have its print function changed
  * @param[in]  print  The new print function
  */
-void vector_set_print(vector *vec, printer print);
+static inline void vector_set_print(vector *vec, printer print) { if (vec != NULL) vec->attr.print = print; }
 
 /*!
  * Sets a new copy function used in copying the elements in the vector
  * @param[out] vec Vector whose copy function will be set or changed
  * @param[in]  cp  The new copy function
  */
-void vector_set_copy(vector *vec, deepcopy cp);
+static inline void vector_set_copy(vector *vec, deepcopy cp) { if (vec != NULL) vec->attr.copy = cp; }
 
 /*!
  * Sets the new function to compare the elements inside the vector
  * @param[out] vec   Vector which will have its compare function changed
  * @param[in]  comp  The new compare function
  */
-void vector_set_comp(vector *vec, comparer comp);
+static inline void vector_set_comp(vector *vec, comparer comp) { if (vec != NULL) vec->attr.comp = comp; }
 
 /*!
  * Empties the vector and frees any memory that was used in any of its elements

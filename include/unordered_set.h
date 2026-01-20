@@ -1,5 +1,5 @@
-#ifndef _UNORDERED_SET_H
-#define _UNORDERED_SET_H
+#ifndef __CS_UNORDERED_SET_H__
+#define __CS_UNORDERED_SET_H__
 
 #include <cs/universal.h>
 

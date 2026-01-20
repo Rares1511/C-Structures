@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef __CS_MAP_H__
+#define __CS_MAP_H__
 
 #include <cs/universal.h>
 

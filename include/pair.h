@@ -1,5 +1,5 @@
-#ifndef PAIR_H
-#define PAIR_H
+#ifndef __CS_PAIR_H__
+#define __CS_PAIR_H__
 
 #include <cs/universal.h>
 
@@ -30,7 +30,7 @@ cs_codes pair_init(pair* p, pair_attr_t* first_attr, pair_attr_t* second_attr);
  * @param second Pointer to the new value for the second element.
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes pair_set(pair* p, void* first, void* second);
+cs_codes pair_set(pair* p, const void* first, const void* second);
 
 /*!
  * Retrieves the first element of the pair.

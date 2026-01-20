@@ -24,7 +24,7 @@ cs_codes pair_init(pair* p, pair_attr_t* first_attr, pair_attr_t* second_attr) {
     return CS_SUCCESS;
 }
 
-cs_codes pair_set(pair* p, void* first, void* second) {
+cs_codes pair_set(pair* p, const void* first, const void* second) {
     if (p == NULL) {
         return CS_ELEM;
     }

@@ -1,5 +1,5 @@
-#ifndef DEQUE_H
-#define DEQUE_H
+#ifndef __CS_DEQUE_H__
+#define __CS_DEQUE_H__
 
 #include <cs/universal.h>
 

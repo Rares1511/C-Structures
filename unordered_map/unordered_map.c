@@ -11,7 +11,7 @@
 
 
 typedef struct unordered_map_entry {
-    pair data;
+    pair *data;
     hash_func_t hash_func;
 } unordered_map_entry;
 
@@ -24,6 +24,20 @@ typedef struct unordered_map_entry {
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
+
+void unordered_map_entry_init(unordered_map umap, const void *key, const void *value, unordered_map_entry *out) {
+    if (!out) {
+        return;
+    }
+    out->data = malloc(sizeof(pair));
+    if (!out->data) {
+        free(out);
+        return;
+    }
+    pair_init(out->data, &umap.key_attr, &umap.value_attr);
+    pair_set(out->data, key, value);
+    out->hash_func = umap.hash_func;
+}
 
 void unordered_map_entry_copy(void *dest, const void *src) {
     unordered_map_entry *d = (unordered_map_entry *)dest;
@@ -46,16 +60,17 @@ void unordered_map_entry_free(void *el) {
     }
     unordered_map_entry *entry = (unordered_map_entry *)el;
     pair_free(&entry->data);
+    free(entry->data);
 }
 
 int unordered_map_entry_comp(const void *a, const void *b) {
     const pair* pa = (const pair*)a;
     const pair* pb = (const pair*)b;
     
-    if (pa->second_attr->comp != NULL) {
-        return pa->second_attr->comp(pa->second, pb->second);
+    if (pa->first_attr->comp != NULL) {
+        return pa->first_attr->comp(pa->first, pb->first);
     }
-    return memcmp(pa->second, pb->second, pa->second_attr->size);
+    return memcmp(pa->first, pb->first, pa->first_attr->size);
 }
 
 size_t unordered_map_entry_hash(const void *el) {
@@ -65,9 +80,9 @@ size_t unordered_map_entry_hash(const void *el) {
         return 0;
     }
     if (entry->hash_func == NULL) {
-        return universal_hash_bytes(entry->data.first, entry->data.first_attr->size);
+        return universal_hash_bytes(entry->data->first, entry->data->first_attr->size);
     }
-    return entry->hash_func(entry->data.first);
+    return entry->hash_func(entry->data->first);
 }
 
 
@@ -99,6 +114,94 @@ cs_codes unordered_map_init(unordered_map *umap,
 
     umap->ht = malloc(sizeof(hash_table));
     return hash_table_init(umap->ht, entry_attr, unordered_map_entry_hash, initial_capacity);
+}
+
+cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value) {
+    if (!umap || !key || !value) {
+        return CS_ELEM;
+    }
+
+    unordered_map_entry entry;
+    unordered_map_entry_init(*umap, key, value, &entry);
+    return hash_table_add_entry(umap->ht, &entry);
+}
+
+cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key) {
+    if (!umap || !key) {
+        return CS_ELEM;
+    }
+
+    unordered_map_entry entry;
+    unordered_map_entry_init(*umap, key, NULL, &entry);
+
+    int rc = hash_table_remove_entry(umap->ht, &entry);
+
+    unordered_map_entry_free(&entry);
+    return rc;
+}
+
+void *unordered_map_get_entry(unordered_map umap, const void *key) {
+    if (!key) {
+        return NULL;
+    }
+
+    unordered_map_entry entry;
+    unordered_map_entry_init(umap, key, NULL, &entry);
+
+    void *found_entry = hash_table_get_entry(*umap.ht, &entry);
+    unordered_map_entry_free(&entry);
+    return ((unordered_map_entry *)found_entry)->data->second;
+}
+
+int unordered_map_count(unordered_map umap, const void *key) {
+    if (!key) {
+        return 0;
+    }
+
+    unordered_map_entry entry;
+    unordered_map_entry_init(umap, key, NULL, &entry);
+
+    int count = hash_table_count(*umap.ht, &entry);
+    unordered_map_entry_free(&entry);
+    return count;
+}
+
+void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
+    if (!umap1 || !umap2) {
+        return;
+    }
+    hash_table_swap(umap1->ht, umap2->ht);
+
+    unordered_map_attr_t temp_key_attr = umap1->key_attr;
+    unordered_map_attr_t temp_value_attr = umap1->value_attr;
+    hash_func_t temp_hash_func = umap1->hash_func;
+
+    umap1->key_attr = umap2->key_attr;
+    umap1->value_attr = umap2->value_attr;
+    umap1->hash_func = umap2->hash_func;
+
+    umap2->key_attr = temp_key_attr;
+    umap2->value_attr = temp_value_attr;
+    umap2->hash_func = temp_hash_func;
+}
+
+void unordered_map_clear(unordered_map *umap) {
+    if (!umap) {
+        return;
+    }
+    hash_table_clear(umap->ht);
+    umap->ht = NULL;
+    umap->key_attr = (unordered_map_attr_t){0};
+    umap->value_attr = (unordered_map_attr_t){0};
+    umap->hash_func = NULL;
+}
+
+void unordered_map_print(FILE *stream, void *v_umap) {
+    if (!stream || !v_umap) {
+        return;
+    }
+    unordered_map *umap = (unordered_map *)v_umap;
+    hash_table_print(stream, umap->ht);
 }
 
 void unordered_map_free(void *v_umap) {

@@ -1,5 +1,5 @@
-#ifndef _STACK_H_
-#define _STACK_H_
+#ifndef __CS_STACK_H__
+#define __CS_STACK_H__
 
 #include <cs/universal.h>
 

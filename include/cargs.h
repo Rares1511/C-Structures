@@ -1,5 +1,5 @@
-#ifndef _CARGS_H
-#define _CARGS_H
+#ifndef __CS_CARGS_H__
+#define __CS_CARGS_H__
 
 #define __CARGS_REQUIRED_BIT 0
 #define __CARGS_PARSED_BIT 1

@@ -1,5 +1,5 @@
-#ifndef HASH_TABLE_H
-#define HASH_TABLE_H
+#ifndef __CS_HASH_TABLE_H__
+#define __CS_HASH_TABLE_H__
 
 #include <cs/universal.h>
 #include <cs/vector.h>

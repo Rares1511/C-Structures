@@ -1,5 +1,5 @@
-#ifndef FORWARD_LIST_H
-#define FORWARD_LIST_H
+#ifndef __CS_FORWARD_LIST_H__
+#define __CS_FORWARD_LIST_H__
 
 #include <cs/universal.h>
 

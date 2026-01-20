@@ -1,5 +1,5 @@
-#ifndef LIST_H
-#define LIST_H
+#ifndef __CS_LIST_H__
+#define __CS_LIST_H__
 
 #include "universal.h"
 
