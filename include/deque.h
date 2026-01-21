@@ -17,7 +17,7 @@ typedef struct deque_block_t {
 typedef struct deque {
     deque_block_t *blocks; /*!< Array of blocks in the deque */
     deque_attr_t attr;     /*!< Attributes of the deque */
-    int size;              /*!< Total number of elements in the deque */
+    metadata_t meta;       /*!< Metadata for safety checks */
     int block_size;        /*!< Number of elements per block */
     int block_cap;         /*!< Total number of blocks allocated */
     int front;             /*!< Index of the front element in the deque, points to the first block */
@@ -89,14 +89,14 @@ void* deque_at(deque dq, int index);
  * @param dq The deque.
  * @return 1 if the deque is empty, 0 otherwise.
  */
-static inline int deque_empty(deque dq) { return dq.size == 0; }
+static inline int deque_empty(deque dq) { return dq.meta.size == 0; }
 
 /*! 
  * Returns the number of elements in the deque.
  * @param dq The deque.
  * @return The number of elements in the deque.
  */
-static inline int deque_size(deque dq) { return dq.size; }
+static inline int deque_size(deque dq) { return dq.meta.size; }
 
 /*! 
  * Swaps the contents of two deques.

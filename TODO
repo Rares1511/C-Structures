@@ -30,5 +30,4 @@ Extra Modules:
     - Cargs ✔ (Implemented)
 
 Add functionality of initialization that after calling clear if any functions is called it wont start because it is no longer initialized the specific datastructure and a init is required to initialize it again
-Makefile builds everytime
 Add functions for size and empty so that metadata doesnt change every library if i bring another change to it

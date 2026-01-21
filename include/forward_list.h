@@ -13,7 +13,7 @@ typedef struct forward_list_node{
 typedef struct forward_list{
     forward_list_node* head;
     forward_list_attr_t attr;
-    int size;
+    metadata_t meta;
 } forward_list;
 
 /*!
@@ -29,7 +29,14 @@ cs_codes forward_list_init(forward_list* list, forward_list_attr_t attr);
  * @param list The forward list to check.
  * @return 1 if the list is empty, 0 otherwise.
  */
-static inline int forward_list_empty(forward_list list) { return list.size == 0; }
+static inline int forward_list_empty(forward_list list) { return list.meta.size == 0; }
+
+/*! 
+ * Retrieves the size of the forward list.
+ * @param list The forward list.
+ * @return The number of elements in the list.
+ */
+static inline int forward_list_size(forward_list list) { return list.meta.size; }
 
 /*! 
  * Inserts a new element at the front of the forward list.
@@ -63,7 +70,7 @@ static inline void forward_list_set_attr(forward_list* list, forward_list_attr_t
  */
 static inline void forward_list_set_size(forward_list* list, int size) {
     if (!list) return;
-    list->size = size;
+    list->attr.size = size;
 }
 
 /*! 

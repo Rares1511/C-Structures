@@ -58,13 +58,14 @@ cs_codes forward_list_init(forward_list* list, forward_list_attr_t attr){
 
     list->head = NULL;
     list->attr = attr;
-    list->size = 0;
+    metadata_init(&list->meta, 1);
 
     return CS_SUCCESS;
 }
 
 cs_codes forward_list_push_front(forward_list* list, const void* data){
-    if (!list) return CS_ELEM;
+    if (!metadata_is_init(list->meta)) return CS_NULL;
+    if (!list) return CS_NULL;
     if (!data) return CS_ELEM;
 
     forward_list_node* new_node = forward_list_node_init(data, list->attr.copy, list->attr.size);
@@ -72,7 +73,7 @@ cs_codes forward_list_push_front(forward_list* list, const void* data){
 
     new_node->next = list->head;
     list->head = new_node;
-    list->size++;
+    metadata_size_inc(&list->meta, 1);
 
     return CS_SUCCESS;
 }
@@ -85,7 +86,7 @@ cs_codes forward_list_pop_front(forward_list* list){
     list->head = list->head->next;
 
     forward_list_node_free(temp, list->attr.fr);
-    list->size--;
+    metadata_size_inc(&list->meta, -1);
 
     return CS_SUCCESS;
 }
@@ -97,22 +98,24 @@ void* forward_list_front (forward_list list){
 
 void forward_list_swap(forward_list* list1, forward_list* list2){
     if (!list1 || !list2) return;
+    if (!metadata_is_init(list1->meta) || !metadata_is_init(list2->meta)) return;
 
     forward_list_node* temp_head = list1->head;
-    int temp_size = list1->size;
+    metadata_t temp_meta = list1->meta;
     forward_list_attr_t temp_attr = list1->attr;
 
     list1->head = list2->head;
-    list1->size = list2->size;
+    list1->meta = list2->meta;
     list1->attr = list2->attr;
 
     list2->head = temp_head;
-    list2->size = temp_size;
+    list2->meta = temp_meta;
     list2->attr = temp_attr;
 }
 
 void forward_list_clear(forward_list* list){
     if (!list) return;
+    if (!metadata_is_init(list->meta)) return;
 
     forward_list_node* current = list->head;
     forward_list_node* next_node;
@@ -124,13 +127,15 @@ void forward_list_clear(forward_list* list){
     }
 
     list->head = NULL;
-    list->size = 0;
+    metadata_init(&list->meta, 0);
 }
 
 void forward_list_print(FILE *stream, const void *v_l) {
     forward_list* list = (forward_list*)v_l;
     if (!list) return;
     if (!list->attr.print) return;
+    if (!metadata_is_init(list->meta)) return;
+    if (forward_list_empty(*list)) return;
 
     forward_list_node* current = list->head;
     while (current) {

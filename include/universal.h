@@ -10,6 +10,22 @@
 
 #define NULL ((void *)0)
 
+// Internal helpers
+#define RETURN_IF_1(cond) \
+    do { if (cond) return; } while (0)
+
+#define RETURN_IF_2(cond, retval) \
+    do { if (cond) return (retval); } while (0)
+
+// Macro selector
+#define RETURN_IF_GET(_1, _2, NAME, ...) NAME
+
+// Public macro
+//  RETURN_IF(cond)            -> return;
+//  RETURN_IF(cond, retval)    -> return retval;
+#define CS_RETURN_IF(...) \
+    RETURN_IF_GET(__VA_ARGS__, RETURN_IF_2, RETURN_IF_1)(__VA_ARGS__)
+
 typedef enum cs_codes {
     CS_SUCCESS = 0,
     CS_MEM = -1,
@@ -21,7 +37,8 @@ typedef enum cs_codes {
     CS_COMP = -7,
     CS_UNKNOWN = -8,
     CS_FILE = -9,
-    CS_NULL = -10
+    CS_NULL = -10,
+    CS_UNINITIALIZED = -11
 } cs_codes;
 
 typedef void (*printer)(FILE *, const void *);

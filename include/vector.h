@@ -15,6 +15,20 @@ typedef struct vector {
 #define VECTOR_SIZE sizeof(vector)
 
 /*!
+ * Checks if the vector is empty
+ * @param[in] vec  The vector to be checked
+ * @return 1 if the vector is empty, 0 otherwise
+ */
+static inline int vector_empty(vector vec) { return vec.meta.size == 0; };
+
+/*!
+ * Returns the current size of the vector
+ * @param[in] vec  The vector whose size will be returned
+ * @return The size of the vector
+ */
+static inline int vector_size(vector vec) { return vec.meta.size; };
+
+/*!
  * Initializes the given variable with the correct vector structure datatype
  * @param[out] vec        Variable that is initalized
  * @param[in]  attr       Attributes decribing the elements that the vector will contain
@@ -38,7 +52,7 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos);
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_push_back(vector *vec, const void *el);
+static inline cs_codes vector_push_back(vector *vec, const void *el) { return vector_insert_at(vec, el, vector_size(*vec)); }
 
 /*!
  * Erase the element at the position offered
@@ -54,7 +68,7 @@ cs_codes vector_erase(vector *vec, int pos);
  * @param[out] vec  Vector from which the last element will be deleted
  * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_pop_back(vector *vec);
+static inline cs_codes vector_pop_back(vector *vec) { return vector_erase(vec, vector_size(*vec) - 1); }
 
 /*!
  * Replaces the value at the position offered with the new value given
@@ -90,20 +104,6 @@ void *vector_at(vector vec, int pos);
  * has been assigned
  */
 int vector_count(vector vec, const void *el);
-
-/*!
- * Checks if the vector is empty
- * @param[in] vec  The vector to be checked
- * @return 1 if the vector is empty, 0 otherwise
- */
-static inline int vector_empty(vector vec) { return vec.meta.size == 0; };
-
-/*!
- * Returns the current size of the vector
- * @param[in] vec  The vector whose size will be returned
- * @return The size of the vector
- */
-static inline int vector_size(vector vec) { return vec.meta.size; };
 
 /*!
  * Sets the new attributes for the vector
@@ -144,7 +144,7 @@ static inline void vector_set_comp(vector *vec, comparer comp) { if (vec != NULL
  * Empties the vector and frees any memory that was used in any of its elements
  * @param[out] vec Vector which will have its contet emptied
  */
-void vector_clear(vector *vec);
+static inline void vector_clear(vector *vec) { vector_free((void*) vec); }
 
 /*!
  * Swaps the two given vector structures.

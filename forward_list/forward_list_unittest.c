@@ -72,7 +72,7 @@ test_res test_forward_list_push_front() {
         }
     }
 
-    if (list.size != __TEST_SIZE) {
+    if (forward_list_size(list) != __TEST_SIZE) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size after push_front is incorrect",
