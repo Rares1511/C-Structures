@@ -149,7 +149,7 @@ cs_codes rbt_insert_standard(rbt *t, rbt_node *new_node) {
         }
     }
 
-    if (t->size == 0) {
+    if (rbt_empty(*t)) {
         t->root = new_node;
     } else {
         int cmp = rbt_node_compare(*t, new_node->data, prev->data);
@@ -161,8 +161,7 @@ cs_codes rbt_insert_standard(rbt *t, rbt_node *new_node) {
         new_node->father = prev;
     }
 
-    t->size++;
-
+    metadata_size_inc(t->meta, 1);
     return CS_SUCCESS;
 }
 
@@ -428,7 +427,7 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
     }
 
     rbt_node_free(delete_node, t->attr);
-    t->size--;
+    metadata_size_inc(t->meta, -1);
 
     if (original_color == __RBT_NODE_BLACK_COLOR) {
         return rbt_delete_fixup(t, x, x_father);
@@ -443,29 +442,27 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-cs_codes rbt_init(rbt *t, rbt_attr_t attr) {
-    if (t == NULL) {
-        return CS_ELEM;
-    }
-    if (attr.size < 0 || attr.size > SIZE_TH) {
-        return CS_SIZE;
-    }
+rbt *rbt_init(rbt_attr_t attr) {
+    CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, NULL);
+    rbt *t = malloc(sizeof(rbt));
+    CS_RETURN_IF(t == NULL, NULL);
 
     t->root = NULL;
-    t->size = 0;
+    t->meta = malloc(sizeof(metadata_t));
+    CS_RETURN_IF(t->meta == NULL, NULL);
+    metadata_init(t->meta);
     t->attr = attr;
 
-    return CS_SUCCESS;
+    return t;
 }
 
 cs_codes rbt_insert(rbt *t, void *data) {
+    CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
     int rc;
     rbt_node *new_node;
 
     new_node = rbt_node_init(data, t->attr);
-    if (new_node == NULL) {
-        return CS_MEM;
-    }
+    CS_RETURN_IF(new_node == NULL, CS_MEM);
 
     rc = rbt_insert_standard(t, new_node);
     if (rc != CS_SUCCESS) {
@@ -473,53 +470,43 @@ cs_codes rbt_insert(rbt *t, void *data) {
         return rc;
     }
 
-    rc = rbt_insert_fixup(t, new_node);
-    if (rc != CS_SUCCESS) {
-        return rc;
-    }
-
-    return CS_SUCCESS;
+    return rbt_insert_fixup(t, new_node);
 }
 
 cs_codes rbt_delete(rbt *t, void *data) {
-    int rc;
+    CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
     rbt_node *delete_node = rbt_node_find(*t, data);
 
-    if (delete_node == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(delete_node == NULL, CS_ELEM);
 
-    rc = rbt_delete_standard(t, delete_node);
-    if (rc != CS_SUCCESS) {
-        return rc;
-    }
-
-    return CS_SUCCESS;
+    return rbt_delete_standard(t, delete_node);
 }
 
 void* rbt_find(rbt t, void *data) {
+    CS_RETURN_IF(data == NULL, NULL);
     rbt_node *node = rbt_node_find(t, data);
-    if (node == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(node == NULL, NULL);
     return node->data;
 }
 
 void rbt_swap(rbt *t1, rbt *t2) {
+    CS_RETURN_IF(t1 == NULL || t2 == NULL);
+
     rbt_node *temp_root = t1->root;
-    size_t temp_size = t1->size;
+    metadata_t *temp_meta = t1->meta;
     rbt_attr_t temp_attr = t1->attr;
 
     t1->root = t2->root;
-    t1->size = t2->size;
+    t1->meta = t2->meta;
     t1->attr = t2->attr;
 
     t2->root = temp_root;
-    t2->size = temp_size;
+    t2->meta = temp_meta;
     t2->attr = temp_attr;
 }
 
 void rbt_clear(rbt *t) {
+    CS_RETURN_IF(t == NULL);
     rbt_node *node = t->root, *next;
 
     while (node != NULL) {
@@ -541,14 +528,15 @@ void rbt_clear(rbt *t) {
         }
     }
 
+    metadata_size_inc(t->meta, -rbt_size(*t));
     t->root = NULL;
-    t->size = 0;
 }
 
 void rbt_print(FILE *stream, void *v_t) {
+    CS_RETURN_IF(v_t == NULL || stream == NULL);
     rbt *t = (rbt *)v_t;
     
-    rbt_print_stack_item *stack = malloc(sizeof(rbt_print_stack_item) * (int)ceil(log2(t->size + 1)));
+    rbt_print_stack_item *stack = malloc(sizeof(rbt_print_stack_item) * (int)ceil(log2(rbt_size(*t) + 1)));
     int stack_size = 0;
 
     stack[stack_size++] = (rbt_print_stack_item){t->root, 0};
@@ -588,6 +576,27 @@ void rbt_print(FILE *stream, void *v_t) {
 }
 
 void rbt_free(void *v_t) {
+    CS_RETURN_IF(v_t == NULL);
     rbt *t = (rbt *)v_t;
-    rbt_clear(t);
+    rbt_node *node = t->root, *next;
+    while (node != NULL) {
+        if (node->left != NULL) {
+            node = node->left;
+        } else if (node->right != NULL) {
+            node = node->right;
+        } else {
+            next = node->father;
+            rbt_node_free(node, t->attr);
+            if (next != NULL) {
+                if (next->left == node) {
+                    next->left = NULL;
+                } else {
+                    next->right = NULL;
+                }
+            }
+            node = next;
+        }
+    }
+    free(t->meta);
+    free(t);
 }

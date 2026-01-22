@@ -44,7 +44,6 @@ endif
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
 
 # Only these are built/installed/tested as shared libs
-# (edit this list whenever you want to publish more)
 INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
 # ---------------- Core/Dependency objects ----------------
 # Any objects you want to be able to link into other libs (but not necessarily installed as libs)

@@ -94,35 +94,38 @@ void list_node_free(list_node *node, freer fr) {
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-cs_codes list_init(list *l, list_attr_t attr) {
-    if (attr.size < 0 || attr.size > SIZE_TH)
-        return CS_SIZE;
+list *list_init(list_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    list *l = malloc(sizeof(list));
+    CS_RETURN_IF(l == NULL, NULL);
     l->attr = attr;
-    l->size = 0;
+    l->meta = malloc(sizeof(metadata_t));
+    CS_RETURN_IF(l->meta == NULL, NULL);
+    metadata_init(l->meta);
     l->front = NULL;
-    return CS_SUCCESS;
+    return l;
 }
 
 cs_codes list_push_front(list *l, const void *el) {
+    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
     list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
-    if (!aux)
-        return CS_MEM;
-    if (l->size != 0) {
+    CS_RETURN_IF(aux == NULL, CS_MEM);
+    if (!list_empty(*l)) {
         aux->prev = l->front->prev;
         l->front->prev->next = aux;
         l->front->prev = aux;
         aux->next = l->front;
     }
     l->front = aux;
-    l->size++;
+    metadata_size_inc(l->meta, 1);
     return CS_SUCCESS;
 }
 
 cs_codes list_push_back(list *l, const void *el) {
+    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
     list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
-    if (!aux)
-        return CS_MEM;
-    if (l->size != 0) {
+    CS_RETURN_IF(aux == NULL, CS_MEM);
+    if (!list_empty(*l)) {
         l->front->prev->next = aux;
         aux->prev = l->front->prev;
         aux->next = l->front;
@@ -130,15 +133,15 @@ cs_codes list_push_back(list *l, const void *el) {
     }
     else
         l->front = aux;
-    l->size++;
+    metadata_size_inc(l->meta, 1);
     return CS_SUCCESS;
 }
 
 cs_codes list_pop_front(list *l) {
-    if (l->size == 0)
-        return CS_EMPTY;
-    l->size--;
-    if (l->size == 0) {
+    CS_RETURN_IF(l == NULL, CS_NULL);
+    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
+    metadata_size_inc(l->meta, -1);
+    if (list_empty(*l)) {
         list_node_free(l->front, l->attr.fr);
         l->front = NULL;
         return CS_SUCCESS;
@@ -152,10 +155,10 @@ cs_codes list_pop_front(list *l) {
 }
 
 cs_codes list_pop_back(list *l) {
-    if (l->size == 0)
-        return CS_EMPTY;
-    l->size--;
-    if (l->size == 0) {
+    CS_RETURN_IF(l == NULL, CS_NULL);
+    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
+    metadata_size_inc(l->meta, -1);
+    if (list_empty(*l)) {
         list_node_free(l->front, l->attr.fr);
         return CS_SUCCESS;
     }
@@ -167,15 +170,16 @@ cs_codes list_pop_back(list *l) {
 }
 
 cs_codes list_erase(list *l, int pos) {
-    if (pos < 0 || pos >= l->size)
-        return CS_SIZE;
+    CS_RETURN_IF(l == NULL, CS_NULL);
+    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
+    CS_RETURN_IF(pos < 0 || pos >= list_size(*l), CS_POS);
 
-    if (l->size == 1 || pos == 0) {
+    if (list_size(*l) == 1 || pos == 0) {
         list_node *aux = l->front;
         l->front = l->front->next;
         list_node_free(aux, l->attr.fr);
-        l->size--;
-        if (l->size == 0)
+        metadata_size_inc(l->meta, -1);
+        if (list_empty(*l))
             l->front = NULL;
         return CS_SUCCESS;
     }
@@ -186,51 +190,58 @@ cs_codes list_erase(list *l, int pos) {
     current->prev->next = current->next;
     current->next->prev = current->prev;
     list_node_free(current, l->attr.fr);
-    l->size--;
+    metadata_size_inc(l->meta, -1);
     return CS_SUCCESS;
 }
 
 void *list_front(list l) {
-    if (l.size == 0)
-        return NULL;
+    CS_RETURN_IF(list_empty(l), NULL);
     return l.front->data;
 }
 
 void *list_back(list l) {
-    if (l.size == 0)
-        return NULL;
+    CS_RETURN_IF(list_empty(l), NULL);
     return l.front->prev->data;
 }
 
-cs_codes list_sort(list *l) {
+void list_sort(list *l) {
+    CS_RETURN_IF(l == NULL);
     list_sort_helper(l->attr, l->front, l->front->prev);
-    return CS_SUCCESS;
 }
 
 void list_swap(list *l1, list *l2) {
+    CS_RETURN_IF(l1 == NULL || l2 == NULL);
+
     list_attr_t attr = l1->attr;
     list_node *front = l1->front;
-    int size = l1->size;
+    metadata_t *meta = l1->meta;
 
     l1->attr = l2->attr;
     l1->front = l2->front;
-    l1->size = l2->size;
+    l1->meta = l2->meta;
 
     l2->attr = attr;
     l2->front = front;
-    l2->size = size;
+    l2->meta = meta;
 }
 
 void list_clear(list *l) {
-    list_free(l);
+    CS_RETURN_IF(l == NULL);
+    list_node *node = l->front->next;
+    while (node != l->front) {
+        list_node *aux = node;
+        node = node->next;
+        list_node_free(aux, l->attr.fr);
+    }
+    list_node_free(l->front, l->attr.fr);
     l->front = NULL;
-    l->size = 0;
+    metadata_size_inc(l->meta, -l->meta->size);
 }
 
 void list_print(FILE *stream, void *l_p) {
+    CS_RETURN_IF(l_p == NULL || stream == NULL);
     list l = *(list *)l_p;
-    if (!l.attr.print || l.size == 0)
-        return;
+    CS_RETURN_IF(list_empty(l) || l.attr.print == NULL);
     l.attr.print(stream, l.front->data);
     list_node *node = l.front->next;
     while (node != l.front) {
@@ -240,9 +251,9 @@ void list_print(FILE *stream, void *l_p) {
 }
 
 void list_free(void *l_p) {
+    CS_RETURN_IF(l_p == NULL);
     list *l = (list *)l_p;
-    if (l->size == 0)
-        return;
+    CS_RETURN_IF(list_empty(*l));
     list_node *node = l->front->next;
     while (node != l->front) {
         list_node *aux = node;
@@ -250,4 +261,6 @@ void list_free(void *l_p) {
         list_node_free(aux, l->attr.fr);
     }
     list_node_free(l->front, l->attr.fr);
+    free(l->meta);
+    free(l);
 }

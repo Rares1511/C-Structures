@@ -1,12 +1,12 @@
 Sequence Containers (Arrays): 
-    - Vector ✔ (Implemented + Unittest)
-    - Deque ✔ (Implemented + Unittest)
-    - List ✔ (Implemented + Unittest)
-    - Forward_list ✔ (Implemented + Unittest)
+    - Vector ✔ (Implemented)
+    - Deque ✔ (Implemented)
+    - List ✔ (Implemented)
+    - Forward_list ✔ (Implemented)
 
 Associative Containers (RBT):
-    - Set ✔ (Implemented + Unittest)
-    - Map ✔ (Implemented + Unittest)
+    - Set ✔ (Implemented)
+    - Map ✔ (Implemented)
     - Multiset
     - Multimap
 
@@ -26,8 +26,10 @@ Container Adapters:
     - Flat Multimap
 
 Extra Modules:
-    - Pair ✔ (Implemented + Unittest)
+    - Pair ✔ (Implemented)
     - Cargs ✔ (Implemented)
 
 Add functionality of initialization that after calling clear if any functions is called it wont start because it is no longer initialized the specific datastructure and a init is required to initialize it again
 Add functions for size and empty so that metadata doesnt change every library if i bring another change to it
+Added the above to sequence containers + verify unittest
+Change metadata from static variable to pointer to know initialization clear

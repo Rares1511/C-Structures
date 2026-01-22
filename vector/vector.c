@@ -71,21 +71,22 @@ void vector_qsort(void *base, int low, int high, int size) {
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-cs_codes vector_init(vector *vec, vector_attr_t attr) {
-    CS_RETURN_IF(vec == NULL, CS_NULL);
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(metadata_is_init(vec->meta), CS_FUNC);
-    vec->cap = INIT_CAPACITY;
+vector *vector_init(vector_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    vector *vec = malloc(sizeof(vector));
+    CS_RETURN_IF(vec == NULL, NULL);
+    vec->vec = malloc(INIT_CAPACITY * attr.size);
+    CS_RETURN_IF(vec->vec == NULL, NULL);
     vec->attr = attr;
-    metadata_init(&vec->meta, 1);
-    vec->vec = malloc(vec->attr.size * vec->cap);
-    CS_RETURN_IF(vec->vec == NULL, CS_MEM);
-    return CS_SUCCESS;
+    vec->cap = INIT_CAPACITY;
+    vec->meta = malloc(sizeof(metadata_t));
+    CS_RETURN_IF(vec->meta == NULL, NULL);
+    metadata_init(vec->meta);
+    return vec;
 }
 
 cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
-    CS_RETURN_IF(!metadata_is_init(vec->meta), CS_UNINITIALIZED);
     int size = vector_size(*vec);
     CS_RETURN_IF(pos > size || pos < 0, CS_POS);
     if (size == vec->cap) {
@@ -106,13 +107,12 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
         vec->attr.copy(vec->vec + vec->attr.size * pos, el);
     else
         memcpy(vec->vec + vec->attr.size * pos, el, vec->attr.size);
-    metadata_size_inc(&vec->meta, 1);
+    metadata_size_inc(vec->meta, 1);
     return CS_SUCCESS;
 }
 
 cs_codes vector_erase(vector *vec, int pos) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
-    CS_RETURN_IF(!metadata_is_init(vec->meta), CS_UNINITIALIZED);
     int size = vector_size(*vec);
     CS_RETURN_IF(vector_empty(*vec), CS_EMPTY);
     CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
@@ -121,19 +121,17 @@ cs_codes vector_erase(vector *vec, int pos) {
     if (pos != size - 1)
         memcpy(vec->vec + vec->attr.size * pos, vec->vec + vec->attr.size * (pos + 1),
                (size - pos - 1) * vec->attr.size);
-    metadata_size_inc(&vec->meta, -1);
+    metadata_size_inc(vec->meta, -1);
     return CS_SUCCESS;
 }
 
 void *vector_at(vector vec, int pos) {
-    CS_RETURN_IF(!metadata_is_init(vec.meta), NULL);
     CS_RETURN_IF(pos >= vector_size(vec) || pos < 0 || vector_empty(vec), NULL);
     return vec.vec + vec.attr.size * pos;
 }
 
 int vector_count(vector vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    CS_RETURN_IF(!metadata_is_init(vec.meta), CS_UNINITIALIZED);
     int count = 0, size = vector_size(vec);
     for (int i = 0; i < size; i++) {
         if (vector_compare(vec.vec + i * vec.attr.size, el, vec.attr.comp, vec.attr.size) == 0)
@@ -144,7 +142,6 @@ int vector_count(vector vec, const void *el) {
 
 cs_codes vector_replace(vector *vec, const void *el, int pos) {
     CS_RETURN_IF(el == NULL || vec == NULL, CS_NULL);
-    CS_RETURN_IF(!metadata_is_init(vec->meta), CS_UNINITIALIZED);
     CS_RETURN_IF(vector_empty(*vec), CS_EMPTY);
     int size = vector_size(*vec);
     CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
@@ -159,7 +156,6 @@ cs_codes vector_replace(vector *vec, const void *el, int pos) {
 
 int vector_find(vector vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    CS_RETURN_IF(!metadata_is_init(vec.meta), CS_FUNC);
     int size = vector_size(vec);
     for (int i = 0; i < size; i++) {
         if (vector_compare(vec.vec + i * vec.attr.size, el, vec.attr.comp, vec.attr.size) == 0)
@@ -170,11 +166,10 @@ int vector_find(vector vec, const void *el) {
 
 void vector_swap(vector *v1, vector *v2) {
     CS_RETURN_IF(v1 == NULL || v2 == NULL);
-    CS_RETURN_IF(!metadata_is_init(v1->meta) || !metadata_is_init(v2->meta));
 
     void *aux = v1->vec;
     vector_attr_t attr = v1->attr;
-    metadata_t meta = v1->meta;
+    metadata_t *meta = v1->meta;
     int cap = v1->cap;
 
     v1->attr = v2->attr;
@@ -190,7 +185,6 @@ void vector_swap(vector *v1, vector *v2) {
 
 void vector_sort(vector *vec) {
     CS_RETURN_IF(vec == NULL);
-    CS_RETURN_IF(!metadata_is_init(vec->meta));
     int size = vector_size(*vec);
     if (vec->attr.comp == NULL) {
         vector_qsort(vec->vec, 0, size - 1, vec->attr.size);
@@ -200,10 +194,19 @@ void vector_sort(vector *vec) {
     }
 }
 
+void vector_clear(vector *vec) {
+    CS_RETURN_IF(vec == NULL);
+    int size = vector_size(*vec);
+    if (vec->attr.fr) {
+        for (int i = 0; i < size; i++)
+            vec->attr.fr(vec->vec + i * vec->attr.size);
+    }
+    metadata_size_inc(vec->meta, -size);
+}
+
 void vector_print(FILE *stream, void *v_vec) {
     CS_RETURN_IF(stream == NULL || v_vec == NULL);
     vector *vec = (vector *)v_vec;
-    CS_RETURN_IF(!metadata_is_init(vec->meta));
     CS_RETURN_IF(vec->attr.print == NULL);
     int size = vector_size(*vec);
     for (int i = 0; i < size; i++)
@@ -213,13 +216,13 @@ void vector_print(FILE *stream, void *v_vec) {
 void vector_free(void *v_vec) {
     CS_RETURN_IF(v_vec == NULL);
     vector *vec = (vector *)v_vec;
-    CS_RETURN_IF(!metadata_is_init(vec->meta));
+    int size = vector_size(*vec);
     if (vec->attr.fr) {
-        int size = vector_size(*vec);
         for (int i = 0; i < size; i++)
             vec->attr.fr(vec->vec + i * vec->attr.size);
     }
-    metadata_init(&vec->meta, 0);
+    metadata_size_inc(vec->meta, -size);
     free(vec->vec);
-    vec->vec = NULL;
+    free(vec->meta);
+    free(vec);
 }

@@ -3,7 +3,7 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t stack_attr;
+typedef univ_attr_t stack_attr_t;
 
 typedef enum stack_type {
     CS_STACK_ARRAY,
@@ -19,12 +19,11 @@ typedef struct stack {
 
 /*!
  * @brief Initializes a stack with the specified type and attributes.
- * @param[in] s Pointer to the stack to initialize.
  * @param[in] type The type of the stack (array, deque, list).
  * @param[in] attr Attributes for the underlying container.
- * @return CS_OK on success, error code otherwise.
+ * @return Pointer to the initialized stack, or NULL on failure.
  */
-cs_codes stack_init(stack *s, stack_type type, stack_attr attr);
+stack *stack_init(stack_type type, stack_attr_t attr);
 
 /*!
  * @brief Pushes an element onto the stack.

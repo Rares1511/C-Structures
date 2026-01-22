@@ -3,23 +3,17 @@
 
 #include <stdlib.h>
 
-cs_codes unordered_set_init(unordered_set *uset, unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity) {
-    if (uset == NULL) {
-        return CS_ELEM;
-    }
-
-    uset->ht = malloc(sizeof(hash_table));
-    if (uset->ht == NULL) {
-        return CS_MEM;
-    }
-
-    return hash_table_init(uset->ht, attr, hash_func, initial_capacity);
+unordered_set *unordered_set_init(unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity) {
+    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    unordered_set *uset = (unordered_set *)malloc(sizeof(unordered_set));
+    CS_RETURN_IF(uset == NULL, NULL);
+    uset->ht = hash_table_init(attr, hash_func, initial_capacity);
+    CS_RETURN_IF(uset->ht == NULL, NULL);
+    return uset;
 }
 
 cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
-    if (uset == NULL || uset->ht == NULL || key == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
     if (hash_table_get_entry(*(uset->ht), key) != NULL) {
         return CS_ELEM;
     }
@@ -27,53 +21,46 @@ cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
 }
 
 cs_codes unordered_set_erase(unordered_set *uset, const void *key) {
-    if (uset == NULL || uset->ht == NULL || key == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
     return hash_table_remove_entry(uset->ht, key);
 }
 
 void* unordered_set_find(unordered_set uset, const void *key) {
-    if (uset.ht == NULL || key == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(uset.ht == NULL || key == NULL, NULL);
     return hash_table_get_entry(*(uset.ht), key);
 }
 
+int unordered_set_empty(unordered_set uset) {
+    CS_RETURN_IF(uset.ht == NULL, 1);
+    return hash_table_empty(*(uset.ht));
+}
+
+int unordered_set_size(unordered_set uset) {
+    CS_RETURN_IF(uset.ht == NULL, 0);
+    return hash_table_size(*(uset.ht));
+}
+
 int unordered_set_count(unordered_set uset, const void *key) {
-    if (uset.ht == NULL || key == NULL) {
-        return 0;
-    }
+    CS_RETURN_IF(uset.ht == NULL || key == NULL, 0);
     return hash_table_count(*(uset.ht), key);
 }
 
 void unordered_set_clear(unordered_set *uset) {
-    if (uset == NULL || uset->ht == NULL) {
-        return;
-    }
+    CS_RETURN_IF(uset == NULL || uset->ht == NULL);
     hash_table_clear(uset->ht);
 }
 
-void unordered_set_free(void *v_uset) {
-    if (v_uset == NULL) {
-        return;
-    }
+void unordered_set_print(FILE *stream, void *v_uset) {
+    CS_RETURN_IF(stream == NULL || v_uset == NULL);
     unordered_set *uset = (unordered_set *)v_uset;
-    if (uset == NULL || uset->ht == NULL) {
-        return;
-    }
-    hash_table_free(uset->ht);
-    free(uset->ht);
-    uset->ht = NULL;
+    CS_RETURN_IF(uset == NULL || uset->ht == NULL);
+    hash_table_print(stream, uset->ht);
 }
 
-void unordered_set_print(FILE *stream, void *v_uset) {
-    if (stream == NULL || v_uset == NULL) {
-        return;
-    }
+void unordered_set_free(void *v_uset) {
+    CS_RETURN_IF(v_uset == NULL);
     unordered_set *uset = (unordered_set *)v_uset;
-    if (uset == NULL || uset->ht == NULL) {
-        return;
-    }
-    hash_table_print(stream, uset->ht);
+    CS_RETURN_IF(uset == NULL || uset->ht == NULL);
+    hash_table_free(uset->ht);
+    free(uset);
 }

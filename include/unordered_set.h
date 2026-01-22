@@ -13,13 +13,12 @@ typedef struct unordered_set {
 
 /*!
  * @brief Initializes an unordered set.
- * @param[in] uset Pointer to the unordered set to initialize.
  * @param[in] attr Attributes for the unordered set.
  * @param[in] hash_func Hash function to use for the unordered set.
  * @param[in] initial_capacity Initial capacity of the unordered set.
- * @return CS_OK on success, error code otherwise.
+ * @return Pointer to the initialized unordered set, or NULL on failure.
  */
-cs_codes unordered_set_init(unordered_set *uset, unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity);
+unordered_set *unordered_set_init(unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity);
 
 /*!
  * @brief Inserts a key into the unordered set.
@@ -52,6 +51,20 @@ void* unordered_set_find(unordered_set uset, const void *key);
  * @return Number of occurrences of the key.
  */
 int unordered_set_count(unordered_set uset, const void *key);
+
+/*!
+ * @brief Checks if the unordered set is empty.
+ * @param[in] uset The unordered set.
+ * @return 1 if empty, 0 otherwise.
+ */
+int unordered_set_empty(unordered_set uset);
+
+/*!
+ * @brief Gets the size of the unordered set.
+ * @param[in] uset The unordered set.
+ * @return The number of elements in the unordered set.
+ */
+int unordered_set_size(unordered_set uset);
 
 /*!
  * @brief Clears the unordered set.

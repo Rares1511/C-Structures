@@ -5,33 +5,33 @@
 
 #include <stdlib.h>
 
-cs_codes stack_init(stack *s, stack_type type, stack_attr attr) {
-    if (s == NULL) {
-        return CS_ELEM;
-    }
+stack *stack_init(stack_type type, stack_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    stack *s = (stack *)malloc(sizeof(stack));
+    CS_RETURN_IF(s == NULL, NULL);
     s->type = type;
     switch(type) {
         case CS_STACK_ARRAY:
-            s->container = malloc(sizeof(vector));
-            return vector_init(s->container, attr);
+            s->container = vector_init(attr);
+            break;
         case CS_STACK_DEQUE:
-            s->container = malloc(sizeof(deque));
-            return deque_init(s->container, attr);
+            s->container = deque_init(attr);
+            break;
         case CS_STACK_LIST:
-            s->container = malloc(sizeof(list));
-            return list_init(s->container, attr);
+            s->container = list_init(attr);
+            break;
         case CS_STACK_DEFAULT:
-            s->container = malloc(sizeof(deque));
-            return deque_init(s->container, attr);
+            s->container = deque_init(attr);
+            break;
         default:
-            return CS_ELEM;
+            free(s);
+            return NULL;
     }
+    return s;
 }
 
 cs_codes stack_push(stack *s, const void *el) {
-    if (s == NULL || el == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(NULL == s || NULL == el, CS_ELEM);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_push_back(s->container, el);
@@ -47,9 +47,7 @@ cs_codes stack_push(stack *s, const void *el) {
 }
 
 cs_codes stack_pop(stack *s) {
-    if (s == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(NULL == s, CS_ELEM);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_pop_back(s->container);
@@ -65,9 +63,7 @@ cs_codes stack_pop(stack *s) {
 }
 
 void* stack_top(const stack *s) {
-    if (s == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(NULL == s, NULL);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_at(*(vector *)(s->container), vector_size(*(vector *)(s->container)) - 1);
@@ -83,9 +79,7 @@ void* stack_top(const stack *s) {
 }
 
 int stack_size(const stack *s) {
-    if (s == NULL) {
-        return -1;
-    }
+    CS_RETURN_IF(NULL == s, -1);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_size(*(vector *)(s->container));
@@ -101,9 +95,7 @@ int stack_size(const stack *s) {
 }
 
 int stack_empty(const stack *s) {
-    if (s == NULL) {
-        return -1;
-    }
+    CS_RETURN_IF(NULL == s, -1);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_empty(*(vector *)(s->container));
@@ -119,9 +111,7 @@ int stack_empty(const stack *s) {
 }
 
 void stack_clear(stack *s) {
-    if (s == NULL) {
-        return;
-    }
+    CS_RETURN_IF(NULL == s);
     switch(s->type) {
         case CS_STACK_ARRAY:
             vector_clear(s->container);
@@ -138,16 +128,6 @@ void stack_clear(stack *s) {
         default:
             break;
     }
-}
-
-void stack_free(void *v_s) {
-    if (v_s == NULL) {
-        return;
-    }
-    stack *s = (stack *)v_s;
-    stack_clear(s);
-    free(s->container);
-    free(s);
 }
 
 void stack_print(FILE *stream, void *v_s) {
@@ -171,4 +151,11 @@ void stack_print(FILE *stream, void *v_s) {
         default:
             break;
     }
+}
+
+void stack_free(void *v_s) {
+    CS_RETURN_IF(NULL == v_s);
+    stack *s = (stack *)v_s;
+    stack_clear(s);
+    free(s);
 }

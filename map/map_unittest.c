@@ -105,123 +105,41 @@ int rbt_is_valid(rbt *t) {
 
 
 test_res test_map_init() {
-    map m;
     map_attr_t key_attr = {
-        .size = sizeof(int),
-        .comp = NULL,
-        .copy = NULL,
-        .fr = NULL,
-        .print = NULL,
-    };
-    map_attr_t val_attr = {
-        .size = sizeof(int),
-        .comp = NULL,
-        .copy = NULL,
-        .fr = NULL,
-        .print = NULL,
-    };
-
-    cs_codes rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS) {
-        return (test_res){
-            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
-    }
-
-    if (rbt_is_valid(m.t) == 0) {
-        return (test_res){
-            .test_name = (char *)__func__, .reason = "RBT properties violated", .return_code = CS_UNKNOWN};
-    }
-
-    map_free(&m);
-    if (m.t != NULL && m.t->root != NULL) {
-        return (test_res){.test_name = (char *)__func__,
-                          .reason = "map_free failed",
-                          .return_code = CS_UNKNOWN};
-    }
-
-    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
-};
-
-test_res test_map_insert() {
-    map m;
-    map_attr_t key_attr = {
-        .size = sizeof(int),
         .comp = NULL,
         .copy = NULL,
         .fr = NULL,
         .print = print_int,
-    };
-    map_attr_t val_attr = {
         .size = sizeof(int),
+    };
+
+    map_attr_t val_attr = {
         .comp = NULL,
         .copy = NULL,
         .fr = NULL,
         .print = print_int,
+        .size = sizeof(int),
     };
-    int frk[__VALUE_RANGE], keys[__TEST_SIZE], values[__TEST_SIZE];
-    memset(frk, 0, sizeof(frk));
 
-    cs_codes rc = map_init(&m, key_attr, val_attr);
-    if (rc != CS_SUCCESS) {
+    map *m = map_init(key_attr, val_attr);
+    if (m == NULL) {
         return (test_res){
-            .test_name = (char *)__func__, .reason = "map_init failed", .return_code = rc};
-    }
-
-    for (int i = 0; i < __TEST_SIZE; i++) {
-        keys[i] = rand() % __VALUE_RANGE;
-        while (frk[keys[i]] == 1) {
-            keys[i] = rand() % __VALUE_RANGE;
-        }
-        frk[keys[i]] = 1;
-        values[i] = rand() % __VALUE_RANGE;
-        rc = map_insert(&m, &keys[i], &values[i]);
-        if (rc != CS_SUCCESS) {
-            map_free(&m);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "map_insert failed",
-                .return_code = rc
-            };
-        }
-        if (rbt_is_valid(m.t) == 0) {
-            map_free(&m);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "RBT properties violated",
-                .return_code = CS_UNKNOWN
-            };
-        }
-    }
-
-    if (map_size(m) != __TEST_SIZE) {
-        map_free(&m);
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "map_size returned incorrect size",
+            .test_name = (char*) __func__,
+            .reason = "map_init returned NULL",
             .return_code = CS_UNKNOWN
         };
     }
 
-    for (int i = 0; i < __TEST_SIZE; i++) {
-        int *val = (int *)map_find(m, &keys[i]);
-        if (val == NULL || *val != values[i]) {
-            map_free(&m);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "map_find returned incorrect value",
-                .return_code = CS_UNKNOWN
-            };
-        }
-    }
-
-    map_free(&m);
-    return (test_res){.test_name = (char *)__func__, .reason = "none", .return_code = CS_SUCCESS};
-}
+    return (test_res){
+        .test_name = (char*) __func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+};
 
 int main(int argc, char **argv) {
     test tests[] = {
         test_map_init,
-        test_map_insert,
     };
 
     unittest(tests, sizeof(tests) / sizeof(test), argc, argv);

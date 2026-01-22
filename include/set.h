@@ -12,14 +12,10 @@ typedef struct set {
 
 /*!
  * Initializes a set with the given attributes.
- * @param s Pointer to the set to be initialized.
  * @param attr Attributes for the set.
- * @return One of the following:
- *   @li CS_SUCCESS — Initialization successful.
- *   @li CS_ELEM — The set pointer is NULL.
- *   @li CS_SIZE — The size attribute is invalid.
+ * @return Pointer to the initialized set, or NULL on failure.
  */
-cs_codes set_init(set *s, set_attr_t attr);
+set *set_init(set_attr_t attr);
 
 /*!
  * Inserts a new element into the set.
@@ -36,6 +32,13 @@ cs_codes set_insert(set *s, void *data);
  * @return cs_codes Status code indicating success or type of error.
  */
 cs_codes set_delete(set *s, void *data);
+
+/*!
+ * Checks if the set is empty.
+ * @param s The set to check.
+ * @return 1 if the set is empty, 0 otherwise.
+ */
+int set_empty(set s);
 
 /*!
  * Returns the number of elements in the set.

@@ -14,14 +14,15 @@ typedef struct unordered_map {
     unordered_map_attr_t value_attr;
 } unordered_map;
 
-cs_codes unordered_map_init(unordered_map *umap,
-                                 unordered_map_attr_t key_attr,
+unordered_map *unordered_map_init(unordered_map_attr_t key_attr,
                                  unordered_map_attr_t value_attr,
                                  hash_func_t hash_func,
                                  int initial_capacity);
 cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value);
 cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key);
 void *unordered_map_get_entry(unordered_map umap, const void *key);
+int unordered_map_empty(unordered_map umap);
+int unordered_map_size(unordered_map umap);
 int unordered_map_count(unordered_map umap, const void *key);
 void unordered_map_swap(unordered_map *umap1, unordered_map *umap2);
 void unordered_map_clear(unordered_map *umap);

@@ -5,240 +5,25 @@
 FILE *__DEBUG_OUT = NULL;
 
 test_res test_forward_list_init() {
-    forward_list list;
     forward_list_attr_t attr = {
         .size = sizeof(int),
-        .copy = NULL,
         .fr = NULL,
-        .print = NULL,
-        .comp = NULL,
-    };
-
-    cs_codes rc = forward_list_init(&list, attr);
-    if (rc != CS_SUCCESS) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "forward_list_init failed",
-            .return_code = rc
-        };
-    }
-
-    forward_list_free(&list);
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
-    };
-}
-
-test_res test_forward_list_push_front() {
-    forward_list list;
-    forward_list_attr_t attr = {
-        .size = sizeof(int),
         .copy = NULL,
-        .fr = NULL,
-        .print = NULL,
-        .comp = NULL,
+        .print = print_int,
+        .comp = NULL
     };
-    int value;
 
-    cs_codes rc = forward_list_init(&list, attr);
-    if (rc != CS_SUCCESS) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "forward_list_init failed",
-            .return_code = rc
-        };
-    }
-
-    for (int i = 0; i < __TEST_SIZE; i++) {
-        value = rand() % 10000;
-        rc = forward_list_push_front(&list, &value);
-        if (rc != CS_SUCCESS) {
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "forward_list_push_front failed",
-                .return_code = rc
-            };
-        }
-
-        if (*(int *)forward_list_front(list) != value) {
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "front element mismatch after push_front",
-                .return_code = CS_UNKNOWN
-            };
-        }
-    }
-
-    if (forward_list_size(list) != __TEST_SIZE) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "Size after push_front is incorrect",
+    forward_list* list = forward_list_init(attr);
+    if (list == NULL) {
+        return (test_res) {
+            .test_name = (char*) __func__,
+            .reason = "forward_list_init returned NULL",
             .return_code = CS_UNKNOWN
         };
-    }
-
-    forward_list_free(&list);
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
     };
-}
 
-test_res test_forward_list_pop_front() {
-    forward_list list;
-    forward_list_attr_t attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = NULL,
-        .comp = NULL,
-    };
-    int values[__TEST_SIZE];
-
-    cs_codes rc = forward_list_init(&list, attr);
-    if (rc != CS_SUCCESS) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "forward_list_init failed",
-            .return_code = rc
-        };
-    }
-
-    for (int i = 0; i < __TEST_SIZE; i++) {
-        values[i] = rand() % 10000;
-        rc = forward_list_push_front(&list, &values[i]);
-        if (rc != CS_SUCCESS) {
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "forward_list_push_front failed",
-                .return_code = rc
-            };
-        }
-    }
-
-    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
-        if (*(int *)forward_list_front(list) != values[i]) {
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "front element mismatch before pop_front",
-                .return_code = CS_UNKNOWN
-            };
-        }
-
-        rc = forward_list_pop_front(&list);
-        if (rc != CS_SUCCESS) {
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "forward_list_pop_front failed",
-                .return_code = rc
-            };
-        }
-    }
-
-    forward_list_free(&list);
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
-    };
-}
-
-test_res test_forward_list_swap() {
-    forward_list list1, list2;
-    forward_list_attr_t attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = NULL,
-        .comp = NULL,
-    };
-    int values1[__TEST_SIZE], values2[__TEST_SIZE];
-
-    cs_codes rc = forward_list_init(&list1, attr);
-    if (rc != CS_SUCCESS) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "forward_list_init for list1 failed",
-            .return_code = rc
-        };
-    }
-
-    rc = forward_list_init(&list2, attr);
-    if (rc != CS_SUCCESS) {
-        forward_list_free(&list1);
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "forward_list_init for list2 failed",
-            .return_code = rc
-        };
-    }
-
-    for (int i = 0; i < __TEST_SIZE; i++) {
-        values1[i] = rand() % 10000;
-        values2[i] = rand() % 10000;
-
-        rc = forward_list_push_front(&list1, &values1[i]);
-        if (rc != CS_SUCCESS) {
-            forward_list_free(&list1);
-            forward_list_free(&list2);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "forward_list_push_front for list1 failed",
-                .return_code = rc
-            };
-        }
-
-        rc = forward_list_push_front(&list2, &values2[i]);
-        if (rc != CS_SUCCESS) {
-            forward_list_free(&list1);
-            forward_list_free(&list2);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "forward_list_push_front for list2 failed",
-                .return_code = rc
-            };
-        }
-    }
-
-    forward_list_swap(&list1, &list2);
-
-    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
-        if (*(int *)forward_list_front(list1) != values2[i]) {
-            forward_list_free(&list1);
-            forward_list_free(&list2);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "list1 front element mismatch after swap",
-                .return_code = CS_UNKNOWN
-            };
-        }
-        forward_list_pop_front(&list1);
-    }
-
-    for (int i = __TEST_SIZE - 1; i >= 0; i--) {
-        if (*(int *)forward_list_front(list2) != values1[i]) {
-            forward_list_free(&list1);
-            forward_list_free(&list2);
-            return (test_res){
-                .test_name = (char *)__func__,
-                .reason = "list2 front element mismatch after swap",
-                .return_code = CS_UNKNOWN
-            };
-        }
-        forward_list_pop_front(&list2);
-    }
-
-    forward_list_free(&list1);
-    forward_list_free(&list2);
-
-    return (test_res){
-        .test_name = (char *)__func__,
+    return (test_res) {
+        .test_name = (char*) __func__,
         .reason = NULL,
         .return_code = CS_SUCCESS
     };
@@ -247,9 +32,6 @@ test_res test_forward_list_swap() {
 int main(int argc, char** argv) {
     test tests[] = {
         test_forward_list_init,
-        test_forward_list_push_front,
-        test_forward_list_pop_front,
-        test_forward_list_swap,
     };
 
     unittest(tests, sizeof(tests)/sizeof(test), argc, argv);

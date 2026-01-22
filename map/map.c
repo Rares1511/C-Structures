@@ -42,11 +42,11 @@ int map_node_comp(const void *a, const void *b) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
-    m->t = malloc(sizeof(rbt));
-    if (m->t == NULL) {
-        return CS_MEM;
-    }
+map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
+    CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, NULL);
+    CS_RETURN_IF(val_attr.size <= 0 || val_attr.size > SIZE_TH, NULL);
+    map *m = (map *)malloc(sizeof(map));
+    CS_RETURN_IF(m == NULL, NULL);
     map_attr_t pair_attr = {
         .comp = map_node_comp,
         .copy = map_node_copy,
@@ -56,13 +56,13 @@ cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
     };
     m->key_attr = key_attr;
     m->val_attr = val_attr;
-    return rbt_init(m->t, pair_attr);
+    m->t = rbt_init(pair_attr);
+    CS_RETURN_IF(m->t == NULL, NULL);
+    return m;
 }
 
 cs_codes map_insert(map *m, void *key, void *val) {
-    if (m == NULL || key == NULL || val == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(m == NULL || key == NULL || val == NULL, CS_NULL);
     pair data;
     pair_init(&data, &m->key_attr, &m->val_attr);
     pair_set(&data, key, val);
@@ -70,40 +70,42 @@ cs_codes map_insert(map *m, void *key, void *val) {
     return rbt_insert(m->t, &data);
 }
 
+int map_empty(map m) {
+    CS_RETURN_IF(m.t == NULL, 1);
+    return rbt_empty(*(m.t));
+}
+
 int map_size(map m) {
-    if (m.t == NULL) {
-        return 0;
-    }
-    return m.t->size;
+    CS_RETURN_IF(m.t == NULL, 0);
+    return rbt_size(*(m.t));
 }   
 
 void* map_find(map m, void *key) {
-    if (m.t == NULL || key == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(m.t == NULL || key == NULL, NULL);
     pair search_key;
     pair_init(&search_key, &m.key_attr, &m.val_attr);
     pair_set(&search_key, key, NULL);
 
     pair* result = (pair*)rbt_find(*(m.t), &search_key);
     pair_free(&search_key);
-    if (result == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(result == NULL, NULL);
     return result->second;
 }
 
+void map_clear(map *m) {
+    CS_RETURN_IF(m == NULL);
+    rbt_clear(m->t);
+}
+
 void map_print(FILE *stream, void *v_m) {
-    if (v_m == NULL || stream == NULL) {
-        return;
-    }
+    CS_RETURN_IF(v_m == NULL || stream == NULL);
     map *m = (map *)v_m;
     rbt_print(stream, m->t);
 }
 
 void map_free(void *v_m) {
+    CS_RETURN_IF(v_m == NULL);
     map *m = (map *)v_m;
     rbt_free(m->t);
-    free(m->t);
-    m->t = NULL;
+    free(m);
 }

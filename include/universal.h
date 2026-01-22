@@ -55,7 +55,6 @@ typedef struct univ_attr_t {
 } univ_attr_t;
 
 typedef struct metadata_t {
-    char is_init; /*!< flag to indicate if the structure is initialized */
     int size;    /*!< number of elements in the structure */
 } metadata_t;
 
@@ -71,14 +70,7 @@ static void metadata_size_inc(metadata_t *meta, int inc) { meta->size += inc; }
  * @param[out] meta     Metadata structure to be initialized
  * @param[in]  is_init  Flag to indicate if the structure is initialized
  */
-static void metadata_init(metadata_t *meta, int is_init) { meta->size = 0; meta->is_init = is_init; }
-
-/*!
- * Checks if the metadata structure is initialized
- * @param[in] meta  Metadata structure to be checked
- * @return 1 if initialized, 0 otherwise
- */
-static int metadata_is_init(metadata_t meta) { return meta.is_init; }
+static void metadata_init(metadata_t *meta) { meta->size = 0; }
 
 /*!
  * A simple universal hash function for byte arrays.

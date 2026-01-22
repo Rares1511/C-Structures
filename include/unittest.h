@@ -68,7 +68,7 @@ static inline void unittest(test *tests, int size, int argc, char **argv) {
     const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
     __DEBUG_OUT = fopen(debug_file, "a");
     if (__DEBUG_OUT == NULL) {
-        fprintf(__DEBUG_OUT, "Failed to open debug file: %s\n", debug_file);
+        printf("Failed to open debug file: %s\n", debug_file);
         return;
     }
 

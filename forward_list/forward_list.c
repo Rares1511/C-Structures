@@ -52,56 +52,56 @@ void forward_list_node_free(forward_list_node* node, freer fr){
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-cs_codes forward_list_init(forward_list* list, forward_list_attr_t attr){
-    if (!list) return CS_ELEM;
-    if (attr.size <= 0 || attr.size > SIZE_TH) return CS_SIZE;
+forward_list *forward_list_init(forward_list_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    forward_list* list = (forward_list*)malloc(sizeof(forward_list));
+    CS_RETURN_IF(list == NULL, NULL);
 
     list->head = NULL;
     list->attr = attr;
-    metadata_init(&list->meta, 1);
+    list->meta = malloc(sizeof(metadata_t));
+    CS_RETURN_IF(list->meta == NULL, NULL);
+    metadata_init(list->meta);
 
-    return CS_SUCCESS;
+    return list;
 }
 
-cs_codes forward_list_push_front(forward_list* list, const void* data){
-    if (!metadata_is_init(list->meta)) return CS_NULL;
-    if (!list) return CS_NULL;
-    if (!data) return CS_ELEM;
+cs_codes forward_list_push_front(forward_list* list, const void* data) {
+    CS_RETURN_IF(list == NULL || data == NULL, CS_NULL);
 
     forward_list_node* new_node = forward_list_node_init(data, list->attr.copy, list->attr.size);
-    if (!new_node) return CS_MEM;
+    CS_RETURN_IF(new_node == NULL, CS_MEM);
 
     new_node->next = list->head;
     list->head = new_node;
-    metadata_size_inc(&list->meta, 1);
+    metadata_size_inc(list->meta, 1);
 
     return CS_SUCCESS;
 }
 
-cs_codes forward_list_pop_front(forward_list* list){
-    if (!list) return CS_ELEM;
-    if (forward_list_empty(*list)) return CS_EMPTY;
+cs_codes forward_list_pop_front(forward_list* list) {
+    CS_RETURN_IF(list == NULL, CS_NULL);
+    CS_RETURN_IF(forward_list_empty(*list), CS_EMPTY);
 
     forward_list_node* temp = list->head;
     list->head = list->head->next;
 
     forward_list_node_free(temp, list->attr.fr);
-    metadata_size_inc(&list->meta, -1);
+    metadata_size_inc(list->meta, -1);
 
     return CS_SUCCESS;
 }
 
-void* forward_list_front (forward_list list){
-    if (forward_list_empty(list)) return NULL;
+void* forward_list_front(forward_list list) {
+    CS_RETURN_IF(forward_list_empty(list), NULL);
     return list.head->data;
 }
 
-void forward_list_swap(forward_list* list1, forward_list* list2){
-    if (!list1 || !list2) return;
-    if (!metadata_is_init(list1->meta) || !metadata_is_init(list2->meta)) return;
+void forward_list_swap(forward_list* list1, forward_list* list2) {
+    CS_RETURN_IF(list1 == NULL || list2 == NULL);
 
     forward_list_node* temp_head = list1->head;
-    metadata_t temp_meta = list1->meta;
+    metadata_t *temp_meta = list1->meta;
     forward_list_attr_t temp_attr = list1->attr;
 
     list1->head = list2->head;
@@ -114,8 +114,7 @@ void forward_list_swap(forward_list* list1, forward_list* list2){
 }
 
 void forward_list_clear(forward_list* list){
-    if (!list) return;
-    if (!metadata_is_init(list->meta)) return;
+    CS_RETURN_IF(list == NULL);
 
     forward_list_node* current = list->head;
     forward_list_node* next_node;
@@ -127,15 +126,15 @@ void forward_list_clear(forward_list* list){
     }
 
     list->head = NULL;
-    metadata_init(&list->meta, 0);
+    metadata_size_inc(list->meta, -forward_list_size(*list));
 }
 
 void forward_list_print(FILE *stream, const void *v_l) {
+    CS_RETURN_IF(stream == NULL || v_l == NULL);
     forward_list* list = (forward_list*)v_l;
-    if (!list) return;
-    if (!list->attr.print) return;
-    if (!metadata_is_init(list->meta)) return;
-    if (forward_list_empty(*list)) return;
+    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(forward_list_empty(*list));
+    CS_RETURN_IF(list->attr.print == NULL);
 
     forward_list_node* current = list->head;
     while (current) {
@@ -145,7 +144,15 @@ void forward_list_print(FILE *stream, const void *v_l) {
 }
 
 void forward_list_free(void *v_l) {
+    CS_RETURN_IF(v_l == NULL);
     forward_list* list = (forward_list*)v_l;
-    if(!list) return;
-    forward_list_clear(list);
+    forward_list_node* current = list->head;
+    forward_list_node* next_node;
+    while (current) {
+        next_node = current->next;
+        forward_list_node_free(current, list->attr.fr);
+        current = next_node;
+    }
+    free(list->meta);
+    free(list);
 }

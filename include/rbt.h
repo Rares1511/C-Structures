@@ -18,13 +18,15 @@ typedef struct rbt_node {
 
 typedef struct rbt {
     rbt_node *root;
+    metadata_t *meta;
     rbt_attr_t attr;
-    int size;
 } rbt;
 
-cs_codes rbt_init(rbt *t, rbt_attr_t attr);
+rbt *rbt_init(rbt_attr_t attr);
 cs_codes rbt_insert(rbt *t, void *data);
 cs_codes rbt_delete(rbt *t, void *data);
+static inline int rbt_empty(rbt t) { return (t.root == NULL); }
+static inline int rbt_size(rbt t) { return t.meta->size; }
 void* rbt_find(rbt t, void *data);
 void rbt_swap(rbt *t1, rbt *t2);
 void rbt_clear(rbt *t);

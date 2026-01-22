@@ -33,154 +33,121 @@ size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t hash, int initial_capacity) {
-    if (ht == NULL) {
-        return CS_ELEM;
-    }
-    if (initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH) {
-        return CS_SIZE;
-    }
+hash_table *hash_table_init(hash_table_attr_t attr, hash_func_t hash, int initial_capacity) {
+    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, NULL);
+
+    hash_table *ht = (hash_table *)malloc(sizeof(hash_table));
+    CS_RETURN_IF(NULL == ht, NULL);
 
     ht->cap = initial_capacity;
-    ht->size = 0;
+    ht->meta = (metadata_t *)malloc(sizeof(metadata_t));
+    CS_RETURN_IF(NULL == ht->meta, NULL);
+    metadata_init(ht->meta);
     ht->attr = attr;
     ht->hash = hash;
-    ht->buckets = malloc(sizeof(vector*) * initial_capacity);
+    ht->buckets = malloc(sizeof(vector**) * initial_capacity);
     if (ht->buckets == NULL) {
-        return CS_MEM;
+        free(ht);
+        return NULL;
     }
     for (int i = 0; i < initial_capacity; i++) {
         ht->buckets[i] = NULL;
     }
 
-    return CS_SUCCESS;
+    return ht;
 }
 
 cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
-    if (ht == NULL || el == NULL) {
-        return CS_ELEM;
-    }
-
+    CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
     int idx = __hash_table_get_bucket_index(*ht, el);
-    if (idx < 0 || idx >= ht->cap) {
-        return CS_SIZE;
-    }
+    CS_RETURN_IF(idx < 0 || idx >= ht->cap, CS_SIZE);
 
     if (ht->buckets[idx] == NULL) {
-        ht->buckets[idx] = malloc(sizeof(vector));
+        ht->buckets[idx] = vector_init(ht->attr);
         if (NULL == ht->buckets[idx]) {
             return CS_MEM;
         }
-        int rc = vector_init(ht->buckets[idx], ht->attr);
-        if (CS_SUCCESS != rc) {
-            return rc;
-        }
     }
 
-    return vector_push_back(ht->buckets[idx], el);
+    int rc = vector_push_back(ht->buckets[idx], el);
+    CS_RETURN_IF(rc != CS_SUCCESS, rc);
+    metadata_size_inc(ht->meta, 1);
+    return CS_SUCCESS;
 }
 
 cs_codes hash_table_remove_entry(hash_table *ht, const void *el) {
-    if (ht == NULL || el == NULL) {
-        return CS_ELEM;
-    }
-
+    CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
     int idx = __hash_table_get_bucket_index(*ht, el);
-    if (idx < 0 || idx >= ht->cap) {
-        return CS_SIZE;
-    }
-    if (ht->buckets[idx] == NULL) {
-        return CS_ELEM;
-    }
+    CS_RETURN_IF(idx < 0 || idx >= ht->cap, CS_SIZE);
+    CS_RETURN_IF(ht->buckets[idx] == NULL, CS_ELEM);
 
     vector *bucket = ht->buckets[idx];
     int bucket_idx = vector_find(*bucket, el);
-    if (bucket_idx == -1) {
-        return CS_ELEM;
-    }
-    return vector_erase(bucket, bucket_idx);
+    CS_RETURN_IF(bucket_idx == -1, CS_ELEM);
+    int rc = vector_erase(bucket, bucket_idx);
+    CS_RETURN_IF(rc != CS_SUCCESS, rc);
+    metadata_size_inc(ht->meta, -1);
+    return CS_SUCCESS;
 }
 
 void* hash_table_get_entry(hash_table ht, const void *el) {
-    if (el == NULL) {
-        return NULL;
-    }
-
+    CS_RETURN_IF(el == NULL, NULL);
     int idx = __hash_table_get_bucket_index(ht, el);
-    if (idx < 0 || idx >= ht.cap) {
-        return NULL;
-    }
-    if (ht.buckets[idx] == NULL) {
-        return NULL;
-    }
+    CS_RETURN_IF(idx < 0 || idx >= ht.cap, NULL);
+    CS_RETURN_IF(ht.buckets[idx] == NULL, NULL);
 
     vector *bucket = ht.buckets[idx];
     int bucket_idx = vector_find(*bucket, el);
-    if (bucket_idx == -1) {
-        return NULL;
-    }
+    CS_RETURN_IF(bucket_idx == -1, NULL);
     return vector_at(*bucket, bucket_idx);
 }
 
 int hash_table_count(hash_table ht, const void *el) {
-    if (el == NULL) {
-        return 0;
-    }
-
+    CS_RETURN_IF(el == NULL, 0);
     int idx = __hash_table_get_bucket_index(ht, el);
-    if (idx < 0 || idx >= ht.cap) {
-        return 0;
-    }
-    if (ht.buckets[idx] == NULL) {
-        return 0;
-    }
+    CS_RETURN_IF(idx < 0 || idx >= ht.cap, 0);
+    CS_RETURN_IF(ht.buckets[idx] == NULL, 0);
 
     vector *bucket = ht.buckets[idx];
     return vector_count(*bucket, el);
 }
 
 void hash_table_swap(hash_table *ht1, hash_table *ht2) {
-    if (ht1 == NULL || ht2 == NULL) {
-        return;
-    }
+    CS_RETURN_IF(ht1 == NULL || ht2 == NULL);
+
     hash_table_attr_t attr = ht1->attr;
     int cap = ht1->cap;
-    int size = ht1->size;
+    metadata_t *meta = ht1->meta;
     vector **buckets = ht1->buckets;
     hash_func_t hash = ht1->hash;
 
     ht1->attr = ht2->attr;
     ht1->cap = ht2->cap;
-    ht1->size = ht2->size;
+    ht1->meta = ht2->meta;
     ht1->buckets = ht2->buckets;
     ht1->hash = ht2->hash;
 
     ht2->attr = attr;
     ht2->cap = cap;
-    ht2->size = size;
+    ht2->meta = meta;
     ht2->buckets = buckets;
     ht2->hash = hash;
 }
 
 void hash_table_clear(hash_table *ht) {
-    if (ht == NULL) {
-        return;
-    }
+    CS_RETURN_IF(ht == NULL);
 
     for (int i = 0; i < ht->cap; i++) {
         if (ht->buckets[i] != NULL) {
             vector_free(ht->buckets[i]);
-            free(ht->buckets[i]);
             ht->buckets[i] = NULL;
         }
     }
-    ht->size = 0;
+    metadata_size_inc(ht->meta, -hash_table_size(*ht));
 }
 
 void hash_table_print(FILE *stream, void *v_ht) {
-    if (v_ht == NULL) {
-        return;
-    }
+    CS_RETURN_IF(stream == NULL || v_ht == NULL);
     hash_table *ht = (hash_table*)v_ht;
 
     for (int i = 0; i < ht->cap; i++) {
@@ -192,12 +159,9 @@ void hash_table_print(FILE *stream, void *v_ht) {
 }
 
 void hash_table_free(void *v_ht) {
-    if (v_ht == NULL) {
-        return;
-    }
-
+    CS_RETURN_IF(v_ht == NULL);
     hash_table *ht = (hash_table*)v_ht;
     hash_table_clear(ht);
     free(ht->buckets);
-    ht->buckets = NULL;
+    free(ht);
 }

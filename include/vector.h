@@ -8,7 +8,7 @@ typedef univ_attr_t vector_attr_t;
 typedef struct vector {
     void *vec;          /*!< size of the datatype */
     int cap;            /*!< current maximum capacity of the vector */
-    metadata_t meta;    /*!< metadata of the vector */
+    metadata_t *meta;   /*!< metadata of the vector */
     vector_attr_t attr; /*!< attributes of the elements inside the vector */
 } vector;
 
@@ -19,23 +19,21 @@ typedef struct vector {
  * @param[in] vec  The vector to be checked
  * @return 1 if the vector is empty, 0 otherwise
  */
-static inline int vector_empty(vector vec) { return vec.meta.size == 0; };
+static inline int vector_empty(vector vec) { return vec.meta->size == 0; };
 
 /*!
  * Returns the current size of the vector
  * @param[in] vec  The vector whose size will be returned
  * @return The size of the vector
  */
-static inline int vector_size(vector vec) { return vec.meta.size; };
+static inline int vector_size(vector vec) { return vec.meta->size; };
 
 /*!
  * Initializes the given variable with the correct vector structure datatype
- * @param[out] vec        Variable that is initalized
  * @param[in]  attr       Attributes decribing the elements that the vector will contain
- * @return CS_MEM if a memory problem ocurred, CS_SIZE in case a negative or too big size has been
- * entered or CS_SUCCESS upon a successful initalization
+ * @return NULL if a memory problem ocurred or a pointer to the initialized vector structure
  */
-cs_codes vector_init(vector *vec, vector_attr_t attr);
+vector *vector_init(vector_attr_t attr);
 
 /*!
  * Inserts the element at the given position in the offered vector
@@ -144,7 +142,7 @@ static inline void vector_set_comp(vector *vec, comparer comp) { if (vec != NULL
  * Empties the vector and frees any memory that was used in any of its elements
  * @param[out] vec Vector which will have its contet emptied
  */
-static inline void vector_clear(vector *vec) { vector_free((void*) vec); }
+void vector_clear(vector *vec);
 
 /*!
  * Swaps the two given vector structures.

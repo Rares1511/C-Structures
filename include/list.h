@@ -13,18 +13,16 @@ typedef struct list_node {
 
 typedef struct list {
     list_node *front; /*!< front element of the list */
-    int size;         /*!< current size of the list */
+    metadata_t *meta; /*!< metadata for the list */
     list_attr_t attr; /*!< attributes for the datatype inside the list */
 } list;
 
 /*!
  * Initializes the list with th given attributes for the datatype inside
- * @param[out] l        List that will be initialized
- * @param[in]  el_attr  Attributes for the datatype inside the list
- * @return CS_SIZE if given a negative or too big size for the elements or CS_SUCCESS
- * for a successful initialization
+ * @param attr Attributes for the datatype inside the list
+ * @return Pointer to the initialized list, or NULL on failure
  */
-cs_codes list_init(list *l, list_attr_t el_attr);
+list *list_init(list_attr_t attr);
 
 /*!
  * Pushes the element at the front of the list
@@ -69,13 +67,13 @@ cs_codes list_erase(list *l, int pos);
  * @param[in] l  List that will be checked
  * @return 1 if the list is empty, 0 otherwise 
  */
-static inline int list_empty(list l) { return l.size == 0; }
+static inline int list_empty(list l) { return l.meta->size == 0; }
 
 /*!
  * Returns the number of elements in the list
  * @param[in] l  List whose size will be returned
  */
-static inline int list_size(list l) { return l.size; }
+static inline int list_size(list l) { return l.meta->size; }
 
 /*!
  * Gives a pointer to the information the front element in the list holds
@@ -96,42 +94,57 @@ void *list_back(list l);
  * CS_SIZE if the list contains elements with a negative or too big size or CS_SUCCESS
  * for a successful sort
  */
-cs_codes list_sort(list *l);
+void list_sort(list *l);
 
 /*!
  * Sets the new attributes for the elements of the list
  * @param[out] l     List whose attributes will be changed
  * @param[in]  attr  New attributes for the elements of the list
  */
-static inline void list_set_attr(list *l, list_attr_t attr) { l->attr = attr; }
+static inline void list_set_attr(list *l, list_attr_t attr) { 
+    CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH || !metadata_is_init(l->meta));
+    l->attr = attr; 
+}
 
 /*!
  * Sets the new free function for the datatype inside the list
  * @param[out] l   List whose free function will be changed
  * @param[in]  fr  New free function for the datatype inside the list
  */
-static inline void list_set_free(list *l, freer fr) { l->attr.fr = fr; }
+static inline void list_set_free(list *l, freer fr) { 
+    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    l->attr.fr = fr; 
+}
 
 /*!
  * Sets the new print function for the datatype inside the list
  * @param[out] l      List whose print function will be changed
  * @param[in]  print  New print function for the datatype inside the list
  */
-static inline void list_set_print(list *l, printer print) { l->attr.print = print; }
+static inline void list_set_print(list *l, printer print) { 
+    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    l->attr.print = print; 
+}
 
 /*!
  * Sets the new copy function for the datatype inside the list
  * @param[out] l   List whose copy function will be changed
  * @param[in]  cp  New copy function for copying the elements inside the list
  */
-static inline void list_set_copy(list *l, deepcopy copy) { l->attr.copy = copy; }
+static inline void list_set_copy(list *l, deepcopy copy) { 
+    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    l->attr.copy = copy; 
+}
 
 /*!
  * Sets the new comp function for the datatype inside the list
  * @param[out] l      List whose comp function will be changed
  * @param[in]  print  New comp function for the datatype inside the list
  */
-static inline void list_set_comp(list *l, comparer comp) { l->attr.comp = comp; }
+static inline void list_set_comp(list *l, comparer comp) { 
+    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    l->attr.comp = comp; 
+}
 
 /*!
  * Swaps the two given lists

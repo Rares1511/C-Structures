@@ -14,12 +14,11 @@ typedef struct map {
 
 /*!
  * Initializes a new map
- * @param[in] m - pointer to the map to be initialized
  * @param[in] key_attr - attributes of the key datatype
  * @param[in] val_attr - attributes of the value datatype
- * @return CS_SUCCESS on success, CS_MEM on memory allocation failure
+ * @return pointer to the initialized map, or NULL on memory allocation failure
  */
-cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
+map *map_init(map_attr_t key_attr, map_attr_t val_attr);
 
 /*!
  * Inserts a new key-value pair into the map
@@ -29,6 +28,13 @@ cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
  * @return CS_SUCCESS on success, CS_ELEM if the key already exists, CS_MEM on memory allocation failure
  */
 cs_codes map_insert(map *m, void *key, void *val);
+
+/*!
+ * Checks if the map is empty
+ * @param[in] m - the map
+ * @return 1 if the map is empty, 0 otherwise
+ */
+int map_empty(map m);
 
 /*!
  * Retrieves the number of key-value pairs in the map

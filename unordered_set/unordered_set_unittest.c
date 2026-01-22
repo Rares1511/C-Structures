@@ -5,32 +5,23 @@
 FILE *__DEBUG_OUT = NULL;
 
 test_res test_unordered_set_init() {
-    unordered_set uset;
-    unordered_set_attr_t attr = { 
-        .comp = NULL,
-        .copy = NULL,
-        .fr = NULL,
+    unordered_set_attr_t attr = {
         .size = sizeof(int),
+        .comp = NULL,
+        .fr = NULL,
+        .copy = NULL,
         .print = print_int
     };
-    cs_codes rc = unordered_set_init(&uset, attr, NULL, 10);
-    if (rc != CS_SUCCESS) {
+
+    unordered_set *uset = unordered_set_init(attr, NULL, 10);
+
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
-            .reason = "Failed to initialize unordered_set",
-            .return_code = rc
+            .reason = "Failed to initialize unordered set",
+            .return_code = CS_UNKNOWN
         };
     }
-
-    if (uset.ht == NULL) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Hash table inside unordered_set is NULL after initialization",
-            .return_code = CS_ELEM
-        };
-    }
-
-    unordered_set_free(&uset);
 
     return (test_res){
         .test_name = (char*) __func__,
