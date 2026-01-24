@@ -56,7 +56,7 @@ map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
     };
     m->key_attr = key_attr;
     m->val_attr = val_attr;
-    m->t = rbt_init(pair_attr, 0);
+    m->t = rbt_init(pair_attr);
     CS_RETURN_IF(m->t == NULL, NULL);
     return m;
 }
