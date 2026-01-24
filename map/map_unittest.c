@@ -130,6 +130,8 @@ test_res test_map_init() {
         };
     }
 
+    map_free(m);
+
     return (test_res){
         .test_name = (char*) __func__,
         .reason = NULL,

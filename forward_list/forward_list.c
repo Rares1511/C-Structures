@@ -146,12 +146,14 @@ void forward_list_print(FILE *stream, const void *v_l) {
 void forward_list_free(void *v_l) {
     CS_RETURN_IF(v_l == NULL);
     forward_list* list = (forward_list*)v_l;
-    forward_list_node* current = list->head;
-    forward_list_node* next_node;
-    while (current) {
-        next_node = current->next;
-        forward_list_node_free(current, list->attr.fr);
-        current = next_node;
+    if (!forward_list_empty(*list)) {
+        forward_list_node* current = list->head;
+        forward_list_node* next_node;
+        while (current) {
+            next_node = current->next;
+            forward_list_node_free(current, list->attr.fr);
+            current = next_node;
+        }
     }
     free(list->meta);
     free(list);

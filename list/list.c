@@ -253,14 +253,15 @@ void list_print(FILE *stream, void *l_p) {
 void list_free(void *l_p) {
     CS_RETURN_IF(l_p == NULL);
     list *l = (list *)l_p;
-    CS_RETURN_IF(list_empty(*l));
-    list_node *node = l->front->next;
-    while (node != l->front) {
-        list_node *aux = node;
-        node = node->next;
-        list_node_free(aux, l->attr.fr);
+    if (!list_empty(*l)) {
+        list_node *node = l->front->next;
+        while (node != l->front) {
+            list_node *aux = node;
+            node = node->next;
+            list_node_free(aux, l->attr.fr);
+        }
+        list_node_free(l->front, l->attr.fr);
     }
-    list_node_free(l->front, l->attr.fr);
     free(l->meta);
     free(l);
 }

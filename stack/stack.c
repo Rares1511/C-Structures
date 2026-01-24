@@ -156,6 +156,21 @@ void stack_print(FILE *stream, void *v_s) {
 void stack_free(void *v_s) {
     CS_RETURN_IF(NULL == v_s);
     stack *s = (stack *)v_s;
-    stack_clear(s);
+    switch (s->type) {
+    case CS_STACK_ARRAY:
+        vector_free(s->container);
+        break;
+    case CS_STACK_DEQUE:
+        deque_free(s->container);
+        break;
+    case CS_STACK_LIST:
+        list_free(s->container);
+        break;
+    case CS_STACK_DEFAULT:
+        deque_free(s->container);
+        break;
+    default:
+        break;
+    }
     free(s);
 }

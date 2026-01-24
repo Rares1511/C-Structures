@@ -23,6 +23,8 @@ test_res test_unordered_set_init() {
         };
     }
 
+    unordered_set_free(uset);
+
     return (test_res){
         .test_name = (char*) __func__,
         .reason = NULL,

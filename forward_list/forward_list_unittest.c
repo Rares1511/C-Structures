@@ -22,6 +22,8 @@ test_res test_forward_list_init() {
         };
     };
 
+    forward_list_free(list);
+
     return (test_res) {
         .test_name = (char*) __func__,
         .reason = NULL,

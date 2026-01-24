@@ -163,5 +163,6 @@ void hash_table_free(void *v_ht) {
     hash_table *ht = (hash_table*)v_ht;
     hash_table_clear(ht);
     free(ht->buckets);
+    free(ht->meta);
     free(ht);
 }
