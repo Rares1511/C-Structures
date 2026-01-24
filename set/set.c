@@ -11,7 +11,7 @@ set *set_init(set_attr_t attr) {
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
     set *s = malloc(sizeof(set));
     CS_RETURN_IF(s == NULL, NULL);
-    s->t = rbt_init(attr);
+    s->t = rbt_init(attr, 0);
     CS_RETURN_IF(s->t == NULL, NULL);
     return s;
 }

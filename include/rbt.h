@@ -20,9 +20,10 @@ typedef struct rbt {
     rbt_node *root;
     metadata_t *meta;
     rbt_attr_t attr;
+    int is_multi;
 } rbt;
 
-rbt *rbt_init(rbt_attr_t attr);
+rbt *rbt_init(rbt_attr_t attr, int is_multi);
 cs_codes rbt_insert(rbt *t, void *data);
 cs_codes rbt_delete(rbt *t, void *data);
 static inline int rbt_empty(rbt t) { return (t.root == NULL); }

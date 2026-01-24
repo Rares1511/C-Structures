@@ -50,6 +50,7 @@ INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set 
 CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 
 # Per-module extra object deps (link-time deps)
+DEPS_rbt		   := vector/vector.o
 DEPS_map           := rbt/rbt.o pair/pair.o
 DEPS_set           := rbt/rbt.o
 DEPS_stack		   := vector/vector.o deque/deque.o list/list.o
