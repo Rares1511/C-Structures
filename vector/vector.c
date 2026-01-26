@@ -204,9 +204,9 @@ void vector_clear(vector *vec) {
     metadata_size_inc(vec->meta, -size);
 }
 
-void vector_print(FILE *stream, void *v_vec) {
+void vector_print(FILE *stream, const void *v_vec) {
     CS_RETURN_IF(stream == NULL || v_vec == NULL);
-    vector *vec = (vector *)v_vec;
+    const vector *vec = (const vector *)v_vec;
     CS_RETURN_IF(vec->attr.print == NULL);
     int size = vector_size(*vec);
     for (int i = 0; i < size; i++)

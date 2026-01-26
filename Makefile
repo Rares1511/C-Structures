@@ -27,7 +27,7 @@ PATH_INCLUDEDIR  := /usr/local/include/cs
 LOCAL_INCLUDEDIR := include
 
 # Don't put -lm in CFLAGS; keep link libs in LDLIBS
-CFLAGS  := -Wall -Wextra -fPIC
+CFLAGS  := -Wall -Wextra -fPIC -Wno-unknown-pragmas
 LDLIBS  := -lm
 
 UNITTEST_LOG := unittest_log.ansi
@@ -41,22 +41,27 @@ endif
 
 # ---------------- Modules ----------------
 # All modules that exist in the repo
-SUBDIRS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
+SUBDIRS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack multiset multimap unordered_multiset unordered_multimap queue priority_queue
 
 # Only these are built/installed/tested as shared libs
-INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack
+INSTALL_LIBS := cargs pair vector deque list forward_list set map unordered_set unordered_map stack multiset multimap unordered_multiset unordered_multimap queue priority_queue
 # ---------------- Core/Dependency objects ----------------
 # Any objects you want to be able to link into other libs (but not necessarily installed as libs)
 CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 
 # Per-module extra object deps (link-time deps)
-DEPS_rbt		   := vector/vector.o
-DEPS_map           := rbt/rbt.o pair/pair.o
-DEPS_set           := rbt/rbt.o
-DEPS_stack		   := vector/vector.o deque/deque.o list/list.o
-DEPS_unordered_set := hash_table/hash_table.o vector/vector.o
-DEPS_unordered_map := hash_table/hash_table.o vector/vector.o pair/pair.o
-
+DEPS_rbt		   		:= vector/vector.o
+DEPS_map           		:= rbt/rbt.o pair/pair.o
+DEPS_set           		:= rbt/rbt.o
+DEPS_stack		   		:= vector/vector.o deque/deque.o list/list.o
+DEPS_queue		   		:= deque/deque.o list/list.o
+DEPS_priority_queue		:= vector/vector.o deque/deque.o
+DEPS_unordered_set 		:= hash_table/hash_table.o vector/vector.o
+DEPS_unordered_map 		:= hash_table/hash_table.o vector/vector.o pair/pair.o
+DEPS_multiset      		:= rbt/rbt.o pair/pair.o
+DEPS_multimap      		:= rbt/rbt.o pair/pair.o vector/vector.o
+DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
+DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 # ---------------- Derived paths ----------------
 # Main object for each module is module/module.o
 MOD_OBJ = $1/$1.o

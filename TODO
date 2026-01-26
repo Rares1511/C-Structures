@@ -7,19 +7,19 @@ Sequence Containers (Arrays):
 Associative Containers (RBT):
     - Set ✔ (Implemented)
     - Map ✔ (Implemented)
-    - Multiset
-    - Multimap
+    - Multiset ✔ (Implemented)
+    - Multimap ✔ (Implemented)
 
 Unordered associative containers (Hash Table):
     - Unordered Set ✔ (Implemented)
     - Unordered Map ✔ (Implemented)
-    - Unordered Multiset
-    - Unordered Multimap
+    - Unordered Multiset ✔ (Implemented)
+    - Unordered Multimap ✔ (Implemented)
 
 Container Adapters:
     - Stack ✔ (Implemented)
-    - Queue
-    - Priority Queue
+    - Queue ✔ (Implemented)
+    - Priority Queue ✔ (Implemented)
     - Flat Set
     - Flat Map
     - Flat Multiset
@@ -29,4 +29,4 @@ Extra Modules:
     - Pair ✔ (Implemented)
     - Cargs ✔ (Implemented)
 
-Check memory usage after changing init function methodology
+Modify Unordered multiset with pair with count
