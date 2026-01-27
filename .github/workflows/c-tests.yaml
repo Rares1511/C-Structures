@@ -20,10 +20,9 @@ jobs:
         sudo apt-get install -y build-essential valgrind time
 
     - name: Build and Run Tests
-      # We use sudo here because your Makefile's 'unittest' target 
-      # depends on the 'install' target which writes to /usr/local
       run: |
-        sudo make unittest memcheck=true SEED=1234
+        # No sudo needed!
+        make unittest memcheck=true SEED=1234
       
     - name: Display Test Results
       # This ensures that even if tests fail, we see the log in the console
