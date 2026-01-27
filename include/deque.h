@@ -48,6 +48,15 @@ cs_codes deque_push_back(deque *dq, const void*  el);
 cs_codes deque_push_front(deque *dq, const void*  el);
 
 /*! 
+ * Inserts an element at the specified index in the deque.
+ * @param dq Pointer to the deque.
+ * @param index The index at which to insert the element.
+ * @param el Pointer to the element to insert.
+ * @return CS_SUCCESS on success, or an error code on failure.
+ */
+cs_codes deque_insert_at(deque *dq, const void *el, int index);
+
+/*! 
  * Pops an element from the back of the deque.
  * @param dq Pointer to the deque.
  * @return CS_SUCCESS on success, or an error code on failure.
@@ -60,6 +69,14 @@ cs_codes deque_pop_back(deque *dq);
  * @return CS_SUCCESS on success, or an error code on failure.
  */
 cs_codes deque_pop_front(deque *dq);
+
+/*! 
+ * Erases the element at the specified index in the deque.
+ * @param dq Pointer to the deque.
+ * @param index The index of the element to erase.
+ * @return CS_SUCCESS on success, or an error code on failure.
+ */
+cs_codes deque_erase(deque *dq, int index);
 
 /*! 
  * Pops an element from the back of the deque.

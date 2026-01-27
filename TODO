@@ -20,7 +20,7 @@ Container Adapters:
     - Stack ✔ (Implemented)
     - Queue ✔ (Implemented)
     - Priority Queue ✔ (Implemented)
-    - Flat Set
+    - Flat Set ✔ (Implemented)
     - Flat Map
     - Flat Multiset
     - Flat Multimap
