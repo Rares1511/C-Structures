@@ -154,11 +154,11 @@ unittest-$1: install $(call UNITTEST_SRC,$1)
 	  echo "[RUN][$1] valgrind --leak-check=full $1/unittest $$$$MODARGS"; \
 	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
 	    valgrind --leak-check=full \
-	    $1/unittest $$$$MODARGS >> $(UNITTEST_LOG) 2>&1 ; \
+		$1/unittest $$$$MODARGS 2>&1 | tee -a $(UNITTEST_LOG) ; \
 	else \
 	  echo "[RUN][$1] $1/unittest $$$$MODARGS"; \
 	  /usr/bin/time -f "[TIME][$1] %E real, %U user, %S sys" \
-	    $1/unittest $$$$MODARGS >> $(UNITTEST_LOG) 2>&1 ; \
+	    $1/unittest $$$$MODARGS 2>&1 | tee -a $(UNITTEST_LOG) ; \
 	fi
 	@$(RM) $1/unittest
 endef

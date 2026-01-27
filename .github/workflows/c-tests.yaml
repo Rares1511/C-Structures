@@ -1,0 +1,31 @@
+name: C Data Structures CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Build Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential valgrind time
+
+    - name: Build and Run Tests
+      # We use sudo here because your Makefile's 'unittest' target 
+      # depends on the 'install' target which writes to /usr/local
+      run: |
+        sudo make unittest memcheck=true SEED=1234
+      
+    - name: Display Test Results
+      # This ensures that even if tests fail, we see the log in the console
+      if: always()
+      run: cat unittest_log.ansi
