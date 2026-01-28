@@ -4,17 +4,6 @@
 // Required by unittest.h
 FILE *__DEBUG_OUT = NULL;
 
-// Helper to get standard int attributes
-static inline list_attr_t get_int_attr() {
-    return (list_attr_t){
-        .size = sizeof(int),
-        .fr = NULL,
-        .copy = NULL,
-        .print = print_int,
-        .comp = comp_int_max
-    };
-}
-
 // 1. Test Initialization
 test_res test_list_init() {
     list_attr_t attr = get_int_attr();

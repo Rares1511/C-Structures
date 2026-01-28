@@ -63,14 +63,14 @@ typedef struct metadata_t {
  * @param[in,out] meta  Metadata whose size will be increased
  * @param[in]     inc   The increment value (can be negative to decrease size)
  */
-static void metadata_size_inc(metadata_t *meta, int inc) { meta->size += inc; }
+static inline void metadata_size_inc(metadata_t *meta, int inc) { meta->size += inc; }
 
 /*!
  * Initializes the metadata structure
  * @param[out] meta     Metadata structure to be initialized
  * @param[in]  is_init  Flag to indicate if the structure is initialized
  */
-static void metadata_init(metadata_t *meta) { meta->size = 0; }
+static inline void metadata_init(metadata_t *meta) { meta->size = 0; }
 
 /*!
  * A simple universal hash function for byte arrays.
@@ -78,7 +78,7 @@ static void metadata_init(metadata_t *meta) { meta->size = 0; }
  * @param[in] size Size of the data in bytes.
  * @return A size_t hash value.
  */
-static size_t universal_hash_bytes(const void *data, size_t size) {
+static inline size_t universal_hash_bytes(const void *data, size_t size) {
     const unsigned char *bytes = (const unsigned char *)data;
     size_t hash = 1469598103934665603ULL;  // FNV offset basis (64-bit)
 

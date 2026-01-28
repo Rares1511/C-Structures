@@ -4,17 +4,6 @@
 // Required by unittest.h
 FILE *__DEBUG_OUT = NULL;
 
-// Helper to get a standard int attribute
-static inline vector_attr_t get_int_attr() {
-    return (vector_attr_t){
-        .size = sizeof(int),
-        .fr = NULL,
-        .copy = NULL,
-        .print = print_int,
-        .comp = comp_int_max // standard ascending
-    };
-}
-
 // 1. Test Initialization
 test_res test_vector_init() {
     vector_attr_t attr = get_int_attr();

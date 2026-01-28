@@ -58,7 +58,7 @@ cs_codes forward_list_pop_front(forward_list* list);
  * @return The number of elements in the list.
  */
 static inline void forward_list_set_attr(forward_list* list, forward_list_attr_t attr) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta) || attr.size <= 0 || attr.size > SIZE_TH);
+    CS_RETURN_IF(list == NULL || attr.size <= 0 || attr.size > SIZE_TH);
     list->attr = attr;
 }
 
@@ -68,7 +68,7 @@ static inline void forward_list_set_attr(forward_list* list, forward_list_attr_t
  * @param size The new size to set.
  */
 static inline void forward_list_set_size(forward_list* list, int size) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta));
+    CS_RETURN_IF(list == NULL);
     list->attr.size = size;
 }
 
@@ -78,7 +78,7 @@ static inline void forward_list_set_size(forward_list* list, int size) {
  * @param fr The freer function to set.
  */
 static inline void forward_list_set_free(forward_list* list, freer fr) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta));
+    CS_RETURN_IF(list == NULL);
     list->attr.fr = fr;
 }
 
@@ -88,7 +88,7 @@ static inline void forward_list_set_free(forward_list* list, freer fr) {
  * @param cp The copy function to set.
  */
 static inline void forward_list_set_copy(forward_list* list, deepcopy cp) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta));
+    CS_RETURN_IF(list == NULL);
     list->attr.copy = cp;
 }
 
@@ -98,7 +98,7 @@ static inline void forward_list_set_copy(forward_list* list, deepcopy cp) {
  * @param pr The print function to set.
  */
 static inline void forward_list_set_print(forward_list* list, printer pr) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta));
+    CS_RETURN_IF(list == NULL);
     list->attr.print = pr;
 }
 
@@ -108,7 +108,7 @@ static inline void forward_list_set_print(forward_list* list, printer pr) {
  * @param cmp The compare function to set.
  */
 static inline void forward_list_set_compare(forward_list* list, comparer cmp) {
-    CS_RETURN_IF(list == NULL || !metadata_is_init(list->meta));
+    CS_RETURN_IF(list == NULL);
     list->attr.comp = cmp;
 }
 

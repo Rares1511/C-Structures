@@ -102,7 +102,7 @@ void list_sort(list *l);
  * @param[in]  attr  New attributes for the elements of the list
  */
 static inline void list_set_attr(list *l, list_attr_t attr) { 
-    CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH || !metadata_is_init(l->meta));
+    CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH);
     l->attr = attr; 
 }
 
@@ -112,7 +112,7 @@ static inline void list_set_attr(list *l, list_attr_t attr) {
  * @param[in]  fr  New free function for the datatype inside the list
  */
 static inline void list_set_free(list *l, freer fr) { 
-    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    CS_RETURN_IF(l == NULL);
     l->attr.fr = fr; 
 }
 
@@ -122,7 +122,7 @@ static inline void list_set_free(list *l, freer fr) {
  * @param[in]  print  New print function for the datatype inside the list
  */
 static inline void list_set_print(list *l, printer print) { 
-    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    CS_RETURN_IF(l == NULL);
     l->attr.print = print; 
 }
 
@@ -132,7 +132,7 @@ static inline void list_set_print(list *l, printer print) {
  * @param[in]  cp  New copy function for copying the elements inside the list
  */
 static inline void list_set_copy(list *l, deepcopy copy) { 
-    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    CS_RETURN_IF(l == NULL);
     l->attr.copy = copy; 
 }
 
@@ -142,7 +142,7 @@ static inline void list_set_copy(list *l, deepcopy copy) {
  * @param[in]  print  New comp function for the datatype inside the list
  */
 static inline void list_set_comp(list *l, comparer comp) { 
-    CS_RETURN_IF(l == NULL || !metadata_is_init(l->meta));
+    CS_RETURN_IF(l == NULL);
     l->attr.comp = comp; 
 }
 

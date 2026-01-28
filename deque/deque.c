@@ -61,7 +61,11 @@ cs_codes deque_push_back(deque *dq, const void* el) {
         dq->blocks[dq->back].front = 0;
         dq->blocks[dq->back].back = 0;
     }
-    memcpy(dq->blocks[dq->back].data + (dq->blocks[dq->back].back * dq->attr.size), el, dq->attr.size);
+    if (dq->attr.copy) {
+        dq->attr.copy(dq->blocks[dq->back].data + (dq->blocks[dq->back].back * dq->attr.size), el);
+    } else {
+        memcpy(dq->blocks[dq->back].data + (dq->blocks[dq->back].back * dq->attr.size), el, dq->attr.size);
+    }
     dq->blocks[dq->back].back++;
     metadata_size_inc(dq->meta, 1);
     return CS_SUCCESS;
@@ -91,7 +95,11 @@ cs_codes deque_push_front(deque *dq, const void* el) {
         dq->blocks[dq->front].back = dq->block_size;
     }
     dq->blocks[dq->front].front--;
-    memcpy(dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size), el, dq->attr.size);
+    if (dq->attr.copy) {
+        dq->attr.copy(dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size), el);
+    } else {
+        memcpy(dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size), el, dq->attr.size);
+    }
     metadata_size_inc(dq->meta, 1);
     return CS_SUCCESS;
 }
@@ -108,26 +116,40 @@ cs_codes deque_insert_at(deque *dq, const void *el, int index) {
     }
 
     if (index < size / 2) {
-        // Shift elements towards front
-        deque_push_front(dq, dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size));
-        for (int i = 0; i < index; i++) {
+        // Shift elements towards front - make space at front first
+        void *first_el = dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size);
+        deque_push_front(dq, first_el);
+        // Free the duplicate at position 1 (was position 0 before push)
+        if (dq->attr.fr) {
+            dq->attr.fr(deque_at(*dq, 1));
+        }
+        for (int i = 1; i < index; i++) {
             void *src = deque_at(*dq, i + 1);
             void *dest = deque_at(*dq, i);
             memcpy(dest, src, dq->attr.size);
         }
-        void *target = deque_at(*dq, index);
-        memcpy(target, el, dq->attr.size);
     } else {
-        // Shift elements towards back
-        deque_push_back(dq, dq->blocks[dq->back].data + ((dq->blocks[dq->back].back - 1) * dq->attr.size));
-        for (int i = size - 1; i > index; i--) {
+        // Shift elements towards back - make space at back first
+        void *last_el = dq->blocks[dq->back].data + ((dq->blocks[dq->back].back - 1) * dq->attr.size);
+        deque_push_back(dq, last_el);
+        // Free the duplicate at position size-1 (was last before push, now second-to-last)
+        if (dq->attr.fr) {
+            dq->attr.fr(deque_at(*dq, size));
+        }
+        for (int i = size; i > index; i--) {
             void *src = deque_at(*dq, i - 1);
             void *dest = deque_at(*dq, i);
             memcpy(dest, src, dq->attr.size);
         }
-        void *target = deque_at(*dq, index);
+    }
+
+    void *target = deque_at(*dq, index);
+    if (dq->attr.copy) {
+        dq->attr.copy(target, el);
+    } else {
         memcpy(target, el, dq->attr.size);
     }
+
     return CS_SUCCESS;
 }
 
@@ -188,6 +210,10 @@ cs_codes deque_erase(deque *dq, int index) {
         return deque_pop_back(dq);
     }
 
+    void *temp = malloc(dq->attr.size);
+    CS_RETURN_IF(temp == NULL, CS_MEM);
+    memcpy(temp, deque_at(*dq, index), dq->attr.size);
+
     if (index < size / 2) {
         // Shift elements towards back
         for (int i = index; i > 0; i--) {
@@ -195,6 +221,8 @@ cs_codes deque_erase(deque *dq, int index) {
             void *dest = deque_at(*dq, i);
             memcpy(dest, src, dq->attr.size);
         }
+        memcpy(deque_at(*dq, 0), temp, dq->attr.size);
+        free(temp);
         return deque_pop_front(dq);
     } else {
         // Shift elements towards front
@@ -203,6 +231,8 @@ cs_codes deque_erase(deque *dq, int index) {
             void *dest = deque_at(*dq, i);
             memcpy(dest, src, dq->attr.size);
         }
+        memcpy(deque_at(*dq, size - 1), temp, dq->attr.size);
+        free(temp);
         return deque_pop_back(dq);
     }
 }
