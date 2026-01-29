@@ -1,8 +1,5 @@
 #include <cs/deque.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
+#include <unittest.h>
 
 // ============================================================================
 // deque_init
@@ -1043,81 +1040,75 @@ test_res test_deque_large_random_access() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // deque_init
-        test_deque_init,
-        
-        // deque_push_back
-        test_deque_push_back_single,
-        test_deque_push_back_multiple,
-        test_deque_push_back_growth,
-        
-        // deque_push_front
-        test_deque_push_front_single,
-        test_deque_push_front_multiple,
-        test_deque_push_front_growth,
-        
-        // deque_insert_at
-        test_deque_insert_at_front,
-        test_deque_insert_at_middle,
-        test_deque_insert_at_back,
-        
-        // deque_pop_back
-        test_deque_pop_back_single,
-        test_deque_pop_back_multiple,
-        test_deque_pop_back_empty,
-        
-        // deque_pop_front
-        test_deque_pop_front_single,
-        test_deque_pop_front_multiple,
-        test_deque_pop_front_empty,
-        
-        // deque_erase
-        test_deque_erase_front,
-        test_deque_erase_middle,
-        test_deque_erase_back,
-        
-        // deque_back
-        test_deque_back,
-        
-        // deque_front
-        test_deque_front,
-        
-        // deque_at
-        test_deque_at_valid,
-        test_deque_at_out_of_bounds,
-        test_deque_at_cross_block,
-        
-        // deque_empty
-        test_deque_empty_initial,
-        test_deque_empty_after_ops,
-        
-        // deque_size
-        test_deque_size_initial,
-        test_deque_size_after_ops,
-        
-        // deque_swap
-        test_deque_swap,
-        test_deque_swap_empty,
-        
-        // deque_clear
-        test_deque_clear,
-        test_deque_clear_reuse,
-        
-        // Complex struct integrity
-        test_deque_nested_data_integrity,
-        test_deque_deep_copy_verification,
-        
-        // Mixed/stress tests
-        test_deque_push_both_sides,
-        test_deque_alternating_ops,
-        test_deque_pop_all_front,
-        test_deque_pop_all_back,
-        test_deque_large_random_access
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+test deque_tests[] = {
+    // deque_init
+    test_deque_init,
+    
+    // deque_push_back
+    test_deque_push_back_single,
+    test_deque_push_back_multiple,
+    test_deque_push_back_growth,
+    
+    // deque_push_front
+    test_deque_push_front_single,
+    test_deque_push_front_multiple,
+    test_deque_push_front_growth,
+    
+    // deque_insert_at
+    test_deque_insert_at_front,
+    test_deque_insert_at_middle,
+    test_deque_insert_at_back,
+    
+    // deque_pop_back
+    test_deque_pop_back_single,
+    test_deque_pop_back_multiple,
+    test_deque_pop_back_empty,
+    
+    // deque_pop_front
+    test_deque_pop_front_single,
+    test_deque_pop_front_multiple,
+    test_deque_pop_front_empty,
+    
+    // deque_erase
+    test_deque_erase_front,
+    test_deque_erase_middle,
+    test_deque_erase_back,
+    
+    // deque_back
+    test_deque_back,
+    
+    // deque_front
+    test_deque_front,
+    
+    // deque_at
+    test_deque_at_valid,
+    test_deque_at_out_of_bounds,
+    test_deque_at_cross_block,
+    
+    // deque_empty
+    test_deque_empty_initial,
+    test_deque_empty_after_ops,
+    
+    // deque_size
+    test_deque_size_initial,
+    test_deque_size_after_ops,
+    
+    // deque_swap
+    test_deque_swap,
+    test_deque_swap_empty,
+    
+    // deque_clear
+    test_deque_clear,
+    test_deque_clear_reuse,
+    
+    // Complex struct integrity
+    test_deque_nested_data_integrity,
+    test_deque_deep_copy_verification,
+    
+    // Mixed/stress tests
+    test_deque_push_both_sides,
+    test_deque_alternating_ops,
+    test_deque_pop_all_front,
+    test_deque_pop_all_back,
+    test_deque_large_random_access
+};

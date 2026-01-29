@@ -19,25 +19,79 @@
 
 #include <cs/universal.h>
 #include <cs/cargs.h>
-
-extern FILE *__DEBUG_OUT;
+#include <cs/rbt.h>
 
 #define __GREEN_UNITTEST  "\033[32m"
 #define __RED_UNITTEST    "\033[31m"
 #define __RESET_UNITTEST  "\033[0m"
 #define __BOLD_UNITTEST   "\033[1m"
 
-#ifdef DEBUG
-#define DEBUG_PRINT(...) do { \
-    if (__DEBUG_OUT) { \
-        fprintf(__DEBUG_OUT, "[%s:%d:%s] ", __FILE__, __LINE__, __func__); \
-        fprintf(__DEBUG_OUT, __VA_ARGS__); \
-        fflush(__DEBUG_OUT); \
-    } \
-} while (0)
-#else
-#define DEBUG_PRINT(...) do {} while (0)
-#endif
+#pragma region RBT VALIDATION HELPERS
+// ============================================================================
+// RBT VALIDATION HELPERS
+// Used by set, map, multiset, multimap unittests to verify RBT integrity
+// ============================================================================
+
+static inline int rbt_check_black_height(rbt_node *node) {
+    if (node == NULL) {
+        return 1;
+    }
+
+    int left_bh  = rbt_check_black_height(node->left);
+    int right_bh = rbt_check_black_height(node->right);
+
+    if (left_bh == -1 || right_bh == -1)
+        return -1;
+
+    if (left_bh != right_bh)
+        return -1;
+
+    if (node->color == __RBT_NODE_RED_COLOR) {
+        if ((node->left && node->left->color == __RBT_NODE_RED_COLOR) ||
+            (node->right && node->right->color == __RBT_NODE_RED_COLOR)) {
+            return -1;
+        }
+    }
+
+    return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
+}
+
+static inline int rbt_check_bst(rbt_node *node, rbt_attr_t attr, void *min_key, void *max_key) {
+    if (!node) return 1;
+
+    if (min_key) {
+        if (attr.comp && attr.comp(node->data, min_key) <= 0)
+            return 0;
+    }
+
+    if (max_key) {
+        if (attr.comp && attr.comp(node->data, max_key) >= 0)
+            return 0;
+    }
+
+    if (!rbt_check_bst(node->left, attr, min_key, node->data))
+        return 0;
+
+    if (!rbt_check_bst(node->right, attr, node->data, max_key))
+        return 0;
+
+    return 1;
+}
+
+static inline int rbt_is_valid(rbt *t) {
+    if (t->root && t->root->color != __RBT_NODE_BLACK_COLOR)
+        return 0;
+
+    if (!rbt_check_bst(t->root, t->attr, NULL, NULL))
+        return 0;
+
+    int bh = rbt_check_black_height(t->root);
+    if (bh == -1)
+        return 0;
+
+    return 1;
+}
+#pragma endregion
 
 typedef struct test_res {
     char *test_name;
@@ -460,85 +514,4 @@ static inline univ_attr_t get_test_struct_attr_min() {
         .print = print_test_struct_compact,
         .comp = comp_test_struct_min
     };
-}
-
-static inline void unittest(test *tests, int size, int argc, char **argv) {
-    int i, seed, success = 0, failed = 0;
-    test_res res;
-    cparser parser;
-
-    int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
-
-    cargs_init(&parser, argc, argv);
-    cargs_add_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, __UNITTEST_DEBUG_FILE_DEFAULT_VALUE);
-    cargs_add_arg(&parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
-    cargs_add_arg(&parser, __UNITTEST_MODULE_ARG_NAME, "Module to run tests for", 1, CARG_TYPE_STRING, NULL);
-    cargs_parse(&parser);
-
-    const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
-    __DEBUG_OUT = fopen(debug_file, "a");
-    if (__DEBUG_OUT == NULL) {
-        printf("Failed to open debug file: %s\n", debug_file);
-        return;
-    }
-
-    seed = *(int*)cargs_get_arg(&parser, __UNITTEST_SEED_ARG_NAME);
-    srand(seed);
-
-    const char *module_name = (const char*)cargs_get_arg(&parser, __UNITTEST_MODULE_ARG_NAME);
-
-    fprintf(__DEBUG_OUT, "========================================\n");
-    fprintf(__DEBUG_OUT, "  MODULE: %s\n", module_name);
-    fprintf(__DEBUG_OUT, "  SEED: %d\n", seed);
-    fprintf(__DEBUG_OUT, "  UNITTEST RUN (total tests: %d)\n", size);
-    fprintf(__DEBUG_OUT, "========================================\n");
-
-    for (i = 0; i < size; i++) {
-        res = tests[i]();
-
-        char buffer[__MAX_REASON_SIZE];
-        const char *dots =
-            "..........................................................................";
-
-        strncpy(buffer, res.test_name, sizeof(buffer) - 1);
-        buffer[sizeof(buffer) - 1] = '\0';
-
-        size_t len = strlen(buffer);
-        size_t max_dots = (__MAX_PRINT_SIZE > len) ? (__MAX_PRINT_SIZE - len) : 0;
-        strncat(buffer, dots, max_dots);
-
-        if (res.return_code != CS_SUCCESS) {
-            /* FAILURE */
-            failed++;
-            fprintf(__DEBUG_OUT,
-                    "[%2d/%2d] %s" __RED_UNITTEST __BOLD_UNITTEST "[FAIL]" __RESET_UNITTEST
-                    "  reason: %s\n",
-                    i + 1, size, buffer,
-                    res.reason ? res.reason : "(no reason)");
-
-        } else {
-            /* SUCCESS */
-            success++;
-            fprintf(__DEBUG_OUT,
-                    "[%2d/%2d] %s" __GREEN_UNITTEST "[ OK ]" __RESET_UNITTEST
-                    "  SUCCESS: %d/%d\n",
-                    i + 1, size, buffer, success, size);
-        }
-    }
-
-    /* Color summary depending on fail/success */
-    if (failed == 0) {
-        fprintf(__DEBUG_OUT, __GREEN_UNITTEST __BOLD_UNITTEST
-                "SUMMARY: %d passed, %d failed (total %d)\n" __RESET_UNITTEST,
-                success, failed, size);
-    } else {
-        fprintf(__DEBUG_OUT, __RED_UNITTEST __BOLD_UNITTEST
-                "SUMMARY: %d passed, %d failed (total %d)\n" __RESET_UNITTEST,
-                success, failed, size);
-    }
-
-    fprintf(__DEBUG_OUT, "========================================\n\n");
-
-    fclose(__DEBUG_OUT);
-    cargs_free(&parser);
 }

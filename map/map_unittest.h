@@ -1,78 +1,7 @@
 #include <cs/map.h>
 #include <cs/rbt.h>
 #include <cs/pair.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       START OF HELPER FUNCTIONS SECTION                                    ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-int rbt_check_black_height(rbt_node *node) {
-    if (node == NULL) {
-        return 1;
-    }
-
-    int left_bh  = rbt_check_black_height(node->left);
-    int right_bh = rbt_check_black_height(node->right);
-
-    if (left_bh == -1 || right_bh == -1)
-        return -1;
-
-    if (left_bh != right_bh)
-        return -1;
-
-    if (node->color == __RBT_NODE_RED_COLOR) {
-        if ((node->left && node->left->color == __RBT_NODE_RED_COLOR) ||
-            (node->right && node->right->color == __RBT_NODE_RED_COLOR)) {
-            return -1;
-        }
-    }
-
-    return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
-}
-
-int rbt_check_bst(rbt_node *node, rbt_attr_t attr, void *min_key, void *max_key) {
-    if (!node) return 1;
-
-    if (min_key) {
-        if (attr.comp && attr.comp(node->data, min_key) <= 0)
-            return 0;
-    }
-
-    if (max_key) {
-        if (attr.comp && attr.comp(node->data, max_key) >= 0)
-            return 0;
-    }
-
-    if (!rbt_check_bst(node->left, attr, min_key, node->data))
-        return 0;
-
-    if (!rbt_check_bst(node->right, attr, node->data, max_key))
-        return 0;
-
-    return 1;
-}
-
-int rbt_is_valid(rbt *t) {
-    if (t->root && t->root->color != __RBT_NODE_BLACK_COLOR)
-        return 0;
-
-    if (!rbt_check_bst(t->root, t->attr, NULL, NULL))
-        return 0;
-
-    int bh = rbt_check_black_height(t->root);
-    if (bh == -1)
-        return 0;
-
-    return 1;
-}
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#include <unittest.h>
 
 // ============================================================================
 // map_init
@@ -1063,56 +992,50 @@ test_res test_map_delete_all_verify_rbt() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // map_init
-        test_map_init,
+test map_tests[] = {
+    // map_init
+    test_map_init,
 
-        // map_insert
-        test_map_insert_single,
-        test_map_insert_multiple,
-        test_map_insert_duplicate_key,
-        test_map_insert_ascending,
-        test_map_insert_descending,
+    // map_insert
+    test_map_insert_single,
+    test_map_insert_multiple,
+    test_map_insert_duplicate_key,
+    test_map_insert_ascending,
+    test_map_insert_descending,
 
-        // map_delete
-        test_map_delete_single,
-        test_map_delete_multiple,
-        test_map_delete_nonexistent,
-        test_map_delete_random_order,
+    // map_delete
+    test_map_delete_single,
+    test_map_delete_multiple,
+    test_map_delete_nonexistent,
+    test_map_delete_random_order,
 
-        // map_find
-        test_map_find_existing,
-        test_map_find_nonexistent,
-        test_map_find_all,
+    // map_find
+    test_map_find_existing,
+    test_map_find_nonexistent,
+    test_map_find_all,
 
-        // map_empty
-        test_map_empty_initial,
-        test_map_empty_after_ops,
+    // map_empty
+    test_map_empty_initial,
+    test_map_empty_after_ops,
 
-        // map_size
-        test_map_size_initial,
-        test_map_size_after_ops,
+    // map_size
+    test_map_size_initial,
+    test_map_size_after_ops,
 
-        // map_swap
-        test_map_swap,
-        test_map_swap_empty,
+    // map_swap
+    test_map_swap,
+    test_map_swap_empty,
 
-        // map_clear
-        test_map_clear,
-        test_map_clear_reuse,
+    // map_clear
+    test_map_clear,
+    test_map_clear_reuse,
 
-        // Complex struct integrity
-        test_map_nested_data_integrity,
-        test_map_deep_copy_verification,
+    // Complex struct integrity
+    test_map_nested_data_integrity,
+    test_map_deep_copy_verification,
 
-        // Stress tests with RBT integrity
-        test_map_stress_insert_delete,
-        test_map_interleaved_insert_delete,
-        test_map_delete_all_verify_rbt
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+    // Stress tests with RBT integrity
+    test_map_stress_insert_delete,
+    test_map_interleaved_insert_delete,
+    test_map_delete_all_verify_rbt
+};

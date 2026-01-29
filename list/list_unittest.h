@@ -1,8 +1,5 @@
 #include <cs/list.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
+#include <unittest.h>
 
 // ============================================================================
 // list_init
@@ -1035,80 +1032,74 @@ test_res test_list_mixed_operations() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // list_init
-        test_list_init,
-        
-        // list_push_front
-        test_list_push_front_single,
-        test_list_push_front_multiple,
-        
-        // list_push_back
-        test_list_push_back_single,
-        test_list_push_back_multiple,
-        
-        // list_pop_front
-        test_list_pop_front_single,
-        test_list_pop_front_multiple,
-        test_list_pop_front_empty,
-        
-        // list_pop_back
-        test_list_pop_back_single,
-        test_list_pop_back_multiple,
-        test_list_pop_back_empty,
-        
-        // list_erase
-        test_list_erase_front,
-        test_list_erase_middle,
-        test_list_erase_back,
-        test_list_erase_invalid,
-        
-        // list_front
-        test_list_front,
-        
-        // list_back
-        test_list_back,
-        
-        // list_empty
-        test_list_empty_initial,
-        test_list_empty_after_ops,
-        
-        // list_size
-        test_list_size_initial,
-        test_list_size_after_ops,
-        
-        // list_swap
-        test_list_swap,
-        test_list_swap_empty,
-        
-        // list_clear
-        test_list_clear,
-        test_list_clear_reuse,
-        
-        // list_sort
-        test_list_sort_ascending,
-        test_list_sort_already_sorted,
-        test_list_sort_reverse,
-        test_list_sort_by_score,
-        
-        // Circularity tests
-        test_list_circularity,
-        test_list_traverse_forward,
-        test_list_traverse_backward,
-        
-        // Complex struct integrity
-        test_list_nested_data_integrity,
-        test_list_deep_copy_verification,
-        
-        // Stress tests
-        test_list_alternating_push_pop,
-        test_list_large_dataset,
-        test_list_erase_all,
-        test_list_mixed_operations
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+test list_tests[] = {
+    // list_init
+    test_list_init,
+    
+    // list_push_front
+    test_list_push_front_single,
+    test_list_push_front_multiple,
+    
+    // list_push_back
+    test_list_push_back_single,
+    test_list_push_back_multiple,
+    
+    // list_pop_front
+    test_list_pop_front_single,
+    test_list_pop_front_multiple,
+    test_list_pop_front_empty,
+    
+    // list_pop_back
+    test_list_pop_back_single,
+    test_list_pop_back_multiple,
+    test_list_pop_back_empty,
+    
+    // list_erase
+    test_list_erase_front,
+    test_list_erase_middle,
+    test_list_erase_back,
+    test_list_erase_invalid,
+    
+    // list_front
+    test_list_front,
+    
+    // list_back
+    test_list_back,
+    
+    // list_empty
+    test_list_empty_initial,
+    test_list_empty_after_ops,
+    
+    // list_size
+    test_list_size_initial,
+    test_list_size_after_ops,
+    
+    // list_swap
+    test_list_swap,
+    test_list_swap_empty,
+    
+    // list_clear
+    test_list_clear,
+    test_list_clear_reuse,
+    
+    // list_sort
+    test_list_sort_ascending,
+    test_list_sort_already_sorted,
+    test_list_sort_reverse,
+    test_list_sort_by_score,
+    
+    // Circularity tests
+    test_list_circularity,
+    test_list_traverse_forward,
+    test_list_traverse_backward,
+    
+    // Complex struct integrity
+    test_list_nested_data_integrity,
+    test_list_deep_copy_verification,
+    
+    // Stress tests
+    test_list_alternating_push_pop,
+    test_list_large_dataset,
+    test_list_erase_all,
+    test_list_mixed_operations
+};

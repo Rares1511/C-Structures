@@ -1,8 +1,5 @@
 #include <cs/forward_list.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
+#include <unittest.h>
 
 // ============================================================================
 // forward_list_init
@@ -650,56 +647,50 @@ test_res test_forward_list_alternating_ops() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // forward_list_init
-        test_forward_list_init,
-        
-        // forward_list_push_front
-        test_forward_list_push_front_single,
-        test_forward_list_push_front_multiple,
-        test_forward_list_push_front_order,
-        
-        // forward_list_pop_front
-        test_forward_list_pop_front_single,
-        test_forward_list_pop_front_multiple,
-        test_forward_list_pop_front_empty,
-        
-        // forward_list_front
-        test_forward_list_front,
-        test_forward_list_front_empty,
-        
-        // forward_list_empty
-        test_forward_list_empty_initial,
-        test_forward_list_empty_after_ops,
-        
-        // forward_list_size
-        test_forward_list_size_initial,
-        test_forward_list_size_after_ops,
-        
-        // forward_list_swap
-        test_forward_list_swap,
-        test_forward_list_swap_empty,
-        
-        // forward_list_clear
-        test_forward_list_clear,
-        test_forward_list_clear_reuse,
-        
-        // Traversal
-        test_forward_list_traverse,
-        
-        // Complex struct integrity
-        test_forward_list_nested_data_integrity,
-        test_forward_list_deep_copy_verification,
-        
-        // Stress tests
-        test_forward_list_large_dataset,
-        test_forward_list_push_pop_cycle,
-        test_forward_list_pop_all,
-        test_forward_list_alternating_ops
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+test forward_list_tests[] = {
+    // forward_list_init
+    test_forward_list_init,
+    
+    // forward_list_push_front
+    test_forward_list_push_front_single,
+    test_forward_list_push_front_multiple,
+    test_forward_list_push_front_order,
+    
+    // forward_list_pop_front
+    test_forward_list_pop_front_single,
+    test_forward_list_pop_front_multiple,
+    test_forward_list_pop_front_empty,
+    
+    // forward_list_front
+    test_forward_list_front,
+    test_forward_list_front_empty,
+    
+    // forward_list_empty
+    test_forward_list_empty_initial,
+    test_forward_list_empty_after_ops,
+    
+    // forward_list_size
+    test_forward_list_size_initial,
+    test_forward_list_size_after_ops,
+    
+    // forward_list_swap
+    test_forward_list_swap,
+    test_forward_list_swap_empty,
+    
+    // forward_list_clear
+    test_forward_list_clear,
+    test_forward_list_clear_reuse,
+    
+    // Traversal
+    test_forward_list_traverse,
+    
+    // Complex struct integrity
+    test_forward_list_nested_data_integrity,
+    test_forward_list_deep_copy_verification,
+    
+    // Stress tests
+    test_forward_list_large_dataset,
+    test_forward_list_push_pop_cycle,
+    test_forward_list_pop_all,
+    test_forward_list_alternating_ops
+};

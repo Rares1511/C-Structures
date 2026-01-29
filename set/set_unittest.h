@@ -1,77 +1,6 @@
 #include <cs/set.h>
 #include <cs/rbt.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       START OF HELPER FUNCTIONS SECTION                                    ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-int rbt_check_black_height(rbt_node *node) {
-    if (node == NULL) {
-        return 1;
-    }
-
-    int left_bh  = rbt_check_black_height(node->left);
-    int right_bh = rbt_check_black_height(node->right);
-
-    if (left_bh == -1 || right_bh == -1)
-        return -1;
-
-    if (left_bh != right_bh)
-        return -1;
-
-    if (node->color == __RBT_NODE_RED_COLOR) {
-        if ((node->left && node->left->color == __RBT_NODE_RED_COLOR) ||
-            (node->right && node->right->color == __RBT_NODE_RED_COLOR)) {
-            return -1;
-        }
-    }
-
-    return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
-}
-
-int rbt_check_bst(rbt_node *node, rbt_attr_t attr, void *min_key, void *max_key) {
-    if (!node) return 1;
-
-    if (min_key) {
-        if (attr.comp && attr.comp(node->data, min_key) <= 0)
-            return 0;
-    }
-
-    if (max_key) {
-        if (attr.comp && attr.comp(node->data, max_key) >= 0)
-            return 0;
-    }
-
-    if (!rbt_check_bst(node->left, attr, min_key, node->data))
-        return 0;
-
-    if (!rbt_check_bst(node->right, attr, node->data, max_key))
-        return 0;
-
-    return 1;
-}
-
-int rbt_is_valid(rbt *t) {
-    if (t->root && t->root->color != __RBT_NODE_BLACK_COLOR)
-        return 0;
-
-    if (!rbt_check_bst(t->root, t->attr, NULL, NULL))
-        return 0;
-
-    int bh = rbt_check_black_height(t->root);
-    if (bh == -1)
-        return 0;
-
-    return 1;
-}
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#include <unittest.h>
 
 // ============================================================================
 // set_init
@@ -982,56 +911,50 @@ test_res test_set_delete_all_verify_rbt() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // set_init
-        test_set_init,
-        
-        // set_insert
-        test_set_insert_single,
-        test_set_insert_multiple,
-        test_set_insert_duplicate,
-        test_set_insert_ascending,
-        test_set_insert_descending,
-        
-        // set_delete
-        test_set_delete_single,
-        test_set_delete_multiple,
-        test_set_delete_nonexistent,
-        test_set_delete_random_order,
-        
-        // set_find
-        test_set_find_existing,
-        test_set_find_nonexistent,
-        test_set_find_all,
-        
-        // set_empty
-        test_set_empty_initial,
-        test_set_empty_after_ops,
-        
-        // set_size
-        test_set_size_initial,
-        test_set_size_after_ops,
-        
-        // set_swap
-        test_set_swap,
-        test_set_swap_empty,
-        
-        // set_clear
-        test_set_clear,
-        test_set_clear_reuse,
-        
-        // Complex struct integrity
-        test_set_nested_data_integrity,
-        test_set_deep_copy_verification,
-        
-        // Stress tests with RBT integrity
-        test_set_stress_insert_delete,
-        test_set_interleaved_insert_delete,
-        test_set_delete_all_verify_rbt
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+test set_tests[] = {
+    // set_init
+    test_set_init,
+    
+    // set_insert
+    test_set_insert_single,
+    test_set_insert_multiple,
+    test_set_insert_duplicate,
+    test_set_insert_ascending,
+    test_set_insert_descending,
+    
+    // set_delete
+    test_set_delete_single,
+    test_set_delete_multiple,
+    test_set_delete_nonexistent,
+    test_set_delete_random_order,
+    
+    // set_find
+    test_set_find_existing,
+    test_set_find_nonexistent,
+    test_set_find_all,
+    
+    // set_empty
+    test_set_empty_initial,
+    test_set_empty_after_ops,
+    
+    // set_size
+    test_set_size_initial,
+    test_set_size_after_ops,
+    
+    // set_swap
+    test_set_swap,
+    test_set_swap_empty,
+    
+    // set_clear
+    test_set_clear,
+    test_set_clear_reuse,
+    
+    // Complex struct integrity
+    test_set_nested_data_integrity,
+    test_set_deep_copy_verification,
+    
+    // Stress tests with RBT integrity
+    test_set_stress_insert_delete,
+    test_set_interleaved_insert_delete,
+    test_set_delete_all_verify_rbt
+};

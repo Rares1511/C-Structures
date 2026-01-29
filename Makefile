@@ -38,10 +38,10 @@ LDLIBS  := -lm
 # Unittest Configuration
 UNITTEST_LOG := unittest_log.ansi
 SEED ?= 42
-ARGS = --seed $(SEED) --debug-file $(UNITTEST_LOG)
+ARGS = --seed $(SEED)
 
 ifeq ($(debug),true)
-  CFLAGS += -DDEBUG
+  ARGS += --debug-file $(UNITTEST_LOG)
 endif
 
 # ---------------- Modules ----------------
@@ -138,41 +138,26 @@ uninstall:
 
 # ---------------- Unit Testing ----------------
 
-UNITTEST_SRC = $1/$1_unittest.c
-TEST_MODULES := $(foreach m,$(INSTALL_LIBS),$(if $(wildcard $(call UNITTEST_SRC,$(m))),$(m),))
-SKIP_MODULES := $(filter-out $(TEST_MODULES),$(INSTALL_LIBS))
+# All libraries needed for linking (all modules that have tests)
+UNITTEST_LIBS := $(foreach m,$(INSTALL_LIBS),-l$(m))
 
 unittest-log-init:
 	@$(RM) $(UNITTEST_LOG)
 	@touch $(UNITTEST_LOG)
 
-define MODULE_TEST_RULES
-unittest-$1: libs $(call UNITTEST_SRC,$1)
-	@echo "Building unit test: $1..."
-	$(CC) -o $1/unittest $(call UNITTEST_SRC,$1) $(CFLAGS) \
-	    -L$(LIBOUTDIR) -l$1 -lcargs $(LDLIBS)
+unittest: unittest-log-init libs
+	@$(CC) -o unittest_bin unittest.c $(CFLAGS) \
+	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) -lcargs $(LDLIBS)
 	
-	@MODARGS="$(ARGS) --module $1"; \
-	export LD_LIBRARY_PATH=$$(shell pwd)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
+	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
 	if [ "$(memcheck)" = "true" ]; then \
-	  echo "[RUNNING VALGRIND] $1/unittest"; \
-	  valgrind --leak-check=full $1/unittest $$$$MODARGS 2>&1 | tee -a $(UNITTEST_LOG) ; \
+	  echo "Running unittest ${ARGS} under Valgrind"; \
+	  valgrind --leak-check=full ./unittest_bin $(ARGS) 2>> $(UNITTEST_LOG) ; \
 	else \
-	  echo "[RUNNING] $1/unittest"; \
-	  $1/unittest $$$$MODARGS 2>&1 | tee -a $(UNITTEST_LOG) ; \
+	  echo "Running unittest ${ARGS}"; \
+	  ./unittest_bin $(ARGS) ; \
 	fi
-	@$(RM) $1/unittest
-endef
-
-define MODULE_TEST_SKIP_RULES
-unittest-$1:
-	@echo "Skipping $1 (no test file found)."
-endef
-
-$(foreach m,$(TEST_MODULES),$(eval $(call MODULE_TEST_RULES,$(m))))
-$(foreach m,$(SKIP_MODULES),$(eval $(call MODULE_TEST_SKIP_RULES,$(m))))
-
-unittest: unittest-log-init libs $(INSTALL_LIBS:%=unittest-%)
+	@$(RM) unittest_bin
 
 # ---------------- Cleanup ----------------
 

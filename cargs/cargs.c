@@ -196,9 +196,11 @@ void cargs_add_arg(cparser* parser, const char* name, const char* help, char req
             }
             break;
         case CARG_TYPE_STRING:
-            new_arg->value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
-            if (default_value != NULL) {
-                strcpy((char*)(new_arg->value), (char*)default_value);
+            if (default_value) {
+                new_arg->value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
+                if (default_value != NULL) {
+                    strcpy((char*)(new_arg->value), (char*)default_value);
+                }
             }
             break;
         case CARG_TYPE_BOOL:
@@ -257,6 +259,9 @@ void cargs_parse(cparser* parser) {
                                     *(float*)(parser->parsed_args[j].value) = atof(parser->argv[i + 1]);
                                     break;
                                 case CARG_TYPE_STRING:
+                                    if (parser->parsed_args[j].value == NULL) {
+                                        parser->parsed_args[j].value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
+                                    }
                                     strcpy((char*)(parser->parsed_args[j].value), parser->argv[i + 1]);
                                     break;
                                 default:

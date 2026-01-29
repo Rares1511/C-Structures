@@ -1,8 +1,5 @@
 #include <cs/vector.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
+#include <unittest.h>
 
 // ============================================================================
 // vector_init
@@ -1180,88 +1177,82 @@ test_res test_vector_replace_all() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char **argv) {
-    test tests[] = {
-        // vector_init
-        test_vector_init,
-        
-        // vector_push_back
-        test_vector_push_back_single,
-        test_vector_push_back_multiple,
-        test_vector_push_back_growth,
-        
-        // vector_insert_at
-        test_vector_insert_at_front,
-        test_vector_insert_at_middle,
-        test_vector_insert_at_back,
-        
-        // vector_pop_back
-        test_vector_pop_back_single,
-        test_vector_pop_back_multiple,
-        test_vector_pop_back_empty,
-        
-        // vector_erase
-        test_vector_erase_front,
-        test_vector_erase_middle,
-        test_vector_erase_back,
-        
-        // vector_replace
-        test_vector_replace_single,
-        test_vector_replace_middle,
-        test_vector_replace_invalid_pos,
-        
-        // vector_at
-        test_vector_at_valid,
-        test_vector_at_out_of_bounds,
-        
-        // vector_find
-        test_vector_find_existing,
-        test_vector_find_not_existing,
-        test_vector_find_first_occurrence,
-        
-        // vector_count
-        test_vector_count_none,
-        test_vector_count_single,
-        test_vector_count_multiple,
-        
-        // vector_empty
-        test_vector_empty_initial,
-        test_vector_empty_after_ops,
-        
-        // vector_size
-        test_vector_size_initial,
-        test_vector_size_after_ops,
-        
-        // vector_swap
-        test_vector_swap,
-        test_vector_swap_empty,
-        
-        // vector_clear
-        test_vector_clear,
-        test_vector_clear_reuse,
-        
-        // vector_sort
-        test_vector_sort_ascending,
-        test_vector_sort_already_sorted,
-        test_vector_sort_reverse,
-        test_vector_sort_by_score,
-        
-        // vector_set_* functions
-        test_vector_set_attr,
-        test_vector_set_comp,
-        
-        // Complex struct integrity
-        test_vector_nested_data_integrity,
-        test_vector_deep_copy_verification,
-        
-        // Stress tests
-        test_vector_large_dataset,
-        test_vector_interleaved_ops,
-        test_vector_erase_all,
-        test_vector_replace_all
-    };
-
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+test vector_tests[] = {
+    // vector_init
+    test_vector_init,
+    
+    // vector_push_back
+    test_vector_push_back_single,
+    test_vector_push_back_multiple,
+    test_vector_push_back_growth,
+    
+    // vector_insert_at
+    test_vector_insert_at_front,
+    test_vector_insert_at_middle,
+    test_vector_insert_at_back,
+    
+    // vector_pop_back
+    test_vector_pop_back_single,
+    test_vector_pop_back_multiple,
+    test_vector_pop_back_empty,
+    
+    // vector_erase
+    test_vector_erase_front,
+    test_vector_erase_middle,
+    test_vector_erase_back,
+    
+    // vector_replace
+    test_vector_replace_single,
+    test_vector_replace_middle,
+    test_vector_replace_invalid_pos,
+    
+    // vector_at
+    test_vector_at_valid,
+    test_vector_at_out_of_bounds,
+    
+    // vector_find
+    test_vector_find_existing,
+    test_vector_find_not_existing,
+    test_vector_find_first_occurrence,
+    
+    // vector_count
+    test_vector_count_none,
+    test_vector_count_single,
+    test_vector_count_multiple,
+    
+    // vector_empty
+    test_vector_empty_initial,
+    test_vector_empty_after_ops,
+    
+    // vector_size
+    test_vector_size_initial,
+    test_vector_size_after_ops,
+    
+    // vector_swap
+    test_vector_swap,
+    test_vector_swap_empty,
+    
+    // vector_clear
+    test_vector_clear,
+    test_vector_clear_reuse,
+    
+    // vector_sort
+    test_vector_sort_ascending,
+    test_vector_sort_already_sorted,
+    test_vector_sort_reverse,
+    test_vector_sort_by_score,
+    
+    // vector_set_* functions
+    test_vector_set_attr,
+    test_vector_set_comp,
+    
+    // Complex struct integrity
+    test_vector_nested_data_integrity,
+    test_vector_deep_copy_verification,
+    
+    // Stress tests
+    test_vector_large_dataset,
+    test_vector_interleaved_ops,
+    test_vector_erase_all,
+    test_vector_replace_all
+};
