@@ -402,6 +402,12 @@ static inline void print_int(FILE *stream, const void *el) { fprintf(stream, "%d
 static inline int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
 static inline int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
 
+void copy_string(void *dest, const void *src) {
+    char *d = (char*)dest;
+    const char *s = (const char*)src;
+    strcpy(d, s);
+}
+
 // Helper to get standard int attributes
 static inline univ_attr_t get_int_attr() {
     return (univ_attr_t){

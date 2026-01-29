@@ -7,9 +7,9 @@ typedef univ_attr_t map_attr_t;
 typedef struct rbt rbt;
 
 typedef struct map {
-    rbt *t;
-    map_attr_t key_attr;
-    map_attr_t val_attr;
+    rbt* t;
+    map_attr_t* key_attr;
+    map_attr_t* val_attr;
 } map;
 
 /*!

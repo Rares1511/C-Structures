@@ -174,18 +174,13 @@ cs_codes list_erase(list *l, int pos) {
     CS_RETURN_IF(list_empty(*l), CS_EMPTY);
     CS_RETURN_IF(pos < 0 || pos >= list_size(*l), CS_POS);
 
-    if (list_size(*l) == 1 || pos == 0) {
-        list_node *aux = l->front;
-        l->front = l->front->next;
-        list_node_free(aux, l->attr.fr);
-        metadata_size_inc(l->meta, -1);
-        if (list_empty(*l))
-            l->front = NULL;
-        return CS_SUCCESS;
-    }
+    if (pos == 0)
+        return list_pop_front(l);
+    if (pos == list_size(*l) - 1)
+        return list_pop_back(l);
 
     list_node *current = l->front;
-    for (int i = 0; i < pos; i++, current = current->next);
+    for (; pos > 0; pos--, current = current->next);
 
     current->prev->next = current->next;
     current->next->prev = current->prev;

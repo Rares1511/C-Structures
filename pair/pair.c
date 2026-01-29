@@ -10,17 +10,10 @@ cs_codes pair_init(pair* p, pair_attr_t* first_attr, pair_attr_t* second_attr) {
     if (first_attr->size == 0 || second_attr->size == 0 || first_attr->size > SIZE_TH || second_attr->size > SIZE_TH) {
         return CS_SIZE;
     }
-    p->first = malloc(first_attr->size);
-    if (p->first == NULL) {
-        return CS_MEM;
-    }
-    p->second = malloc(second_attr->size);
-    if (p->second == NULL) {
-        free(p->first);
-        return CS_MEM;
-    }
     p->first_attr = first_attr;
     p->second_attr = second_attr;
+    p->first = NULL;
+    p->second = NULL;
     return CS_SUCCESS;
 }
 
@@ -29,6 +22,16 @@ cs_codes pair_set(pair* p, const void* first, const void* second) {
         return CS_ELEM;
     }
     if (first) {
+        if (p->first == NULL) {
+            p->first = malloc(p->first_attr->size);
+            if (p->first == NULL) {
+                return CS_MEM;
+            }
+        } else {
+            if (p->first_attr->fr) {
+                p->first_attr->fr(p->first);
+            }
+        }
         if (p->first_attr->copy) {
             p->first_attr->copy(p->first, first);
         } else {
@@ -36,6 +39,16 @@ cs_codes pair_set(pair* p, const void* first, const void* second) {
         }
     }
     if (second) {
+        if (p->second == NULL) {
+            p->second = malloc(p->second_attr->size);
+            if (p->second == NULL) {
+                return CS_MEM;
+            }
+        } else {
+            if (p->second_attr->fr) {
+                p->second_attr->fr(p->second);
+            }
+        }
         if (p->second_attr->copy) {
             p->second_attr->copy(p->second, second);
         } else {
@@ -54,9 +67,7 @@ void* pair_second(pair p) {
 }
 
 void pair_print(FILE *stream, const void *v_p) {
-    if (v_p == NULL || stream == NULL) {
-        return;
-    }
+    CS_RETURN_IF(NULL == v_p || NULL == stream);
     pair p = *(pair*)v_p;
     if (p.first_attr->print) {
         fprintf(stream, "Key: ");
@@ -69,6 +80,7 @@ void pair_print(FILE *stream, const void *v_p) {
 }
 
 void pair_free(void *v_p) {
+    CS_RETURN_IF(NULL == v_p);
     pair* p = (pair*)v_p;
     if (p == NULL) {
         return;

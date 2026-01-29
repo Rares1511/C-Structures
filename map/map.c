@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../include/unittest.h"
+#include <unittest.h>
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -40,7 +41,7 @@ int map_node_comp(const void *a, const void *b) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
+#pragma endregion
 
 map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
     CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, NULL);
@@ -54,8 +55,11 @@ map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
         .print = pair_print,
         .size = sizeof(pair),
     };
-    m->key_attr = key_attr;
-    m->val_attr = val_attr;
+    m->key_attr = malloc(sizeof(map_attr_t));
+    m->val_attr = malloc(sizeof(map_attr_t));
+    CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL, NULL);
+    memcpy(m->key_attr, &key_attr, sizeof(map_attr_t));
+    memcpy(m->val_attr, &val_attr, sizeof(map_attr_t));
     m->t = rbt_init(pair_attr);
     CS_RETURN_IF(m->t == NULL, NULL);
     return m;
@@ -64,10 +68,21 @@ map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
 cs_codes map_insert(map *m, void *key, void *val) {
     CS_RETURN_IF(m == NULL || key == NULL || val == NULL, CS_NULL);
     pair data;
-    pair_init(&data, &m->key_attr, &m->val_attr);
+    pair_init(&data, m->key_attr, m->val_attr);
     pair_set(&data, key, val);
 
     return rbt_insert(m->t, &data);
+}
+
+cs_codes map_delete(map *m, void *key) {
+    CS_RETURN_IF(m == NULL || key == NULL, CS_NULL);
+    pair search_key;
+    pair_init(&search_key, m->key_attr, m->val_attr);
+    pair_set(&search_key, key, NULL);
+
+    cs_codes result = rbt_delete(m->t, &search_key);
+    pair_free(&search_key);
+    return result;
 }
 
 int map_empty(map m) {
@@ -83,13 +98,28 @@ int map_size(map m) {
 void* map_find(map m, void *key) {
     CS_RETURN_IF(m.t == NULL || key == NULL, NULL);
     pair search_key;
-    pair_init(&search_key, &m.key_attr, &m.val_attr);
+    pair_init(&search_key, m.key_attr, m.val_attr);
     pair_set(&search_key, key, NULL);
 
     pair* result = (pair*)rbt_find(*(m.t), &search_key);
     pair_free(&search_key);
     CS_RETURN_IF(result == NULL, NULL);
     return result->second;
+}
+
+void map_swap(map *m1, map *m2) {
+    CS_RETURN_IF(m1 == NULL || m2 == NULL);
+   
+    map_attr_t* temp_key_attr = m1->key_attr;
+    map_attr_t* temp_val_attr = m1->val_attr;
+
+    m1->key_attr = m2->key_attr;
+    m1->val_attr = m2->val_attr;
+
+    m2->key_attr = temp_key_attr;
+    m2->val_attr = temp_val_attr;
+
+    rbt_swap(m1->t, m2->t);
 }
 
 void map_clear(map *m) {
@@ -107,5 +137,7 @@ void map_free(void *v_m) {
     CS_RETURN_IF(v_m == NULL);
     map *m = (map *)v_m;
     rbt_free(m->t);
+    free(m->key_attr);
+    free(m->val_attr);
     free(m);
 }

@@ -108,35 +108,50 @@ int vector_count(vector vec, const void *el);
  * @param[out] vec  Vector whose attributes will be changed
  * @param[in]  attr The new attributes
  */
-static inline void vector_set_attr(vector *vec, vector_attr_t attr) { if (vec != NULL) vec->attr = attr; }
+static inline void vector_set_attr(vector *vec, vector_attr_t attr) { 
+    CS_RETURN_IF(NULL == vec);
+    vec->attr = attr; 
+}
 
 /*!
  * Sets the new function to free the elements inside the vector
  * @param[out] vec Vector which will have its free function changed
  * @param[in]  fr  The new free function
  */
-static inline void vector_set_free(vector *vec, freer fr) { if (vec != NULL) vec->attr.fr = fr; }
+static inline void vector_set_free(vector *vec, freer fr) { 
+    CS_RETURN_IF(NULL == vec);
+    vec->attr.fr = fr; 
+}
 
 /*!
  * Sets the new function to print the elements inside the vector
  * @param[out] vec    Vector which will have its print function changed
  * @param[in]  print  The new print function
  */
-static inline void vector_set_print(vector *vec, printer print) { if (vec != NULL) vec->attr.print = print; }
+static inline void vector_set_print(vector *vec, printer print) { 
+    CS_RETURN_IF(NULL == vec);
+    vec->attr.print = print; 
+}
 
 /*!
  * Sets a new copy function used in copying the elements in the vector
  * @param[out] vec Vector whose copy function will be set or changed
  * @param[in]  cp  The new copy function
  */
-static inline void vector_set_copy(vector *vec, deepcopy cp) { if (vec != NULL) vec->attr.copy = cp; }
+static inline void vector_set_copy(vector *vec, deepcopy cp) { 
+    CS_RETURN_IF(NULL == vec);
+    vec->attr.copy = cp; 
+}
 
 /*!
  * Sets the new function to compare the elements inside the vector
  * @param[out] vec   Vector which will have its compare function changed
  * @param[in]  comp  The new compare function
  */
-static inline void vector_set_comp(vector *vec, comparer comp) { if (vec != NULL) vec->attr.comp = comp; }
+static inline void vector_set_comp(vector *vec, comparer comp) { 
+    CS_RETURN_IF(NULL == vec);
+    vec->attr.comp = comp; 
+}
 
 /*!
  * Empties the vector and frees any memory that was used in any of its elements

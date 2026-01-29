@@ -4,85 +4,639 @@
 // Required by unittest.h
 FILE *__DEBUG_OUT = NULL;
 
-// 1. Test Initialization
+// ============================================================================
+// list_init
+// ============================================================================
+
 test_res test_list_init() {
-    list_attr_t attr = get_int_attr();
+    list_attr_t attr = get_test_struct_attr();
     list *l = list_init(attr);
 
     if (!l) return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
-    if (l->front != NULL || list_size(*l) != 0) {
+    if (list_size(*l) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    if (!list_empty(*l)) return (test_res){(char*)__func__, "List not empty after init", CS_UNKNOWN};
+    if (l->front != NULL) return (test_res){(char*)__func__, "Front should be NULL", CS_UNKNOWN};
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_push_front
+// ============================================================================
+
+test_res test_list_push_front_single() {
+    list *l = list_init(get_test_struct_attr());
+    test_struct ts = create_test_struct(42, "FrontItem", 42.0);
+
+    cs_codes result = list_push_front(l, &ts);
+    if (result != CS_SUCCESS) {
+        free_test_struct(&ts);
         list_free(l);
-        return (test_res){(char*)__func__, "Initial state invalid", CS_UNKNOWN};
+        return (test_res){(char*)__func__, "Push front returned error", CS_MEM};
+    }
+
+    test_struct *front = (test_struct*)list_front(*l);
+    if (!front || front->id != 42 || strcmp(front->name, "FrontItem") != 0) {
+        free_test_struct(&ts);
+        list_free(l);
+        return (test_res){(char*)__func__, "Push front value mismatch", CS_ELEM};
+    }
+
+    free_test_struct(&ts);
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_push_front_multiple() {
+    list *l = list_init(get_test_struct_attr());
+    int total = __TEST_SIZE;
+
+    for (int i = 0; i < total; i++) {
+        test_struct ts = create_test_struct(i, "FrontMultiple", (double)i);
+        if (list_push_front(l, &ts) != CS_SUCCESS) {
+            free_test_struct(&ts);
+            list_free(l);
+            return (test_res){(char*)__func__, "Push front failed", CS_MEM};
+        }
+        free_test_struct(&ts);
+    }
+
+    if (list_size(*l) != total) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Size mismatch after push front", CS_UNKNOWN};
+    }
+
+    // Front should be the last pushed element
+    test_struct *front = (test_struct*)list_front(*l);
+    if (!front || front->id != total - 1) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Front element mismatch", CS_ELEM};
     }
 
     list_free(l);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// 2. Test Circularity (Front and Back links)
-test_res test_list_circularity() {
-    list *l = list_init(get_int_attr());
-    int a = 10, b = 20, c = 30;
+// ============================================================================
+// list_push_back
+// ============================================================================
 
-    list_push_back(l, &a); // [10]
-    list_push_back(l, &b); // [10, 20]
-    list_push_front(l, &c); // [30, 10, 20]
+test_res test_list_push_back_single() {
+    list *l = list_init(get_test_struct_attr());
+    test_struct ts = create_test_struct(42, "BackItem", 42.5);
 
-    // Check circular links
-    // front->prev should be 20, front->prev->next should be 30
-    if (*(int*)list_front(*l) != 30 || *(int*)list_back(*l) != 20) {
+    cs_codes result = list_push_back(l, &ts);
+    if (result != CS_SUCCESS) {
+        free_test_struct(&ts);
         list_free(l);
-        return (test_res){(char*)__func__, "Front/Back data mismatch", CS_ELEM};
+        return (test_res){(char*)__func__, "Push back returned error", CS_MEM};
     }
 
-    if (l->front->prev->next != l->front || l->front->next->prev != l->front) {
+    test_struct *back = (test_struct*)list_back(*l);
+    if (!back || back->id != 42 || strcmp(back->name, "BackItem") != 0) {
+        free_test_struct(&ts);
         list_free(l);
-        return (test_res){(char*)__func__, "Circular pointers broken", CS_UNKNOWN};
+        return (test_res){(char*)__func__, "Push back value mismatch", CS_ELEM};
+    }
+
+    free_test_struct(&ts);
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_push_back_multiple() {
+    list *l = list_init(get_test_struct_attr());
+    int total = __TEST_SIZE;
+
+    for (int i = 0; i < total; i++) {
+        test_struct ts = create_test_struct(i, "BackMultiple", (double)i * 1.5);
+        if (list_push_back(l, &ts) != CS_SUCCESS) {
+            free_test_struct(&ts);
+            list_free(l);
+            return (test_res){(char*)__func__, "Push back failed", CS_MEM};
+        }
+        free_test_struct(&ts);
+    }
+
+    if (list_size(*l) != total) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Size mismatch after push back", CS_UNKNOWN};
+    }
+
+    test_struct *back = (test_struct*)list_back(*l);
+    if (!back || back->id != total - 1) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Back element mismatch", CS_ELEM};
     }
 
     list_free(l);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// 3. Test Sequential Popping (Testing transitions to empty)
-test_res test_list_pop_behavior() {
-    list *l = list_init(get_int_attr());
-    int vals[] = {1, 2, 3};
-    for(int i=0; i<3; i++) list_push_back(l, &vals[i]);
+// ============================================================================
+// list_pop_front
+// ============================================================================
 
-    list_pop_front(l); // [2, 3]
-    if (*(int*)list_front(*l) != 2 || list_size(*l) != 2) {
+test_res test_list_pop_front_single() {
+    list *l = list_init(get_test_struct_attr());
+    test_struct ts = create_test_struct(42, "PopFrontTest", 42.0);
+    list_push_back(l, &ts);
+    free_test_struct(&ts);
+
+    cs_codes result = list_pop_front(l);
+    if (result != CS_SUCCESS) {
         list_free(l);
-        return (test_res){(char*)__func__, "Pop front failed", CS_UNKNOWN};
+        return (test_res){(char*)__func__, "Pop front failed", CS_EMPTY};
     }
 
-    list_pop_back(l); // [2]
-    if (*(int*)list_back(*l) != 2 || list_size(*l) != 1) {
+    if (!list_empty(*l)) {
         list_free(l);
-        return (test_res){(char*)__func__, "Pop back failed", CS_UNKNOWN};
-    }
-
-    list_pop_front(l); // Empty
-    if (!list_empty(*l) || l->front != NULL) {
-        list_free(l);
-        return (test_res){(char*)__func__, "Final pop didn't NULL front", CS_UNKNOWN};
+        return (test_res){(char*)__func__, "List not empty after pop", CS_UNKNOWN};
     }
 
     list_free(l);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// 4. Test Sort (Quicksort on linked nodes)
-test_res test_list_sort() {
-    list *l = list_init(get_int_attr());
-    int data[] = {5, 1, 4, 2, 3};
-    for(int i=0; i<5; i++) list_push_back(l, &data[i]);
+test_res test_list_pop_front_multiple() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "PopFrontMulti", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
 
-    list_sort(l); // Should be [1, 2, 3, 4, 5]
+    for (int i = 0; i < 10; i++) {
+        test_struct *front = (test_struct*)list_front(*l);
+        if (!front || front->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Front value mismatch before pop", CS_ELEM};
+        }
+        list_pop_front(l);
+    }
 
+    if (!list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "List not empty after all pops", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_pop_front_empty() {
+    list *l = list_init(get_test_struct_attr());
+
+    cs_codes result = list_pop_front(l);
+    if (result == CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Pop front on empty should fail", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_pop_back
+// ============================================================================
+
+test_res test_list_pop_back_single() {
+    list *l = list_init(get_test_struct_attr());
+    test_struct ts = create_test_struct(42, "PopBackTest", 42.0);
+    list_push_back(l, &ts);
+    free_test_struct(&ts);
+
+    cs_codes result = list_pop_back(l);
+    if (result != CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Pop back failed", CS_EMPTY};
+    }
+
+    if (!list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "List not empty after pop", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_pop_back_multiple() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "PopBackMulti", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    for (int i = 9; i >= 0; i--) {
+        test_struct *back = (test_struct*)list_back(*l);
+        if (!back || back->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Back value mismatch before pop", CS_ELEM};
+        }
+        list_pop_back(l);
+    }
+
+    if (!list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "List not empty after all pops", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_pop_back_empty() {
+    list *l = list_init(get_test_struct_attr());
+
+    cs_codes result = list_pop_back(l);
+    if (result == CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Pop back on empty should fail", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_erase
+// ============================================================================
+
+test_res test_list_erase_front() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "EraseTest", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    cs_codes result = list_erase(l, 0);
+    if (result != CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase front failed", CS_POS};
+    }
+
+    test_struct *front = (test_struct*)list_front(*l);
+    if (list_size(*l) != 4 || !front || front->id != 1) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase front value mismatch", CS_ELEM};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_erase_middle() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "EraseMiddle", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    cs_codes result = list_erase(l, 2); // Erase id=2
+    if (result != CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase middle failed", CS_POS};
+    }
+
+    // Traverse to check order: 0, 1, 3, 4
     list_node *curr = l->front;
-    for(int i=1; i<=5; i++) {
-        if (*(int*)curr->data != i) {
+    int expected[] = {0, 1, 3, 4};
+    for (int i = 0; i < 4; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != expected[i]) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Erase middle order incorrect", CS_ELEM};
+        }
+        curr = curr->next;
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_erase_back() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "EraseBack", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    cs_codes result = list_erase(l, 4); // Erase last
+    if (result != CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase back failed", CS_POS};
+    }
+
+    test_struct *back = (test_struct*)list_back(*l);
+    if (list_size(*l) != 4 || !back || back->id != 3) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase back value mismatch", CS_ELEM};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_erase_invalid() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "EraseInvalid", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    cs_codes result = list_erase(l, 10);
+    if (result == CS_SUCCESS) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Erase at invalid pos should fail", CS_POS};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_front
+// ============================================================================
+
+test_res test_list_front() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "FrontTest", (double)i);
+        list_push_front(l, &ts);
+        test_struct *front = (test_struct*)list_front(*l);
+        if (!front || front->id != i) {
+            free_test_struct(&ts);
+            list_free(l);
+            return (test_res){(char*)__func__, "Front mismatch after push", CS_ELEM};
+        }
+        free_test_struct(&ts);
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_back
+// ============================================================================
+
+test_res test_list_back() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "BackTest", (double)i);
+        list_push_back(l, &ts);
+        test_struct *back = (test_struct*)list_back(*l);
+        if (!back || back->id != i) {
+            free_test_struct(&ts);
+            list_free(l);
+            return (test_res){(char*)__func__, "Back mismatch after push", CS_ELEM};
+        }
+        free_test_struct(&ts);
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_empty
+// ============================================================================
+
+test_res test_list_empty_initial() {
+    list *l = list_init(get_test_struct_attr());
+
+    if (!list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "New list should be empty", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_empty_after_ops() {
+    list *l = list_init(get_test_struct_attr());
+    test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
+
+    list_push_back(l, &ts);
+    if (list_empty(*l)) {
+        free_test_struct(&ts);
+        list_free(l);
+        return (test_res){(char*)__func__, "List should not be empty after push", CS_UNKNOWN};
+    }
+
+    list_pop_back(l);
+    if (!list_empty(*l)) {
+        free_test_struct(&ts);
+        list_free(l);
+        return (test_res){(char*)__func__, "List should be empty after pop", CS_UNKNOWN};
+    }
+
+    free_test_struct(&ts);
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_size
+// ============================================================================
+
+test_res test_list_size_initial() {
+    list *l = list_init(get_test_struct_attr());
+
+    if (list_size(*l) != 0) {
+        list_free(l);
+        return (test_res){(char*)__func__, "New list size should be 0", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_size_after_ops() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 100; i++) {
+        test_struct ts = create_test_struct(i, "SizeOpsTest", (double)i);
+        list_push_back(l, &ts);
+        if (list_size(*l) != i + 1) {
+            free_test_struct(&ts);
+            list_free(l);
+            return (test_res){(char*)__func__, "Size mismatch during push", CS_UNKNOWN};
+        }
+        free_test_struct(&ts);
+    }
+
+    for (int i = 99; i >= 0; i--) {
+        list_pop_back(l);
+        if (list_size(*l) != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Size mismatch during pop", CS_UNKNOWN};
+        }
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_swap
+// ============================================================================
+
+test_res test_list_swap() {
+    list *l1 = list_init(get_test_struct_attr());
+    list *l2 = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "Swap1", (double)i);
+        list_push_back(l1, &ts);
+        free_test_struct(&ts);
+    }
+    for (int i = 10; i < 15; i++) {
+        test_struct ts = create_test_struct(i, "Swap2", (double)i);
+        list_push_back(l2, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_swap(l1, l2);
+
+    test_struct *front1 = (test_struct*)list_front(*l1);
+    test_struct *back1 = (test_struct*)list_back(*l1);
+    if (!front1 || front1->id != 10 || !back1 || back1->id != 14) {
+        list_free(l1);
+        list_free(l2);
+        return (test_res){(char*)__func__, "Swap l1 content mismatch", CS_ELEM};
+    }
+
+    test_struct *front2 = (test_struct*)list_front(*l2);
+    test_struct *back2 = (test_struct*)list_back(*l2);
+    if (!front2 || front2->id != 0 || !back2 || back2->id != 4) {
+        list_free(l1);
+        list_free(l2);
+        return (test_res){(char*)__func__, "Swap l2 content mismatch", CS_ELEM};
+    }
+
+    list_free(l1);
+    list_free(l2);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_swap_empty() {
+    list *l1 = list_init(get_test_struct_attr());
+    list *l2 = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "SwapEmpty", (double)i);
+        list_push_back(l1, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_swap(l1, l2);
+
+    if (!list_empty(*l1)) {
+        list_free(l1);
+        list_free(l2);
+        return (test_res){(char*)__func__, "l1 should be empty after swap", CS_UNKNOWN};
+    }
+
+    if (list_size(*l2) != 5) {
+        list_free(l1);
+        list_free(l2);
+        return (test_res){(char*)__func__, "l2 should have 5 elements", CS_UNKNOWN};
+    }
+
+    list_free(l1);
+    list_free(l2);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_clear
+// ============================================================================
+
+test_res test_list_clear() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 100; i++) {
+        test_struct ts = create_test_struct(i, "ClearTest", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_clear(l);
+
+    if (list_size(*l) != 0 || !list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Clear did not reset list", CS_UNKNOWN};
+    }
+
+    if (l->front != NULL) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Front should be NULL after clear", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_clear_reuse() {
+    list *l = list_init(get_test_struct_attr());
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "ClearReuse", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_clear(l);
+
+    // Verify can reuse after clear
+    for (int i = 100; i < 150; i++) {
+        test_struct ts = create_test_struct(i, "AfterClear", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    test_struct *front = (test_struct*)list_front(*l);
+    if (list_size(*l) != 50 || !front || front->id != 100) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Reuse after clear failed", CS_ELEM};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// list_sort
+// ============================================================================
+
+test_res test_list_sort_ascending() {
+    list *l = list_init(get_test_struct_attr());
+    int ids[] = {50, 10, 40, 20, 30};
+
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(ids[i], "SortTest", (double)ids[i]);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_sort(l);
+
+    // Should be sorted by id: 10, 20, 30, 40, 50
+    int expected[] = {10, 20, 30, 40, 50};
+    list_node *curr = l->front;
+    for (int i = 0; i < 5; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != expected[i]) {
             list_free(l);
             return (test_res){(char*)__func__, "Sort order incorrect", CS_ELEM};
         }
@@ -93,64 +647,466 @@ test_res test_list_sort() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// 5. Test Erase at Position
-test_res test_list_erase() {
-    list *l = list_init(get_int_attr());
-    int vals[] = {100, 200, 300, 400};
-    for(int i=0; i<4; i++) list_push_back(l, &vals[i]);
+test_res test_list_sort_already_sorted() {
+    list *l = list_init(get_test_struct_attr());
 
-    list_erase(l, 2); // Erase 300 -> [100, 200, 400]
-    
-    if (list_size(*l) != 3 || *(int*)l->front->next->next->data != 400) {
-        list_free(l);
-        return (test_res){(char*)__func__, "Middle erase failed", CS_POS};
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "AlreadySorted", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
     }
 
-    list_erase(l, 0); // Erase 100 -> [200, 400]
-    if (*(int*)list_front(*l) != 200) {
-        list_free(l);
-        return (test_res){(char*)__func__, "Front erase failed", CS_POS};
+    list_sort(l);
+
+    list_node *curr = l->front;
+    for (int i = 0; i < 10; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Sort corrupted already sorted data", CS_ELEM};
+        }
+        curr = curr->next;
     }
 
     list_free(l);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// 6. Test Swap and Clear
-test_res test_list_utility() {
-    list *l1 = list_init(get_int_attr());
-    list *l2 = list_init(get_int_attr());
-    int val1 = 1, val2 = 2;
+test_res test_list_sort_reverse() {
+    list *l = list_init(get_test_struct_attr());
 
-    list_push_back(l1, &val1);
-    list_push_back(l2, &val2);
-
-    list_swap(l1, l2);
-    if (*(int*)list_front(*l1) != 2) {
-        list_free(l1); list_free(l2);
-        return (test_res){(char*)__func__, "Swap failed", CS_UNKNOWN};
+    for (int i = 9; i >= 0; i--) {
+        test_struct ts = create_test_struct(i, "ReverseSort", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
     }
 
-    list_clear(l1);
-    if (!list_empty(*l1)) {
-        list_free(l1); list_free(l2);
-        return (test_res){(char*)__func__, "Clear failed", CS_UNKNOWN};
+    list_sort(l);
+
+    list_node *curr = l->front;
+    for (int i = 0; i < 10; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Sort from reverse failed", CS_ELEM};
+        }
+        curr = curr->next;
     }
 
-    list_free(l1);
-    list_free(l2);
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_sort_by_score() {
+    list *l = list_init(get_test_struct_attr_by_score());
+    double scores[] = {50.5, 10.1, 40.4, 20.2, 30.3};
+
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "ScoreSort", scores[i]);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    list_sort(l);
+
+    // Should be sorted by score: 10.1, 20.2, 30.3, 40.4, 50.5
+    double expected[] = {10.1, 20.2, 30.3, 40.4, 50.5};
+    list_node *curr = l->front;
+    for (int i = 0; i < 5; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->score != expected[i]) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Sort by score order incorrect", CS_ELEM};
+        }
+        curr = curr->next;
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// Circularity tests (doubly linked circular list)
+// ============================================================================
+
+test_res test_list_circularity() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 5; i++) {
+        test_struct ts = create_test_struct(i, "CircularTest", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Check circular links: front->prev should be back, back->next should be front
+    if (l->front->prev == NULL || l->front->prev->next != l->front) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Front->prev circular link broken", CS_UNKNOWN};
+    }
+
+    // back is front->prev in circular list
+    list_node *back = l->front->prev;
+    if (back->next != l->front) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Back->next circular link broken", CS_UNKNOWN};
+    }
+
+    test_struct *back_data = (test_struct*)back->data;
+    if (!back_data || back_data->id != 4) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Back element data mismatch", CS_ELEM};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_traverse_forward() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "TraverseForward", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Traverse forward
+    list_node *curr = l->front;
+    for (int i = 0; i < 10; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Forward traverse failed", CS_ELEM};
+        }
+        curr = curr->next;
+    }
+
+    // Should wrap back to front
+    if (curr != l->front) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Forward traverse did not wrap", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_traverse_backward() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "TraverseBackward", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Traverse backward from back (front->prev)
+    list_node *curr = l->front->prev;
+    for (int i = 9; i >= 0; i--) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val || val->id != i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Backward traverse failed", CS_ELEM};
+        }
+        curr = curr->prev;
+    }
+
+    // Should wrap back to back (front->prev)
+    if (curr != l->front->prev) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Backward traverse did not wrap", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// Complex struct integrity tests
+// ============================================================================
+
+test_res test_list_nested_data_integrity() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "NestedIntegrity", (double)i * 2.5);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Verify all nested structures are intact
+    list_node *curr = l->front;
+    for (int i = 0; i < 50; i++) {
+        test_struct *val = (test_struct*)curr->data;
+        if (!val) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Element is NULL", CS_ELEM};
+        }
+
+        // Check address
+        if (!val->address || val->address->zip_code != 10000 + i) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Address data corrupted", CS_ELEM};
+        }
+
+        // Check contacts array
+        int expected_contacts = 2 + (i % 3);
+        if (val->contact_count != expected_contacts || !val->contacts) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Contacts array corrupted", CS_ELEM};
+        }
+
+        // Check tags array
+        int expected_tags = 3 + (i % 3);
+        if (val->tag_count != expected_tags || !val->tags) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Tags array corrupted", CS_ELEM};
+        }
+
+        // Check flags
+        unsigned char expected_flags = TEST_FLAG_ACTIVE;
+        if (i % 2 == 0) expected_flags |= TEST_FLAG_VERIFIED;
+        if (i % 5 == 0) expected_flags |= TEST_FLAG_PREMIUM;
+        if (i % 10 == 0) expected_flags |= TEST_FLAG_ADMIN;
+        if (val->flags != expected_flags) {
+            list_free(l);
+            return (test_res){(char*)__func__, "Flags corrupted", CS_ELEM};
+        }
+
+        curr = curr->next;
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_deep_copy_verification() {
+    list *l = list_init(get_test_struct_attr());
+
+    test_struct original = create_test_struct(42, "DeepCopyTest", 42.42);
+    list_push_back(l, &original);
+
+    // Modify original after push - should not affect list content
+    original.id = 999;
+    free(original.name);
+    original.name = strdup("Modified");
+    original.address->zip_code = 99999;
+
+    test_struct *stored = (test_struct*)list_front(*l);
+    if (!stored || stored->id != 42) {
+        free_test_struct(&original);
+        list_free(l);
+        return (test_res){(char*)__func__, "Deep copy failed - id changed", CS_ELEM};
+    }
+
+    if (strcmp(stored->name, "DeepCopyTest") != 0) {
+        free_test_struct(&original);
+        list_free(l);
+        return (test_res){(char*)__func__, "Deep copy failed - name changed", CS_ELEM};
+    }
+
+    if (stored->address->zip_code != 10042) {
+        free_test_struct(&original);
+        list_free(l);
+        return (test_res){(char*)__func__, "Deep copy failed - address changed", CS_ELEM};
+    }
+
+    free_test_struct(&original);
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// Stress tests
+// ============================================================================
+
+test_res test_list_alternating_push_pop() {
+    list *l = list_init(get_test_struct_attr());
+
+    // Alternate push front/back and pop
+    for (int i = 0; i < 100; i++) {
+        test_struct ts = create_test_struct(i, "Alternating", (double)i);
+        if (i % 2 == 0) {
+            list_push_front(l, &ts);
+        } else {
+            list_push_back(l, &ts);
+        }
+        free_test_struct(&ts);
+    }
+
+    for (int i = 0; i < 50; i++) {
+        if (i % 2 == 0) {
+            list_pop_front(l);
+        } else {
+            list_pop_back(l);
+        }
+    }
+
+    if (list_size(*l) != 50) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Size mismatch after alternating ops", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_large_dataset() {
+    list *l = list_init(get_test_struct_attr());
+    int total = __TEST_SIZE;
+
+    for (int i = 0; i < total; i++) {
+        test_struct ts = create_test_struct(i, "LargeDataset", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    if (list_size(*l) != total) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Large dataset size mismatch", CS_UNKNOWN};
+    }
+
+    // Verify front and back
+    test_struct *front = (test_struct*)list_front(*l);
+    test_struct *back = (test_struct*)list_back(*l);
+    if (!front || front->id != 0 || !back || back->id != total - 1) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Large dataset front/back mismatch", CS_ELEM};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_erase_all() {
+    list *l = list_init(get_test_struct_attr());
+
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "EraseAll", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Erase from front until empty
+    while (!list_empty(*l)) {
+        list_erase(l, 0);
+    }
+
+    if (!list_empty(*l)) {
+        list_free(l);
+        return (test_res){(char*)__func__, "List not empty after erasing all", CS_UNKNOWN};
+    }
+
+    list_free(l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_list_mixed_operations() {
+    list *l = list_init(get_test_struct_attr());
+
+    // Mixed operations
+    for (int i = 0; i < 20; i++) {
+        test_struct ts = create_test_struct(i, "Mixed", (double)i);
+        list_push_back(l, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Pop some from front
+    for (int i = 0; i < 5; i++) {
+        list_pop_front(l);
+    }
+
+    // Pop some from back
+    for (int i = 0; i < 5; i++) {
+        list_pop_back(l);
+    }
+
+    // Erase from middle
+    list_erase(l, 3);
+    list_erase(l, 5);
+
+    // Size should be 20 - 5 - 5 - 2 = 8
+    if (list_size(*l) != 8) {
+        list_free(l);
+        return (test_res){(char*)__func__, "Mixed operations size mismatch", CS_UNKNOWN};
+    }
+
+    list_free(l);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 // MAIN RUNNER
 int main(int argc, char **argv) {
     test tests[] = {
+        // list_init
         test_list_init,
+        
+        // list_push_front
+        test_list_push_front_single,
+        test_list_push_front_multiple,
+        
+        // list_push_back
+        test_list_push_back_single,
+        test_list_push_back_multiple,
+        
+        // list_pop_front
+        test_list_pop_front_single,
+        test_list_pop_front_multiple,
+        test_list_pop_front_empty,
+        
+        // list_pop_back
+        test_list_pop_back_single,
+        test_list_pop_back_multiple,
+        test_list_pop_back_empty,
+        
+        // list_erase
+        test_list_erase_front,
+        test_list_erase_middle,
+        test_list_erase_back,
+        test_list_erase_invalid,
+        
+        // list_front
+        test_list_front,
+        
+        // list_back
+        test_list_back,
+        
+        // list_empty
+        test_list_empty_initial,
+        test_list_empty_after_ops,
+        
+        // list_size
+        test_list_size_initial,
+        test_list_size_after_ops,
+        
+        // list_swap
+        test_list_swap,
+        test_list_swap_empty,
+        
+        // list_clear
+        test_list_clear,
+        test_list_clear_reuse,
+        
+        // list_sort
+        test_list_sort_ascending,
+        test_list_sort_already_sorted,
+        test_list_sort_reverse,
+        test_list_sort_by_score,
+        
+        // Circularity tests
         test_list_circularity,
-        test_list_pop_behavior,
-        test_list_sort,
-        test_list_erase,
-        test_list_utility
+        test_list_traverse_forward,
+        test_list_traverse_backward,
+        
+        // Complex struct integrity
+        test_list_nested_data_integrity,
+        test_list_deep_copy_verification,
+        
+        // Stress tests
+        test_list_alternating_push_pop,
+        test_list_large_dataset,
+        test_list_erase_all,
+        test_list_mixed_operations
     };
 
     unittest(tests, sizeof(tests) / sizeof(test), argc, argv);

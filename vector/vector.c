@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/unittest.h"
-
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -95,13 +93,8 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
         vec->cap += INIT_CAPACITY;
     }
     if (pos != size) {
-        if (vec->attr.copy) {
-            for (int i = size; i > pos; i--)
-                vec->attr.copy(vec->vec + i * vec->attr.size, vec->vec + (i - 1) * vec->attr.size);
-        } else {
-            memmove(vec->vec + (pos + 1) * vec->attr.size, vec->vec + pos * vec->attr.size,
-                    (size - pos) * vec->attr.size);
-        }
+        memmove(vec->vec + (pos + 1) * vec->attr.size, vec->vec + pos * vec->attr.size, 
+                            (size - pos) * vec->attr.size);     
     }
     if (vec->attr.copy)
         vec->attr.copy(vec->vec + vec->attr.size * pos, el);

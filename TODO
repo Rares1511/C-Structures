@@ -1,12 +1,12 @@
 Sequence Containers (Arrays): 
-    - Vector ✔ (Implemented)
-    - Deque ✔ (Implemented)
-    - List ✔ (Implemented)
-    - Forward_list ✔ (Implemented)
+    - Vector ✔ (Implemented + Unittest)
+    - Deque ✔ (Implemented + Unittest)
+    - List ✔ (Implemented + Unittest)
+    - Forward_list ✔ (Implemented + Unittest)
 
 Associative Containers (RBT):
-    - Set ✔ (Implemented)
-    - Map ✔ (Implemented)
+    - Set ✔ (Implemented + Unittest)
+    - Map ✔ (Implemented + Unittest)
     - Multiset ✔ (Implemented)
     - Multimap ✔ (Implemented)
 
@@ -26,5 +26,5 @@ Container Adapters:
     - Flat Multimap
 
 Extra Modules:
-    - Pair ✔ (Implemented)
+    - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented)
