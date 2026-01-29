@@ -178,10 +178,15 @@ void cargs_add_arg(cparser* parser, const char* name, const char* help, char req
     new_arg->short_name = cargs_compute_short_name(name);
     new_arg->help = help;
     new_arg->metadata = 0;
+    new_arg->value = NULL;
     if (required) {
         new_arg->metadata |= (1 << __CARGS_REQUIRED_BIT);
     }
     new_arg->type = type;
+    if (default_value == NULL) {
+        new_arg->metadata |= (1 << __CARGS_NO_DEFAULT_BIT);
+        return;
+    }
     switch (type) {
         case CARG_TYPE_INT:
             new_arg->value = malloc(sizeof(int));
@@ -196,11 +201,9 @@ void cargs_add_arg(cparser* parser, const char* name, const char* help, char req
             }
             break;
         case CARG_TYPE_STRING:
-            if (default_value) {
-                new_arg->value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
-                if (default_value != NULL) {
-                    strcpy((char*)(new_arg->value), (char*)default_value);
-                }
+            new_arg->value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
+            if (default_value != NULL) {
+                strcpy((char*)(new_arg->value), (char*)default_value);
             }
             break;
         case CARG_TYPE_BOOL:
@@ -242,7 +245,8 @@ void cargs_parse(cparser* parser) {
             if (parser->parsed_args[j].metadata & (1 << __CARGS_PARSED_BIT)) {
                 continue; // Already parsed
             }
-            if (strcmp(parser->argv[i], parser->parsed_args[j].large_name) == 0 || strcmp(parser->argv[i], parser->parsed_args[j].short_name) == 0) {
+            if (strcmp(parser->argv[i], parser->parsed_args[j].large_name) == 0 || 
+                (parser->parsed_args[j].short_name && strcmp(parser->argv[i], parser->parsed_args[j].short_name) == 0)) {
                 switch(parser->parsed_args[j].type) {
                     case CARG_TYPE_BOOL:
                         *(char*)(parser->parsed_args[j].value) = 1;
@@ -289,8 +293,12 @@ void cargs_parse(cparser* parser) {
 
 void cargs_free(cparser* parser) {
     for (int i = 0; i < parser->num_parsed; i++) {
-        free(parser->parsed_args[i].value);
         free((void*)parser->parsed_args[i].short_name);
+        if (parser->parsed_args[i].metadata & (1 << __CARGS_NO_DEFAULT_BIT) &&
+            !(parser->parsed_args[i].metadata & (1 << __CARGS_PARSED_BIT))) {
+            continue; // No allocated value
+        }
+        free(parser->parsed_args[i].value);
     }
     free(parser->parsed_args);
     parser->parsed_args = NULL;

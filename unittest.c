@@ -1,4 +1,6 @@
 #include <unittest.h>
+#include <valgrind/valgrind.h>
+#include <valgrind/memcheck.h>
 
 FILE *__DEBUG_OUT = NULL;
 
@@ -42,7 +44,7 @@ static module_tests all_modules[] = {
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
 
 int main(int argc, char **argv) {
-    int seed, total_success = 0, total_failed = 0, total_tests = 0;
+    int seed = 0, total_success = 0, total_failed = 0, total_tests = 0;
     cparser parser;
 
     int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
@@ -120,6 +122,11 @@ int main(int argc, char **argv) {
         fprintf(__DEBUG_OUT, "  >> %s: %d passed, %d failed\n\n", mod->name, success, failed);
         total_success += success;
         total_failed += failed;
+
+        // long leaked, dubious, reachable, suppressed;
+        // VALGRIND_DO_LEAK_CHECK;
+        // VALGRIND_COUNT_LEAKS(leaked, dubious, reachable, suppressed);
+        // fprintf(__DEBUG_OUT, "  >> Leaks: %ld bytes\n", leaked);
     }
 
     // Final summary

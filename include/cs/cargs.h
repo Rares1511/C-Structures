@@ -3,6 +3,7 @@
 
 #define __CARGS_REQUIRED_BIT 0
 #define __CARGS_PARSED_BIT 1
+#define __CARGS_NO_DEFAULT_BIT 2
 
 #define __CARGS_LARGE_PREFIX "--"
 #define __CARGS_SMALL_PREFIX "-"

@@ -142,8 +142,10 @@ uninstall:
 UNITTEST_LIBS := $(foreach m,$(INSTALL_LIBS),-l$(m))
 
 unittest-log-init:
+ifeq ($(debug),true)
 	@$(RM) $(UNITTEST_LOG)
 	@touch $(UNITTEST_LOG)
+endif
 
 unittest: unittest-log-init libs
 	@$(CC) -o unittest_bin unittest.c $(CFLAGS) \
@@ -151,10 +153,12 @@ unittest: unittest-log-init libs
 	
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
 	if [ "$(memcheck)" = "true" ]; then \
-	  echo "Running unittest ${ARGS} under Valgrind"; \
-	  valgrind --leak-check=full ./unittest_bin $(ARGS) 2>> $(UNITTEST_LOG) ; \
+	  if [ "$(debug)" = "true" ]; then \
+	    valgrind --leak-check=full ./unittest_bin $(ARGS) >> $(UNITTEST_LOG) 2>&1 ; \
+	  else \
+	    valgrind --leak-check=full ./unittest_bin $(ARGS) 2>&1 ; \
+	  fi \
 	else \
-	  echo "Running unittest ${ARGS}"; \
 	  ./unittest_bin $(ARGS) ; \
 	fi
 	@$(RM) unittest_bin

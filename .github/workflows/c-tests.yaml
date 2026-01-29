@@ -23,8 +23,3 @@ jobs:
       run: |
         # No sudo needed!
         make unittest memcheck=true SEED=1234
-      
-    - name: Display Test Results
-      # This ensures that even if tests fail, we see the log in the console
-      if: always()
-      run: cat unittest_log.ansi
