@@ -93,9 +93,12 @@ multiset *multiset_init(multiset_attr_t attr) {
     ms->t = rbt_init(rbt_attr);
     CS_RETURN_IF(ms->t == NULL, NULL);
 
-    ms->el_attr = attr;
-    ms->count_attr = count_attr;
+    ms->el_attr = malloc(sizeof(multiset_attr_t));
+    ms->count_attr = malloc(sizeof(multiset_attr_t));
+    CS_RETURN_IF(NULL == ms->el_attr || NULL == ms->count_attr, NULL);
 
+    memcpy(ms->el_attr, &attr, sizeof(multiset_attr_t));
+    memcpy(ms->count_attr, &count_attr, sizeof(multiset_attr_t));
     return ms;
 }
 
@@ -103,11 +106,12 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
     CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
     pair data;
     int inital_count = 1;
-    pair_init(&data, &ms->el_attr, &ms->count_attr);
+    pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, &inital_count);
 
     void *node = rbt_find(*(ms->t), &data);
     if (node != NULL) {
+        pair_free(&data);
         pair *p = (pair *)node;
         int *count = (int *)(p->second);
         (*count)++;
@@ -121,7 +125,8 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
 cs_codes multiset_delete(multiset *ms, const void *elem) {
     CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
     pair data;
-    pair_init(&data, &ms->el_attr, &ms->count_attr);
+    int rc;
+    pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
     void *node = rbt_find(*(ms->t), &data);
@@ -130,26 +135,28 @@ cs_codes multiset_delete(multiset *ms, const void *elem) {
         int *count = (int *)(p->second);
         if (*count > 1) {
             (*count)--;
-            return CS_SUCCESS;
+            rc = CS_SUCCESS;
         } else {
-            return rbt_delete(ms->t, &data);
+            rc = rbt_delete(ms->t, &data);
         }
     } else {
-        return CS_ELEM;
+        rc = CS_ELEM;
     }
+    pair_free(&data);
+    return rc;
 }
 
 int multiset_count(multiset *ms, const void *elem) {
     CS_RETURN_IF(ms == NULL || elem == NULL, 0);
     pair data;
-    pair_init(&data, &ms->el_attr, &ms->count_attr);
+    pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
     void *node = rbt_find(*(ms->t), &data);
+    pair_free(&data);
     if (node != NULL) {
         pair *p = (pair *)node;
-        int *count = (int *)(p->second);
-        return *count;
+        return *((int *)(p->second));
     } else {
         return 0;
     }
@@ -170,5 +177,7 @@ void multiset_free(void *v_ms) {
     CS_RETURN_IF(v_ms == NULL);
     multiset *ms = (multiset *)v_ms;
     rbt_free(ms->t);
+    free(ms->el_attr);
+    free(ms->count_attr);
     free(ms);
 }

@@ -1,8 +1,5 @@
 #include <cs/pair.h>
-#include "../include/unittest.h"
-
-// Required by unittest.h
-FILE *__DEBUG_OUT = NULL;
+#include <unittest.h>   
 
 // ============================================================================
 // pair_init
@@ -47,9 +44,141 @@ test_res test_pair_init_different_types() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
+test_res test_pair_init_null_pair() {
+    pair_attr_t first_attr = get_test_struct_attr();
+    pair_attr_t second_attr = get_test_struct_attr();
+
+    cs_codes rc = pair_init(NULL, &first_attr, &second_attr);
+    if (rc != CS_ELEM) {
+        return (test_res){(char*)__func__, "pair_init with NULL pair should return CS_ELEM", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_init_null_first_attr() {
+    pair p;
+    pair_attr_t second_attr = get_test_struct_attr();
+
+    cs_codes rc = pair_init(&p, NULL, &second_attr);
+    if (rc != CS_ELEM) {
+        return (test_res){(char*)__func__, "pair_init with NULL first_attr should return CS_ELEM", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_init_null_second_attr() {
+    pair p;
+    pair_attr_t first_attr = get_test_struct_attr();
+
+    cs_codes rc = pair_init(&p, &first_attr, NULL);
+    if (rc != CS_ELEM) {
+        return (test_res){(char*)__func__, "pair_init with NULL second_attr should return CS_ELEM", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_init_zero_first_size() {
+    pair p;
+    pair_attr_t first_attr = get_test_struct_attr();
+    first_attr.size = 0;
+    pair_attr_t second_attr = get_test_struct_attr();
+
+    cs_codes rc = pair_init(&p, &first_attr, &second_attr);
+    if (rc != CS_SIZE) {
+        return (test_res){(char*)__func__, "pair_init with zero first size should return CS_SIZE", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_init_zero_second_size() {
+    pair p;
+    pair_attr_t first_attr = get_test_struct_attr();
+    pair_attr_t second_attr = get_test_struct_attr();
+    second_attr.size = 0;
+
+    cs_codes rc = pair_init(&p, &first_attr, &second_attr);
+    if (rc != CS_SIZE) {
+        return (test_res){(char*)__func__, "pair_init with zero second size should return CS_SIZE", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
 // ============================================================================
 // pair_set
 // ============================================================================
+
+test_res test_pair_set_null_pair() {
+    int first = 42;
+    int second = 100;
+
+    cs_codes rc = pair_set(NULL, &first, &second);
+    if (rc != CS_ELEM) {
+        return (test_res){(char*)__func__, "pair_set with NULL pair should return CS_ELEM", CS_UNKNOWN};
+    }
+
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_set_first_only() {
+    pair p;
+    pair_attr_t first_attr = get_int_attr();
+    pair_attr_t second_attr = get_int_attr();
+    pair_init(&p, &first_attr, &second_attr);
+
+    int first = 42;
+    cs_codes rc = pair_set(&p, &first, NULL);
+    if (rc != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "pair_set with first only should succeed", rc};
+    }
+    if (p.first == NULL) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "first should be allocated", CS_UNKNOWN};
+    }
+    if (p.second != NULL) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "second should remain NULL", CS_UNKNOWN};
+    }
+    if (*(int*)p.first != 42) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "first value incorrect", CS_UNKNOWN};
+    }
+
+    pair_free(&p);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_set_second_only() {
+    pair p;
+    pair_attr_t first_attr = get_int_attr();
+    pair_attr_t second_attr = get_int_attr();
+    pair_init(&p, &first_attr, &second_attr);
+
+    int second = 100;
+    cs_codes rc = pair_set(&p, NULL, &second);
+    if (rc != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "pair_set with second only should succeed", rc};
+    }
+    if (p.first != NULL) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "first should remain NULL", CS_UNKNOWN};
+    }
+    if (p.second == NULL) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "second should be allocated", CS_UNKNOWN};
+    }
+    if (*(int*)p.second != 100) {
+        pair_free(&p);
+        return (test_res){(char*)__func__, "second value incorrect", CS_UNKNOWN};
+    }
+
+    pair_free(&p);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
 
 test_res test_pair_set_single() {
     pair p;
@@ -611,6 +740,58 @@ test_res test_pair_string_and_struct() {
 }
 
 // ============================================================================
+// pair_free edge cases
+// ============================================================================
+
+test_res test_pair_free_null() {
+    // Should not crash when freeing NULL
+    pair_free(NULL);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_free_unset_values() {
+    pair p;
+    pair_attr_t first_attr = get_int_attr();
+    pair_attr_t second_attr = get_int_attr();
+    pair_init(&p, &first_attr, &second_attr);
+
+    // Don't set any values - first and second are NULL
+    // Should not crash
+    pair_free(&p);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_free_partial_first() {
+    pair p;
+    pair_attr_t first_attr = get_test_struct_attr();
+    pair_attr_t second_attr = get_test_struct_attr();
+    pair_init(&p, &first_attr, &second_attr);
+
+    test_struct ts = create_test_struct(1, "First", 1.5);
+    pair_set(&p, &ts, NULL);
+    free_test_struct(&ts);
+
+    // Only first is set, second is NULL
+    pair_free(&p);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_pair_free_partial_second() {
+    pair p;
+    pair_attr_t first_attr = get_test_struct_attr();
+    pair_attr_t second_attr = get_test_struct_attr();
+    pair_init(&p, &first_attr, &second_attr);
+
+    test_struct ts = create_test_struct(2, "Second", 2.5);
+    pair_set(&p, NULL, &ts);
+    free_test_struct(&ts);
+
+    // Only second is set, first is NULL
+    pair_free(&p);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
 // Stress tests
 // ============================================================================
 
@@ -713,41 +894,49 @@ test_res test_pair_multiple_pairs() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-// MAIN RUNNER
-int main(int argc, char** argv) {
-    test tests[] = {
-        // pair_init
-        test_pair_init,
-        test_pair_init_different_types,
+test pair_tests[] = {
+    // pair_init
+    test_pair_init,
+    test_pair_init_different_types,
+    test_pair_init_null_pair,
+    test_pair_init_null_first_attr,
+    test_pair_init_null_second_attr,
+    test_pair_init_zero_first_size,
+    test_pair_init_zero_second_size,
 
-        // pair_set
-        test_pair_set_single,
-        test_pair_set_overwrite,
-        test_pair_set_multiple_overwrites,
+    // pair_set
+    test_pair_set_null_pair,
+    test_pair_set_first_only,
+    test_pair_set_second_only,
+    test_pair_set_single,
+    test_pair_set_overwrite,
+    test_pair_set_multiple_overwrites,
 
-        // pair_first / pair_second
-        test_pair_first,
-        test_pair_second,
-        test_pair_first_empty,
-        test_pair_second_empty,
+    // pair_first / pair_second
+    test_pair_first,
+    test_pair_second,
+    test_pair_first_empty,
+    test_pair_second_empty,
 
-        // Deep copy verification
-        test_pair_deep_copy_first,
-        test_pair_deep_copy_second,
+    // Deep copy verification
+    test_pair_deep_copy_first,
+    test_pair_deep_copy_second,
 
-        // Nested data integrity
-        test_pair_nested_data_integrity,
+    // Nested data integrity
+    test_pair_nested_data_integrity,
 
-        // Different type combinations
-        test_pair_int_and_struct,
-        test_pair_struct_and_double,
-        test_pair_string_and_struct,
+    // Different type combinations
+    test_pair_int_and_struct,
+    test_pair_struct_and_double,
+    test_pair_string_and_struct,
 
-        // Stress tests
-        test_pair_stress_set,
-        test_pair_multiple_pairs
-    };
+    // pair_free edge cases
+    test_pair_free_null,
+    test_pair_free_unset_values,
+    test_pair_free_partial_first,
+    test_pair_free_partial_second,
 
-    unittest(tests, sizeof(tests) / sizeof(test), argc, argv);
-    return 0;
-}
+    // Stress tests
+    test_pair_stress_set,
+    test_pair_multiple_pairs
+};

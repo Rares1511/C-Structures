@@ -7,7 +7,7 @@ Sequence Containers (Arrays):
 Associative Containers (RBT):
     - Set ✔ (Implemented + Unittest)
     - Map ✔ (Implemented + Unittest)
-    - Multiset ✔ (Implemented)
+    - Multiset ✔ (Implemented + Unittest)
     - Multimap ✔ (Implemented)
 
 Unordered associative containers (Hash Table):
@@ -28,3 +28,5 @@ Container Adapters:
 Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented)
+
+Change init back to cs_codes instead of mallocing inside

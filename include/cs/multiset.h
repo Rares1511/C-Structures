@@ -8,8 +8,8 @@ typedef struct rbt rbt;
 
 typedef struct multiset {
     rbt *t;               /*!< red black tree containing the multiset data */
-    multiset_attr_t el_attr; /*!< attributes of the multiset elements */
-    multiset_attr_t count_attr; /*!< attributes of the count elements */
+    multiset_attr_t* el_attr; /*!< attributes of the multiset elements */
+    multiset_attr_t* count_attr; /*!< attributes of the count elements */
 } multiset;
 
 /*!

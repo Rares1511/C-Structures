@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <unittest.h>
-
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║

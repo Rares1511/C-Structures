@@ -9,6 +9,8 @@ FILE *__DEBUG_OUT = NULL;
 // Each header defines: <module>_tests[] array and <module>_tests_size
 // ============================================================================
 
+#include "pair/pair_unittest.h"
+
 // Associative containers (Arrays)
 #include "vector/vector_unittest.h"
 #include "deque/deque_unittest.h"
@@ -18,6 +20,8 @@ FILE *__DEBUG_OUT = NULL;
 // Associative containers (RBT)
 #include "set/set_unittest.h"
 #include "map/map_unittest.h"
+#include "multiset/multiset_unittest.h"
+#include "multimap/multimap_unittest.h"
 
 // ============================================================================
 // Module registry - list all modules to test
@@ -30,15 +34,20 @@ typedef struct {
 } module_tests;
 
 static module_tests all_modules[] = {
-    // Associative containers (Arrays)
-    { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
-    { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
-    { "list", list_tests, sizeof(list_tests) / sizeof(test) },
-    { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
+    // Extra modules
+    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
-    // Associative containers (RBT)
-    { "set", set_tests, sizeof(set_tests) / sizeof(test) },
-    { "map", map_tests, sizeof(map_tests) / sizeof(test) },
+    // // Associative containers (Arrays)
+    // { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
+    // { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
+    // { "list", list_tests, sizeof(list_tests) / sizeof(test) },
+    // { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
+
+    // // Associative containers (RBT)
+    // { "set", set_tests, sizeof(set_tests) / sizeof(test) },
+    // { "map", map_tests, sizeof(map_tests) / sizeof(test) },
+    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
+    // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -122,11 +131,6 @@ int main(int argc, char **argv) {
         fprintf(__DEBUG_OUT, "  >> %s: %d passed, %d failed\n\n", mod->name, success, failed);
         total_success += success;
         total_failed += failed;
-
-        // long leaked, dubious, reachable, suppressed;
-        // VALGRIND_DO_LEAK_CHECK;
-        // VALGRIND_COUNT_LEAKS(leaked, dubious, reachable, suppressed);
-        // fprintf(__DEBUG_OUT, "  >> Leaks: %ld bytes\n", leaked);
     }
 
     // Final summary

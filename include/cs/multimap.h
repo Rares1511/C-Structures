@@ -5,12 +5,13 @@
 
 typedef univ_attr_t multimap_attr_t;
 typedef struct rbt rbt;
+typedef struct vector vector;
 
 typedef struct multimap {
     rbt *t;
-    multimap_attr_t key_attr;
-    multimap_attr_t value_attr;
-    multimap_attr_t vec_attr;
+    multimap_attr_t* key_attr;
+    multimap_attr_t* value_attr;
+    multimap_attr_t* vec_attr;
 } multimap;
 
 /*!
@@ -38,6 +39,14 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value);
  * @return CS_SUCCESS on success, or an error code on failure
  */
 cs_codes multimap_delete(multimap *mm, const void *key);
+
+/*!
+ * Retrieve all values associated with a key from the multimap
+ * @param[in] mm   Pointer to the multimap
+ * @param[in] key  Pointer to the key
+ * @return Pointer to a vector of values, or NULL if the key is not found
+ */
+vector* multimap_get(multimap *mm, const void *key);
 
 /*!
  * Clear all entries from the multimap

@@ -32,7 +32,7 @@ PATH_INCLUDEDIR  := /usr/local/include/cs
 
 # Flags
 # -I$(LOCAL_INCLUDEDIR) is key: it allows compilation without prior installation
-CFLAGS  := -Wall -Wextra -fPIC -Wno-unknown-pragmas -I$(LOCAL_INCLUDEDIR)
+CFLAGS  := -Wall -Wextra -fPIC -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
 LDLIBS  := -lm
 
 # Unittest Configuration
