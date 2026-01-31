@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/unittest.h"
-
+#pragma region Helper Structs
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER STRUCT SECTION                                        ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -20,8 +19,10 @@ typedef struct {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER STRUCT SECTION                                         ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -440,20 +441,19 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-
-rbt *rbt_init(rbt_attr_t attr) {
-    CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, NULL);
-    rbt *t = malloc(sizeof(rbt));
-    CS_RETURN_IF(t == NULL, NULL);
+cs_codes rbt_init(rbt *t, rbt_attr_t attr) {
+    CS_RETURN_IF(NULL == t, CS_NULL);
+    CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, CS_SIZE);
 
     t->root = NULL;
     t->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(t->meta == NULL, NULL);
+    CS_RETURN_IF(t->meta == NULL, CS_MEM);
     metadata_init(t->meta);
     t->attr = attr;
 
-    return t;
+    return CS_SUCCESS;
 }
 
 cs_codes rbt_insert(rbt *t, void *data) {
@@ -598,5 +598,4 @@ void rbt_free(void *v_t) {
         }
     }
     free(t->meta);
-    free(t);
 }

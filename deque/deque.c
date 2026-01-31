@@ -4,27 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-
-deque *deque_init(deque_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    deque *dq = malloc(sizeof(deque));
-    CS_RETURN_IF(dq == NULL, NULL);
+cs_codes deque_init(deque *dq, deque_attr_t attr) {
+    CS_RETURN_IF(NULL == dq, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     dq->blocks = malloc(sizeof(deque_block_t) * DEQUE_INIT_BLOCKS);
-    CS_RETURN_IF(dq->blocks == NULL, NULL);
+    CS_RETURN_IF(dq->blocks == NULL, CS_MEM);
 
     dq->attr = attr;
     dq->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(dq->meta == NULL, NULL);
+    CS_RETURN_IF(dq->meta == NULL, CS_MEM);
     metadata_init(dq->meta);
     dq->block_size = DEQUE_BLOCK_SIZE;
     dq->block_cap = DEQUE_INIT_BLOCKS;
@@ -32,14 +20,14 @@ deque *deque_init(deque_attr_t attr) {
     dq->back = dq->block_cap / 2;
 
     dq->blocks[dq->front].data = malloc(attr.size * dq->block_size);
-    if (dq->blocks[dq->front].data == NULL) {
+    if (NULL == dq->blocks[dq->front].data) {
         free(dq->blocks);
-        free(dq);
-        return NULL;
+        free(dq->meta);
+        return CS_MEM;
     }
     dq->blocks[dq->front].front = dq->block_cap / 2;
     dq->blocks[dq->front].back = dq->block_cap / 2;
-    return dq;
+    return CS_SUCCESS;
 }
 
 cs_codes deque_push_back(deque *dq, const void* el) {
@@ -333,5 +321,4 @@ void deque_free(void *v_dq) {
     }
     free(dq->meta);
     free(dq->blocks);
-    free(dq);
 }

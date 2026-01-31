@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -50,20 +51,19 @@ void forward_list_node_free(forward_list_node* node, freer fr){
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-
-forward_list *forward_list_init(forward_list_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    forward_list* list = (forward_list*)malloc(sizeof(forward_list));
-    CS_RETURN_IF(list == NULL, NULL);
+cs_codes forward_list_init(forward_list *list, forward_list_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(list == NULL, CS_NULL);
 
     list->head = NULL;
     list->attr = attr;
     list->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(list->meta == NULL, NULL);
+    CS_RETURN_IF(list->meta == NULL, CS_MEM);
     metadata_init(list->meta);
 
-    return list;
+    return CS_SUCCESS;
 }
 
 cs_codes forward_list_push_front(forward_list* list, const void* data) {
@@ -156,5 +156,4 @@ void forward_list_free(void *v_l) {
         }
     }
     free(list->meta);
-    free(list);
 }

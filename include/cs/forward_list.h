@@ -19,9 +19,10 @@ typedef struct forward_list{
 /*!
  * Initializes a forward list with the given attributes.
  * @param attr Attributes for the forward list (e.g., element size).
- * @return Pointer to the initialized forward list, or NULL on failure.
+ * @param[out] list Pointer to the forward list to initialize.
+ * @return CS_SUCCESS on success, or an error code on failure.
  */
-forward_list *forward_list_init(forward_list_attr_t attr);
+cs_codes forward_list_init(forward_list *list, forward_list_attr_t attr);
 
 /*! 
  * Checks if the forward list is empty.

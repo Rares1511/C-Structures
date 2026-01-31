@@ -22,7 +22,7 @@ typedef struct rbt {
     rbt_attr_t attr;
 } rbt;
 
-rbt *rbt_init(rbt_attr_t attr);
+cs_codes rbt_init(rbt *t, rbt_attr_t attr);
 cs_codes rbt_insert(rbt *t, void *data);
 cs_codes rbt_delete(rbt *t, void *data);
 static inline int rbt_empty(rbt t) { return (t.root == NULL); }

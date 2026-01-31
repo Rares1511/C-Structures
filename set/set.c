@@ -5,15 +5,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../include/unittest.h"
-
-set *set_init(set_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    set *s = malloc(sizeof(set));
-    CS_RETURN_IF(s == NULL, NULL);
-    s->t = rbt_init(attr);
-    CS_RETURN_IF(s->t == NULL, NULL);
-    return s;
+cs_codes set_init(set *s, set_attr_t attr) {
+    CS_RETURN_IF(NULL == s, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    s->t = malloc(sizeof(rbt));
+    CS_RETURN_IF(NULL == s->t, CS_MEM);
+    return rbt_init(s->t, attr);
 }
 
 cs_codes set_insert(set *s, void *data) {
@@ -60,5 +57,5 @@ void set_free(void *v_s) {
     CS_RETURN_IF(v_s == NULL);
     set *s = (set *)v_s;
     rbt_free(s->t);
-    free(s);
+    free(s->t);
 }

@@ -41,11 +41,10 @@ int map_node_comp(const void *a, const void *b) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
-    CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, NULL);
-    CS_RETURN_IF(val_attr.size <= 0 || val_attr.size > SIZE_TH, NULL);
-    map *m = (map *)malloc(sizeof(map));
-    CS_RETURN_IF(m == NULL, NULL);
+cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr) {
+    CS_RETURN_IF(NULL == m, CS_NULL);
+    CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(val_attr.size <= 0 || val_attr.size > SIZE_TH, CS_SIZE);
     map_attr_t pair_attr = {
         .comp = map_node_comp,
         .copy = map_node_copy,
@@ -55,12 +54,12 @@ map *map_init(map_attr_t key_attr, map_attr_t val_attr) {
     };
     m->key_attr = malloc(sizeof(map_attr_t));
     m->val_attr = malloc(sizeof(map_attr_t));
-    CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL, NULL);
+    CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL, CS_MEM);
     memcpy(m->key_attr, &key_attr, sizeof(map_attr_t));
     memcpy(m->val_attr, &val_attr, sizeof(map_attr_t));
-    m->t = rbt_init(pair_attr);
-    CS_RETURN_IF(m->t == NULL, NULL);
-    return m;
+    m->t = malloc(sizeof(rbt));
+    CS_RETURN_IF(NULL == m->t, CS_MEM);
+    return rbt_init(m->t, pair_attr);
 }
 
 cs_codes map_insert(map *m, void *key, void *val) {
@@ -137,5 +136,5 @@ void map_free(void *v_m) {
     rbt_free(m->t);
     free(m->key_attr);
     free(m->val_attr);
-    free(m);
+    free(m->t);
 }

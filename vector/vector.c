@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -68,19 +69,19 @@ void vector_qsort(void *base, int low, int high, int size) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-vector *vector_init(vector_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    vector *vec = malloc(sizeof(vector));
-    CS_RETURN_IF(vec == NULL, NULL);
-    vec->vec = malloc(INIT_CAPACITY * attr.size);
-    CS_RETURN_IF(vec->vec == NULL, NULL);
-    vec->attr = attr;
-    vec->cap = INIT_CAPACITY;
-    vec->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(vec->meta == NULL, NULL);
-    metadata_init(vec->meta);
-    return vec;
+cs_codes vector_init(vector *v, vector_attr_t attr) {
+    CS_RETURN_IF(NULL == v, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    v->vec = malloc(INIT_CAPACITY * attr.size);
+    CS_RETURN_IF(v->vec == NULL, CS_MEM);
+    v->attr = attr;
+    v->cap = INIT_CAPACITY;
+    v->meta = malloc(sizeof(metadata_t));
+    CS_RETURN_IF(v->meta == NULL, CS_MEM);
+    metadata_init(v->meta);
+    return CS_SUCCESS;
 }
 
 cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
@@ -217,5 +218,4 @@ void vector_free(void *v_vec) {
     metadata_size_inc(vec->meta, -size);
     free(vec->vec);
     free(vec->meta);
-    free(vec);
 }

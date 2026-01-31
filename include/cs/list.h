@@ -1,7 +1,7 @@
 #ifndef __CS_LIST_H__
 #define __CS_LIST_H__
 
-#include "universal.h"
+#include <cs/universal.h>
 
 typedef univ_attr_t list_attr_t;
 
@@ -19,10 +19,11 @@ typedef struct list {
 
 /*!
  * Initializes the list with th given attributes for the datatype inside
- * @param attr Attributes for the datatype inside the list
- * @return Pointer to the initialized list, or NULL on failure
+ * @param[in] attr Attributes for the datatype inside the list
+ * @param[out] l  Pointer to the list that will be initialized
+ * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful initialization
  */
-list *list_init(list_attr_t attr);
+cs_codes list_init(list *l, list_attr_t attr);
 
 /*!
  * Pushes the element at the front of the list

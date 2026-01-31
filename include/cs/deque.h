@@ -26,10 +26,11 @@ typedef struct deque {
 
 /*!
  * Initializes a deque with the specified attributes.
-  * @param dq Pointer to the deque to initialize.
-  * @return Pointer to the initialized deque, or NULL on failure.
+ * @param dq Pointer to the deque to initialize.
+ * @param attr Attributes for the deque.
+ * @return CS_SUCCESS on success, or an error code on failure.
  */
-deque *deque_init(deque_attr_t attr);
+cs_codes deque_init(deque *dq, deque_attr_t attr);
 
 /*! 
  * Pushes an element to the back of the deque.

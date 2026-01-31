@@ -31,9 +31,10 @@ static inline int vector_size(vector vec) { return vec.meta->size; };
 /*!
  * Initializes the given variable with the correct vector structure datatype
  * @param[in]  attr       Attributes decribing the elements that the vector will contain
- * @return NULL if a memory problem ocurred or a pointer to the initialized vector structure
+ * @param[out] v          Pointer to the vector structure that will be initialized
+ * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-vector *vector_init(vector_attr_t attr);
+cs_codes vector_init(vector *v, vector_attr_t attr);
 
 /*!
  * Inserts the element at the given position in the offered vector

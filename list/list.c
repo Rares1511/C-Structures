@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -93,17 +94,17 @@ void list_node_free(list_node *node, freer fr) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-list *list_init(list_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    list *l = malloc(sizeof(list));
-    CS_RETURN_IF(l == NULL, NULL);
+cs_codes list_init(list *l, list_attr_t attr) {
+    CS_RETURN_IF(NULL == l, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     l->attr = attr;
     l->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(l->meta == NULL, NULL);
+    CS_RETURN_IF(l->meta == NULL, CS_MEM);
     metadata_init(l->meta);
     l->front = NULL;
-    return l;
+    return CS_SUCCESS;
 }
 
 cs_codes list_push_front(list *l, const void *el) {
@@ -258,5 +259,4 @@ void list_free(void *l_p) {
         list_node_free(l->front, l->attr.fr);
     }
     free(l->meta);
-    free(l);
 }

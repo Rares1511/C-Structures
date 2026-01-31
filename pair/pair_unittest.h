@@ -722,7 +722,6 @@ test_res test_pair_string_and_struct() {
     free_test_struct(&second);
 
     char *stored_first = (char*)pair_first(p);
-    printf("Stored first: %s\n", stored_first);
     test_struct *stored_second = (test_struct*)pair_second(p);
 
     if (!stored_first || strcmp(stored_first, "Hello, Pair!") != 0) {

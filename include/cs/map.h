@@ -16,9 +16,10 @@ typedef struct map {
  * Initializes a new map
  * @param[in] key_attr - attributes of the key datatype
  * @param[in] val_attr - attributes of the value datatype
- * @return pointer to the initialized map, or NULL on memory allocation failure
+ * @param[out] m - pointer to the map to initialize
+ * @return CS_SUCCESS on success, CS_MEM on memory allocation failure
  */
-map *map_init(map_attr_t key_attr, map_attr_t val_attr);
+cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
 
 /*!
  * Inserts a new key-value pair into the map

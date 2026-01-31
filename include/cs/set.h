@@ -13,9 +13,10 @@ typedef struct set {
 /*!
  * Initializes a set with the given attributes.
  * @param attr Attributes for the set.
- * @return Pointer to the initialized set, or NULL on failure.
+ * @param s Pointer to the set to be initialized.
+ * @return cs_codes Status code indicating success or type of error.
  */
-set *set_init(set_attr_t attr);
+cs_codes set_init(set *s, set_attr_t attr);
 
 /*!
  * Inserts a new element into the set.
