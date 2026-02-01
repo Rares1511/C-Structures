@@ -93,6 +93,24 @@ static inline int rbt_is_valid(rbt *t) {
 }
 #pragma endregion
 
+#pragma region Hash Functions
+// Simple hash function for integers
+size_t hash_int(const void *key) {
+    return *(int *)key;
+}
+
+// Simple hash function for strings
+size_t hash_string(const void *key) {
+    const char *str = *(const char **)key;
+    size_t hash = 5381;
+    int c;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
+    return hash;
+}
+#pragma endregion
+
 typedef struct test_res {
     char *test_name;
     char *reason;

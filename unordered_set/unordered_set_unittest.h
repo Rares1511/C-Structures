@@ -3,22 +3,6 @@
 #include <unittest.h>
 #include <string.h>
 
-// Simple hash function for integers
-size_t hash_int(const void *key) {
-    return *(int *)key;
-}
-
-// Simple hash function for strings
-size_t hash_string(const void *key) {
-    const char *str = *(const char **)key;
-    size_t hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
-    }
-    return hash;
-}
-
 /******************************************************************************/
 /*                              INIT TESTS                                    */
 /******************************************************************************/

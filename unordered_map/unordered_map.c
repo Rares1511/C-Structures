@@ -27,18 +27,15 @@ typedef struct unordered_map_entry {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-void unordered_map_entry_init(unordered_map umap, const void *key, const void *value, unordered_map_entry *out) {
-    if (!out) {
-        return;
-    }
+void unordered_map_entry_init(unordered_map *umap, const void *key, const void *value, unordered_map_entry *out) {
+    CS_RETURN_IF(NULL == out || NULL == umap);
     out->data = malloc(sizeof(pair));
     if (!out->data) {
-        free(out);
         return;
     }
-    pair_init(out->data, &umap.key_attr, &umap.value_attr);
+    pair_init(out->data, &umap->key_attr, &umap->value_attr);
     pair_set(out->data, key, value);
-    out->hash_func = umap.hash_func;
+    out->hash_func = umap->hash_func;
 }
 
 void unordered_map_entry_copy(void *dest, const void *src) {
@@ -53,21 +50,21 @@ void unordered_map_entry_print(FILE *stream, const void *el) {
         return;
     }
     const unordered_map_entry *entry = (const unordered_map_entry *)el;
-    pair_print(stream, &entry->data);
+    pair_print(stream, entry->data);
 }
 
 void unordered_map_entry_free(void *el) {
-    if (!el) {
-        return;
-    }
+    CS_RETURN_IF(NULL == el);
     unordered_map_entry *entry = (unordered_map_entry *)el;
-    pair_free(&entry->data);
+    pair_free(entry->data);
     free(entry->data);
 }
 
 int unordered_map_entry_comp(const void *a, const void *b) {
-    const pair* pa = (const pair*)a;
-    const pair* pb = (const pair*)b;
+    const unordered_map_entry* ea = (const unordered_map_entry*)a;
+    const unordered_map_entry* eb = (const unordered_map_entry*)b;
+    const pair* pa = ea->data;
+    const pair* pb = eb->data;
     
     if (pa->first_attr->comp != NULL) {
         return pa->first_attr->comp(pa->first, pb->first);
@@ -123,7 +120,7 @@ cs_codes unordered_map_init(unordered_map *umap,
 cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value) {
     CS_RETURN_IF(NULL == umap || NULL == key || NULL == value, CS_NULL);
     unordered_map_entry entry;
-    unordered_map_entry_init(*umap, key, value, &entry);
+    unordered_map_entry_init(umap, key, value, &entry);
 
     void *existing_entry = hash_table_get_entry(*(umap->ht), &entry);
     if (existing_entry != NULL) {
@@ -138,7 +135,7 @@ cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key) {
     CS_RETURN_IF(NULL == umap || NULL == key, CS_NULL);
 
     unordered_map_entry entry;
-    unordered_map_entry_init(*umap, key, NULL, &entry);
+    unordered_map_entry_init(umap, key, NULL, &entry);
     int rc = hash_table_remove_entry(umap->ht, &entry);
     unordered_map_entry_free(&entry);
     return rc;
@@ -148,9 +145,10 @@ void *unordered_map_get_entry(unordered_map umap, const void *key) {
     CS_RETURN_IF(NULL == key, NULL);
 
     unordered_map_entry entry;
-    unordered_map_entry_init(umap, key, NULL, &entry);
+    unordered_map_entry_init(&umap, key, NULL, &entry);
     void *found_entry = hash_table_get_entry(*umap.ht, &entry);
     unordered_map_entry_free(&entry);
+    CS_RETURN_IF(NULL == found_entry, NULL);
     return ((unordered_map_entry *)found_entry)->data->second;
 }
 
@@ -166,7 +164,7 @@ int unordered_map_count(unordered_map umap, const void *key) {
     CS_RETURN_IF(NULL == key, 0);
 
     unordered_map_entry entry;
-    unordered_map_entry_init(umap, key, NULL, &entry);
+    unordered_map_entry_init(&umap, key, NULL, &entry);
 
     int count = hash_table_count(*umap.ht, &entry);
     unordered_map_entry_free(&entry);
@@ -193,10 +191,6 @@ void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
 void unordered_map_clear(unordered_map *umap) {
     CS_RETURN_IF(NULL == umap);
     hash_table_clear(umap->ht);
-    umap->ht = NULL;
-    umap->key_attr = (unordered_map_attr_t){0};
-    umap->value_attr = (unordered_map_attr_t){0};
-    umap->hash_func = NULL;
 }
 
 void unordered_map_print(FILE *stream, void *v_umap) {
