@@ -19,7 +19,7 @@ Unordered associative containers (Hash Table):
 Container Adapters:
     - Stack ✔ (Implemented + Unittest)
     - Queue ✔ (Implemented + Unittest)
-    - Priority Queue ✔ (Implemented)
+    - Priority Queue ✔ (Implemented + Unittest)
     - Flat Set ✔ (Implemented)
     - Flat Map
     - Flat Multiset

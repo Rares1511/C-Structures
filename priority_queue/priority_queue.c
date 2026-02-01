@@ -94,30 +94,56 @@ cs_codes priority_queue_push(priority_queue *pq, void *data) {
 
 cs_codes priority_queue_pop(priority_queue *pq) {
     CS_RETURN_IF(pq == NULL, CS_NULL);
+    CS_RETURN_IF(priority_queue_empty(*pq), CS_EMPTY);
+    
     int rc, size = 0;
     comparer comp = NULL;
     void *temp = NULL;
+    freer fr = NULL;
 
     switch (pq->type) {
         case CS_PRIORITY_QUEUE_VECTOR:
             size = ((vector*)pq->container)->attr.size;
             comp = ((vector*)pq->container)->attr.comp;
+            fr = ((vector*)pq->container)->attr.fr;
             break;
         case CS_PRIORITY_QUEUE_DEQUE:
             size = ((deque*)pq->container)->attr.size;
             comp = ((deque*)pq->container)->attr.comp;
+            fr = ((deque*)pq->container)->attr.fr;
             break;
         default:
             return CS_FUNC;
     }
 
+    int last_index = priority_queue_size(*pq) - 1;
+    
+    // Special case: only one element, just pop it
+    if (last_index == 0) {
+        switch (pq->type) {
+            case CS_PRIORITY_QUEUE_VECTOR:
+                return vector_pop_back((vector*)pq->container);
+            case CS_PRIORITY_QUEUE_DEQUE:
+                return deque_pop_back((deque*)pq->container);
+            default:
+                return CS_FUNC;
+        }
+    }
+
     temp = malloc(size);
     CS_RETURN_IF(temp == NULL, CS_MEM);
 
-    int last_index = priority_queue_size(*pq) - 1;
     void *top = priority_queue_at(*pq, 0);
     void *last = priority_queue_at(*pq, last_index);
+    
+    // Free the top element's internal data before overwriting
+    if (fr) fr(top);
+    
+    // Shallow copy last to top (now owns last's internal data)
     memcpy(top, last, size);
+    
+    // Zero out last so pop_back's free call won't double-free
+    memset(last, 0, size);
 
     switch (pq->type) {
         case CS_PRIORITY_QUEUE_VECTOR:
