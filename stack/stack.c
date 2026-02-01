@@ -30,7 +30,7 @@ cs_codes stack_init(stack *s, stack_type type, stack_attr_t attr) {
 }
 
 cs_codes stack_push(stack *s, const void *el) {
-    CS_RETURN_IF(NULL == s || NULL == el, CS_ELEM);
+    CS_RETURN_IF(NULL == s || NULL == el, CS_NULL);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_push_back(s->container, el);
@@ -44,7 +44,7 @@ cs_codes stack_push(stack *s, const void *el) {
 }
 
 cs_codes stack_pop(stack *s) {
-    CS_RETURN_IF(NULL == s, CS_ELEM);
+    CS_RETURN_IF(NULL == s, CS_NULL);
     switch(s->type) {
         case CS_STACK_ARRAY:
             return vector_pop_back(s->container);

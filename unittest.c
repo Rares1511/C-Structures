@@ -29,6 +29,9 @@ FILE *__DEBUG_OUT = NULL;
 #include "unordered_multiset/unordered_multiset_unittest.h"
 #include "unordered_multimap/unordered_multimap_unittest.h"
 
+// Container adapters
+#include "stack/stack_unittest.h"
+
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================
@@ -60,6 +63,9 @@ static module_tests all_modules[] = {
     { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
     { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
     { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
+
+    // Container adapters
+    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
