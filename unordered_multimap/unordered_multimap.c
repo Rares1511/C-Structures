@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+#pragma region Helper Structs
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        START OF HELPER STRUCT SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -19,8 +19,9 @@ typedef struct unordered_multimap_entry {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                         END OF HELPER STRUCT SECTION                                       ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -90,16 +91,19 @@ size_t unordered_multimap_entry_hash(const void *el) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-unordered_multimap *unordered_multimap_init(unordered_multimap_attr_t key_attr,
+cs_codes unordered_multimap_init(unordered_multimap *ummap,
+                                 unordered_multimap_attr_t key_attr,
                                  unordered_multimap_attr_t value_attr,
                                  hash_func_t hash_func,
                                  int initial_capacity) {
-    CS_RETURN_IF(initial_capacity <= 0, NULL);
-    CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0, NULL);
-    CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, NULL);
-    unordered_multimap *ummap = (unordered_multimap *)malloc(sizeof(unordered_multimap));
-    CS_RETURN_IF(ummap == NULL, NULL);
+    CS_RETURN_IF(NULL == ummap, CS_NULL);
+    CS_RETURN_IF(initial_capacity <= 0, CS_SIZE);
+    CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0, CS_SIZE);
+    CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
+    ummap->ht = malloc(sizeof(hash_table));
+    CS_RETURN_IF(NULL == ummap->ht, CS_MEM);
 
     hash_table_attr_t ht_attr = {
         .size = sizeof(unordered_multimap_entry),
@@ -109,17 +113,11 @@ unordered_multimap *unordered_multimap_init(unordered_multimap_attr_t key_attr,
         .copy = unordered_multimap_entry_copy,
     };
 
-    ummap->ht = hash_table_init(ht_attr, hash_func, initial_capacity);
-    if (!ummap->ht) {
-        free(ummap);
-        return NULL;
-    }
-
     ummap->hash_func = hash_func;
     ummap->key_attr = key_attr;
     ummap->value_attr = value_attr;
 
-    return ummap;
+    return hash_table_init(ummap->ht, ht_attr, unordered_multimap_entry_hash, initial_capacity);
 }
 
 cs_codes unordered_multimap_add_entry(unordered_multimap *umap, const void *key, const void *value) {
@@ -211,5 +209,5 @@ void unordered_multimap_free(void *v_umap) {
     CS_RETURN_IF(NULL == v_umap);
     unordered_multimap *umap = (unordered_multimap *)v_umap;
     hash_table_free(umap->ht);
-    free(umap);
+    free(umap->ht);
 }

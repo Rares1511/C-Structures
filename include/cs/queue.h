@@ -18,11 +18,12 @@ typedef struct queue {
 
 /*!
  * Initialize a queue with given attributes and underlying container type.
+ * @param[out] q Pointer to the queue to be initialized.
  * @param[in] attr Attributes for the queue (currently unused, set to 0).
  * @param[in] type The underlying container type for the queue.
  * @return Pointer to the initialized queue structure.
  */
-queue* queue_init(queue_attr attr, queue_type type);
+cs_codes queue_init(queue *q, queue_attr attr, queue_type type);
 
 /*! Push an element to the back of the queue.
  * @param[in,out] q Pointer to the queue.

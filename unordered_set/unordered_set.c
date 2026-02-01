@@ -3,13 +3,12 @@
 
 #include <stdlib.h>
 
-unordered_set *unordered_set_init(unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity) {
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    unordered_set *uset = (unordered_set *)malloc(sizeof(unordered_set));
-    CS_RETURN_IF(uset == NULL, NULL);
-    uset->ht = hash_table_init(attr, hash_func, initial_capacity);
-    CS_RETURN_IF(uset->ht == NULL, NULL);
-    return uset;
+cs_codes unordered_set_init(unordered_set *uset, unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity) {
+    CS_RETURN_IF(NULL == uset, CS_NULL);
+    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    uset->ht = malloc(sizeof(hash_table));
+    CS_RETURN_IF(NULL == uset->ht, CS_MEM);
+    return hash_table_init(uset->ht, attr, hash_func, initial_capacity);
 }
 
 cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
@@ -62,5 +61,5 @@ void unordered_set_free(void *v_uset) {
     unordered_set *uset = (unordered_set *)v_uset;
     CS_RETURN_IF(uset == NULL || uset->ht == NULL);
     hash_table_free(uset->ht);
-    free(uset);
+    free(uset->ht);
 }

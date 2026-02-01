@@ -5,28 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-flat_set* flat_set_init(flat_set_attr_t attr, flat_set_type type) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    flat_set *fs = (flat_set *)malloc(sizeof(flat_set));
-    CS_RETURN_IF(NULL == fs, NULL);
+cs_codes flat_set_init(flat_set *fs, flat_set_attr_t attr, flat_set_type type) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(NULL == fs, CS_NULL);
 
     fs->type = type;
-    fs->container = NULL;
     switch (type) {
         case CS_FLAT_SET_DEQUE:
-            fs->container = deque_init(attr);
-            break;
+            fs->container = malloc(sizeof(deque));
+            CS_RETURN_IF(NULL == fs->container, CS_MEM);
+            return deque_init((deque*)fs->container, attr);
         case CS_FLAT_SET_VECTOR:
-            fs->container = vector_init(attr);
-            break;
+            fs->container = malloc(sizeof(vector));
+            CS_RETURN_IF(NULL == fs->container, CS_MEM);
+            return vector_init((vector*)fs->container, attr);
         default:
-            break;
+            return CS_FUNC;
     }
-    if (NULL == fs->container) {
-        free(fs);
-        return NULL;
-    }
-    return fs;
+    return CS_SUCCESS;
 }
 
 cs_codes flat_set_insert(flat_set *fs, void *data) {
@@ -209,5 +205,5 @@ void flat_set_free(void *v_fs) {
         default:
             break;
     }
-    free(fs);
+    free(fs->container);
 }

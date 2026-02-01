@@ -22,10 +22,11 @@ typedef struct unordered_multimap {
  * @param[in] initial_capacity The initial capacity of the unordered multimap.
  * @return A pointer to the initialized unordered multimap.
  */
-unordered_multimap *unordered_multimap_init(unordered_multimap_attr_t key_attr,
-                                 unordered_multimap_attr_t value_attr,
-                                 hash_func_t hash_func,
-                                 int initial_capacity);
+cs_codes unordered_multimap_init(unordered_multimap *ummap,
+                                unordered_multimap_attr_t key_attr,
+                                unordered_multimap_attr_t value_attr,
+                                hash_func_t hash_func,
+                                int initial_capacity);
 
 /*!
  * @brief Adds a key-value pair to the unordered multimap.

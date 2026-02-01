@@ -16,7 +16,7 @@ typedef struct flat_set {
     flat_set_type type;
 } flat_set;
 
-flat_set* flat_set_init(flat_set_attr_t attr, flat_set_type type);
+cs_codes flat_set_init(flat_set *fs, flat_set_attr_t attr, flat_set_type type);
 cs_codes flat_set_insert(flat_set *fs, void *data);
 cs_codes flat_set_erase(flat_set *fs, void *data);
 int flat_set_find(flat_set fs, void *data);

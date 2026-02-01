@@ -9,7 +9,7 @@ typedef enum stack_type {
     CS_STACK_ARRAY,
     CS_STACK_DEQUE,
     CS_STACK_LIST,
-    CS_STACK_DEFAULT
+    CS_STACK_DEFAULT = CS_STACK_DEQUE
 } stack_type;
 
 typedef struct stack {
@@ -20,10 +20,11 @@ typedef struct stack {
 /*!
  * @brief Initializes a stack with the specified type and attributes.
  * @param[in] type The type of the stack (array, deque, list).
+ * @param[in,out] s Pointer to the stack to initialize.
  * @param[in] attr Attributes for the underlying container.
- * @return Pointer to the initialized stack, or NULL on failure.
+ * @return CS_OK on success, error code otherwise.
  */
-stack *stack_init(stack_type type, stack_attr_t attr);
+cs_codes stack_init(stack *s, stack_type type, stack_attr_t attr);
 
 /*!
  * @brief Pushes an element onto the stack.

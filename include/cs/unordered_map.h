@@ -17,12 +17,14 @@ typedef struct unordered_map {
 /*!
  * Initialize an unordered map with the specified attributes and hash function.
  * @param[in] key_attr Attributes for the keys.
+ * @param[in] umap Pointer to the unordered map to initialize.
  * @param[in] value_attr Attributes for the values.
  * @param[in] hash_func Hash function for the keys.
  * @param[in] initial_capacity Initial capacity of the unordered map.
- * @return Pointer to the initialized unordered map.
+ * @return CS_SUCCESS on success, error code otherwise.
  */
-unordered_map *unordered_map_init(unordered_map_attr_t key_attr,
+cs_codes unordered_map_init(unordered_map *umap,
+                                 unordered_map_attr_t key_attr,
                                  unordered_map_attr_t value_attr,
                                  hash_func_t hash_func,
                                  int initial_capacity);

@@ -18,11 +18,12 @@ typedef struct priority_queue {
 
 /*!
  * Initializes a priority queue with the specified attributes and type.
+ * @param[out] pq A pointer to the priority queue to initialize.
  * @param[in] attr The attributes for the priority queue.
  * @param[in] type The underlying container type for the priority queue.
- * @return A pointer to the initialized priority queue, or NULL on failure.
+ * @return A cs_codes value indicating success or failure.
  */
-priority_queue* priority_queue_init(priority_queue_attr_t attr, priority_queue_type type);
+cs_codes priority_queue_init(priority_queue *pq, priority_queue_attr_t attr, priority_queue_type type);
 
 /*!
  * Pushes an element onto the priority queue.

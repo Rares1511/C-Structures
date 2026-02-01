@@ -16,7 +16,7 @@ typedef struct hash_table {
     vector **buckets;
 } hash_table;
 
-hash_table *hash_table_init(hash_table_attr_t attr, hash_func_t hash, int initial_capacity);
+cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t hash, int initial_capacity);
 cs_codes hash_table_add_entry(hash_table *ht, const void *el);
 cs_codes hash_table_remove_entry(hash_table *ht, const void *el);
 void *hash_table_get_entry(hash_table ht, const void *el);

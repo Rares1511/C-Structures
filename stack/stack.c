@@ -5,29 +5,28 @@
 
 #include <stdlib.h>
 
-stack *stack_init(stack_type type, stack_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    stack *s = (stack *)malloc(sizeof(stack));
-    CS_RETURN_IF(s == NULL, NULL);
+cs_codes stack_init(stack *s, stack_type type, stack_attr_t attr) {
+    CS_RETURN_IF(NULL == s, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     s->type = type;
     switch(type) {
         case CS_STACK_ARRAY:
-            s->container = vector_init(attr);
-            break;
+            s->container = malloc(sizeof(vector));
+            CS_RETURN_IF(NULL == s->container, CS_MEM);
+            return vector_init(s->container, attr);
         case CS_STACK_DEQUE:
-            s->container = deque_init(attr);
-            break;
+            s->container = malloc(sizeof(deque));
+            CS_RETURN_IF(NULL == s->container, CS_MEM);
+            return deque_init(s->container, attr);
         case CS_STACK_LIST:
-            s->container = list_init(attr);
-            break;
-        case CS_STACK_DEFAULT:
-            s->container = deque_init(attr);
-            break;
+            s->container = malloc(sizeof(list));
+            CS_RETURN_IF(NULL == s->container, CS_MEM);
+            return list_init(s->container, attr);
         default:
-            free(s);
-            return NULL;
+            free(s->container);
+            return CS_ELEM;
     }
-    return s;
+    return CS_SUCCESS;
 }
 
 cs_codes stack_push(stack *s, const void *el) {
@@ -39,8 +38,6 @@ cs_codes stack_push(stack *s, const void *el) {
             return deque_push_back(s->container, el);
         case CS_STACK_LIST:
             return list_push_back(s->container, el);
-        case CS_STACK_DEFAULT:
-            return deque_push_back(s->container, el);
         default:
             return CS_ELEM;
     }
@@ -55,8 +52,6 @@ cs_codes stack_pop(stack *s) {
             return deque_pop_back(s->container);
         case CS_STACK_LIST:
             return list_pop_back(s->container);
-        case CS_STACK_DEFAULT:
-            return deque_pop_back(s->container);
         default:
             return CS_ELEM;
     }
@@ -71,8 +66,6 @@ void* stack_top(const stack *s) {
             return deque_back(*(deque *)(s->container));
         case CS_STACK_LIST:
             return list_back(*(list *)(s->container));
-        case CS_STACK_DEFAULT:
-            return deque_back(*(deque *)(s->container));
         default:
             return NULL;
     }
@@ -87,8 +80,6 @@ int stack_size(const stack *s) {
             return deque_size(*(deque *)(s->container));
         case CS_STACK_LIST:
             return list_size(*(list *)(s->container));
-        case CS_STACK_DEFAULT:
-            return deque_size(*(deque *)(s->container));
         default:
             return -1;
     }
@@ -103,8 +94,6 @@ int stack_empty(const stack *s) {
             return deque_empty(*(deque *)(s->container));
         case CS_STACK_LIST:
             return list_empty(*(list *)(s->container));
-        case CS_STACK_DEFAULT:
-            return deque_empty(*(deque *)(s->container));
         default:
             return -1;
     }
@@ -121,9 +110,6 @@ void stack_clear(stack *s) {
             break;
         case CS_STACK_LIST:
             list_clear(s->container);
-            break;
-        case CS_STACK_DEFAULT:
-            deque_clear(s->container);
             break;
         default:
             break;
@@ -145,9 +131,6 @@ void stack_print(FILE *stream, void *v_s) {
         case CS_STACK_LIST:
             list_print(stream, s->container);
             break;
-        case CS_STACK_DEFAULT:
-            deque_print(stream, s->container);
-            break;
         default:
             break;
     }
@@ -166,11 +149,8 @@ void stack_free(void *v_s) {
     case CS_STACK_LIST:
         list_free(s->container);
         break;
-    case CS_STACK_DEFAULT:
-        deque_free(s->container);
-        break;
     default:
         break;
     }
-    free(s);
+    free(s->container);
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -31,45 +32,43 @@ size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-
-hash_table *hash_table_init(hash_table_attr_t attr, hash_func_t hash, int initial_capacity) {
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, NULL);
-
-    hash_table *ht = (hash_table *)malloc(sizeof(hash_table));
-    CS_RETURN_IF(NULL == ht, NULL);
+cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t hash, int initial_capacity) {
+    CS_RETURN_IF(NULL == ht, CS_NULL);
+    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
 
     ht->cap = initial_capacity;
     ht->meta = (metadata_t *)malloc(sizeof(metadata_t));
-    CS_RETURN_IF(NULL == ht->meta, NULL);
+    CS_RETURN_IF(NULL == ht->meta, CS_NULL);
     metadata_init(ht->meta);
     ht->attr = attr;
     ht->hash = hash;
     ht->buckets = malloc(sizeof(vector**) * initial_capacity);
     if (ht->buckets == NULL) {
-        free(ht);
-        return NULL;
+        free(ht->meta);
+        return CS_NULL;
     }
     for (int i = 0; i < initial_capacity; i++) {
         ht->buckets[i] = NULL;
     }
 
-    return ht;
+    return CS_SUCCESS;
 }
 
 cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
-    int idx = __hash_table_get_bucket_index(*ht, el);
+    int idx = __hash_table_get_bucket_index(*ht, el), rc;
     CS_RETURN_IF(idx < 0 || idx >= ht->cap, CS_SIZE);
 
     if (ht->buckets[idx] == NULL) {
-        ht->buckets[idx] = vector_init(ht->attr);
-        if (NULL == ht->buckets[idx]) {
-            return CS_MEM;
-        }
+        ht->buckets[idx] = malloc(sizeof(vector));
+        CS_RETURN_IF(ht->buckets[idx] == NULL, CS_MEM);
+        rc = vector_init(ht->buckets[idx], ht->attr);
+        CS_RETURN_IF(rc != CS_SUCCESS, rc);
     }
 
-    int rc = vector_push_back(ht->buckets[idx], el);
+    rc = vector_push_back(ht->buckets[idx], el);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
     metadata_size_inc(ht->meta, 1);
     return CS_SUCCESS;
@@ -140,6 +139,7 @@ void hash_table_clear(hash_table *ht) {
     for (int i = 0; i < ht->cap; i++) {
         if (ht->buckets[i] != NULL) {
             vector_free(ht->buckets[i]);
+            free(ht->buckets[i]);
             ht->buckets[i] = NULL;
         }
     }
@@ -164,5 +164,4 @@ void hash_table_free(void *v_ht) {
     hash_table_clear(ht);
     free(ht->buckets);
     free(ht->meta);
-    free(ht);
 }

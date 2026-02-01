@@ -4,16 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-unordered_multiset *unordered_multiset_init(unordered_multiset_attr_t attr, hash_func_t hash_func, int initial_capacity) {
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    unordered_multiset *umset = (unordered_multiset *)malloc(sizeof(unordered_multiset));
-    CS_RETURN_IF(umset == NULL, NULL);
-    umset->ht = hash_table_init(attr, hash_func, initial_capacity);
-    if (!umset->ht) {
-        free(umset);
-        return NULL;
-    }
-    return umset;
+cs_codes unordered_multiset_init(unordered_multiset *umset, 
+                            unordered_multiset_attr_t attr, 
+                            hash_func_t hash_func, 
+                            int initial_capacity) {
+    CS_RETURN_IF(NULL == umset, CS_NULL);
+    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    umset->ht = malloc(sizeof(hash_table));
+    CS_RETURN_IF(NULL == umset->ht, CS_MEM);
+    return hash_table_init(umset->ht, attr, hash_func, initial_capacity);
 }
 
 cs_codes unordered_multiset_insert(unordered_multiset *umset, const void *key) {
@@ -61,5 +60,5 @@ void unordered_multiset_free(void *v_umset) {
     CS_RETURN_IF(v_umset == NULL);
     unordered_multiset *umset = (unordered_multiset *)v_umset;
     hash_table_free(umset->ht);
-    free(umset);
+    free(umset->ht);
 }

@@ -23,6 +23,9 @@ FILE *__DEBUG_OUT = NULL;
 #include "multiset/multiset_unittest.h"
 #include "multimap/multimap_unittest.h"
 
+// Unordered associative containers (Hash Table)
+#include "unordered_set/unordered_set_unittest.h"
+
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================
@@ -37,17 +40,20 @@ static module_tests all_modules[] = {
     // Extra modules
     { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
-    // // Associative containers (Arrays)
+    // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
     { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
     { "list", list_tests, sizeof(list_tests) / sizeof(test) },
     { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
 
-    // // Associative containers (RBT)
+    // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test) },
     { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
     { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
+
+    // Unordered associative containers (Hash Table)
+    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);

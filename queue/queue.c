@@ -4,28 +4,23 @@
 
 #include <stdlib.h>
 
-queue* queue_init(queue_attr attr, queue_type type) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    queue *q = (queue *)malloc(sizeof(queue));
-    CS_RETURN_IF(q == NULL, NULL);
-
+cs_codes queue_init(queue *q, queue_attr attr, queue_type type) {
+    CS_RETURN_IF(NULL == q, CS_NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     q->type = type;
-    q->container = NULL;
     switch (type) {
-    case CS_QUEUE_LIST:
-        q->container = list_init(attr);
-        break;
-    case CS_QUEUE_DEQUE:
-        q->container = deque_init(attr);
-        break;
-    default:
-        break;
+        case CS_QUEUE_LIST:
+            q->container = malloc(sizeof(list));
+            CS_RETURN_IF(NULL == q->container, CS_MEM);
+            return list_init(q->container, attr);
+        case CS_QUEUE_DEQUE:
+            q->container = malloc(sizeof(deque));
+            CS_RETURN_IF(NULL == q->container, CS_MEM);
+            return deque_init(q->container, attr);
+        default:
+            return CS_ELEM;
     }
-    if (q->container == NULL) {
-        free(q);
-        return NULL;
-    }
-    return q;
+    return CS_SUCCESS;
 }
 
 cs_codes queue_push(queue *q, void *data) {
@@ -153,5 +148,5 @@ void queue_free(void *v_q) {
     default:
         break;
     }
-    free(q);
+    free(q->container);
 }

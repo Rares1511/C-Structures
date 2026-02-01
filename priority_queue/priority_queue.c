@@ -28,32 +28,24 @@ void *priority_queue_at(priority_queue pq, int index) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion HELPER_FUNCTIONS
 
-priority_queue* priority_queue_init(priority_queue_attr_t attr, priority_queue_type type) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    priority_queue *pq = (priority_queue*) malloc(sizeof(priority_queue));
-    CS_RETURN_IF(pq == NULL, NULL);
+cs_codes priority_queue_init(priority_queue *pq, priority_queue_attr_t attr, priority_queue_type type) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(pq == NULL, CS_NULL);
 
     pq->type = type;
-    pq->container = NULL;
-
     switch (type) {
         case CS_PRIORITY_QUEUE_VECTOR:
-            pq->container = vector_init(attr);
-            break;
+            pq->container = malloc(sizeof(vector));
+            CS_RETURN_IF(NULL == pq->container, CS_MEM);
+            return vector_init((vector*)pq->container, attr);
         case CS_PRIORITY_QUEUE_DEQUE:
-            pq->container = deque_init(attr);
-            break;
+            pq->container = malloc(sizeof(deque));
+            CS_RETURN_IF(NULL == pq->container, CS_MEM);
+            return deque_init((deque*)pq->container, attr);
         default:
-            free(pq);
-            return NULL;
+            return CS_ELEM;
     }
-
-    if (pq->container == NULL) {
-        free(pq);
-        return NULL;
-    }
-
-    return pq;
+    return CS_SUCCESS;
 }
 
 cs_codes priority_queue_push(priority_queue *pq, void *data) {
@@ -255,5 +247,5 @@ void priority_queue_free(void *v_pq) {
         default:
             break;
     }
-    free(pq);
+    free(pq->container);
 }
