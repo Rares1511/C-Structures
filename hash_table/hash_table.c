@@ -161,7 +161,13 @@ void hash_table_print(FILE *stream, void *v_ht) {
 void hash_table_free(void *v_ht) {
     CS_RETURN_IF(v_ht == NULL);
     hash_table *ht = (hash_table*)v_ht;
-    hash_table_clear(ht);
+    for (int i = 0; i < ht->cap; i++) {
+        if (ht->buckets[i] != NULL) {
+            vector_free(ht->buckets[i]);
+            free(ht->buckets[i]);
+            ht->buckets[i] = NULL;
+        }
+    }
     free(ht->buckets);
     free(ht->meta);
 }

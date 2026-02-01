@@ -26,6 +26,8 @@ FILE *__DEBUG_OUT = NULL;
 // Unordered associative containers (Hash Table)
 #include "unordered_set/unordered_set_unittest.h"
 #include "unordered_map/unordered_map_unittest.h"
+#include "unordered_multiset/unordered_multiset_unittest.h"
+#include "unordered_multimap/unordered_multimap_unittest.h"
 
 // ============================================================================
 // Module registry - list all modules to test
@@ -55,7 +57,9 @@ static module_tests all_modules[] = {
 
     // Unordered associative containers (Hash Table)
     { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
-    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) }
+    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
+    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
+    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);

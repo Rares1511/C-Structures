@@ -13,8 +13,8 @@ Associative Containers (RBT):
 Unordered associative containers (Hash Table):
     - Unordered Set ✔ (Implemented + Unittest)
     - Unordered Map ✔ (Implemented + Unittest)
-    - Unordered Multiset ✔ (Implemented)
-    - Unordered Multimap ✔ (Implemented)
+    - Unordered Multiset ✔ (Implemented + Unittest)
+    - Unordered Multimap ✔ (Implemented + Unittest)
 
 Container Adapters:
     - Stack ✔ (Implemented)

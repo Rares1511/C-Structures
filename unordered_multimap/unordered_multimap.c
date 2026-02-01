@@ -27,18 +27,16 @@ typedef struct unordered_multimap_entry {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 
-void unordered_multimap_entry_init(unordered_multimap umap, const void *key, const void *value, unordered_multimap_entry *out) {
-    if (!out) {
-        return;
-    }
+void unordered_multimap_entry_init(unordered_multimap *umap, const void *key, const void *value, unordered_multimap_entry *out) {
+    CS_RETURN_IF(NULL == out);
     out->data = malloc(sizeof(pair));
     if (!out->data) {
         free(out);
         return;
     }
-    pair_init(out->data, &umap.key_attr, &umap.value_attr);
+    pair_init(out->data, &umap->key_attr, &umap->value_attr);
     pair_set(out->data, key, value);
-    out->hash_func = umap.hash_func;
+    out->hash_func = umap->hash_func;
 }
 
 void unordered_multimap_entry_copy(void *dest, const void *src) {
@@ -49,25 +47,23 @@ void unordered_multimap_entry_copy(void *dest, const void *src) {
 }
 
 void unordered_multimap_entry_print(FILE *stream, const void *el) {
-    if (!stream || !el) {
-        return;
-    }
+    CS_RETURN_IF(NULL == stream || NULL == el);
     const unordered_multimap_entry *entry = (const unordered_multimap_entry *)el;
-    pair_print(stream, &entry->data);
+    pair_print(stream, entry->data);
 }
 
 void unordered_multimap_entry_free(void *el) {
-    if (!el) {
-        return;
-    }
+    CS_RETURN_IF(NULL == el);
     unordered_multimap_entry *entry = (unordered_multimap_entry *)el;
-    pair_free(&entry->data);
+    pair_free(entry->data);
     free(entry->data);
 }
 
 int unordered_multimap_entry_comp(const void *a, const void *b) {
-    const pair* pa = (const pair*)a;
-    const pair* pb = (const pair*)b;
+    const unordered_multimap_entry* ea = (const unordered_multimap_entry*)a;
+    const unordered_multimap_entry* eb = (const unordered_multimap_entry*)b;
+    const pair* pa = (const pair*) ea->data;
+    const pair* pb = (const pair*) eb->data;
     
     if (pa->first_attr->comp != NULL) {
         return pa->first_attr->comp(pa->first, pb->first);
@@ -77,7 +73,7 @@ int unordered_multimap_entry_comp(const void *a, const void *b) {
 
 size_t unordered_multimap_entry_hash(const void *el) {
     // Simple hash function for demonstration purposes
-    unordered_multimap_entry *entry = (unordered_multimap_entry *)el;
+    const unordered_multimap_entry *entry = (const unordered_multimap_entry *)el;
     if (entry == NULL) {
         return 0;
     }
@@ -124,18 +120,16 @@ cs_codes unordered_multimap_add_entry(unordered_multimap *umap, const void *key,
     CS_RETURN_IF(NULL == umap || NULL == key || NULL == value, CS_NULL);
 
     unordered_multimap_entry entry;
-    unordered_multimap_entry_init(*umap, key, value, &entry);
+    unordered_multimap_entry_init(umap, key, value, &entry);
 
-    cs_codes code = hash_table_add_entry(umap->ht, &entry);
-    unordered_multimap_entry_free(&entry);
-    return code;
+    return hash_table_add_entry(umap->ht, &entry);
 }
 
 cs_codes unordered_multimap_remove_entry(unordered_multimap *umap, const void *key) {
     CS_RETURN_IF(NULL == umap || NULL == key, CS_NULL);
 
     unordered_multimap_entry entry;
-    unordered_multimap_entry_init(*umap, key, NULL, &entry);
+    unordered_multimap_entry_init(umap, key, NULL, &entry);
     int rc = hash_table_remove_entry(umap->ht, &entry);
     unordered_multimap_entry_free(&entry);
     return rc;
@@ -145,7 +139,7 @@ void *unordered_multimap_get_entry(unordered_multimap umap, const void *key) {
     CS_RETURN_IF(NULL == umap.ht || NULL == key, NULL);
 
     unordered_multimap_entry entry;
-    unordered_multimap_entry_init(umap, key, NULL, &entry);
+    unordered_multimap_entry_init(&umap, key, NULL, &entry);
     void *res = hash_table_get_entry(*(umap.ht), &entry);
     unordered_multimap_entry_free(&entry);
     if (res) {
@@ -169,7 +163,7 @@ int unordered_multimap_count(unordered_multimap umap, const void *key) {
     CS_RETURN_IF(NULL == umap.ht || NULL == key, 0);
 
     unordered_multimap_entry entry;
-    unordered_multimap_entry_init(umap, key, NULL, &entry);
+    unordered_multimap_entry_init(&umap, key, NULL, &entry);
     int count = hash_table_count(*(umap.ht), &entry);
     unordered_multimap_entry_free(&entry);
     return count;
