@@ -1487,6 +1487,597 @@ test_res test_stack_clear_and_reuse() {
 }
 
 /******************************************************************************/
+/*                          TEST STRUCT TESTS                                 */
+/******************************************************************************/
+
+test_res test_stack_struct_basic() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    test_struct ts = create_test_struct(1, "TestStack", 10.5);
+    rc = stack_push(&s, &ts);
+    free_test_struct(&ts);
+
+    if (rc != CS_SUCCESS) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to push struct",
+            .return_code = rc
+        };
+    }
+
+    if (stack_size(&s) != 1) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Size should be 1",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_multiple() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    for (int i = 0; i < 100; i++) {
+        test_struct ts = create_test_struct(i, "MultiTest", (double)i * 1.5);
+        rc = stack_push(&s, &ts);
+        free_test_struct(&ts);
+
+        if (rc != CS_SUCCESS) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "Failed to push struct",
+                .return_code = rc
+            };
+        }
+    }
+
+    if (stack_size(&s) != 100) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Size should be 100",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_top() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    for (int i = 0; i < 10; i++) {
+        test_struct ts = create_test_struct(i, "TopTest", (double)i);
+        stack_push(&s, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Top should be id=9 (last pushed)
+    test_struct *top = (test_struct *)stack_top(&s);
+    if (top == NULL || top->id != 9) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Top should have id=9",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_lifo_order() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    // Push structs with increasing IDs
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "LIFOTest", (double)i);
+        stack_push(&s, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Pop and verify LIFO order (should be 49, 48, 47, ...)
+    for (int i = 49; i >= 0; i--) {
+        test_struct *top = (test_struct *)stack_top(&s);
+        if (top == NULL || top->id != i) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "LIFO order violated with struct",
+                .return_code = CS_UNKNOWN
+            };
+        }
+        stack_pop(&s);
+    }
+
+    if (!stack_empty(&s)) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Stack should be empty after popping all",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_simple() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    // Test with simple structs (no nested allocations)
+    for (int i = 0; i < 100; i++) {
+        test_struct ts = create_test_struct_simple(i);
+        rc = stack_push(&s, &ts);
+        free_test_struct(&ts);
+
+        if (rc != CS_SUCCESS) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "Failed to push simple struct",
+                .return_code = rc
+            };
+        }
+    }
+
+    // Verify LIFO order with simple structs
+    for (int i = 99; i >= 50; i--) {
+        test_struct *top = (test_struct *)stack_top(&s);
+        if (top == NULL || top->id != i) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "LIFO order violated with simple struct",
+                .return_code = CS_UNKNOWN
+            };
+        }
+        stack_pop(&s);
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_deque_container() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_DEQUE, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize deque stack",
+            .return_code = rc
+        };
+    }
+
+    // Push complex structs
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "DequeTest", (double)i * 2.5);
+        rc = stack_push(&s, &ts);
+        free_test_struct(&ts);
+
+        if (rc != CS_SUCCESS) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "Failed to push struct to deque stack",
+                .return_code = rc
+            };
+        }
+    }
+
+    // Verify LIFO order
+    for (int i = 49; i >= 0; i--) {
+        test_struct *top = (test_struct *)stack_top(&s);
+        if (top == NULL || top->id != i) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "LIFO order violated in deque stack",
+                .return_code = CS_UNKNOWN
+            };
+        }
+        stack_pop(&s);
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_list_container() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_LIST, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize list stack",
+            .return_code = rc
+        };
+    }
+
+    // Push complex structs
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "ListTest", (double)i * 2.5);
+        rc = stack_push(&s, &ts);
+        free_test_struct(&ts);
+
+        if (rc != CS_SUCCESS) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "Failed to push struct to list stack",
+                .return_code = rc
+            };
+        }
+    }
+
+    // Verify LIFO order
+    for (int i = 49; i >= 0; i--) {
+        test_struct *top = (test_struct *)stack_top(&s);
+        if (top == NULL || top->id != i) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "LIFO order violated in list stack",
+                .return_code = CS_UNKNOWN
+            };
+        }
+        stack_pop(&s);
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_clear() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    // Push complex structs
+    for (int i = 0; i < 50; i++) {
+        test_struct ts = create_test_struct(i, "ClearTest", (double)i);
+        stack_push(&s, &ts);
+        free_test_struct(&ts);
+    }
+
+    // Clear should free all struct memory
+    stack_clear(&s);
+
+    if (!stack_empty(&s)) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Stack should be empty after clear",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    // Push again to verify clear worked
+    for (int i = 100; i < 150; i++) {
+        test_struct ts = create_test_struct(i, "AfterClear", (double)i);
+        rc = stack_push(&s, &ts);
+        free_test_struct(&ts);
+
+        if (rc != CS_SUCCESS) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "Failed to push after clear",
+                .return_code = rc
+            };
+        }
+    }
+
+    // Verify top is id=149
+    test_struct *top = (test_struct *)stack_top(&s);
+    if (top == NULL || top->id != 149) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Top should have id=149 after clear and reuse",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_deep_copy_verify() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    // Create a complex struct
+    test_struct ts = create_test_struct(42, "DeepCopyTest", 99.99);
+    char *original_name = ts.name;
+
+    stack_push(&s, &ts);
+
+    // The stack should have deep copied the struct
+    test_struct *stacked = (test_struct *)stack_top(&s);
+    if (stacked == NULL) {
+        free_test_struct(&ts);
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Top returned NULL",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    // The name pointers should be different (deep copy)
+    if (stacked->name == original_name) {
+        free_test_struct(&ts);
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Name was not deep copied",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    // But the values should be equal
+    if (stacked->id != 42 || strcmp(stacked->name, "DeepCopyTest") != 0) {
+        free_test_struct(&ts);
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Deep copied values don't match",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    free_test_struct(&ts);
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+test_res test_stack_struct_interleaved() {
+    stack_attr_t attr = {
+        .size = sizeof(test_struct),
+        .copy = copy_test_struct,
+        .fr = free_test_struct,
+        .comp = NULL,
+        .print = print_test_struct_compact
+    };
+
+    stack s;
+    cs_codes rc = stack_init(&s, CS_STACK_ARRAY, attr);
+    if (rc != CS_SUCCESS) {
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Failed to initialize",
+            .return_code = rc
+        };
+    }
+
+    int next_push = 0;
+    int expected_top = -1;
+
+    for (int i = 0; i < 50; i++) {
+        // Push 2 structs
+        test_struct ts1 = create_test_struct(next_push++, "Interleaved", 1.0);
+        test_struct ts2 = create_test_struct(next_push++, "Interleaved", 2.0);
+        stack_push(&s, &ts1);
+        stack_push(&s, &ts2);
+        expected_top = next_push - 1;
+        free_test_struct(&ts1);
+        free_test_struct(&ts2);
+
+        // Pop 1 struct and verify it was the last pushed
+        test_struct *top = (test_struct *)stack_top(&s);
+        if (top == NULL || top->id != expected_top) {
+            stack_free(&s);
+            return (test_res){
+                .test_name = (char *)__func__,
+                .reason = "LIFO order violated in interleaved operations",
+                .return_code = CS_UNKNOWN
+            };
+        }
+        stack_pop(&s);
+        expected_top--;
+    }
+
+    // Should have 50 elements remaining
+    if (stack_size(&s) != 50) {
+        stack_free(&s);
+        return (test_res){
+            .test_name = (char *)__func__,
+            .reason = "Size mismatch after interleaved operations",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    stack_free(&s);
+
+    return (test_res){
+        .test_name = (char *)__func__,
+        .reason = NULL,
+        .return_code = CS_SUCCESS
+    };
+}
+
+/******************************************************************************/
 /*                              TEST REGISTRY                                 */
 /******************************************************************************/
 
@@ -1547,4 +2138,16 @@ test stack_tests[] = {
     test_stack_push_pop_cycle,
     test_stack_negative_values,
     test_stack_clear_and_reuse,
+
+    // Struct tests
+    test_stack_struct_basic,
+    test_stack_struct_multiple,
+    test_stack_struct_top,
+    test_stack_struct_lifo_order,
+    test_stack_struct_simple,
+    test_stack_struct_deque_container,
+    test_stack_struct_list_container,
+    test_stack_struct_clear,
+    test_stack_struct_deep_copy_verify,
+    test_stack_struct_interleaved,
 };
