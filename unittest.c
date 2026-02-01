@@ -33,6 +33,7 @@ FILE *__DEBUG_OUT = NULL;
 #include "stack/stack_unittest.h"
 #include "queue/queue_unittest.h"
 #include "priority_queue/priority_queue_unittest.h"
+#include "flat_set/flat_set_unittest.h"
 
 // ============================================================================
 // Module registry - list all modules to test
@@ -70,6 +71,7 @@ static module_tests all_modules[] = {
     { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
     { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
     { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
+    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
