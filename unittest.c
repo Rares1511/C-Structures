@@ -46,8 +46,8 @@ static module_tests all_modules[] = {
     // // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test) },
-    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
-    // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
+    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
+    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);

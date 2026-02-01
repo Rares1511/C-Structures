@@ -14,10 +14,11 @@ typedef struct multiset {
 
 /*!
  * Initialize a multiset structure
+ * @param[in] ms Pointer to the multiset structure to initialize
  * @param[in] attr Attributes of the multiset element datatype
- * @return Pointer to the initialized multiset structure, or NULL on failure
+ * @return CS_SUCCESS on success, or an error code on failure
  */
-multiset *multiset_init(multiset_attr_t attr);
+cs_codes multiset_init(multiset *ms, multiset_attr_t attr);
 
 /*! 
  * Insert an element into the multiset

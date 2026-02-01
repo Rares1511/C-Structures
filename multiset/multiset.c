@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-
+#pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
@@ -68,11 +68,11 @@ void multiset_node_print(FILE *stream, const void *node) {
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
-multiset *multiset_init(multiset_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
-    multiset *ms = (multiset *)malloc(sizeof(multiset));
-    CS_RETURN_IF(ms == NULL, NULL);
+cs_codes multiset_init(multiset *ms, multiset_attr_t attr) {
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(NULL == ms, CS_NULL);
 
     rbt_attr_t rbt_attr = {
         .comp = multiset_node_comp,
@@ -90,16 +90,15 @@ multiset *multiset_init(multiset_attr_t attr) {
         .comp = NULL
     };
 
-    ms->t = rbt_init(rbt_attr);
-    CS_RETURN_IF(ms->t == NULL, NULL);
-
     ms->el_attr = malloc(sizeof(multiset_attr_t));
     ms->count_attr = malloc(sizeof(multiset_attr_t));
-    CS_RETURN_IF(NULL == ms->el_attr || NULL == ms->count_attr, NULL);
-
+    CS_RETURN_IF(NULL == ms->el_attr || NULL == ms->count_attr, CS_MEM);
     memcpy(ms->el_attr, &attr, sizeof(multiset_attr_t));
     memcpy(ms->count_attr, &count_attr, sizeof(multiset_attr_t));
-    return ms;
+
+    ms->t = malloc(sizeof(rbt));
+    CS_RETURN_IF(NULL == ms->t, CS_MEM);
+    return rbt_init(ms->t, rbt_attr);
 }
 
 cs_codes multiset_insert(multiset *ms, const void *elem) {
@@ -179,5 +178,5 @@ void multiset_free(void *v_ms) {
     rbt_free(ms->t);
     free(ms->el_attr);
     free(ms->count_attr);
-    free(ms);
+    free(ms->t);
 }

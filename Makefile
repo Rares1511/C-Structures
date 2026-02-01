@@ -109,14 +109,14 @@ install: libs install_headers install_libs
 install_headers:
 	@echo "Installing headers to $(PATH_INCLUDEDIR)..."
 	$(MKDIR_P) $(PATH_INCLUDEDIR)
-	cp $(LOCAL_INCLUDEDIR)/universal.h $(PATH_INCLUDEDIR)
+	cp $(LOCAL_INCLUDEDIR)/cs/universal.h $(PATH_INCLUDEDIR)
 	@for h in $(INSTALL_LIBS); do \
-	    if [ -f $(LOCAL_INCLUDEDIR)/$$h.h ]; then \
-	        cp $(LOCAL_INCLUDEDIR)/$$h.h $(PATH_INCLUDEDIR); \
+	    if [ -f $(LOCAL_INCLUDEDIR)/cs/$$h.h ]; then \
+	        cp $(LOCAL_INCLUDEDIR)/cs/$$h.h $(PATH_INCLUDEDIR); \
 	    fi \
 	done
-	cp $(LOCAL_INCLUDEDIR)/rbt.h $(PATH_INCLUDEDIR)
-	cp $(LOCAL_INCLUDEDIR)/hash_table.h $(PATH_INCLUDEDIR)
+	cp $(LOCAL_INCLUDEDIR)/cs/rbt.h $(PATH_INCLUDEDIR)
+	cp $(LOCAL_INCLUDEDIR)/cs/hash_table.h $(PATH_INCLUDEDIR)
 
 install_libs:
 	@echo "Installing libraries to $(LIBDIR)..."

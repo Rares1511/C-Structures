@@ -18,9 +18,10 @@ typedef struct multimap {
  * Initialize a multimap structure
  * @param[in] key_attr Attributes of the key datatype
  * @param[in] value_attr Attributes of the value datatype
- * @return Pointer to the initialized multimap structure, or NULL on failure
+ * @param[out] mm Pointer to the multimap to initialize
+ * @return CS_SUCCESS on success, or an error code on failure
  */
-multimap *multimap_init(multimap_attr_t key_attr,
+cs_codes multimap_init(multimap *mm, multimap_attr_t key_attr,
                            multimap_attr_t value_attr);
 
 /*!
