@@ -47,7 +47,7 @@ endif
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
            unordered_map stack multiset multimap unordered_multiset \
-           unordered_multimap queue priority_queue flat_set
+           unordered_multimap queue priority_queue flat_set large_number
 
 INSTALL_LIBS := $(SUBDIRS)
 
@@ -152,15 +152,17 @@ unittest: unittest-log-init libs
 	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) -lcargs $(LDLIBS)
 	
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
-	if [ "$(memcheck)" = "true" ]; then \
-	  if [ "$(debug)" = "true" ]; then \
-	    valgrind --leak-check=full ./unittest_bin $(ARGS) >> $(UNITTEST_LOG) 2>&1 ; \
+	for module in $(SUBDIRS); do \
+	  if [ "$(memcheck)" = "true" ]; then \
+	    if [ "$(debug)" = "true" ]; then \
+	      valgrind --leak-check=full ./unittest_bin $(ARGS) --module $$module >> $(UNITTEST_LOG) 2>&1 ; \
+	    else \
+	      valgrind --leak-check=full ./unittest_bin $(ARGS) --module $$module 2>&1 ; \
+	    fi \
 	  else \
-	    valgrind --leak-check=full ./unittest_bin $(ARGS) 2>&1 ; \
+	    ./unittest_bin $(ARGS) --module $$module ; \
 	  fi \
-	else \
-	  ./unittest_bin $(ARGS) ; \
-	fi
+	done
 	@$(RM) unittest_bin
 
 # ---------------- Cleanup ----------------

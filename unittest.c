@@ -35,6 +35,9 @@ FILE *__DEBUG_OUT = NULL;
 #include "priority_queue/priority_queue_unittest.h"
 #include "flat_set/flat_set_unittest.h"
 
+// Numeric types
+#include "large_number/large_number_unittest.h"
+
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================
@@ -72,6 +75,9 @@ static module_tests all_modules[] = {
     { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
     { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
     { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
+
+    // Numeric types
+    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -85,6 +91,7 @@ int main(int argc, char **argv) {
     cargs_init(&parser, argc, argv);
     cargs_add_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, NULL);
     cargs_add_arg(&parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
+    cargs_add_arg(&parser, __UNITTEST_MODULE_ARG_NAME, "Module to test (if not specified, all modules are tested)", 0, CARG_TYPE_STRING, NULL);
     cargs_parse(&parser);
 
     const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
@@ -102,6 +109,31 @@ int main(int argc, char **argv) {
 
     seed = *(int*)cargs_get_arg(&parser, __UNITTEST_SEED_ARG_NAME);
     srand(seed);
+
+    const char *module_filter = (const char *)cargs_get_arg(&parser, __UNITTEST_MODULE_ARG_NAME);
+    if (module_filter) {
+        // Filter modules based on the provided module name
+        int found = 0;
+        for (int m = 0; m < num_modules; m++) {
+            if (strcmp(all_modules[m].name, module_filter) == 0) {
+                all_modules[0] = all_modules[m];
+                num_modules = 1;
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            fprintf(__DEBUG_OUT, "Module '%s' not found. Available modules:\n", module_filter);
+            for (int m = 0; m < num_modules; m++) {
+                fprintf(__DEBUG_OUT, "  - %s\n", all_modules[m].name);
+            }
+            if (close_file) {
+                fclose(__DEBUG_OUT);
+            }
+            cargs_free(&parser);
+            return -1;
+        }
+    }
 
     // Calculate total tests
     for (int m = 0; m < num_modules; m++) {
