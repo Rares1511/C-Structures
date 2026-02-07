@@ -1,5 +1,6 @@
 #include <cs/large_number.h>
 #include <unittest.h>
+#include "test_data/large_numbers.h"
 
 // ============================================================================
 // large_number_init - LN_INT tests
@@ -116,11 +117,11 @@ test_res test_large_number_init_char_simple() {
 
 test_res test_large_number_init_char_50_digits() {
     large_number ln;
-    // 50 digit number - way beyond LONG_MAX
-    cs_codes rc = large_number_init(&ln, 10, LN_CHAR, "12345678901234567890123456789012345678901234567890");
+    // 50 digit number - way beyond LONG_MAX (using test_data)
+    cs_codes rc = large_number_init(&ln, 10, LN_CHAR, LARGE_NUM_A_STR);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 50) return (test_res){(char*)__func__, "Size should be 50", CS_UNKNOWN};
+    if (ln.size != LARGE_NUM_A_SIZE) return (test_res){(char*)__func__, "Size should be 50", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -128,12 +129,11 @@ test_res test_large_number_init_char_50_digits() {
 
 test_res test_large_number_init_char_100_digits() {
     large_number ln;
-    // 100 nines
-    cs_codes rc = large_number_init(&ln, 10, LN_CHAR, 
-        "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    // 100 nines (using test_data)
+    cs_codes rc = large_number_init(&ln, 10, LN_CHAR, VERY_LARGE_ALL_NINES_STR);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 100) return (test_res){(char*)__func__, "Size should be 100", CS_UNKNOWN};
+    if (ln.size != VERY_LARGE_ALL_NINES_SIZE) return (test_res){(char*)__func__, "Size should be 100", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -239,10 +239,10 @@ test_res test_large_number_clear_preserves_capacity() {
 test_res test_large_number_add_small() {
     large_number a, b, result, expected;
     
-    // 12345 + 67890 = 80235
-    large_number_init(&a, 10, LN_INT, 12345L);
-    large_number_init(&b, 10, LN_INT, 67890L);
-    large_number_init(&expected, 10, LN_INT, 80235L);
+    // 12345 + 67890 = 80235 (using test_data constants)
+    large_number_init(&a, 10, LN_CHAR, SMALL_NUM_1_STR);
+    large_number_init(&b, 10, LN_CHAR, SMALL_NUM_2_STR);
+    large_number_init(&expected, 10, LN_CHAR, SMALL_SUM_1_2_STR);
     large_number_init(&result, 10, LN_EMPTY);
     
     cs_codes rc = large_number_add(&result, a, b);
@@ -2092,6 +2092,256 @@ test_res test_large_number_switch_base_power_of_two() {
 }
 
 // ============================================================================
+// Tests using test_data/large_numbers.h - Very Large Numbers
+// ============================================================================
+
+test_res test_large_number_add_50_digits() {
+    large_number a, b, result, expected;
+    
+    // large_num_a + large_num_b = large_sum_a_b (50 digit numbers)
+    large_number_init(&a, 10, LN_CHAR, LARGE_NUM_A_STR);
+    large_number_init(&b, 10, LN_CHAR, LARGE_NUM_B_STR);
+    large_number_init(&expected, 10, LN_CHAR, LARGE_SUM_A_B_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != LARGE_SUM_A_B_SIZE) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Result should have 51 digits", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "50-digit addition failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_100_nines_plus_one() {
+    large_number a, b, result, expected;
+    
+    // 100 nines + 1 = 1 followed by 100 zeros
+    large_number_init(&a, 10, LN_CHAR, VERY_LARGE_ALL_NINES_STR);
+    large_number_init(&b, 10, LN_CHAR, ONE_DIGIT_STR);
+    large_number_init(&expected, 10, LN_CHAR, VERY_LARGE_PLUS_ONE_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != VERY_LARGE_PLUS_ONE_SIZE) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Result should have 101 digits", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "100 nines + 1 failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_fibonacci() {
+    large_number fib200, fib201, result, expected;
+    
+    // F(200) + F(201) = F(202)
+    large_number_init(&fib200, 10, LN_CHAR, FIB_200_STR);
+    large_number_init(&fib201, 10, LN_CHAR, FIB_201_STR);
+    large_number_init(&expected, 10, LN_CHAR, FIB_202_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, fib200, fib201);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&fib200);
+        large_number_free(&fib201);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != FIB_202_SIZE) {
+        large_number_free(&fib200);
+        large_number_free(&fib201);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Fibonacci result has wrong size", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&fib200);
+        large_number_free(&fib201);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "F(200) + F(201) != F(202)", CS_ELEM};
+    }
+    
+    large_number_free(&fib200);
+    large_number_free(&fib201);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_alternating_pattern() {
+    large_number a, b, result, expected;
+    
+    // alternating_10 + alternating_90 = alternating_sum
+    large_number_init(&a, 10, LN_CHAR, ALTERNATING_10_STR);
+    large_number_init(&b, 10, LN_CHAR, ALTERNATING_90_STR);
+    large_number_init(&expected, 10, LN_CHAR, ALTERNATING_SUM_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != ALTERNATING_SUM_SIZE) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Alternating sum has wrong size", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Alternating pattern addition failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_power_of_10() {
+    large_number a, b, result, expected;
+    
+    // (10^30 - 1) + 1 = 10^30
+    large_number_init(&a, 10, LN_CHAR, POWER_10_30_MINUS_1_STR);
+    large_number_init(&b, 10, LN_CHAR, ONE_DIGIT_STR);
+    large_number_init(&expected, 10, LN_CHAR, POWER_10_30_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != POWER_10_30_SIZE) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Power of 10 result has wrong size", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(10^30 - 1) + 1 != 10^30", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_long_max_doubled() {
+    large_number a, b, result, expected;
+    
+    // LONG_MAX + LONG_MAX = 18446744073709551614
+    large_number_init(&a, 10, LN_CHAR, LONG_MAX_STR);
+    large_number_init(&b, 10, LN_CHAR, LONG_MAX_2_STR);
+    large_number_init(&expected, 10, LN_CHAR, LONG_MAX_DOUBLED_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (result.size != LONG_MAX_DOUBLED_SIZE) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "LONG_MAX doubled has wrong size", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "LONG_MAX + LONG_MAX mismatch", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
 // Tests registry
 // ============================================================================
 
@@ -2210,4 +2460,12 @@ test large_number_tests[] = {
     test_large_number_switch_base_big_number_to_hex,
     test_large_number_switch_base_big_number_multiple_bases,
     test_large_number_switch_base_power_of_two,
+    
+    // Tests using test_data/large_numbers.h
+    test_large_number_add_50_digits,
+    test_large_number_add_100_nines_plus_one,
+    test_large_number_add_fibonacci,
+    test_large_number_add_alternating_pattern,
+    test_large_number_add_power_of_10,
+    test_large_number_add_long_max_doubled,
 };
