@@ -70,6 +70,14 @@ cs_codes large_number_switch_base(large_number *ln, unsigned int new_base);
 int large_number_comp(const large_number a, const large_number b);
 
 /*!
+ * @brief Checks if two large_number values are equal
+ * @param[in] a First large_number to compare
+ * @param[in] b Second large_number to compare
+ * @return 1 if equal, 0 otherwise
+ */
+int large_number_equal(const large_number a, const large_number b);
+
+/*!
  * @brief Clears the contents of a large_number, resetting its size and sign
  * @param[in,out] ln Pointer to large_number to clear
  */

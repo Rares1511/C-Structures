@@ -3,6 +3,17 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define LN_ENSURE_CAPACITY(ln) \
+    do { \
+        if ((ln)->size >= (ln)->capacity) { \
+            unsigned int *__new_digits = realloc((ln)->digits, sizeof(unsigned int) * (ln)->capacity * 2); \
+            if (NULL == __new_digits) return CS_MEM; \
+            (ln)->digits = __new_digits; \
+            memset((ln)->digits + (ln)->capacity, 0, sizeof(unsigned int) * (ln)->capacity); \
+            (ln)->capacity *= 2; \
+        } \
+    } while (0)
+
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
@@ -10,31 +21,32 @@
 
 
 cs_codes large_number_sub_helper(large_number *out, const large_number big, large_number small) {
-    int i, diff, borrow = 0;
+    int diff, borrow = 0;
     out->sign = big.sign;
     out->base = big.base;
-    for (i = 0; i < small.size; i++) {
-        diff = big.digits[i] - small.digits[i] - borrow;
+    out->size = 0;
+    while (out->size < small.size) {
+        diff = big.digits[out->size] - small.digits[out->size] - borrow;
         if (diff < 0) {
             diff += big.base;
             borrow = 1;
         } else {
             borrow = 0;
         }
-        out->digits[i] = diff;
-        out->size++;
+        LN_ENSURE_CAPACITY(out);
+        out->digits[out->size++] = diff;
     }
 
-    for (; i < big.size; i++) {
-        diff = big.digits[i] - borrow;
+    while (out->size < big.size) {
+        diff = big.digits[out->size] - borrow;
         if (diff < 0) {
             diff += big.base;
             borrow = 1;
         } else {
             borrow = 0;
         }
-        out->digits[i] = diff;
-        out->size++;
+        LN_ENSURE_CAPACITY(out);
+        out->digits[out->size++] = diff;
     }
 
     while (out->size > 0 && out->digits[out->size - 1] == 0) {
@@ -43,7 +55,6 @@ cs_codes large_number_sub_helper(large_number *out, const large_number big, larg
 
     return CS_SUCCESS;
 }
-
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
@@ -67,19 +78,25 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
     switch (type) {
         case LN_CHAR: {
             char *char_digits = va_arg(args, char*);
-            int len = 0;
-            for (; char_digits[len] != '\0'; len++);
+            int len = strlen(char_digits);
+            ln->sign = __POSITIVE_SIGN;
             for (int i = len - 1; i >= 0; i--) {
-                if (ln->size >= ln->capacity) {
-                    unsigned int *new_digits = realloc(ln->digits, sizeof(unsigned int) * ln->capacity * 2);
-                    CS_RETURN_IF(NULL == new_digits, CS_MEM);
-                    ln->digits = new_digits;
-                    memset(ln->digits + ln->capacity, 0, sizeof(unsigned int) * ln->capacity);
-                    ln->capacity *= 2;
+                if (i == 0 && char_digits[i] == '-') {
+                    ln->sign = __NEGATIVE_SIGN;
+                    continue;
                 }
+                if (char_digits[i] < '0' || char_digits[i] > '9') {
+                    va_end(args);
+                    return CS_ELEM;
+                }
+                LN_ENSURE_CAPACITY(ln);
                 ln->digits[ln->size++] = (unsigned int)(char_digits[i] - '0');
             }
-            ln->sign = __POSITIVE_SIGN;
+            ln->base = 10;
+            if (base != 10) {
+                va_end(args);
+                return large_number_switch_base(ln, base);
+            }
             break;
         }
         case LN_INT: {
@@ -90,13 +107,7 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
                 number = -number;
             }
             do {
-                if (ln->size >= ln->capacity) {
-                    unsigned int *new_digits = realloc(ln->digits, sizeof(unsigned int) * ln->capacity * 2);
-                    CS_RETURN_IF(NULL == new_digits, CS_MEM);
-                    ln->digits = new_digits;
-                    memset(ln->digits + ln->capacity, 0, sizeof(unsigned int) * ln->capacity);
-                    ln->capacity *= 2;
-                }
+                LN_ENSURE_CAPACITY(ln);
                 ln->digits[ln->size++] = number % base;
                 number /= base;
             } while (number > 0);
@@ -104,19 +115,16 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
         }
         case LN_NUM: {
             large_number source = va_arg(args, large_number);
-            for (int i = 0; i < source.size; i++) {
-                if (i >= ln->capacity) {
-                    unsigned int *new_digits = realloc(ln->digits, sizeof(unsigned int) * ln->capacity * 2);
-                    CS_RETURN_IF(NULL == new_digits, CS_MEM);
-                    ln->digits = new_digits;
-                    memset(ln->digits + ln->capacity, 0, sizeof(unsigned int) * ln->capacity);
-                    ln->capacity *= 2;
-                }
-                ln->digits[i] = source.digits[i];
+            for ( ; ln->size < source.size; ln->size++) {
+                LN_ENSURE_CAPACITY(ln);
+                ln->digits[ln->size] = source.digits[ln->size];
             }
-            ln->size = source.size;
             ln->sign = source.sign;
             ln->base = source.base;
+            if (ln->base != base) {
+                va_end(args);
+                return large_number_switch_base(ln, base);
+            }
             break;
         }
         case LN_EMPTY: {
@@ -150,13 +158,7 @@ cs_codes large_number_add(large_number *out, const large_number a, const large_n
         carry = sum / a.base;
         sum = sum % a.base;
 
-        if (out->size >= out->capacity) {
-            unsigned int *new_digits = realloc(out->digits, sizeof(unsigned int) * out->capacity * 2);
-            CS_RETURN_IF(NULL == new_digits, CS_MEM);
-            out->digits = new_digits;
-            memset(out->digits + out->capacity, 0, sizeof(unsigned int) * out->capacity);
-            out->capacity *= 2;
-        }
+        LN_ENSURE_CAPACITY(out);
         out->digits[out->size] = sum;
     }
 
@@ -166,13 +168,16 @@ cs_codes large_number_add(large_number *out, const large_number a, const large_n
         carry = sum / a.base;
         sum = sum % a.base;
 
-        if (out->size >= out->capacity) {
-            unsigned int *new_digits = realloc(out->digits, sizeof(unsigned int) * out->capacity * 2);
-            CS_RETURN_IF(NULL == new_digits, CS_MEM);
-            out->digits = new_digits;
-            memset(out->digits + out->capacity, 0, sizeof(unsigned int) * out->capacity);
-            out->capacity *= 2;
-        }
+        LN_ENSURE_CAPACITY(out);
+        out->digits[out->size++] = sum;
+    }
+
+    while (out->size < b.size) {
+        sum = b.digits[out->size] + carry;
+
+        carry = sum / b.base;
+        sum = sum % b.base;
+        LN_ENSURE_CAPACITY(out);
         out->digits[out->size++] = sum;
     }
 
@@ -182,13 +187,7 @@ cs_codes large_number_add(large_number *out, const large_number a, const large_n
         carry = sum / b.base;
         sum = sum % b.base;
 
-        if (out->size >= out->capacity) {
-            unsigned int *new_digits = realloc(out->digits, sizeof(unsigned int) * out->capacity * 2);
-            CS_RETURN_IF(NULL == new_digits, CS_MEM);
-            out->digits = new_digits;
-            memset(out->digits + out->capacity, 0, sizeof(unsigned int) * out->capacity);
-            out->capacity *= 2;
-        }
+        LN_ENSURE_CAPACITY(out);
         out->digits[out->size++] = sum;
     }
 
@@ -197,13 +196,7 @@ cs_codes large_number_add(large_number *out, const large_number a, const large_n
         carry = sum / a.base;
         sum = sum % a.base;
 
-        if (out->size >= out->capacity) {
-            unsigned int *new_digits = realloc(out->digits, sizeof(unsigned int) * out->capacity * 2);
-            CS_RETURN_IF(NULL == new_digits, CS_MEM);
-            out->digits = new_digits;
-            memset(out->digits + out->capacity, 0, sizeof(unsigned int) * out->capacity);
-            out->capacity *= 2;
-        }
+        LN_ENSURE_CAPACITY(out);
         out->digits[out->size++] = sum;
     }
 
@@ -255,13 +248,7 @@ cs_codes large_number_switch_base(large_number *ln, unsigned int new_base) {
             remainder = current % new_base;
         }
 
-        if (result.size >= result.capacity) {
-            unsigned int *new_digits = realloc(result.digits, sizeof(unsigned int) * result.capacity * 2);
-            CS_RETURN_IF(NULL == new_digits, CS_MEM);
-            result.digits = new_digits;
-            memset(result.digits + result.capacity, 0, sizeof(unsigned int) * result.capacity);
-            result.capacity *= 2;
-        }
+        LN_ENSURE_CAPACITY(&result);
         result.digits[result.size++] = remainder;
 
         while (temp.size > 0 && temp.digits[temp.size - 1] == 0) {
@@ -290,6 +277,10 @@ int large_number_comp(const large_number a, const large_number b) {
         }
     }
     return 0;
+}
+
+int large_number_equal(const large_number a, const large_number b) {
+    return large_number_comp(a, b) == 0;
 }
 
 void large_number_clear(large_number *ln) {

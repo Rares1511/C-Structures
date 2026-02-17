@@ -28,5 +28,3 @@ Container Adapters:
 Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented)
-
-Change init back to cs_codes instead of mallocing inside
