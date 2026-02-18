@@ -29,6 +29,7 @@ Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented)
 
-Implement shrink to all data structures
 Move INIT_CAPACITY from universal to the .h of each file to have different module init capacities
+
+Implement shrink to all data structures
 Change *_clear to cs_codes and make it reserve the INIT_CAPACITY of the data structure or CS_SUCCESS if it only initialized nodes like rbt or list

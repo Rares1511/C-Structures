@@ -63,11 +63,11 @@ cs_codes large_number_sub_helper(large_number *out, const large_number big, larg
 
 cs_codes large_number_init(large_number *ln, unsigned int base, large_number_type type, ...) {
     CS_RETURN_IF(NULL == ln, CS_NULL);
-    ln->digits = malloc(sizeof(unsigned int) * INIT_CAPACITY);
+    ln->digits = malloc(sizeof(unsigned int) * LN_INIT_CAPACITY);
     CS_RETURN_IF(NULL == ln->digits, CS_MEM);
-    memset(ln->digits, 0, sizeof(unsigned int) * INIT_CAPACITY);
+    memset(ln->digits, 0, sizeof(unsigned int) * LN_INIT_CAPACITY);
     ln->size = 0;
-    ln->capacity = INIT_CAPACITY;
+    ln->capacity = LN_INIT_CAPACITY;
     ln->sign = __POSITIVE_SIGN;
     ln->base = base;
 

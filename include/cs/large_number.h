@@ -4,6 +4,7 @@
 #include <cs/universal.h>
 #include <stdarg.h>
 
+#define LN_INIT_CAPACITY 32
 #define __POSITIVE_SIGN 1
 #define __NEGATIVE_SIGN -1
 

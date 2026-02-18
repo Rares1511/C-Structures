@@ -4,8 +4,6 @@
 
 #include <stdio.h>
 
-#define INIT_CAPACITY 256
-
 #define SIZE_TH 1000
 
 #define NULL ((void *)0)
