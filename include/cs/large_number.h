@@ -55,6 +55,15 @@ cs_codes large_number_add(large_number *out, const large_number a, const large_n
 cs_codes large_number_sub(large_number *out, const large_number a, const large_number b);
 
 /*!
+ * @brief Multiplies two large_number values and stores the result in out
+ * @param[out] out Pointer to large_number to store the result
+ * @param[in] a First large_number operand
+ * @param[in] b Second large_number operand
+ * @return CS_SUCCESS on success, error code otherwise
+ */
+cs_codes large_number_mul(large_number *out, const large_number a, const large_number b);
+
+/*!
  * @brief Converts a large_number to a different base
  * @param[in,out] ln Pointer to large_number to convert
  * @param[in] new_base The target base to convert to (must be >= 2)

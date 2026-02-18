@@ -2342,6 +2342,763 @@ test_res test_large_number_add_long_max_doubled() {
 }
 
 // ============================================================================
+// large_number_mul tests
+// ============================================================================
+
+test_res test_large_number_mul_basic() {
+    large_number a, b, result, expected;
+    
+    // 12 * 34 = 408
+    large_number_init(&a, 10, LN_INT, 12L);
+    large_number_init(&b, 10, LN_INT, 34L);
+    large_number_init(&expected, 10, LN_INT, 408L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "12 * 34 != 408", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_by_zero() {
+    large_number a, b, result, expected;
+    
+    // 12345 * 0 = 0
+    large_number_init(&a, 10, LN_INT, 12345L);
+    large_number_init(&b, 10, LN_INT, 0L);
+    large_number_init(&expected, 10, LN_INT, 0L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Multiplying by zero should give zero", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_by_one() {
+    large_number a, b, result;
+    
+    // 12345 * 1 = 12345
+    large_number_init(&a, 10, LN_INT, 12345L);
+    large_number_init(&b, 10, LN_INT, 1L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, a) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Multiplying by one should preserve number", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_small() {
+    large_number a, b, result, expected;
+    
+    // 12345 * 67890 = 838102050
+    large_number_init(&a, 10, LN_CHAR, MUL_SMALL_1_STR);
+    large_number_init(&b, 10, LN_CHAR, MUL_SMALL_2_STR);
+    large_number_init(&expected, 10, LN_CHAR, MUL_SMALL_RESULT_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "12345 * 67890 != 838102050", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_999_squared() {
+    large_number a, result, expected;
+    
+    // 999 * 999 = 998001
+    large_number_init(&a, 10, LN_CHAR, MUL_999_STR);
+    large_number_init(&expected, 10, LN_CHAR, MUL_999_RESULT_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, a);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "999 * 999 != 998001", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_commutative() {
+    large_number a, b, result1, result2;
+    
+    // a * b should equal b * a
+    large_number_init(&a, 10, LN_INT, 12345L);
+    large_number_init(&b, 10, LN_INT, 67890L);
+    large_number_init(&result1, 10, LN_EMPTY);
+    large_number_init(&result2, 10, LN_EMPTY);
+    
+    large_number_mul(&result1, a, b);
+    large_number_mul(&result2, b, a);
+    
+    if (large_number_comp(result1, result2) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&result1);
+        large_number_free(&result2);
+        return (test_res){(char*)__func__, "Multiplication not commutative", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&result1);
+    large_number_free(&result2);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_positive_times_negative() {
+    large_number a, b, result;
+    
+    // 100 * (-5) = -500
+    large_number_init(&a, 10, LN_INT, 100L);
+    large_number_init(&b, 10, LN_INT, -5L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (result.sign != __NEGATIVE_SIGN) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Result should be negative", CS_ELEM};
+    }
+    
+    // Check absolute value = 500
+    large_number expected;
+    large_number_init(&expected, 10, LN_INT, 500L);
+    result.sign = __POSITIVE_SIGN; // Temporarily make positive for comparison
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&result);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "100 * 5 != 500", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&result);
+    large_number_free(&expected);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_negative_times_negative() {
+    large_number a, b, result, expected;
+    
+    // (-10) * (-10) = 100
+    large_number_init(&a, 10, LN_INT, -10L);
+    large_number_init(&b, 10, LN_INT, -10L);
+    large_number_init(&expected, 10, LN_INT, 100L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (result.sign != __POSITIVE_SIGN) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Negative * negative should be positive", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(-10) * (-10) != 100", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_power_of_10() {
+    large_number a, b, result, expected;
+    
+    // 12345 * 10000 = 123450000
+    large_number_init(&a, 10, LN_CHAR, MUL_SMALL_1_STR);
+    large_number_init(&b, 10, LN_CHAR, MUL_BY_10000_STR);
+    large_number_init(&expected, 10, LN_CHAR, MUL_12345_BY_10000_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "12345 * 10000 != 123450000", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_large_numbers() {
+    large_number a, two, result, expected;
+    
+    // Large 50-digit number * 2
+    large_number_init(&a, 10, LN_CHAR, LARGE_NUM_A_STR);
+    large_number_init(&two, 10, LN_INT, 2L);
+    large_number_init(&expected, 10, LN_CHAR, MUL_LARGE_A_DOUBLED_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, two);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&two);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&two);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Large * 2 mismatch", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&two);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_power_10_squared() {
+    large_number a, result, expected;
+    
+    // (10^25)^2 = 10^50
+    large_number_init(&a, 10, LN_CHAR, MUL_POWER_10_25_STR);
+    large_number_init(&expected, 10, LN_CHAR, MUL_POWER_10_50_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, a);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (result.size != MUL_POWER_10_50_SIZE) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(10^25)^2 should have 51 digits", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(10^25)^2 != 10^50", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_square_10_20() {
+    large_number a, result, expected;
+    
+    // (10^20)^2 = 10^40
+    large_number_init(&a, 10, LN_CHAR, MUL_SQUARE_10_20_STR);
+    large_number_init(&expected, 10, LN_CHAR, MUL_SQUARE_10_40_STR);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, a);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (result.size != MUL_SQUARE_10_40_SIZE) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(10^20)^2 should have 41 digits", CS_ELEM};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "(10^20)^2 != 10^40", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_null_output() {
+    large_number a, b;
+    large_number_init(&a, 10, LN_INT, 123L);
+    large_number_init(&b, 10, LN_INT, 456L);
+    
+    cs_codes rc = large_number_mul(NULL, a, b);
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    
+    if (rc != CS_NULL) {
+        return (test_res){(char*)__func__, "Expected CS_NULL for NULL output", CS_UNKNOWN};
+    }
+    
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_different_bases() {
+    large_number a, b, result;
+    
+    // Different bases should fail
+    large_number_init(&a, 10, LN_INT, 123L);
+    large_number_init(&b, 16, LN_INT, 123L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&result);
+    
+    if (rc != CS_SIZE) {
+        return (test_res){(char*)__func__, "Expected CS_SIZE for different bases", CS_UNKNOWN};
+    }
+    
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_single_digit() {
+    large_number a, b, result, expected;
+    
+    // 7 * 8 = 56
+    large_number_init(&a, 10, LN_INT, 7L);
+    large_number_init(&b, 10, LN_INT, 8L);
+    large_number_init(&expected, 10, LN_INT, 56L);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "7 * 8 != 56", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_with_carry_chain() {
+    large_number a, b, result, expected;
+    
+    // 99999 * 99999 = 9999800001
+    large_number_init(&a, 10, LN_INT, 99999L);
+    large_number_init(&b, 10, LN_INT, 99999L);
+    large_number_init(&expected, 10, LN_CHAR, "9999800001");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "99999 * 99999 != 9999800001", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_associative() {
+    large_number a, b, c, ab, bc, result1, result2;
+    
+    // (a * b) * c should equal a * (b * c)
+    large_number_init(&a, 10, LN_INT, 12L);
+    large_number_init(&b, 10, LN_INT, 34L);
+    large_number_init(&c, 10, LN_INT, 56L);
+    large_number_init(&ab, 10, LN_EMPTY);
+    large_number_init(&bc, 10, LN_EMPTY);
+    large_number_init(&result1, 10, LN_EMPTY);
+    large_number_init(&result2, 10, LN_EMPTY);
+    
+    large_number_mul(&ab, a, b);       // ab = 12 * 34 = 408
+    large_number_mul(&result1, ab, c); // result1 = 408 * 56 = 22848
+    
+    large_number_mul(&bc, b, c);       // bc = 34 * 56 = 1904
+    large_number_mul(&result2, a, bc); // result2 = 12 * 1904 = 22848
+    
+    if (large_number_comp(result1, result2) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&c);
+        large_number_free(&ab);
+        large_number_free(&bc);
+        large_number_free(&result1);
+        large_number_free(&result2);
+        return (test_res){(char*)__func__, "Multiplication not associative", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&c);
+    large_number_free(&ab);
+    large_number_free(&bc);
+    large_number_free(&result1);
+    large_number_free(&result2);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_distributive() {
+    large_number a, b, c, sum_bc, mul_a_sum, mul_ab, mul_ac, sum_products;
+    
+    // a * (b + c) should equal (a * b) + (a * c)
+    large_number_init(&a, 10, LN_INT, 5L);
+    large_number_init(&b, 10, LN_INT, 7L);
+    large_number_init(&c, 10, LN_INT, 3L);
+    large_number_init(&sum_bc, 10, LN_EMPTY);
+    large_number_init(&mul_a_sum, 10, LN_EMPTY);
+    large_number_init(&mul_ab, 10, LN_EMPTY);
+    large_number_init(&mul_ac, 10, LN_EMPTY);
+    large_number_init(&sum_products, 10, LN_EMPTY);
+    
+    // Left side: a * (b + c)
+    large_number_add(&sum_bc, b, c);      // b + c = 10
+    large_number_mul(&mul_a_sum, a, sum_bc); // 5 * 10 = 50
+    
+    // Right side: (a * b) + (a * c)
+    large_number_mul(&mul_ab, a, b);      // 5 * 7 = 35
+    large_number_mul(&mul_ac, a, c);      // 5 * 3 = 15
+    large_number_add(&sum_products, mul_ab, mul_ac); // 35 + 15 = 50
+    
+    if (large_number_comp(mul_a_sum, sum_products) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&c);
+        large_number_free(&sum_bc);
+        large_number_free(&mul_a_sum);
+        large_number_free(&mul_ab);
+        large_number_free(&mul_ac);
+        large_number_free(&sum_products);
+        return (test_res){(char*)__func__, "Distributive property failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&c);
+    large_number_free(&sum_bc);
+    large_number_free(&mul_a_sum);
+    large_number_free(&mul_ab);
+    large_number_free(&mul_ac);
+    large_number_free(&sum_products);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_base2() {
+    large_number a, b, result, expected;
+    
+    // Binary: 1010 (10) * 11 (3) = 11110 (30)
+    large_number_init(&a, 2, LN_INT, 10L);  // 1010 in binary
+    large_number_init(&b, 2, LN_INT, 3L);   // 11 in binary
+    large_number_init(&expected, 2, LN_INT, 30L); // 11110 in binary
+    large_number_init(&result, 2, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Binary multiplication failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_base16() {
+    large_number a, b, result, expected;
+    
+    // Hex: FF (255) * 2 = 1FE (510)
+    large_number_init(&a, 16, LN_INT, 255L);
+    large_number_init(&b, 16, LN_INT, 2L);
+    large_number_init(&expected, 16, LN_INT, 510L);
+    large_number_init(&result, 16, LN_EMPTY);
+    
+    cs_codes rc = large_number_mul(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Mul returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "Hex multiplication failed", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_factorial_10() {
+    large_number result, one, temp, expected;
+    
+    // Compute 10! = 3628800
+    large_number_init(&result, 10, LN_INT, 1L);
+    large_number_init(&temp, 10, LN_EMPTY);
+    large_number_init(&expected, 10, LN_INT, 3628800L);
+    
+    for (int i = 2; i <= 10; i++) {
+        large_number_init(&one, 10, LN_INT, (long)i);
+        large_number_mul(&temp, result, one);
+        large_number_free(&result);
+        large_number_init(&result, 10, LN_NUM, temp);
+        large_number_clear(&temp);
+        large_number_free(&one);
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&result);
+        large_number_free(&temp);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "10! != 3628800", CS_ELEM};
+    }
+    
+    large_number_free(&result);
+    large_number_free(&temp);
+    large_number_free(&expected);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_factorial_20() {
+    large_number result, one, temp, expected;
+    
+    // Compute 20! = 2432902008176640000
+    large_number_init(&result, 10, LN_INT, 1L);
+    large_number_init(&temp, 10, LN_EMPTY);
+    large_number_init(&expected, 10, LN_CHAR, FACTORIAL_20_STR);
+    
+    for (int i = 2; i <= 20; i++) {
+        large_number_init(&one, 10, LN_INT, (long)i);
+        large_number_mul(&temp, result, one);
+        large_number_free(&result);
+        large_number_init(&result, 10, LN_NUM, temp);
+        large_number_clear(&temp);
+        large_number_free(&one);
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&result);
+        large_number_free(&temp);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "20! mismatch", CS_ELEM};
+    }
+    
+    large_number_free(&result);
+    large_number_free(&temp);
+    large_number_free(&expected);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_mul_repeated_doubling() {
+    large_number num, two, temp;
+    
+    // Start with 1, double 10 times: should get 1024
+    large_number_init(&num, 10, LN_INT, 1L);
+    large_number_init(&two, 10, LN_INT, 2L);
+    large_number_init(&temp, 10, LN_EMPTY);
+    
+    for (int i = 0; i < 10; i++) {
+        large_number_mul(&temp, num, two);
+        large_number_free(&num);
+        large_number_init(&num, 10, LN_NUM, temp);
+        large_number_clear(&temp);
+    }
+    
+    large_number expected;
+    large_number_init(&expected, 10, LN_INT, 1024L);
+    
+    if (large_number_comp(num, expected) != 0) {
+        large_number_free(&num);
+        large_number_free(&two);
+        large_number_free(&temp);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "2^10 != 1024", CS_ELEM};
+    }
+    
+    large_number_free(&num);
+    large_number_free(&two);
+    large_number_free(&temp);
+    large_number_free(&expected);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
 // Tests registry
 // ============================================================================
 
@@ -2468,4 +3225,41 @@ test large_number_tests[] = {
     test_large_number_add_alternating_pattern,
     test_large_number_add_power_of_10,
     test_large_number_add_long_max_doubled,
+    
+    // Mul - Basic tests
+    test_large_number_mul_basic,
+    test_large_number_mul_by_zero,
+    test_large_number_mul_by_one,
+    test_large_number_mul_small,
+    test_large_number_mul_999_squared,
+    test_large_number_mul_single_digit,
+    test_large_number_mul_with_carry_chain,
+    
+    // Mul - Mathematical properties
+    test_large_number_mul_commutative,
+    test_large_number_mul_associative,
+    test_large_number_mul_distributive,
+    
+    // Mul - Sign handling
+    test_large_number_mul_positive_times_negative,
+    test_large_number_mul_negative_times_negative,
+    
+    // Mul - Large numbers
+    test_large_number_mul_power_of_10,
+    test_large_number_mul_large_numbers,
+    test_large_number_mul_power_10_squared,
+    test_large_number_mul_square_10_20,
+    
+    // Mul - Different bases
+    test_large_number_mul_base2,
+    test_large_number_mul_base16,
+    
+    // Mul - Edge cases
+    test_large_number_mul_null_output,
+    test_large_number_mul_different_bases,
+    
+    // Mul - Stress tests
+    test_large_number_mul_factorial_10,
+    test_large_number_mul_factorial_20,
+    test_large_number_mul_repeated_doubling,
 };

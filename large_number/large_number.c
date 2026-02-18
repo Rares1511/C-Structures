@@ -227,6 +227,55 @@ cs_codes large_number_sub(large_number *out, const large_number a, const large_n
     return CS_SUCCESS;
 }
 
+cs_codes large_number_mul(large_number *out, const large_number a, const large_number b) {
+    CS_RETURN_IF(NULL == out, CS_NULL);
+    CS_RETURN_IF(a.base != b.base, CS_SIZE);
+
+    unsigned int carry;
+    unsigned long long product;
+    int i, j;
+
+    large_number_clear(out);
+    out->sign = a.sign * b.sign;
+    out->base = a.base;
+    out->size = 0;
+
+    for (i = 0; i < a.size; i++) {
+        carry = 0;
+        for (j = 0; j < b.size; j++) {
+            if (i + j >= out->size) {
+                out->size = i + j + 1;
+            }
+            if (i + j >= out->capacity) {
+                LN_ENSURE_CAPACITY(out);
+            }
+            product = (unsigned long long)a.digits[i] * b.digits[j] + carry;
+            if (i + j < out->size) {
+                product += out->digits[i + j];
+            }
+            out->digits[i + j] = (unsigned int)(product % a.base);
+            carry = (unsigned int)(product / a.base);
+        }
+        if (carry > 0) {
+            if (i + j >= out->size) {
+                out->size = i + j + 1;
+            }
+            if (i + j >= out->capacity) {
+                LN_ENSURE_CAPACITY(out);
+            }
+            out->digits[i + j] = carry;
+        }
+    }
+    while (out->size > 0 && out->digits[out->size - 1] == 0) {
+        out->size--;
+    }
+    if (out->size == 0) {
+        out->sign = __POSITIVE_SIGN;
+        out->size = 1;
+    }
+    return CS_SUCCESS;
+}
+
 cs_codes large_number_switch_base(large_number *ln, unsigned int new_base) {
     CS_RETURN_IF(NULL == ln, CS_NULL);
     CS_RETURN_IF(new_base < 2, CS_SIZE);
