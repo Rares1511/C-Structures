@@ -10,6 +10,7 @@ typedef struct multiset {
     rbt *t;               /*!< red black tree containing the multiset data */
     multiset_attr_t* el_attr; /*!< attributes of the multiset elements */
     multiset_attr_t* count_attr; /*!< attributes of the count elements */
+    int size;             /*!< number of unique elements in the multiset */
 } multiset;
 
 /*!
@@ -45,10 +46,31 @@ cs_codes multiset_delete(multiset *ms, const void *elem);
 int multiset_count(multiset *ms, const void *elem);
 
 /*! 
+ * Check if the multiset is empty
+ * @param[in] ms Pointer to the multiset
+ * @return 1 if the multiset is empty, 0 otherwise
+ */
+static inline int multiset_empty(multiset ms) { return ms.size == 0; }
+
+/*! 
+ * Get the number of unique elements in the multiset
+ * @param[in] ms Pointer to the multiset
+ * @return Number of unique elements in the multiset
+ */
+static inline int multiset_size(multiset ms) { return ms.size; }
+
+/*! 
  * Clear all entries from the multiset
  * @param[in,out] ms Pointer to the multiset
  */
 void multiset_clear(multiset *ms);
+
+/*! 
+ * Swap the contents of two multisets
+ * @param[in,out] ms1 Pointer to the first multiset
+ * @param[in,out] ms2 Pointer to the second multiset
+ */
+void multiset_swap(multiset *ms1, multiset *ms2);
 
 /*! 
  * Print the contents of the multiset

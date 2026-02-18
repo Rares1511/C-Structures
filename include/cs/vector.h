@@ -3,13 +3,17 @@
 
 #include <cs/universal.h>
 
+#define VECTOR_SHRINK_FACTOR 4
+#define VECTOR_INIT_CAPACITY 1024
+
 typedef univ_attr_t vector_attr_t;
 
 typedef struct vector {
-    void *vec;          /*!< size of the datatype */
-    int cap;            /*!< current maximum capacity of the vector */
-    metadata_t *meta;   /*!< metadata of the vector */
-    vector_attr_t attr; /*!< attributes of the elements inside the vector */
+    void *vec;            /*!< size of the datatype */
+    int cap;              /*!< current maximum capacity of the vector */
+    int size;             /*!< current size of the vector */
+    int shrink_factor;    /*!< threshold for shrinking the vector */
+    vector_attr_t attr;   /*!< attributes of the elements inside the vector */
 } vector;
 
 #define VECTOR_SIZE sizeof(vector)
@@ -19,14 +23,14 @@ typedef struct vector {
  * @param[in] vec  The vector to be checked
  * @return 1 if the vector is empty, 0 otherwise
  */
-static inline int vector_empty(vector vec) { return vec.meta->size == 0; };
+static inline int vector_empty(vector vec) { return vec.size == 0; };
 
 /*!
  * Returns the current size of the vector
  * @param[in] vec  The vector whose size will be returned
  * @return The size of the vector
  */
-static inline int vector_size(vector vec) { return vec.meta->size; };
+static inline int vector_size(vector vec) { return vec.size; };
 
 /*!
  * Initializes the given variable with the correct vector structure datatype

@@ -54,24 +54,6 @@ typedef struct univ_attr_t {
     comparer comp; /*!< compare function for the datatype */
 } univ_attr_t;
 
-typedef struct metadata_t {
-    int size;    /*!< number of elements in the structure */
-} metadata_t;
-
-/*!
- * Increases the size stored in the metadata by the given increment
- * @param[in,out] meta  Metadata whose size will be increased
- * @param[in]     inc   The increment value (can be negative to decrease size)
- */
-static inline void metadata_size_inc(metadata_t *meta, int inc) { meta->size += inc; }
-
-/*!
- * Initializes the metadata structure
- * @param[out] meta     Metadata structure to be initialized
- * @param[in]  is_init  Flag to indicate if the structure is initialized
- */
-static inline void metadata_init(metadata_t *meta) { meta->size = 0; }
-
 /*!
  * A simple universal hash function for byte arrays.
  * @param[in] data Pointer to the data to hash.

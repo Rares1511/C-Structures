@@ -90,6 +90,7 @@ cs_codes multiset_init(multiset *ms, multiset_attr_t attr) {
         .comp = NULL
     };
 
+    ms->size = 0;
     ms->el_attr = malloc(sizeof(multiset_attr_t));
     ms->count_attr = malloc(sizeof(multiset_attr_t));
     CS_RETURN_IF(NULL == ms->el_attr || NULL == ms->count_attr, CS_MEM);
@@ -104,7 +105,7 @@ cs_codes multiset_init(multiset *ms, multiset_attr_t attr) {
 cs_codes multiset_insert(multiset *ms, const void *elem) {
     CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
     pair data;
-    int inital_count = 1;
+    int inital_count = 1, rc;
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, &inital_count);
 
@@ -114,11 +115,17 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
         pair *p = (pair *)node;
         int *count = (int *)(p->second);
         (*count)++;
-        return CS_SUCCESS;
+        rc = CS_SUCCESS;
     }
     else {
-        return rbt_insert(ms->t, &data);
+        rc = rbt_insert(ms->t, &data);
     }
+
+    if (rc == CS_SUCCESS) {
+        ms->size++;
+    }
+
+    return rc;
 }
 
 cs_codes multiset_delete(multiset *ms, const void *elem) {
@@ -142,6 +149,11 @@ cs_codes multiset_delete(multiset *ms, const void *elem) {
         rc = CS_ELEM;
     }
     pair_free(&data);
+
+    if (rc == CS_SUCCESS) {
+        ms->size--;
+    }
+
     return rc;
 }
 
@@ -164,6 +176,24 @@ int multiset_count(multiset *ms, const void *elem) {
 void multiset_clear(multiset *ms) {
     CS_RETURN_IF(ms == NULL);
     rbt_clear(ms->t);
+}
+
+void multiset_swap(multiset *ms1, multiset *ms2) {
+    CS_RETURN_IF(ms1 == NULL || ms2 == NULL);
+    multiset_attr_t* temp_el_attr = ms1->el_attr;
+    multiset_attr_t* temp_count_attr = ms1->count_attr;
+    rbt *temp_t = ms1->t;
+    int temp_size = ms1->size;
+
+    ms1->el_attr = ms2->el_attr;
+    ms1->count_attr = ms2->count_attr;
+    ms1->size = ms2->size;
+    ms1->t = ms2->t;
+
+    ms2->el_attr = temp_el_attr;
+    ms2->count_attr = temp_count_attr;
+    ms2->size = temp_size;
+    ms2->t = temp_t;
 }
 
 void multiset_print(FILE *stream, void *v_ms) {

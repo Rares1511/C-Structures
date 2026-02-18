@@ -12,8 +12,8 @@ typedef struct list_node {
 } list_node;
 
 typedef struct list {
+    int size;         /*!< size of the list */
     list_node *front; /*!< front element of the list */
-    metadata_t *meta; /*!< metadata for the list */
     list_attr_t attr; /*!< attributes for the datatype inside the list */
 } list;
 
@@ -68,13 +68,13 @@ cs_codes list_erase(list *l, int pos);
  * @param[in] l  List that will be checked
  * @return 1 if the list is empty, 0 otherwise 
  */
-static inline int list_empty(list l) { return l.meta->size == 0; }
+static inline int list_empty(list l) { return l.size == 0; }
 
 /*!
  * Returns the number of elements in the list
  * @param[in] l  List whose size will be returned
  */
-static inline int list_size(list l) { return l.meta->size; }
+static inline int list_size(list l) { return l.size; }
 
 /*!
  * Gives a pointer to the information the front element in the list holds

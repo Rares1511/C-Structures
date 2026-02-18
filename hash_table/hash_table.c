@@ -39,16 +39,11 @@ cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t has
     CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
 
     ht->cap = initial_capacity;
-    ht->meta = (metadata_t *)malloc(sizeof(metadata_t));
-    CS_RETURN_IF(NULL == ht->meta, CS_NULL);
-    metadata_init(ht->meta);
+    ht->size = 0;
     ht->attr = attr;
     ht->hash = hash;
     ht->buckets = malloc(sizeof(vector**) * initial_capacity);
-    if (ht->buckets == NULL) {
-        free(ht->meta);
-        return CS_NULL;
-    }
+    CS_RETURN_IF(NULL == ht->buckets, CS_MEM);
     for (int i = 0; i < initial_capacity; i++) {
         ht->buckets[i] = NULL;
     }
@@ -70,7 +65,7 @@ cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
 
     rc = vector_push_back(ht->buckets[idx], el);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
-    metadata_size_inc(ht->meta, 1);
+    ht->size++;
     return CS_SUCCESS;
 }
 
@@ -85,7 +80,7 @@ cs_codes hash_table_remove_entry(hash_table *ht, const void *el) {
     CS_RETURN_IF(bucket_idx == -1, CS_ELEM);
     int rc = vector_erase(bucket, bucket_idx);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
-    metadata_size_inc(ht->meta, -1);
+    ht->size--;
     return CS_SUCCESS;
 }
 
@@ -116,19 +111,19 @@ void hash_table_swap(hash_table *ht1, hash_table *ht2) {
 
     hash_table_attr_t attr = ht1->attr;
     int cap = ht1->cap;
-    metadata_t *meta = ht1->meta;
+    int size = ht1->size;
     vector **buckets = ht1->buckets;
     hash_func_t hash = ht1->hash;
 
     ht1->attr = ht2->attr;
     ht1->cap = ht2->cap;
-    ht1->meta = ht2->meta;
+    ht1->size = ht2->size;
     ht1->buckets = ht2->buckets;
     ht1->hash = ht2->hash;
 
     ht2->attr = attr;
     ht2->cap = cap;
-    ht2->meta = meta;
+    ht2->size = size;
     ht2->buckets = buckets;
     ht2->hash = hash;
 }
@@ -143,7 +138,7 @@ void hash_table_clear(hash_table *ht) {
             ht->buckets[i] = NULL;
         }
     }
-    metadata_size_inc(ht->meta, -hash_table_size(*ht));
+    ht->size = 0;
 }
 
 void hash_table_print(FILE *stream, void *v_ht) {
@@ -169,5 +164,4 @@ void hash_table_free(void *v_ht) {
         }
     }
     free(ht->buckets);
-    free(ht->meta);
 }

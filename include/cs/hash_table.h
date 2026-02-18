@@ -10,7 +10,7 @@ typedef size_t (*hash_func_t)(const void *key);
 
 typedef struct hash_table {
     int cap;
-    metadata_t *meta;
+    int size;
     hash_table_attr_t attr;
     hash_func_t hash;
     vector **buckets;
@@ -21,8 +21,8 @@ cs_codes hash_table_add_entry(hash_table *ht, const void *el);
 cs_codes hash_table_remove_entry(hash_table *ht, const void *el);
 void *hash_table_get_entry(hash_table ht, const void *el);
 int hash_table_count(hash_table ht, const void *el);
-static inline int hash_table_empty(hash_table ht) { return ht.meta->size == 0; };
-static inline int hash_table_size(hash_table ht) { return ht.meta->size; };
+static inline int hash_table_empty(hash_table ht) { return ht.size == 0; };
+static inline int hash_table_size(hash_table ht) { return ht.size; };
 void hash_table_swap(hash_table *ht1, hash_table *ht2);
 void hash_table_clear(hash_table *ht);
 void hash_table_print(FILE *stream, void *v_ht);

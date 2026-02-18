@@ -162,7 +162,6 @@ cs_codes rbt_insert_standard(rbt *t, rbt_node *new_node) {
         new_node->father = prev;
     }
 
-    metadata_size_inc(t->meta, 1);
     return CS_SUCCESS;
 }
 
@@ -428,7 +427,6 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
     }
 
     rbt_node_free(delete_node, t->attr);
-    metadata_size_inc(t->meta, -1);
 
     if (original_color == __RBT_NODE_BLACK_COLOR) {
         return rbt_delete_fixup(t, x, x_father);
@@ -448,9 +446,7 @@ cs_codes rbt_init(rbt *t, rbt_attr_t attr) {
     CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, CS_SIZE);
 
     t->root = NULL;
-    t->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(t->meta == NULL, CS_MEM);
-    metadata_init(t->meta);
+    t->size = 0;
     t->attr = attr;
 
     return CS_SUCCESS;
@@ -470,7 +466,13 @@ cs_codes rbt_insert(rbt *t, void *data) {
         return rc;
     }
 
-    return rbt_insert_fixup(t, new_node);
+    rc = rbt_insert_fixup(t, new_node);
+    if (rc != CS_SUCCESS) {
+        rbt_node_free(new_node, t->attr);
+        return rc;
+    }
+    t->size++;
+    return CS_SUCCESS;
 }
 
 cs_codes rbt_delete(rbt *t, void *data) {
@@ -479,7 +481,9 @@ cs_codes rbt_delete(rbt *t, void *data) {
 
     CS_RETURN_IF(delete_node == NULL, CS_ELEM);
 
-    return rbt_delete_standard(t, delete_node);
+    int rc = rbt_delete_standard(t, delete_node);
+    t->size--;
+    return rc;
 }
 
 void* rbt_find(rbt t, void *data) {
@@ -493,15 +497,15 @@ void rbt_swap(rbt *t1, rbt *t2) {
     CS_RETURN_IF(t1 == NULL || t2 == NULL);
 
     rbt_node *temp_root = t1->root;
-    metadata_t *temp_meta = t1->meta;
+    int temp_size = t1->size;
     rbt_attr_t temp_attr = t1->attr;
 
     t1->root = t2->root;
-    t1->meta = t2->meta;
+    t1->size = t2->size;
     t1->attr = t2->attr;
 
     t2->root = temp_root;
-    t2->meta = temp_meta;
+    t2->size = temp_size;
     t2->attr = temp_attr;
 }
 
@@ -528,7 +532,7 @@ void rbt_clear(rbt *t) {
         }
     }
 
-    metadata_size_inc(t->meta, -rbt_size(*t));
+    t->size = 0;
     t->root = NULL;
 }
 
@@ -597,5 +601,4 @@ void rbt_free(void *v_t) {
             node = next;
         }
     }
-    free(t->meta);
 }

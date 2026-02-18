@@ -59,9 +59,7 @@ cs_codes forward_list_init(forward_list *list, forward_list_attr_t attr) {
 
     list->head = NULL;
     list->attr = attr;
-    list->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(list->meta == NULL, CS_MEM);
-    metadata_init(list->meta);
+    list->size = 0;
 
     return CS_SUCCESS;
 }
@@ -74,7 +72,7 @@ cs_codes forward_list_push_front(forward_list* list, const void* data) {
 
     new_node->next = list->head;
     list->head = new_node;
-    metadata_size_inc(list->meta, 1);
+    list->size++;
 
     return CS_SUCCESS;
 }
@@ -87,7 +85,7 @@ cs_codes forward_list_pop_front(forward_list* list) {
     list->head = list->head->next;
 
     forward_list_node_free(temp, list->attr.fr);
-    metadata_size_inc(list->meta, -1);
+    list->size--;
 
     return CS_SUCCESS;
 }
@@ -101,15 +99,15 @@ void forward_list_swap(forward_list* list1, forward_list* list2) {
     CS_RETURN_IF(list1 == NULL || list2 == NULL);
 
     forward_list_node* temp_head = list1->head;
-    metadata_t *temp_meta = list1->meta;
+    int temp_size = list1->size;
     forward_list_attr_t temp_attr = list1->attr;
 
     list1->head = list2->head;
-    list1->meta = list2->meta;
+    list1->size = list2->size;
     list1->attr = list2->attr;
 
     list2->head = temp_head;
-    list2->meta = temp_meta;
+    list2->size = temp_size;
     list2->attr = temp_attr;
 }
 
@@ -126,7 +124,7 @@ void forward_list_clear(forward_list* list){
     }
 
     list->head = NULL;
-    metadata_size_inc(list->meta, -forward_list_size(*list));
+    list->size = 0;
 }
 
 void forward_list_print(FILE *stream, const void *v_l) {
@@ -155,5 +153,4 @@ void forward_list_free(void *v_l) {
             current = next_node;
         }
     }
-    free(list->meta);
 }

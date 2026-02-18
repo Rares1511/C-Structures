@@ -84,6 +84,7 @@ cs_codes multimap_init(multimap *mm, multimap_attr_t key_attr,
     memcpy(mm->vec_attr, &vec_attr, sizeof(multimap_attr_t));
 
     mm->t = malloc(sizeof(rbt));
+    mm->size = 0;
     CS_RETURN_IF(NULL == mm->t, CS_MEM);
     return rbt_init(mm->t, rbt_attr);
 }
@@ -100,7 +101,7 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
     if (p != NULL) {
         pair_free(&data);
         vector *vec = (vector *)p->second;
-        return vector_push_back(vec, value);
+        rc = vector_push_back(vec, value);
     }
     else {
         vector vec;
@@ -111,8 +112,14 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
         }
         vector_push_back(&vec, value);
         pair_set(&data, NULL, &vec);
-        return rbt_insert(mm->t, &data);
+        rc = rbt_insert(mm->t, &data);
     }
+
+    if (CS_SUCCESS == rc) {
+        mm->size++;
+    }
+
+    return rc;
 }
 
 cs_codes multimap_delete(multimap *mm, const void *key) {
@@ -136,6 +143,11 @@ cs_codes multimap_delete(multimap *mm, const void *key) {
         rc = CS_ELEM;
     }
     pair_free(&data);
+
+    if (CS_SUCCESS == rc) {
+        mm->size--;
+    }
+
     return rc;
 }
 
@@ -157,6 +169,25 @@ vector* multimap_get(multimap *mm, const void *key) {
 void multimap_clear(multimap *mm) {
     CS_RETURN_IF(mm == NULL);
     rbt_clear(mm->t);
+}
+
+void multimap_swap(multimap *mm1, multimap *mm2) {
+    CS_RETURN_IF(mm1 == NULL || mm2 == NULL);
+    rbt_swap(mm1->t, mm2->t);
+    multimap_attr_t* temp_key_attr = mm1->key_attr;
+    multimap_attr_t* temp_value_attr = mm1->value_attr;
+    multimap_attr_t* temp_vec_attr = mm1->vec_attr;
+    int temp_size = mm1->size;
+
+    mm1->key_attr = mm2->key_attr;
+    mm1->value_attr = mm2->value_attr;
+    mm1->vec_attr = mm2->vec_attr;
+    mm1->size = mm2->size;
+
+    mm2->key_attr = temp_key_attr;
+    mm2->value_attr = temp_value_attr;
+    mm2->vec_attr = temp_vec_attr;
+    mm2->size = temp_size;
 }
 
 void multimap_print(FILE *stream, void *v_mm) {

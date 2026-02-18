@@ -93,15 +93,12 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
                 ln->digits[ln->size++] = (unsigned int)(char_digits[i] - '0');
             }
             ln->base = 10;
-            if (base != 10) {
-                va_end(args);
-                return large_number_switch_base(ln, base);
-            }
             break;
         }
         case LN_INT: {
             long number = va_arg(args, long);
             ln->sign = __POSITIVE_SIGN;
+            ln->base = base;
             if (number < 0) {
                 ln->sign = __NEGATIVE_SIGN;
                 number = -number;
@@ -121,10 +118,6 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
             }
             ln->sign = source.sign;
             ln->base = source.base;
-            if (ln->base != base) {
-                va_end(args);
-                return large_number_switch_base(ln, base);
-            }
             break;
         }
         case LN_EMPTY: {
@@ -134,6 +127,10 @@ cs_codes large_number_init(large_number *ln, unsigned int base, large_number_typ
     }
 
     va_end(args);
+
+    if (ln->base != base) {
+        return large_number_switch_base(ln, base);
+    }
 
     return CS_SUCCESS;
 }

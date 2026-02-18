@@ -2,6 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define VEC_ENSURE_CAPACITY(vec) \
+    do { \
+        if (vector_size(*(vec)) == (vec)->cap) { \
+            void *__new_vec = realloc((vec)->vec, ((vec)->cap + VECTOR_INIT_CAPACITY) * (vec)->attr.size); \
+            if (NULL == __new_vec) return CS_MEM; \
+            (vec)->vec = __new_vec; \
+            (vec)->cap += VECTOR_INIT_CAPACITY; \
+        } else if ((vec)->size < (vec)->cap / (vec)->shrink_factor && (vec)->cap > VECTOR_INIT_CAPACITY) { \
+            int new_cap = (vec)->cap / 2; \
+            if (new_cap < VECTOR_INIT_CAPACITY) new_cap = VECTOR_INIT_CAPACITY; \
+            void *__new_vec = realloc((vec)->vec, new_cap * (vec)->attr.size); \
+            if (NULL == __new_vec) return CS_MEM; \
+            (vec)->vec = __new_vec; \
+            (vec)->cap = new_cap; \
+        } \
+    } while (0)
+
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
@@ -74,13 +91,12 @@ void vector_qsort(void *base, int low, int high, int size) {
 cs_codes vector_init(vector *v, vector_attr_t attr) {
     CS_RETURN_IF(NULL == v, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
-    v->vec = malloc(INIT_CAPACITY * attr.size);
+    v->vec = malloc(VECTOR_INIT_CAPACITY * attr.size);
     CS_RETURN_IF(v->vec == NULL, CS_MEM);
     v->attr = attr;
-    v->cap = INIT_CAPACITY;
-    v->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(v->meta == NULL, CS_MEM);
-    metadata_init(v->meta);
+    v->cap = VECTOR_INIT_CAPACITY;
+    v->size = 0;
+    v->shrink_factor = VECTOR_SHRINK_FACTOR;
     return CS_SUCCESS;
 }
 
@@ -88,11 +104,7 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
     int size = vector_size(*vec);
     CS_RETURN_IF(pos > size || pos < 0, CS_POS);
-    if (size == vec->cap) {
-        vec->vec = realloc(vec->vec, (vec->cap + INIT_CAPACITY) * vec->attr.size);
-        CS_RETURN_IF(!vec->vec, CS_MEM);
-        vec->cap += INIT_CAPACITY;
-    }
+    VEC_ENSURE_CAPACITY(vec);
     if (pos != size) {
         memmove(vec->vec + (pos + 1) * vec->attr.size, vec->vec + pos * vec->attr.size, 
                             (size - pos) * vec->attr.size);     
@@ -101,7 +113,7 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
         vec->attr.copy(vec->vec + vec->attr.size * pos, el);
     else
         memcpy(vec->vec + vec->attr.size * pos, el, vec->attr.size);
-    metadata_size_inc(vec->meta, 1);
+    vec->size++;
     return CS_SUCCESS;
 }
 
@@ -115,7 +127,8 @@ cs_codes vector_erase(vector *vec, int pos) {
     if (pos != size - 1)
         memcpy(vec->vec + vec->attr.size * pos, vec->vec + vec->attr.size * (pos + 1),
                (size - pos - 1) * vec->attr.size);
-    metadata_size_inc(vec->meta, -1);
+    vec->size--;
+    VEC_ENSURE_CAPACITY(vec);
     return CS_SUCCESS;
 }
 
@@ -163,17 +176,17 @@ void vector_swap(vector *v1, vector *v2) {
 
     void *aux = v1->vec;
     vector_attr_t attr = v1->attr;
-    metadata_t *meta = v1->meta;
+    int size = v1->size;
     int cap = v1->cap;
 
     v1->attr = v2->attr;
-    v1->meta = v2->meta;
+    v1->size = v2->size;
     v1->cap = v2->cap;
     v1->vec = v2->vec;
 
     v2->attr = attr;
+    v2->size = size;
     v2->cap = cap;
-    v2->meta = meta;
     v2->vec = aux;
 }
 
@@ -195,7 +208,7 @@ void vector_clear(vector *vec) {
         for (int i = 0; i < size; i++)
             vec->attr.fr(vec->vec + i * vec->attr.size);
     }
-    metadata_size_inc(vec->meta, -size);
+    vec->size = 0;
 }
 
 void vector_print(FILE *stream, const void *v_vec) {
@@ -215,7 +228,6 @@ void vector_free(void *v_vec) {
         for (int i = 0; i < size; i++)
             vec->attr.fr(vec->vec + i * vec->attr.size);
     }
-    metadata_size_inc(vec->meta, -size);
+    vec->size = 0;
     free(vec->vec);
-    free(vec->meta);
 }

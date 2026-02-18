@@ -100,9 +100,7 @@ cs_codes list_init(list *l, list_attr_t attr) {
     CS_RETURN_IF(NULL == l, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     l->attr = attr;
-    l->meta = malloc(sizeof(metadata_t));
-    CS_RETURN_IF(l->meta == NULL, CS_MEM);
-    metadata_init(l->meta);
+    l->size = 0;
     l->front = NULL;
     return CS_SUCCESS;
 }
@@ -118,7 +116,7 @@ cs_codes list_push_front(list *l, const void *el) {
         aux->next = l->front;
     }
     l->front = aux;
-    metadata_size_inc(l->meta, 1);
+    l->size++;
     return CS_SUCCESS;
 }
 
@@ -134,14 +132,14 @@ cs_codes list_push_back(list *l, const void *el) {
     }
     else
         l->front = aux;
-    metadata_size_inc(l->meta, 1);
+    l->size++;
     return CS_SUCCESS;
 }
 
 cs_codes list_pop_front(list *l) {
     CS_RETURN_IF(l == NULL, CS_NULL);
     CS_RETURN_IF(list_empty(*l), CS_EMPTY);
-    metadata_size_inc(l->meta, -1);
+    l->size--;
     if (list_empty(*l)) {
         list_node_free(l->front, l->attr.fr);
         l->front = NULL;
@@ -158,7 +156,7 @@ cs_codes list_pop_front(list *l) {
 cs_codes list_pop_back(list *l) {
     CS_RETURN_IF(l == NULL, CS_NULL);
     CS_RETURN_IF(list_empty(*l), CS_EMPTY);
-    metadata_size_inc(l->meta, -1);
+    l->size--;
     if (list_empty(*l)) {
         list_node_free(l->front, l->attr.fr);
         return CS_SUCCESS;
@@ -186,7 +184,7 @@ cs_codes list_erase(list *l, int pos) {
     current->prev->next = current->next;
     current->next->prev = current->prev;
     list_node_free(current, l->attr.fr);
-    metadata_size_inc(l->meta, -1);
+    l->size--;
     return CS_SUCCESS;
 }
 
@@ -210,15 +208,15 @@ void list_swap(list *l1, list *l2) {
 
     list_attr_t attr = l1->attr;
     list_node *front = l1->front;
-    metadata_t *meta = l1->meta;
+    int size = l1->size;
 
     l1->attr = l2->attr;
     l1->front = l2->front;
-    l1->meta = l2->meta;
+    l1->size = l2->size;
 
     l2->attr = attr;
     l2->front = front;
-    l2->meta = meta;
+    l2->size = size;
 }
 
 void list_clear(list *l) {
@@ -231,7 +229,7 @@ void list_clear(list *l) {
     }
     list_node_free(l->front, l->attr.fr);
     l->front = NULL;
-    metadata_size_inc(l->meta, -l->meta->size);
+    l->size = 0;
 }
 
 void list_print(FILE *stream, void *l_p) {
@@ -258,5 +256,4 @@ void list_free(void *l_p) {
         }
         list_node_free(l->front, l->attr.fr);
     }
-    free(l->meta);
 }

@@ -12,6 +12,7 @@ typedef struct multimap {
     multimap_attr_t* key_attr;
     multimap_attr_t* value_attr;
     multimap_attr_t* vec_attr;
+    int size;
 } multimap;
 
 /*!
@@ -50,10 +51,31 @@ cs_codes multimap_delete(multimap *mm, const void *key);
 vector* multimap_get(multimap *mm, const void *key);
 
 /*!
+ * Check if the multimap is empty
+ * @param[in] mm The multimap to check
+ * @return 1 if the multimap is empty, 0 otherwise
+ */
+static inline int multimap_empty(multimap mm) { return mm.size == 0; }
+
+/*!
+ * Get the number of key-value pairs in the multimap
+ * @param[in] mm Pointer to the multimap
+ * @return The number of key-value pairs in the multimap
+ */
+static inline int multimap_size(multimap mm) { return mm.size; }
+
+/*!
  * Clear all entries from the multimap
  * @param[in,out] mm Pointer to the multimap
  */
 void multimap_clear(multimap *mm);
+
+/*!
+ * Swap the contents of two multimaps
+ * @param[in,out] mm1 Pointer to the first multimap
+ * @param[in,out] mm2 Pointer to the second multimap
+ */
+void multimap_swap(multimap *mm1, multimap *mm2);
 
 /*!
  * Print the contents of the multimap
