@@ -11,12 +11,12 @@ test_res test_large_number_init_int_positive() {
     cs_codes rc = large_number_init(&ln, 10, LN_INT, 12345L);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 5) return (test_res){(char*)__func__, "Size should be 5", CS_UNKNOWN};
+    if (ln.whole_size != 5) return (test_res){(char*)__func__, "Size should be 5", CS_UNKNOWN};
     if (ln.sign != __POSITIVE_SIGN) return (test_res){(char*)__func__, "Sign should be positive", CS_UNKNOWN};
     if (ln.base != 10) return (test_res){(char*)__func__, "Base not set correctly", CS_UNKNOWN};
-    // Check digits: 12345 -> reversed: {5, 4, 3, 2, 1}
-    if (ln.digits[0] != 5 || ln.digits[1] != 4 || ln.digits[2] != 3 || 
-        ln.digits[3] != 2 || ln.digits[4] != 1) {
+    // Check whole_digits: 12345 -> reversed: {5, 4, 3, 2, 1}
+    if (ln.whole_digits[0] != 5 || ln.whole_digits[1] != 4 || ln.whole_digits[2] != 3 || 
+        ln.whole_digits[3] != 2 || ln.whole_digits[4] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch", CS_ELEM};
     }
@@ -31,8 +31,8 @@ test_res test_large_number_init_int_negative() {
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
     if (ln.sign != __NEGATIVE_SIGN) return (test_res){(char*)__func__, "Sign should be negative", CS_UNKNOWN};
-    // Check digits: 9876 -> reversed: {6, 7, 8, 9}
-    if (ln.digits[0] != 6 || ln.digits[1] != 7 || ln.digits[2] != 8 || ln.digits[3] != 9) {
+    // Check whole_digits: 9876 -> reversed: {6, 7, 8, 9}
+    if (ln.whole_digits[0] != 6 || ln.whole_digits[1] != 7 || ln.whole_digits[2] != 8 || ln.whole_digits[3] != 9) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch", CS_ELEM};
     }
@@ -46,7 +46,7 @@ test_res test_large_number_init_int_zero() {
     cs_codes rc = large_number_init(&ln, 10, LN_INT, 0L);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 1) return (test_res){(char*)__func__, "Size should be 1 for zero", CS_UNKNOWN};
+    if (ln.whole_size != 0) return (test_res){(char*)__func__, "Size should be 0 for zero", CS_UNKNOWN};
     if (ln.sign != __POSITIVE_SIGN) return (test_res){(char*)__func__, "Sign should be positive", CS_UNKNOWN};
     
     large_number_free(&ln);
@@ -59,7 +59,7 @@ test_res test_large_number_init_int_large() {
     cs_codes rc = large_number_init(&ln, 10, LN_INT, 9223372036854775807L);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 19) return (test_res){(char*)__func__, "Size should be 19 for LONG_MAX", CS_UNKNOWN};
+    if (ln.whole_size != 19) return (test_res){(char*)__func__, "Size should be 19 for LONG_MAX", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -67,13 +67,13 @@ test_res test_large_number_init_int_large() {
 
 test_res test_large_number_init_int_base2() {
     large_number ln;
-    // 10 in base 2 = 1010 -> digits: {0, 1, 0, 1}
+    // 10 in base 2 = 1010 -> whole_digits: {0, 1, 0, 1}
     cs_codes rc = large_number_init(&ln, 2, LN_INT, 10L);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
     if (ln.base != 2) return (test_res){(char*)__func__, "Base should be 2", CS_UNKNOWN};
-    if (ln.size != 4) return (test_res){(char*)__func__, "Size should be 4", CS_UNKNOWN};
-    if (ln.digits[0] != 0 || ln.digits[1] != 1 || ln.digits[2] != 0 || ln.digits[3] != 1) {
+    if (ln.whole_size != 4) return (test_res){(char*)__func__, "Size should be 4", CS_UNKNOWN};
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 1 || ln.whole_digits[2] != 0 || ln.whole_digits[3] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for binary 10", CS_ELEM};
     }
@@ -84,13 +84,13 @@ test_res test_large_number_init_int_base2() {
 
 test_res test_large_number_init_int_base16() {
     large_number ln;
-    // 255 in base 16 = FF -> digits: {15, 15}
+    // 255 in base 16 = FF -> whole_digits: {15, 15}
     cs_codes rc = large_number_init(&ln, 16, LN_INT, 255L);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
     if (ln.base != 16) return (test_res){(char*)__func__, "Base should be 16", CS_UNKNOWN};
-    if (ln.size != 2) return (test_res){(char*)__func__, "Size should be 2", CS_UNKNOWN};
-    if (ln.digits[0] != 15 || ln.digits[1] != 15) {
+    if (ln.whole_size != 2) return (test_res){(char*)__func__, "Size should be 2", CS_UNKNOWN};
+    if (ln.whole_digits[0] != 15 || ln.whole_digits[1] != 15) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for hex 255", CS_ELEM};
     }
@@ -105,11 +105,11 @@ test_res test_large_number_init_int_base16() {
 
 test_res test_large_number_init_char_simple() {
     large_number ln;
-    // Initialize with string "12345" - note: digits stored as char values
+    // Initialize with string "12345" - note: whole_digits stored as char values
     cs_codes rc = large_number_init(&ln, 10, LN_CHAR, "12345");
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != 5) return (test_res){(char*)__func__, "Size should be 5", CS_UNKNOWN};
+    if (ln.whole_size != 5) return (test_res){(char*)__func__, "Size should be 5", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -121,7 +121,7 @@ test_res test_large_number_init_char_50_digits() {
     cs_codes rc = large_number_init(&ln, 10, LN_CHAR, LARGE_NUM_A_STR);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != LARGE_NUM_A_SIZE) return (test_res){(char*)__func__, "Size should be 50", CS_UNKNOWN};
+    if (ln.whole_size != LARGE_NUM_A_SIZE) return (test_res){(char*)__func__, "Size should be 50", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -133,7 +133,7 @@ test_res test_large_number_init_char_100_digits() {
     cs_codes rc = large_number_init(&ln, 10, LN_CHAR, VERY_LARGE_ALL_NINES_STR);
     
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
-    if (ln.size != VERY_LARGE_ALL_NINES_SIZE) return (test_res){(char*)__func__, "Size should be 100", CS_UNKNOWN};
+    if (ln.whole_size != VERY_LARGE_ALL_NINES_SIZE) return (test_res){(char*)__func__, "Size should be 100", CS_UNKNOWN};
     
     large_number_free(&ln);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -188,6 +188,180 @@ test_res test_large_number_init_num_copy_negative() {
 }
 
 // ============================================================================
+// large_number_init - LN_DOUBLE tests
+// ============================================================================
+
+test_res test_large_number_init_double_positive() {
+    large_number ln;
+    cs_codes rc = large_number_init(&ln, 10, LN_DOUBLE, 123.456);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    if (ln.sign != __POSITIVE_SIGN) return (test_res){(char*)__func__, "Sign should be positive", CS_UNKNOWN};
+    if (ln.base != 10) return (test_res){(char*)__func__, "Base not set correctly", CS_UNKNOWN};
+    // Check whole part: 123 -> reversed: {3, 2, 1}
+    if (ln.whole_size != 3) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 3", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 3 || ln.whole_digits[1] != 2 || ln.whole_digits[2] != 1) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digits mismatch", CS_ELEM};
+    }
+    // Check fractional part: 456 -> {4, 5, 6}
+    if (ln.frac_size != 3) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be 3", CS_UNKNOWN};
+    }
+    if (ln.frac_digits[0] != 4 || ln.frac_digits[1] != 5 || ln.frac_digits[2] != 6) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac digits mismatch", CS_ELEM};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_init_double_negative() {
+    large_number ln;
+    cs_codes rc = large_number_init(&ln, 10, LN_DOUBLE, -99.25);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    if (ln.sign != __NEGATIVE_SIGN) return (test_res){(char*)__func__, "Sign should be negative", CS_UNKNOWN};
+    // Check whole part: 99 -> reversed: {9, 9}
+    if (ln.whole_size != 2) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 2", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 9 || ln.whole_digits[1] != 9) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digits mismatch", CS_ELEM};
+    }
+    // Check fractional part: 25 -> {2, 5}
+    if (ln.frac_size != 2) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be 2", CS_UNKNOWN};
+    }
+    if (ln.frac_digits[0] != 2 || ln.frac_digits[1] != 5) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac digits mismatch", CS_ELEM};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_init_double_no_fraction() {
+    large_number ln;
+    cs_codes rc = large_number_init(&ln, 10, LN_DOUBLE, 500.0);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    // Check whole part: 500 -> reversed: {0, 0, 5}
+    if (ln.whole_size != 3) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 3", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 0 || ln.whole_digits[2] != 5) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digits mismatch", CS_ELEM};
+    }
+    // Fractional part should be empty
+    if (ln.frac_size != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be 0 for whole number", CS_UNKNOWN};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_init_double_only_fraction() {
+    large_number ln;
+    cs_codes rc = large_number_init(&ln, 10, LN_DOUBLE, 0.5);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    // Check whole part: 0 -> {0}
+    if (ln.whole_size != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 0", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digits should be 0", CS_ELEM};
+    }
+    // Check fractional part: 5 -> {5}
+    if (ln.frac_size < 1) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be at least 1", CS_UNKNOWN};
+    }
+    if (ln.frac_digits[0] != 5) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac digit should be 5", CS_ELEM};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_init_double_zero() {
+    large_number ln;
+    cs_codes rc = large_number_init(&ln, 10, LN_DOUBLE, 0.0);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    if (ln.whole_size != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 0 for zero", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digit should be 0", CS_ELEM};
+    }
+    if (ln.frac_size != 0) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be 0", CS_UNKNOWN};
+    }
+    if (ln.sign != __POSITIVE_SIGN) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Sign should be positive", CS_UNKNOWN};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_init_double_base2() {
+    large_number ln;
+    // 5.5 in base 2: whole part 5 = 101, fractional 0.5 = 0.1 in binary
+    cs_codes rc = large_number_init(&ln, 2, LN_DOUBLE, 5.5);
+    
+    if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    if (ln.base != 2) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Base should be 2", CS_UNKNOWN};
+    }
+    // Check whole part: 5 in binary = 101 -> reversed: {1, 0, 1}
+    if (ln.whole_size != 3) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole size should be 3", CS_UNKNOWN};
+    }
+    if (ln.whole_digits[0] != 1 || ln.whole_digits[1] != 0 || ln.whole_digits[2] != 1) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Whole digits mismatch for binary 5", CS_ELEM};
+    }
+    // Check fractional part: 0.5 in binary = 0.1 -> {1}
+    if (ln.frac_size < 1) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac size should be at least 1", CS_UNKNOWN};
+    }
+    if (ln.frac_digits[0] != 1) {
+        large_number_free(&ln);
+        return (test_res){(char*)__func__, "Frac digit should be 1 for 0.5 in binary", CS_ELEM};
+    }
+    
+    large_number_free(&ln);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
 // large_number_init - NULL pointer test
 // ============================================================================
 
@@ -209,7 +383,7 @@ test_res test_large_number_clear() {
     
     large_number_clear(&ln);
     
-    if (ln.size != 0) return (test_res){(char*)__func__, "Size not reset to 0", CS_UNKNOWN};
+    if (ln.whole_size != 0) return (test_res){(char*)__func__, "Size not reset to 0", CS_UNKNOWN};
     if (ln.sign != __POSITIVE_SIGN) return (test_res){(char*)__func__, "Sign not reset to positive", CS_UNKNOWN};
     
     large_number_free(&ln);
@@ -219,11 +393,11 @@ test_res test_large_number_clear() {
 test_res test_large_number_clear_preserves_capacity() {
     large_number ln;
     large_number_init(&ln, 10, LN_INT, 123456789L);
-    int original_capacity = ln.capacity;
+    int original_capacity = ln.whole_capacity;
     
     large_number_clear(&ln);
     
-    if (ln.capacity != original_capacity) {
+    if (ln.whole_capacity != original_capacity) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Capacity changed after clear", CS_UNKNOWN};
     }
@@ -384,20 +558,20 @@ test_res test_large_number_add_long_max() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    // Result should have 20 digits
-    if (result.size != 20) {
+    // Result should have 20 whole_digits
+    if (result.whole_size != 20) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "LONG_MAX + LONG_MAX should have 20 digits", CS_ELEM};
+        return (test_res){(char*)__func__, "LONG_MAX + LONG_MAX should have 20 whole_digits", CS_ELEM};
     }
     
-    // Verify last few digits of 18446744073709551614: ...1614
-    if (result.digits[0] != 4 || result.digits[1] != 1 || result.digits[2] != 6 || result.digits[3] != 1) {
+    // Verify last few whole_digits of 18446744073709551614: ...1614
+    if (result.whole_digits[0] != 4 || result.whole_digits[1] != 1 || result.whole_digits[2] != 6 || result.whole_digits[3] != 1) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "LONG_MAX + LONG_MAX last digits mismatch", CS_ELEM};
+        return (test_res){(char*)__func__, "LONG_MAX + LONG_MAX last whole_digits mismatch", CS_ELEM};
     }
     
     large_number_free(&a);
@@ -931,6 +1105,275 @@ test_res test_large_number_add_null_output() {
 }
 
 // ============================================================================
+// large_number_add - Fractional numbers
+// ============================================================================
+
+test_res test_large_number_add_frac_simple() {
+    large_number a, b, result, expected;
+    
+    // 1.5 + 2.5 = 4.0
+    large_number_init(&a, 10, LN_CHAR, "1.5");
+    large_number_init(&b, 10, LN_CHAR, "2.5");
+    large_number_init(&expected, 10, LN_CHAR, "4.0");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.5 + 2.5 != 4.0", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_no_carry() {
+    large_number a, b, result, expected;
+    
+    // 1.23 + 4.56 = 5.79
+    large_number_init(&a, 10, LN_CHAR, "1.23");
+    large_number_init(&b, 10, LN_CHAR, "4.56");
+    large_number_init(&expected, 10, LN_CHAR, "5.79");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.23 + 4.56 != 5.79", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_with_carry() {
+    large_number a, b, result, expected;
+    
+    // 0.99 + 0.01 = 1.00
+    large_number_init(&a, 10, LN_CHAR, "0.99");
+    large_number_init(&b, 10, LN_CHAR, "0.01");
+    large_number_init(&expected, 10, LN_CHAR, "1.00");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "0.99 + 0.01 != 1.00", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_different_lengths() {
+    large_number a, b, result, expected;
+    
+    // 1.5 + 2.125 = 3.625
+    large_number_init(&a, 10, LN_CHAR, "1.5");
+    large_number_init(&b, 10, LN_CHAR, "2.125");
+    large_number_init(&expected, 10, LN_CHAR, "3.625");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.5 + 2.125 != 3.625", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_whole_plus_frac() {
+    large_number a, b, result, expected;
+    
+    // 10 + 0.5 = 10.5
+    large_number_init(&a, 10, LN_INT, 10L);
+    large_number_init(&b, 10, LN_CHAR, "0.5");
+    large_number_init(&expected, 10, LN_CHAR, "10.5");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "10 + 0.5 != 10.5", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_large_carry_chain() {
+    large_number a, b, result, expected;
+    
+    // 99.999 + 0.001 = 100.000
+    large_number_init(&a, 10, LN_CHAR, "99.999");
+    large_number_init(&b, 10, LN_CHAR, "0.001");
+    large_number_init(&expected, 10, LN_CHAR, "100.000");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "99.999 + 0.001 != 100.000", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_with_double_init() {
+    large_number a, b, result, expected;
+    
+    // Test using LN_DOUBLE initialization
+    // 1.25 + 2.75 = 4.0
+    large_number_init(&a, 10, LN_DOUBLE, 1.25);
+    large_number_init(&b, 10, LN_DOUBLE, 2.75);
+    large_number_init(&expected, 10, LN_DOUBLE, 4.0);
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.25 + 2.75 != 4.0", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_add_frac_long_precision() {
+    large_number a, b, result, expected;
+    
+    // 0.123456 + 0.876544 = 1.000000
+    large_number_init(&a, 10, LN_CHAR, "0.123456");
+    large_number_init(&b, 10, LN_CHAR, "0.876544");
+    large_number_init(&expected, 10, LN_CHAR, "1.000000");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_add(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Add returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "0.123456 + 0.876544 != 1.000000", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
 // large_number_sub - Basic subtraction tests
 // ============================================================================
 
@@ -1243,6 +1686,274 @@ test_res test_large_number_sub_null_output() {
     
     if (rc != CS_NULL) return (test_res){(char*)__func__, "Expected CS_NULL for NULL output", rc};
     
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// large_number_sub - Fractional numbers
+// ============================================================================
+
+test_res test_large_number_sub_frac_simple() {
+    large_number a, b, result, expected;
+    
+    // 2.5 - 1.5 = 1.0
+    large_number_init(&a, 10, LN_CHAR, "2.5");
+    large_number_init(&b, 10, LN_CHAR, "1.5");
+    large_number_init(&expected, 10, LN_CHAR, "1.0");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "2.5 - 1.5 != 1.0", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_no_borrow() {
+    large_number a, b, result, expected;
+    
+    // 5.79 - 1.23 = 4.56
+    large_number_init(&a, 10, LN_CHAR, "5.79");
+    large_number_init(&b, 10, LN_CHAR, "1.23");
+    large_number_init(&expected, 10, LN_CHAR, "4.56");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "5.79 - 1.23 != 4.56", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_with_borrow() {
+    large_number a, b, result, expected;
+    
+    // 1.00 - 0.01 = 0.99
+    large_number_init(&a, 10, LN_CHAR, "1.00");
+    large_number_init(&b, 10, LN_CHAR, "0.01");
+    large_number_init(&expected, 10, LN_CHAR, "0.99");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.00 - 0.01 != 0.99", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_different_lengths() {
+    large_number a, b, result, expected;
+    
+    // 3.625 - 1.5 = 2.125
+    large_number_init(&a, 10, LN_CHAR, "3.625");
+    large_number_init(&b, 10, LN_CHAR, "1.5");
+    large_number_init(&expected, 10, LN_CHAR, "2.125");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "3.625 - 1.5 != 2.125", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_whole_minus_frac() {
+    large_number a, b, result, expected;
+    
+    // 10 - 0.5 = 9.5
+    large_number_init(&a, 10, LN_INT, 10L);
+    large_number_init(&b, 10, LN_CHAR, "0.5");
+    large_number_init(&expected, 10, LN_CHAR, "9.5");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "10 - 0.5 != 9.5", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_large_borrow_chain() {
+    large_number a, b, result, expected;
+    
+    // 100.000 - 0.001 = 99.999
+    large_number_init(&a, 10, LN_CHAR, "100.000");
+    large_number_init(&b, 10, LN_CHAR, "0.001");
+    large_number_init(&expected, 10, LN_CHAR, "99.999");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "100.000 - 0.001 != 99.999", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_result_negative() {
+    large_number a, b, result, expected;
+    
+    // 1.5 - 2.5 = -1.0
+    large_number_init(&a, 10, LN_CHAR, "1.5");
+    large_number_init(&b, 10, LN_CHAR, "2.5");
+    large_number_init(&expected, 10, LN_CHAR, "-1.0");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "1.5 - 2.5 != -1.0", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_large_number_sub_frac_result_zero() {
+    large_number a, b, result, expected;
+    
+    // 3.14159 - 3.14159 = 0.00000
+    large_number_init(&a, 10, LN_CHAR, "3.14159");
+    large_number_init(&b, 10, LN_CHAR, "3.14159");
+    large_number_init(&expected, 10, LN_CHAR, "0.00000");
+    large_number_init(&result, 10, LN_EMPTY);
+    
+    cs_codes rc = large_number_sub(&result, a, b);
+    
+    if (rc != CS_SUCCESS) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        return (test_res){(char*)__func__, "Sub returned error", rc};
+    }
+    
+    if (large_number_comp(result, expected) != 0) {
+        large_number_free(&a);
+        large_number_free(&b);
+        large_number_free(&expected);
+        large_number_free(&result);
+        return (test_res){(char*)__func__, "3.14159 - 3.14159 != 0", CS_ELEM};
+    }
+    
+    large_number_free(&a);
+    large_number_free(&b);
+    large_number_free(&expected);
+    large_number_free(&result);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
@@ -1664,7 +2375,7 @@ test_res test_large_number_free_basic() {
 }
 
 // ============================================================================
-// large_number_switch_base - Basic conversion tests
+// large_number_swap_base - Basic conversion tests
 // ============================================================================
 
 test_res test_large_number_switch_base_decimal_to_binary() {
@@ -1672,7 +2383,7 @@ test_res test_large_number_switch_base_decimal_to_binary() {
     // 10 in decimal = 1010 in binary
     large_number_init(&ln, 10, LN_INT, 10L);
     
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1682,12 +2393,12 @@ test_res test_large_number_switch_base_decimal_to_binary() {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Base should be 2", CS_UNKNOWN};
     }
-    if (ln.size != 4) {
+    if (ln.whole_size != 4) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 4 for binary 10", CS_UNKNOWN};
     }
     // 1010 reversed = {0, 1, 0, 1}
-    if (ln.digits[0] != 0 || ln.digits[1] != 1 || ln.digits[2] != 0 || ln.digits[3] != 1) {
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 1 || ln.whole_digits[2] != 0 || ln.whole_digits[3] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for binary 10", CS_ELEM};
     }
@@ -1699,9 +2410,9 @@ test_res test_large_number_switch_base_decimal_to_binary() {
 test_res test_large_number_switch_base_binary_to_decimal() {
     large_number ln;
     // 1010 in binary = 10 in decimal
-    large_number_init(&ln, 2, LN_INT, 10L); // 10 in base 2 representation -> digits: {0,1,0,1}
+    large_number_init(&ln, 2, LN_INT, 10L); // 10 in base 2 representation -> whole_digits: {0,1,0,1}
     
-    cs_codes rc = large_number_switch_base(&ln, 10);
+    cs_codes rc = large_number_swap_base(&ln, 10);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1711,12 +2422,12 @@ test_res test_large_number_switch_base_binary_to_decimal() {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Base should be 10", CS_UNKNOWN};
     }
-    if (ln.size != 2) {
+    if (ln.whole_size != 2) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 2 for decimal 10", CS_UNKNOWN};
     }
     // 10 reversed = {0, 1}
-    if (ln.digits[0] != 0 || ln.digits[1] != 1) {
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for decimal 10", CS_ELEM};
     }
@@ -1727,10 +2438,10 @@ test_res test_large_number_switch_base_binary_to_decimal() {
 
 test_res test_large_number_switch_base_decimal_to_hex() {
     large_number ln;
-    // 255 in decimal = FF in hex (digits: {15, 15})
+    // 255 in decimal = FF in hex (whole_digits: {15, 15})
     large_number_init(&ln, 10, LN_INT, 255L);
     
-    cs_codes rc = large_number_switch_base(&ln, 16);
+    cs_codes rc = large_number_swap_base(&ln, 16);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1740,11 +2451,11 @@ test_res test_large_number_switch_base_decimal_to_hex() {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Base should be 16", CS_UNKNOWN};
     }
-    if (ln.size != 2) {
+    if (ln.whole_size != 2) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 2 for hex FF", CS_UNKNOWN};
     }
-    if (ln.digits[0] != 15 || ln.digits[1] != 15) {
+    if (ln.whole_digits[0] != 15 || ln.whole_digits[1] != 15) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for hex FF", CS_ELEM};
     }
@@ -1758,7 +2469,7 @@ test_res test_large_number_switch_base_hex_to_decimal() {
     // FF in hex = 255 in decimal
     large_number_init(&ln, 16, LN_INT, 255L); // 255 in base 16 = FF -> {15, 15}
     
-    cs_codes rc = large_number_switch_base(&ln, 10);
+    cs_codes rc = large_number_swap_base(&ln, 10);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1768,12 +2479,12 @@ test_res test_large_number_switch_base_hex_to_decimal() {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Base should be 10", CS_UNKNOWN};
     }
-    if (ln.size != 3) {
+    if (ln.whole_size != 3) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 3 for decimal 255", CS_UNKNOWN};
     }
     // 255 reversed = {5, 5, 2}
-    if (ln.digits[0] != 5 || ln.digits[1] != 5 || ln.digits[2] != 2) {
+    if (ln.whole_digits[0] != 5 || ln.whole_digits[1] != 5 || ln.whole_digits[2] != 2) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for decimal 255", CS_ELEM};
     }
@@ -1786,14 +2497,14 @@ test_res test_large_number_switch_base_same_base() {
     large_number ln;
     large_number_init(&ln, 10, LN_INT, 12345L);
     
-    cs_codes rc = large_number_switch_base(&ln, 10);
+    cs_codes rc = large_number_swap_base(&ln, 10);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "switch_base should return SUCCESS for same base", rc};
     }
     // Verify nothing changed
-    if (ln.base != 10 || ln.size != 5) {
+    if (ln.base != 10 || ln.whole_size != 5) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Number should be unchanged", CS_UNKNOWN};
     }
@@ -1803,7 +2514,7 @@ test_res test_large_number_switch_base_same_base() {
 }
 
 test_res test_large_number_switch_base_null() {
-    cs_codes rc = large_number_switch_base(NULL, 10);
+    cs_codes rc = large_number_swap_base(NULL, 10);
     
     if (rc != CS_NULL) {
         return (test_res){(char*)__func__, "switch_base should return CS_NULL for NULL input", rc};
@@ -1816,7 +2527,7 @@ test_res test_large_number_switch_base_invalid_base() {
     large_number ln;
     large_number_init(&ln, 10, LN_INT, 12345L);
     
-    cs_codes rc = large_number_switch_base(&ln, 1); // Base 1 is invalid
+    cs_codes rc = large_number_swap_base(&ln, 1); // Base 1 is invalid
     
     if (rc != CS_SIZE) {
         large_number_free(&ln);
@@ -1831,7 +2542,7 @@ test_res test_large_number_switch_base_zero() {
     large_number ln;
     large_number_init(&ln, 10, LN_INT, 0L);
     
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     
     // Zero in any base is still zero
     if (rc != CS_SUCCESS) {
@@ -1852,7 +2563,7 @@ test_res test_large_number_switch_base_large_number() {
     // 1000000 in decimal = F4240 in hex
     large_number_init(&ln, 10, LN_INT, 1000000L);
     
-    cs_codes rc = large_number_switch_base(&ln, 16);
+    cs_codes rc = large_number_swap_base(&ln, 16);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1863,13 +2574,13 @@ test_res test_large_number_switch_base_large_number() {
         return (test_res){(char*)__func__, "Base should be 16", CS_UNKNOWN};
     }
     // F4240 hex = {0, 4, 2, 4, 15} reversed (0x0F4240)
-    if (ln.size != 5) {
+    if (ln.whole_size != 5) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 5 for hex F4240", CS_UNKNOWN};
     }
-    // 1000000 = 0xF4240 -> digits: {0, 4, 2, 4, 15}
-    if (ln.digits[0] != 0 || ln.digits[1] != 4 || ln.digits[2] != 2 || 
-        ln.digits[3] != 4 || ln.digits[4] != 15) {
+    // 1000000 = 0xF4240 -> whole_digits: {0, 4, 2, 4, 15}
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 4 || ln.whole_digits[2] != 2 || 
+        ln.whole_digits[3] != 4 || ln.whole_digits[4] != 15) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for hex F4240", CS_ELEM};
     }
@@ -1884,14 +2595,14 @@ test_res test_large_number_switch_base_roundtrip() {
     large_number_init(&ln, 10, LN_INT, 12345L);
     large_number_init(&original, 10, LN_INT, 12345L);
     
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
         return (test_res){(char*)__func__, "First switch_base failed", rc};
     }
     
-    rc = large_number_switch_base(&ln, 10);
+    rc = large_number_swap_base(&ln, 10);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -1914,7 +2625,7 @@ test_res test_large_number_switch_base_base8() {
     // 64 in decimal = 100 in octal
     large_number_init(&ln, 10, LN_INT, 64L);
     
-    cs_codes rc = large_number_switch_base(&ln, 8);
+    cs_codes rc = large_number_swap_base(&ln, 8);
     
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
@@ -1924,12 +2635,12 @@ test_res test_large_number_switch_base_base8() {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Base should be 8", CS_UNKNOWN};
     }
-    if (ln.size != 3) {
+    if (ln.whole_size != 3) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Size should be 3 for octal 100", CS_UNKNOWN};
     }
     // 100 reversed = {0, 0, 1}
-    if (ln.digits[0] != 0 || ln.digits[1] != 0 || ln.digits[2] != 1) {
+    if (ln.whole_digits[0] != 0 || ln.whole_digits[1] != 0 || ln.whole_digits[2] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "Digits mismatch for octal 100", CS_ELEM};
     }
@@ -1945,7 +2656,7 @@ test_res test_large_number_switch_base_big_number_roundtrip() {
     large_number_init(&original, 10, LN_CHAR, "12345678901234567890123456789012345678901234567890");
     
     // Convert decimal -> binary -> decimal
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -1957,7 +2668,7 @@ test_res test_large_number_switch_base_big_number_roundtrip() {
         return (test_res){(char*)__func__, "Base should be 2 after first conversion", CS_UNKNOWN};
     }
     
-    rc = large_number_switch_base(&ln, 10);
+    rc = large_number_swap_base(&ln, 10);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -1982,7 +2693,7 @@ test_res test_large_number_switch_base_big_number_to_hex() {
     large_number_init(&original, 10, LN_CHAR, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
     
     // Convert to hex and back
-    cs_codes rc = large_number_switch_base(&ln, 16);
+    cs_codes rc = large_number_swap_base(&ln, 16);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -1994,7 +2705,7 @@ test_res test_large_number_switch_base_big_number_to_hex() {
         return (test_res){(char*)__func__, "Base should be 16", CS_UNKNOWN};
     }
     
-    rc = large_number_switch_base(&ln, 10);
+    rc = large_number_swap_base(&ln, 10);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -2018,28 +2729,28 @@ test_res test_large_number_switch_base_big_number_multiple_bases() {
     large_number_init(&ln, 10, LN_CHAR, "99999999999999999999999999999999");
     large_number_init(&original, 10, LN_CHAR, "99999999999999999999999999999999");
     
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
         return (test_res){(char*)__func__, "switch_base to binary failed", rc};
     }
     
-    rc = large_number_switch_base(&ln, 8);
+    rc = large_number_swap_base(&ln, 8);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
         return (test_res){(char*)__func__, "switch_base to octal failed", rc};
     }
     
-    rc = large_number_switch_base(&ln, 16);
+    rc = large_number_swap_base(&ln, 16);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
         return (test_res){(char*)__func__, "switch_base to hex failed", rc};
     }
     
-    rc = large_number_switch_base(&ln, 10);
+    rc = large_number_swap_base(&ln, 10);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         large_number_free(&original);
@@ -2063,25 +2774,25 @@ test_res test_large_number_switch_base_power_of_two() {
     // In binary this should be 1 followed by 100 zeros
     large_number_init(&ln, 10, LN_CHAR, "1267650600228229401496703205376"); // 2^100
     
-    cs_codes rc = large_number_switch_base(&ln, 2);
+    cs_codes rc = large_number_swap_base(&ln, 2);
     if (rc != CS_SUCCESS) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "switch_base to binary failed", rc};
     }
     
-    // 2^100 in binary = 101 digits (1 followed by 100 zeros)
-    if (ln.size != 101) {
+    // 2^100 in binary = 101 whole_digits (1 followed by 100 zeros)
+    if (ln.whole_size != 101) {
         large_number_free(&ln);
-        return (test_res){(char*)__func__, "2^100 should have 101 binary digits", CS_UNKNOWN};
+        return (test_res){(char*)__func__, "2^100 should have 101 binary whole_digits", CS_UNKNOWN};
     }
     
     // Most significant digit should be 1, all others 0
-    if (ln.digits[100] != 1) {
+    if (ln.whole_digits[100] != 1) {
         large_number_free(&ln);
         return (test_res){(char*)__func__, "MSB should be 1", CS_ELEM};
     }
     for (int i = 0; i < 100; i++) {
-        if (ln.digits[i] != 0) {
+        if (ln.whole_digits[i] != 0) {
             large_number_free(&ln);
             return (test_res){(char*)__func__, "Lower bits should all be 0", CS_ELEM};
         }
@@ -2113,12 +2824,12 @@ test_res test_large_number_add_50_digits() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != LARGE_SUM_A_B_SIZE) {
+    if (result.whole_size != LARGE_SUM_A_B_SIZE) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "Result should have 51 digits", CS_ELEM};
+        return (test_res){(char*)__func__, "Result should have 51 whole_digits", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2154,12 +2865,12 @@ test_res test_large_number_add_100_nines_plus_one() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != VERY_LARGE_PLUS_ONE_SIZE) {
+    if (result.whole_size != VERY_LARGE_PLUS_ONE_SIZE) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "Result should have 101 digits", CS_ELEM};
+        return (test_res){(char*)__func__, "Result should have 101 whole_digits", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2195,12 +2906,12 @@ test_res test_large_number_add_fibonacci() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != FIB_202_SIZE) {
+    if (result.whole_size != FIB_202_SIZE) {
         large_number_free(&fib200);
         large_number_free(&fib201);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "Fibonacci result has wrong size", CS_ELEM};
+        return (test_res){(char*)__func__, "Fibonacci result has wrong whole_size", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2236,12 +2947,12 @@ test_res test_large_number_add_alternating_pattern() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != ALTERNATING_SUM_SIZE) {
+    if (result.whole_size != ALTERNATING_SUM_SIZE) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "Alternating sum has wrong size", CS_ELEM};
+        return (test_res){(char*)__func__, "Alternating sum has wrong whole_size", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2277,12 +2988,12 @@ test_res test_large_number_add_power_of_10() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != POWER_10_30_SIZE) {
+    if (result.whole_size != POWER_10_30_SIZE) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "Power of 10 result has wrong size", CS_ELEM};
+        return (test_res){(char*)__func__, "Power of 10 result has wrong whole_size", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2318,12 +3029,12 @@ test_res test_large_number_add_long_max_doubled() {
         return (test_res){(char*)__func__, "Add returned error", rc};
     }
     
-    if (result.size != LONG_MAX_DOUBLED_SIZE) {
+    if (result.whole_size != LONG_MAX_DOUBLED_SIZE) {
         large_number_free(&a);
         large_number_free(&b);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "LONG_MAX doubled has wrong size", CS_ELEM};
+        return (test_res){(char*)__func__, "LONG_MAX doubled has wrong whole_size", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2695,11 +3406,11 @@ test_res test_large_number_mul_power_10_squared() {
         return (test_res){(char*)__func__, "Mul returned error", rc};
     }
     
-    if (result.size != MUL_POWER_10_50_SIZE) {
+    if (result.whole_size != MUL_POWER_10_50_SIZE) {
         large_number_free(&a);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "(10^25)^2 should have 51 digits", CS_ELEM};
+        return (test_res){(char*)__func__, "(10^25)^2 should have 51 whole_digits", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -2731,11 +3442,11 @@ test_res test_large_number_mul_square_10_20() {
         return (test_res){(char*)__func__, "Mul returned error", rc};
     }
     
-    if (result.size != MUL_SQUARE_10_40_SIZE) {
+    if (result.whole_size != MUL_SQUARE_10_40_SIZE) {
         large_number_free(&a);
         large_number_free(&expected);
         large_number_free(&result);
-        return (test_res){(char*)__func__, "(10^20)^2 should have 41 digits", CS_ELEM};
+        return (test_res){(char*)__func__, "(10^20)^2 should have 41 whole_digits", CS_ELEM};
     }
     
     if (large_number_comp(result, expected) != 0) {
@@ -3120,6 +3831,14 @@ test large_number_tests[] = {
     test_large_number_init_num_copy,
     test_large_number_init_num_copy_negative,
     
+    // Init - LN_DOUBLE tests
+    test_large_number_init_double_positive,
+    test_large_number_init_double_negative,
+    test_large_number_init_double_no_fraction,
+    test_large_number_init_double_only_fraction,
+    test_large_number_init_double_zero,
+    test_large_number_init_double_base2,
+    
     // Init - Edge cases
     test_large_number_init_null,
     
@@ -3163,6 +3882,16 @@ test large_number_tests[] = {
     // Add - Edge cases
     test_large_number_add_null_output,
     
+    // Add - Fractional numbers
+    test_large_number_add_frac_simple,
+    test_large_number_add_frac_no_carry,
+    test_large_number_add_frac_with_carry,
+    test_large_number_add_frac_different_lengths,
+    test_large_number_add_frac_whole_plus_frac,
+    test_large_number_add_frac_large_carry_chain,
+    test_large_number_add_frac_with_double_init,
+    test_large_number_add_frac_long_precision,
+    
     // Sub - Basic tests
     test_large_number_sub_basic,
     test_large_number_sub_result_negative,
@@ -3176,6 +3905,16 @@ test large_number_tests[] = {
     test_large_number_sub_negative_minus_positive,
     test_large_number_sub_zero,
     test_large_number_sub_null_output,
+    
+    // Sub - Fractional numbers
+    test_large_number_sub_frac_simple,
+    test_large_number_sub_frac_no_borrow,
+    test_large_number_sub_frac_with_borrow,
+    test_large_number_sub_frac_different_lengths,
+    test_large_number_sub_frac_whole_minus_frac,
+    test_large_number_sub_frac_large_borrow_chain,
+    test_large_number_sub_frac_result_negative,
+    test_large_number_sub_frac_result_zero,
     
     // Sub - Multiple consecutive subtractions
     test_large_number_sub_multiple_three_operands,

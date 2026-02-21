@@ -3,8 +3,8 @@
  * @brief Test data for large_number unit tests
  * 
  * Contains string constants representing very large numbers (beyond long range)
- * Maximum long: 9,223,372,036,854,775,807 (about 19 digits)
- * We test with numbers having 50+ digits to ensure we're beyond any native type
+ * Maximum long: 9,223,372,036,854,775,807 (about 19 whole_digits)
+ * We test with numbers having 50+ whole_digits to ensure we're beyond any native type
  */
 
 #ifndef __LARGE_NUMBERS_TEST_DATA_H__
@@ -30,7 +30,7 @@
 #define LONG_MAX_DOUBLED_STR "18446744073709551614"
 
 // ----------------------------------------------------------------------------
-// Large numbers (50 digits - far beyond any native type)
+// Large numbers (50 whole_digits - far beyond any native type)
 // ----------------------------------------------------------------------------
 
 // A + B = 111111111011111111101111111110111111111011111111100
@@ -41,7 +41,7 @@
 #define LARGE_SUM_A_B_STR "111111111011111111101111111110111111111011111111100"
 
 // ----------------------------------------------------------------------------
-// Very large numbers (100 digits)
+// Very large numbers (100 whole_digits)
 // ----------------------------------------------------------------------------
 
 // 100 nines + 1 = 1 followed by 100 zeros
@@ -103,7 +103,7 @@
 #define MUL_LARGE_A_DOUBLED_SIZE 50
 #define MUL_LARGE_A_DOUBLED_STR "24691357802469135780246913578024691357802469135780"
 
-// Factorial-style: 100! has 158 digits, too complex, but we can test smaller
+// Factorial-style: 100! has 158 whole_digits, too complex, but we can test smaller
 // 20! = 2432902008176640000
 #define FACTORIAL_20_STR "2432902008176640000"
 

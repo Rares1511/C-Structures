@@ -11,16 +11,27 @@
 typedef enum large_number_type {
     LN_CHAR,
     LN_INT,
+    LN_DOUBLE,
     LN_NUM,
     LN_EMPTY,
 } large_number_type;
 
+// Whole digits are stored in reverse order (least significant digit first)
+// Fractional digits are stored in normal order (first fractional digit at index 0)
+// Each digit is an unsigned int representing a value in the specified base
 typedef struct large_number {
-    unsigned int *digits;
-    int size;
-    int capacity;
-    int sign; // 1 for positive, -1 for negative
-    unsigned int base;
+    // Whole part of the number, stored as an array of digits (reversed)
+    unsigned int *whole_digits; /*!< Pointer to the array of whole digits */
+    int whole_size;             /*!< Number of digits currently used in the whole part */
+    int whole_capacity;         /*!< Total capacity of the whole_digits array */
+
+    // Fractional part of the number, stored as an array of digits (normal order)
+    unsigned int *frac_digits;  /*!< Pointer to the array of fractional digits */
+    int frac_size;              /*!< Number of digits currently used in the fractional part */
+    int frac_capacity;          /*!< Total capacity of the frac_digits array */
+
+    int sign;                  /*!< Sign of the number, either __POSITIVE_SIGN or __NEGATIVE_SIGN */
+    unsigned int base;         /*!< Base of the number system (e.g., 10 for decimal) */
 } large_number;
 
 /*!
@@ -29,7 +40,7 @@ typedef struct large_number {
  * @param[in] base Base of the number system (e.g., 10 for decimal)
  * @param[in] type Type of the input value (LN_CHAR, LN_INT, LN_NUM)
  * @param[in] ... Variable arguments based on type:
- *                 - LN_CHAR: char* (string of digits)
+ *                 - LN_CHAR: char* (string of whole_digits)
  *                 - LN_INT: long (integer value)
  *                 - LN_NUM: large_number (another large_number to copy)
  * @return CS_SUCCESS on success, error code otherwise
@@ -69,7 +80,7 @@ cs_codes large_number_mul(large_number *out, const large_number a, const large_n
  * @param[in] new_base The target base to convert to (must be >= 2)
  * @return CS_SUCCESS on success, CS_NULL if ln is NULL, CS_SIZE if base < 2
  */
-cs_codes large_number_switch_base(large_number *ln, unsigned int new_base);
+cs_codes large_number_swap_base(large_number *ln, unsigned int new_base);
 
 /*!
  * @brief Compares two large_number values
