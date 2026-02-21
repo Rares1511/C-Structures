@@ -138,9 +138,6 @@ Where:
 > [!NOTE]
 > Initial capacity is 1024 elements (`VECTOR_INIT_CAPACITY`). For small datasets, consider using a smaller initial allocation or `list` for memory efficiency.
 
-> [!WARNING]
-> `vector_at` does not perform bounds checking. Accessing invalid indices results in undefined behavior.
-
 ---
 
 ## Build & Usage
