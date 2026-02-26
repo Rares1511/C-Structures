@@ -10,7 +10,7 @@ test_res test_vector_init(test_arg *arg) {
     vector vec;
     cs_codes rc = vector_init(&vec, attr);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized vector with element size: %zu\n", attr.size);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized vector with element size: %zu\n", (size_t)attr.size);
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Vector initialized successfully\n");
     if (vector_size(vec) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
@@ -32,6 +32,7 @@ test_res test_vector_push_back_single(test_arg *arg) {
     test_struct ts = create_test_struct(42, "TestItem42", 42.5);
 
     cs_codes result = vector_push_back(&vec, &ts);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushed back element with id: %d\n", ts.id);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts);
         vector_free(&vec);
@@ -39,6 +40,7 @@ test_res test_vector_push_back_single(test_arg *arg) {
     }
 
     test_struct *back = (test_struct*)vector_at(vec, 0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Accessed back element %p with id: %d\n", back, back ? back->id : -1);
     if (!back || back->id != 42 || strcmp(back->name, "TestItem42") != 0) {
         free_test_struct(&ts);
         vector_free(&vec);
@@ -55,6 +57,7 @@ test_res test_vector_push_back_multiple(test_arg *arg) {
     vector_init(&vec, get_test_struct_attr());
     int total = __TEST_SIZE;
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing back %d elements\n", total);
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "Item", (double)i * 1.5);
         if (vector_push_back(&vec, &ts) != CS_SUCCESS) {
@@ -65,12 +68,15 @@ test_res test_vector_push_back_multiple(test_arg *arg) {
         free_test_struct(&ts);
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Finished pushing back %d elements\n", total);
     if (vector_size(vec) != total) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Size mismatch after push back", CS_UNKNOWN};
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size after push back is correct: %d\n", vector_size(vec));
 
     test_struct *last = (test_struct*)vector_at(vec, total - 1);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Accessed last element %p with id: %d\n", last, last ? last->id : -1);
     if (!last || last->id != total - 1) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Last element mismatch", CS_ELEM};
@@ -84,6 +90,7 @@ test_res test_vector_push_back_growth(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int total = 100; // Force multiple reallocations
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing growth with %d elements to force reallocations\n", total);
 
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "GrowthTest", (double)i);
@@ -123,6 +130,7 @@ test_res test_vector_insert_at_front(test_arg *arg) {
     }
 
     test_struct ts0 = create_test_struct(0, "InsertedFront", 0.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserting element at front position 0\n");
     cs_codes result = vector_insert_at(&vec, &ts0, 0);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts0);
@@ -152,6 +160,7 @@ test_res test_vector_insert_at_middle(test_arg *arg) {
     }
 
     test_struct ts99 = create_test_struct(99, "InsertedMiddle", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserting element at middle position 5\n");
     cs_codes result = vector_insert_at(&vec, &ts99, 5);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts99);
@@ -189,6 +198,7 @@ test_res test_vector_insert_at_back(test_arg *arg) {
     }
 
     test_struct ts99 = create_test_struct(99, "InsertedBack", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserting element at back position 5\n");
     cs_codes result = vector_insert_at(&vec, &ts99, 5);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts99);
@@ -218,6 +228,7 @@ test_res test_vector_pop_back_single(test_arg *arg) {
     test_struct ts = create_test_struct(42, "PopBackTest", 42.0);
     vector_push_back(&vec, &ts);
     free_test_struct(&ts);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping single element from vector\n");
 
     cs_codes result = vector_pop_back(&vec);
     if (result != CS_SUCCESS) {
@@ -242,6 +253,7 @@ test_res test_vector_pop_back_multiple(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping all 10 elements in reverse order\n");
 
     for (int i = 9; i >= 0; i--) {
         test_struct *last = (test_struct*)vector_at(vec, i);
@@ -264,6 +276,7 @@ test_res test_vector_pop_back_multiple(test_arg *arg) {
 test_res test_vector_pop_back_empty(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pop_back on empty vector (should fail)\n");
 
     cs_codes result = vector_pop_back(&vec);
     if (result == CS_SUCCESS) {
@@ -287,6 +300,7 @@ test_res test_vector_erase_front(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Erasing element at front position 0\n");
 
     cs_codes result = vector_erase(&vec, 0);
     if (result != CS_SUCCESS) {
@@ -312,6 +326,7 @@ test_res test_vector_erase_middle(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Erasing element at middle position 2\n");
 
     cs_codes result = vector_erase(&vec, 2); // Erase id=2
     if (result != CS_SUCCESS) {
@@ -337,6 +352,7 @@ test_res test_vector_erase_back(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Erasing element at back position 4\n");
 
     cs_codes result = vector_erase(&vec, 4); // Erase last
     if (result != CS_SUCCESS) {
@@ -366,6 +382,7 @@ test_res test_vector_replace_single(test_arg *arg) {
     free_test_struct(&ts);
 
     test_struct ts_new = create_test_struct(99, "Replaced", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Replacing element at position 0 (id 42 -> 99)\n");
     cs_codes result = vector_replace(&vec, &ts_new, 0);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts_new);
@@ -395,6 +412,7 @@ test_res test_vector_replace_middle(test_arg *arg) {
     }
 
     test_struct ts_new = create_test_struct(99, "ReplacedMiddle", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Replacing element at middle position 2\n");
     cs_codes result = vector_replace(&vec, &ts_new, 2);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts_new);
@@ -431,6 +449,7 @@ test_res test_vector_replace_invalid_pos(test_arg *arg) {
     free_test_struct(&ts);
 
     test_struct ts_new = create_test_struct(99, "New", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing replace at invalid position 5 (should fail)\n");
     cs_codes result = vector_replace(&vec, &ts_new, 5);
     if (result == CS_SUCCESS) {
         free_test_struct(&ts_new);
@@ -455,6 +474,7 @@ test_res test_vector_at_valid(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing vector_at for all 100 positions\n");
 
     for (int i = 0; i < 100; i++) {
         test_struct *val = (test_struct*)vector_at(vec, i);
@@ -476,6 +496,7 @@ test_res test_vector_at_out_of_bounds(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing out of bounds access at positions 10, -1, 1000\n");
 
     if (vector_at(vec, 10) != NULL) {
         vector_free(&vec);
@@ -510,6 +531,7 @@ test_res test_vector_find_existing(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(5, "FindTest", 5.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Searching for element with id 5\n");
     int pos = vector_find(vec, &search);
     free_test_struct(&search);
 
@@ -532,6 +554,7 @@ test_res test_vector_find_not_existing(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(99, "NotFound", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Searching for non-existing element with id 99\n");
     int pos = vector_find(vec, &search);
     free_test_struct(&search);
 
@@ -555,6 +578,7 @@ test_res test_vector_find_first_occurrence(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(42, "Duplicate", 42.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Finding first occurrence of duplicate element (id 42)\n");
     int pos = vector_find(vec, &search);
     free_test_struct(&search);
 
@@ -581,6 +605,7 @@ test_res test_vector_count_none(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(99, "NotFound", 99.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting non-existing element (id 99)\n");
     int count = vector_count(vec, &search);
     free_test_struct(&search);
 
@@ -603,6 +628,7 @@ test_res test_vector_count_single(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(5, "CountTest", 5.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting single occurrence (id 5)\n");
     int count = vector_count(vec, &search);
     free_test_struct(&search);
 
@@ -630,6 +656,7 @@ test_res test_vector_count_multiple(test_arg *arg) {
     }
 
     test_struct search = create_test_struct(42, "Duplicate", 42.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting 5 duplicates (id 42)\n");
     int count = vector_count(vec, &search);
     free_test_struct(&search);
 
@@ -649,6 +676,7 @@ test_res test_vector_count_multiple(test_arg *arg) {
 test_res test_vector_empty_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking if newly initialized vector is empty\n");
 
     if (!vector_empty(vec)) {
         vector_free(&vec);
@@ -663,6 +691,7 @@ test_res test_vector_empty_after_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing empty state after push/pop operations\n");
 
     vector_push_back(&vec, &ts);
     if (vector_empty(vec)) {
@@ -690,6 +719,7 @@ test_res test_vector_empty_after_ops(test_arg *arg) {
 test_res test_vector_size_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking initial size is 0\n");
 
     if (vector_size(vec) != 0) {
         vector_free(&vec);
@@ -703,6 +733,7 @@ test_res test_vector_size_initial(test_arg *arg) {
 test_res test_vector_size_after_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing size changes during 100 push/pop operations\n");
 
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "SizeOpsTest", (double)i);
@@ -735,6 +766,7 @@ test_res test_vector_swap(test_arg *arg) {
     vector vec1, vec2;
     vector_init(&vec1, get_test_struct_attr());
     vector_init(&vec2, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping two vectors with 5 elements each\n");
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "Swap1", (double)i);
@@ -774,6 +806,7 @@ test_res test_vector_swap_empty(test_arg *arg) {
     vector vec1, vec2;
     vector_init(&vec1, get_test_struct_attr());
     vector_init(&vec2, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping non-empty vector with empty vector\n");
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "SwapEmpty", (double)i);
@@ -812,6 +845,7 @@ test_res test_vector_clear(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Clearing vector with 100 elements\n");
 
     vector_clear(&vec);
 
@@ -832,6 +866,7 @@ test_res test_vector_clear_reuse(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Clearing then reusing vector\n");
 
     vector_clear(&vec);
 
@@ -860,6 +895,7 @@ test_res test_vector_sort_ascending(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int ids[] = {50, 10, 40, 20, 30};
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting unsorted array [50,10,40,20,30]\n");
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(ids[i], "SortTest", (double)ids[i]);
@@ -886,6 +922,7 @@ test_res test_vector_sort_ascending(test_arg *arg) {
 test_res test_vector_sort_already_sorted(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting already sorted array\n");
 
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "AlreadySorted", (double)i);
@@ -910,6 +947,7 @@ test_res test_vector_sort_already_sorted(test_arg *arg) {
 test_res test_vector_sort_reverse(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting reverse-ordered array\n");
 
     for (int i = 9; i >= 0; i--) {
         test_struct ts = create_test_struct(i, "ReverseSort", (double)i);
@@ -935,6 +973,7 @@ test_res test_vector_sort_by_score(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr_by_score());
     double scores[] = {50.5, 10.1, 40.4, 20.2, 30.3};
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting by score [50.5,10.1,40.4,20.2,30.3]\n");
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "ScoreSort", scores[i]);
@@ -965,6 +1004,7 @@ test_res test_vector_sort_by_score(test_arg *arg) {
 test_res test_vector_set_attr(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Changing vector attributes to sort by score\n");
 
     // Change to sort by score
     vector_attr_t new_attr = get_test_struct_attr_by_score();
@@ -996,6 +1036,7 @@ test_res test_vector_set_attr(test_arg *arg) {
 test_res test_vector_set_comp(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Changing comparator function at runtime\n");
 
     // Add elements
     for (int i = 0; i < 5; i++) {
@@ -1026,6 +1067,7 @@ test_res test_vector_set_comp(test_arg *arg) {
 test_res test_vector_nested_data_integrity(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing nested data integrity for 50 complex structs\n");
 
     // Push elements with complex nested data
     for (int i = 0; i < 50; i++) {
@@ -1083,6 +1125,7 @@ test_res test_vector_deep_copy_verification(test_arg *arg) {
 
     test_struct original = create_test_struct(42, "DeepCopyTest", 42.42);
     vector_push_back(&vec, &original);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying deep copy (modifying original should not affect stored)\n");
 
     // Modify original after push - should not affect vector content
     original.id = 999;
@@ -1122,6 +1165,7 @@ test_res test_vector_large_dataset(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int total = __TEST_SIZE;
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing large dataset with %d elements\n", total);
 
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "LargeDataset", (double)i);
@@ -1145,6 +1189,7 @@ test_res test_vector_large_dataset(test_arg *arg) {
 test_res test_vector_interleaved_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing interleaved push/pop operations\n");
 
     // Interleave pushes and pops
     for (int i = 0; i < 50; i++) {
@@ -1180,6 +1225,7 @@ test_res test_vector_erase_all(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Erasing all 50 elements from front\n");
 
     // Erase from front until empty
     while (!vector_empty(vec)) {
@@ -1204,6 +1250,7 @@ test_res test_vector_replace_all(test_arg *arg) {
         vector_push_back(&vec, &ts);
         free_test_struct(&ts);
     }
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Replacing all 20 elements\n");
 
     // Replace all elements
     for (int i = 0; i < 20; i++) {

@@ -32,7 +32,17 @@ cs_codes clogger_init(clogger *logger, const char *filename, const char *modes);
  * @param fmt The format string (like printf).
  * @param ... Additional arguments for the format string.
  */
-void clogger_log(clogger logger, clogger_level level, const char *fmt, ...);
+#define clogger_log(logger, level, fmt, ...) \
+    do { \
+        if ((logger).fp != NULL) { \
+            fprintf((logger).fp, "%s: [%s]" fmt, __func__, \
+                (level) == CLOGGER_DEBUG ? "DEBUG" : \
+                (level) == CLOGGER_INFO ? "INFO" : \
+                (level) == CLOGGER_WARNING ? "WARNING" : "ERROR", \
+                ##__VA_ARGS__); \
+            fflush((logger).fp); \
+        } \
+    } while(0)
 
 /*!
  * Closes the logger by closing the associated file.
