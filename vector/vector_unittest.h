@@ -5,14 +5,18 @@
 // vector_init
 // ============================================================================
 
-test_res test_vector_init() {
+test_res test_vector_init(test_arg *arg) {
     vector_attr_t attr = get_test_struct_attr();
     vector vec;
     cs_codes rc = vector_init(&vec, attr);
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized vector with element size: %zu\n", attr.size);
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Vector initialized successfully\n");
     if (vector_size(vec) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initial size is 0 as expected\n");
     if (!vector_empty(vec)) return (test_res){(char*)__func__, "Vector not empty after init", CS_UNKNOWN};
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Vector is empty after init as expected\n");
 
     vector_free(&vec);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -22,7 +26,7 @@ test_res test_vector_init() {
 // vector_push_back
 // ============================================================================
 
-test_res test_vector_push_back_single() {
+test_res test_vector_push_back_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "TestItem42", 42.5);
@@ -46,7 +50,7 @@ test_res test_vector_push_back_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_push_back_multiple() {
+test_res test_vector_push_back_multiple(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -76,7 +80,7 @@ test_res test_vector_push_back_multiple() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_push_back_growth() {
+test_res test_vector_push_back_growth(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int total = 100; // Force multiple reallocations
@@ -109,7 +113,7 @@ test_res test_vector_push_back_growth() {
 // vector_insert_at
 // ============================================================================
 
-test_res test_vector_insert_at_front() {
+test_res test_vector_insert_at_front(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 1; i <= 5; i++) {
@@ -138,7 +142,7 @@ test_res test_vector_insert_at_front() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_insert_at_middle() {
+test_res test_vector_insert_at_middle(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -175,7 +179,7 @@ test_res test_vector_insert_at_middle() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_insert_at_back() {
+test_res test_vector_insert_at_back(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -208,7 +212,7 @@ test_res test_vector_insert_at_back() {
 // vector_pop_back
 // ============================================================================
 
-test_res test_vector_pop_back_single() {
+test_res test_vector_pop_back_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "PopBackTest", 42.0);
@@ -230,7 +234,7 @@ test_res test_vector_pop_back_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_pop_back_multiple() {
+test_res test_vector_pop_back_multiple(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -257,7 +261,7 @@ test_res test_vector_pop_back_multiple() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_pop_back_empty() {
+test_res test_vector_pop_back_empty(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -275,7 +279,7 @@ test_res test_vector_pop_back_empty() {
 // vector_erase
 // ============================================================================
 
-test_res test_vector_erase_front() {
+test_res test_vector_erase_front(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -300,7 +304,7 @@ test_res test_vector_erase_front() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_erase_middle() {
+test_res test_vector_erase_middle(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -325,7 +329,7 @@ test_res test_vector_erase_middle() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_erase_back() {
+test_res test_vector_erase_back(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -354,7 +358,7 @@ test_res test_vector_erase_back() {
 // vector_replace
 // ============================================================================
 
-test_res test_vector_replace_single() {
+test_res test_vector_replace_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "Original", 42.0);
@@ -381,7 +385,7 @@ test_res test_vector_replace_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_replace_middle() {
+test_res test_vector_replace_middle(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -419,7 +423,7 @@ test_res test_vector_replace_middle() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_replace_invalid_pos() {
+test_res test_vector_replace_invalid_pos(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "Test", 42.0);
@@ -443,7 +447,7 @@ test_res test_vector_replace_invalid_pos() {
 // vector_at
 // ============================================================================
 
-test_res test_vector_at_valid() {
+test_res test_vector_at_valid(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 100; i++) {
@@ -464,7 +468,7 @@ test_res test_vector_at_valid() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_at_out_of_bounds() {
+test_res test_vector_at_out_of_bounds(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -496,7 +500,7 @@ test_res test_vector_at_out_of_bounds() {
 // vector_find
 // ============================================================================
 
-test_res test_vector_find_existing() {
+test_res test_vector_find_existing(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -518,7 +522,7 @@ test_res test_vector_find_existing() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_find_not_existing() {
+test_res test_vector_find_not_existing(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -540,7 +544,7 @@ test_res test_vector_find_not_existing() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_find_first_occurrence() {
+test_res test_vector_find_first_occurrence(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     // Insert duplicates
@@ -567,7 +571,7 @@ test_res test_vector_find_first_occurrence() {
 // vector_count
 // ============================================================================
 
-test_res test_vector_count_none() {
+test_res test_vector_count_none(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -589,7 +593,7 @@ test_res test_vector_count_none() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_count_single() {
+test_res test_vector_count_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 10; i++) {
@@ -611,7 +615,7 @@ test_res test_vector_count_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_count_multiple() {
+test_res test_vector_count_multiple(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 5; i++) {
@@ -642,7 +646,7 @@ test_res test_vector_count_multiple() {
 // vector_empty
 // ============================================================================
 
-test_res test_vector_empty_initial() {
+test_res test_vector_empty_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -655,7 +659,7 @@ test_res test_vector_empty_initial() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_empty_after_ops() {
+test_res test_vector_empty_after_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
@@ -683,7 +687,7 @@ test_res test_vector_empty_after_ops() {
 // vector_size
 // ============================================================================
 
-test_res test_vector_size_initial() {
+test_res test_vector_size_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -696,7 +700,7 @@ test_res test_vector_size_initial() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_size_after_ops() {
+test_res test_vector_size_after_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -727,7 +731,7 @@ test_res test_vector_size_after_ops() {
 // vector_swap
 // ============================================================================
 
-test_res test_vector_swap() {
+test_res test_vector_swap(test_arg *arg) {
     vector vec1, vec2;
     vector_init(&vec1, get_test_struct_attr());
     vector_init(&vec2, get_test_struct_attr());
@@ -766,7 +770,7 @@ test_res test_vector_swap() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_swap_empty() {
+test_res test_vector_swap_empty(test_arg *arg) {
     vector vec1, vec2;
     vector_init(&vec1, get_test_struct_attr());
     vector_init(&vec2, get_test_struct_attr());
@@ -800,7 +804,7 @@ test_res test_vector_swap_empty() {
 // vector_clear
 // ============================================================================
 
-test_res test_vector_clear() {
+test_res test_vector_clear(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 100; i++) {
@@ -820,7 +824,7 @@ test_res test_vector_clear() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_clear_reuse() {
+test_res test_vector_clear_reuse(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     for (int i = 0; i < 50; i++) {
@@ -852,7 +856,7 @@ test_res test_vector_clear_reuse() {
 // vector_sort
 // ============================================================================
 
-test_res test_vector_sort_ascending() {
+test_res test_vector_sort_ascending(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int ids[] = {50, 10, 40, 20, 30};
@@ -879,7 +883,7 @@ test_res test_vector_sort_ascending() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_sort_already_sorted() {
+test_res test_vector_sort_already_sorted(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -903,7 +907,7 @@ test_res test_vector_sort_already_sorted() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_sort_reverse() {
+test_res test_vector_sort_reverse(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -927,7 +931,7 @@ test_res test_vector_sort_reverse() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_sort_by_score() {
+test_res test_vector_sort_by_score(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr_by_score());
     double scores[] = {50.5, 10.1, 40.4, 20.2, 30.3};
@@ -958,7 +962,7 @@ test_res test_vector_sort_by_score() {
 // vector_set_* functions
 // ============================================================================
 
-test_res test_vector_set_attr() {
+test_res test_vector_set_attr(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -989,7 +993,7 @@ test_res test_vector_set_attr() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_set_comp() {
+test_res test_vector_set_comp(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -1019,7 +1023,7 @@ test_res test_vector_set_comp() {
 // Complex struct integrity tests
 // ============================================================================
 
-test_res test_vector_nested_data_integrity() {
+test_res test_vector_nested_data_integrity(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -1073,7 +1077,7 @@ test_res test_vector_nested_data_integrity() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_deep_copy_verification() {
+test_res test_vector_deep_copy_verification(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -1114,7 +1118,7 @@ test_res test_vector_deep_copy_verification() {
 // Stress tests
 // ============================================================================
 
-test_res test_vector_large_dataset() {
+test_res test_vector_large_dataset(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -1138,7 +1142,7 @@ test_res test_vector_large_dataset() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_interleaved_ops() {
+test_res test_vector_interleaved_ops(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -1167,7 +1171,7 @@ test_res test_vector_interleaved_ops() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_erase_all() {
+test_res test_vector_erase_all(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 
@@ -1191,7 +1195,7 @@ test_res test_vector_erase_all() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_vector_replace_all() {
+test_res test_vector_replace_all(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
 

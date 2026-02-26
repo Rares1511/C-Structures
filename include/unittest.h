@@ -1,3 +1,4 @@
+#pragma once
 #define __MAX_REASON_SIZE 1024
 #define __MAX_PRINT_SIZE 75
 
@@ -5,20 +6,23 @@
 #define __VALUE_RANGE 10000
 
 #define __UNITTEST_DEBUG_FILE_ARG_NAME "--debug-file"
-#define __UNITTEST_DEBUG_FILE_DEFAULT_VALUE "unittest_log.ansi"
+#define __UNITTEST_DEBUG_FILE_DEFAULT_VALUE "logs/unittest_log.ansi"
+
+#define __UNITTEST_RESULTS_FILE_NAME "--results-file"
+#define __UNITTEST_RESULTS_FILE_NAME_VALUE "logs/unittest_results.ansi"
 
 #define __UNITTEST_SEED_ARG_NAME "--seed"
 #define __UNITTEST_SEED_DEFAULT_VALUE 42
 
 #define __UNITTEST_MODULE_ARG_NAME "--module"
 
-#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <cs/universal.h>
 #include <cs/cargs.h>
+#include <cs/clogger.h>
 #include <cs/rbt.h>
 
 #define __GREEN_UNITTEST  "\033[32m"
@@ -117,7 +121,11 @@ typedef struct test_res {
     int return_code;
 } test_res;
 
-typedef struct test_res (*test)();
+typedef struct test_arg {
+    clogger *logger;
+} test_arg;
+
+typedef struct test_res (*test)(test_arg *arg);
 
 // ============================================================================
 // COMPLEX TEST STRUCT

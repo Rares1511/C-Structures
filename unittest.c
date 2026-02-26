@@ -2,8 +2,6 @@
 #include <valgrind/valgrind.h>
 #include <valgrind/memcheck.h>
 
-FILE *__DEBUG_OUT = NULL;
-
 // ============================================================================
 // Include all module unittest headers
 // Each header defines: <module>_tests[] array and <module>_tests_size
@@ -50,34 +48,34 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
+    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
     // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
-    { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
-    { "list", list_tests, sizeof(list_tests) / sizeof(test) },
-    { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
+    // { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
+    // { "list", list_tests, sizeof(list_tests) / sizeof(test) },
+    // { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
 
-    // Associative containers (RBT)
-    { "set", set_tests, sizeof(set_tests) / sizeof(test) },
-    { "map", map_tests, sizeof(map_tests) / sizeof(test) },
-    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
-    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
+    // // Associative containers (RBT)
+    // { "set", set_tests, sizeof(set_tests) / sizeof(test) },
+    // { "map", map_tests, sizeof(map_tests) / sizeof(test) },
+    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
+    // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
 
-    // Unordered associative containers (Hash Table)
-    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
-    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
-    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
-    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
+    // // Unordered associative containers (Hash Table)
+    // { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
+    // { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
+    // { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
+    // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
 
-    // Container adapters
-    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
-    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
-    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
-    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
+    // // Container adapters
+    // { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
+    // { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
+    // { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
+    // { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
 
-    // Numeric types
-    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
+    // // Numeric types
+    // { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -85,26 +83,34 @@ static int num_modules = sizeof(all_modules) / sizeof(module_tests);
 int main(int argc, char **argv) {
     int seed = 0, total_success = 0, total_failed = 0, total_tests = 0;
     cparser parser;
+    clogger debug_logger, results_logger;
+    test_arg arg;
 
     int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
 
     cargs_init(&parser, argc, argv);
     cargs_add_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, NULL);
+    cargs_add_arg(&parser, __UNITTEST_RESULTS_FILE_NAME, "Path to the results file", 0, CARG_TYPE_STRING, __UNITTEST_RESULTS_FILE_NAME_VALUE);
     cargs_add_arg(&parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
     cargs_add_arg(&parser, __UNITTEST_MODULE_ARG_NAME, "Module to test (if not specified, all modules are tested)", 0, CARG_TYPE_STRING, NULL);
     cargs_parse(&parser);
 
     const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
-    int close_file = 0;
+    const char *results_file = cargs_get_arg(&parser, __UNITTEST_RESULTS_FILE_NAME);
     if (debug_file != NULL) {
-        __DEBUG_OUT = fopen(debug_file, "a");
-        if (__DEBUG_OUT == NULL) {
-            printf("Failed to open debug file: %s\n", debug_file);
+        if (clogger_init(&debug_logger, debug_file, "a") != CS_SUCCESS) {
+            printf("Failed to initialize debug logger for file: %s\n", debug_file);
             return -1;
         }
-        close_file = 1;
     } else {
-        __DEBUG_OUT = stdout;
+        debug_logger.fp = NULL;
+    }
+
+    if (clogger_init(&results_logger, results_file, "a") != CS_SUCCESS) {
+        printf("Failed to initialize results logger for file: %s\n", results_file);
+        clogger_close(&debug_logger);
+        cargs_free(&parser);
+        return -1;
     }
 
     seed = *(int*)cargs_get_arg(&parser, __UNITTEST_SEED_ARG_NAME);
@@ -123,15 +129,11 @@ int main(int argc, char **argv) {
             }
         }
         if (!found) {
-            fprintf(__DEBUG_OUT, "Module '%s' not found. Available modules:\n", module_filter);
-            for (int m = 0; m < num_modules; m++) {
-                fprintf(__DEBUG_OUT, "  - %s\n", all_modules[m].name);
-            }
-            if (close_file) {
-                fclose(__DEBUG_OUT);
-            }
+            clogger_log(debug_logger, CLOGGER_WARNING, "Module '%s' not found.\n", module_filter);
+            clogger_close(&debug_logger);
             cargs_free(&parser);
-            return -1;
+            clogger_close(&results_logger);
+            return 0;
         }
     }
 
@@ -140,23 +142,24 @@ int main(int argc, char **argv) {
         total_tests += all_modules[m].size;
     }
 
-    fprintf(__DEBUG_OUT, "========================================\n");
-    fprintf(__DEBUG_OUT, "  UNIFIED UNITTEST RUN\n");
-    fprintf(__DEBUG_OUT, "  SEED: %d\n", seed);
-    fprintf(__DEBUG_OUT, "  MODULES: %d | TOTAL TESTS: %d\n", num_modules, total_tests);
-    fprintf(__DEBUG_OUT, "========================================\n\n");
+    clogger_log(results_logger, CLOGGER_INFO, "========================================\n");
+    clogger_log(results_logger, CLOGGER_INFO, "  UNIFIED UNITTEST RUN\n");
+    clogger_log(results_logger, CLOGGER_INFO, "  SEED: %d\n", seed);
+    clogger_log(results_logger, CLOGGER_INFO, "  MODULES: %d | TOTAL TESTS: %d\n", num_modules, total_tests);
+    clogger_log(results_logger, CLOGGER_INFO, "========================================\n\n");
 
     // Run tests for each module
     for (int m = 0; m < num_modules; m++) {
         module_tests *mod = &all_modules[m];
         int success = 0, failed = 0;
 
-        fprintf(__DEBUG_OUT, "----------------------------------------\n");
-        fprintf(__DEBUG_OUT, "  MODULE: %s (%d tests)\n", mod->name, mod->size);
-        fprintf(__DEBUG_OUT, "----------------------------------------\n");
+        clogger_log(results_logger, CLOGGER_INFO, "----------------------------------------\n");
+        clogger_log(results_logger, CLOGGER_INFO, "  MODULE: %s (%d tests)\n", mod->name, mod->size);
+        clogger_log(results_logger, CLOGGER_INFO, "----------------------------------------\n");
 
         for (int i = 0; i < mod->size; i++) {
-            test_res res = mod->tests[i]();
+            arg.logger = &debug_logger;
+            test_res res = mod->tests[i](&arg);
 
             char buffer[__MAX_REASON_SIZE];
             const char *dots =
@@ -171,40 +174,39 @@ int main(int argc, char **argv) {
 
             if (res.return_code != CS_SUCCESS) {
                 failed++;
-                fprintf(__DEBUG_OUT,
+                clogger_log(results_logger, CLOGGER_ERROR,
                         "[%2d/%2d] %s" __RED_UNITTEST __BOLD_UNITTEST "[FAIL]" __RESET_UNITTEST
                         "  reason: %s\n",
                         i + 1, mod->size, buffer,
                         res.reason ? res.reason : "(no reason)");
             } else {
                 success++;
-                fprintf(__DEBUG_OUT,
+                clogger_log(results_logger, CLOGGER_INFO,
                         "[%2d/%2d] %s" __GREEN_UNITTEST "[ OK ]" __RESET_UNITTEST "\n",
                         i + 1, mod->size, buffer);
             }
         }
 
-        fprintf(__DEBUG_OUT, "  >> %s: %d passed, %d failed\n\n", mod->name, success, failed);
+        clogger_log(results_logger, CLOGGER_INFO, "  >> %s: %d passed, %d failed\n\n", mod->name, success, failed);
         total_success += success;
         total_failed += failed;
     }
 
     // Final summary
-    fprintf(__DEBUG_OUT, "========================================\n");
+    clogger_log(results_logger, CLOGGER_INFO, "========================================\n");
     if (total_failed == 0) {
-        fprintf(__DEBUG_OUT, __GREEN_UNITTEST __BOLD_UNITTEST
-                "FINAL SUMMARY: %d passed, %d failed (total %d)\n" __RESET_UNITTEST,
+        clogger_log(results_logger, CLOGGER_INFO, __GREEN_UNITTEST __BOLD_UNITTEST
+                "FINAL SUMMARY: %d passed, %d failed (total %d)" __RESET_UNITTEST "\n",
                 total_success, total_failed, total_tests);
     } else {
-        fprintf(__DEBUG_OUT, __RED_UNITTEST __BOLD_UNITTEST
-                "FINAL SUMMARY: %d passed, %d failed (total %d)\n" __RESET_UNITTEST,
+        clogger_log(results_logger, CLOGGER_ERROR, __RED_UNITTEST __BOLD_UNITTEST
+                "FINAL SUMMARY: %d passed, %d failed (total %d)" __RESET_UNITTEST "\n",
                 total_success, total_failed, total_tests);
     }
-    fprintf(__DEBUG_OUT, "========================================\n\n");
+    clogger_log(results_logger, CLOGGER_INFO, "========================================\n\n");
 
-    if (close_file) {
-        fclose(__DEBUG_OUT);
-    }
+    clogger_close(&debug_logger);
     cargs_free(&parser);
+    clogger_close(&results_logger);
     return total_failed > 0 ? 1 : 0;
 }

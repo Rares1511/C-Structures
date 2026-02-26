@@ -47,7 +47,7 @@ endif
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
            unordered_map stack multiset multimap unordered_multiset \
-           unordered_multimap queue priority_queue flat_set large_number
+           unordered_multimap queue priority_queue flat_set large_number clogger
 
 INSTALL_LIBS := $(SUBDIRS)
 
@@ -147,32 +147,39 @@ ifeq ($(debug),true)
 	@touch $(UNITTEST_LOG)
 endif
 
-unittest: unittest-log-init libs
-	@$(CC) -o unittest_bin unittest.c $(CFLAGS) \
+build_unittest: unittest-log-init libs
+	@$(CC) -o unittest unittest.c $(CFLAGS) \
 	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) -lcargs $(LDLIBS)
 	
+run_unittest: build_unittest
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
 	for module in $(SUBDIRS); do \
 	  if [ "$(memcheck)" = "true" ]; then \
-	    if [ "$(debug)" = "true" ]; then \
-	      valgrind --leak-check=full ./unittest_bin $(ARGS) --module $$module >> $(UNITTEST_LOG) 2>&1 ; \
-	    else \
-	      valgrind --leak-check=full ./unittest_bin $(ARGS) --module $$module 2>&1 ; \
-	    fi \
+	      valgrind --leak-check=full ./unittest $(ARGS) \
+		  --debug-file logs/debug.ansi \
+		  --module $$module \
+		  --results-file logs/results.ansi \
+		  >> logs/memcheck.ansi 2>&1; \
 	  else \
-	    ./unittest_bin $(ARGS) --module $$module ; \
+	    ./unittest $(ARGS) \
+		--debug-file logs/debug.ansi \
+		--module $$module \
+		--results-file logs/results.ansi; \
 	  fi \
 	done
-	@$(RM) unittest_bin
+
+unittest: build_unittest run_unittest
 
 # ---------------- Cleanup ----------------
 
 clean:
 	@echo "Cleaning build files..."
 	$(RM) $(UNITTEST_LOG)
+	$(RM) unittest
+	$(RM) logs/*
 	$(RM) $(LIBOUTDIR)/*.so
 	@for m in $(SUBDIRS); do \
-	    $(RM) $$m/$$m.o $$m/unittest; \
+	    $(RM) $$m/$$m.o; \
 	done
 	@for o in $(CORE_OBJS); do \
 	    $(RM) $$o; \

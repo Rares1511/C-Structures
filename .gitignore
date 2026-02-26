@@ -53,3 +53,5 @@ dkms.conf
 
 # Testing files
 unittest_log.*
+logs/
+lib/

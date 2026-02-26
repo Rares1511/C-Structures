@@ -32,3 +32,5 @@ Extra Modules:
 Implement shrink to deque
 Change *_clear to cs_codes and make it reserve the INIT_CAPACITY of the data structure or CS_SUCCESS if it only initialized nodes like rbt or list
 Think about having fractions on large number (from Z -> Q, have to make: mul, switch_base)
+
+Make logger logic to debug + update it to other unittests
