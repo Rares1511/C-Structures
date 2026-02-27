@@ -84,6 +84,8 @@ int main(int argc, char **argv) {
     int seed = 0, total_success = 0, total_failed = 0, total_tests = 0;
     cparser parser;
     clogger debug_logger, results_logger;
+    clogger_options debug_options = { .min_level = CLOGGER_DEBUG, .modes = "a" };
+    clogger_options results_options = { .min_level = CLOGGER_INFO, .modes = "a" };
     test_arg arg;
 
     int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
@@ -98,7 +100,7 @@ int main(int argc, char **argv) {
     const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
     const char *results_file = cargs_get_arg(&parser, __UNITTEST_RESULTS_FILE_NAME);
     if (debug_file != NULL) {
-        if (clogger_init(&debug_logger, debug_file, "a") != CS_SUCCESS) {
+        if (clogger_init(&debug_logger, debug_file, debug_options) != CS_SUCCESS) {
             printf("Failed to initialize debug logger for file: %s\n", debug_file);
             return -1;
         }
@@ -106,7 +108,7 @@ int main(int argc, char **argv) {
         debug_logger.fp = NULL;
     }
 
-    if (clogger_init(&results_logger, results_file, "a") != CS_SUCCESS) {
+    if (clogger_init(&results_logger, results_file, results_options) != CS_SUCCESS) {
         printf("Failed to initialize results logger for file: %s\n", results_file);
         clogger_close(&debug_logger);
         cargs_free(&parser);

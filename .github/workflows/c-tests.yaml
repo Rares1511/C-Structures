@@ -24,4 +24,10 @@ jobs:
         # No sudo needed!
         mkdir -p logs
         make unittest memcheck=true SEED=1234
+        echo "MEMORY CHECK LOGS:"
+        cat logs/memcheck.ansi
+        echo "TEST DEBUG LOGS:"
+        cat logs/debug.ansi
+        echo "TEST RESULTS LOGS:"
+        cat logs/results.ansi
         rm -rf logs

@@ -134,6 +134,7 @@ export LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH
 | Module | Description | Documentation |
 |--------|-------------|---------------|
 | **Cargs** | Command-line argument parser | [📖 README](cargs/README.md) |
+| **CLogger** | Lightweight file logger with severity levels | [📖 README](clogger/README.md) |
 
 ---
 
@@ -185,10 +186,12 @@ C-Structures/
 │   ├── universal.h      # Common definitions
 │   ├── vector.h
 │   ├── map.h
+│   ├── clogger.h
 │   └── ...
 ├── lib/                 # Compiled shared libraries
 ├── vector/              # Vector implementation
 ├── map/                 # Map implementation
+├── clogger/             # Logger implementation
 ├── ...                  # Other modules
 ├── rbt/                 # Red-Black Tree (internal)
 ├── hash_table/          # Hash Table (internal)
