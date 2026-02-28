@@ -92,7 +92,7 @@ void clogger_print_stacktrace(clogger logger);
                     (long)(_clog_now % 1000)); \
             } \
             if (_clog_flags & CLOGGER_SHOW_LEVEL) { \
-                fprintf((logger).fp, "[%-7s] ", \
+                fprintf((logger).fp, "[%s] ", \
                     (level) == CLOGGER_DEBUG ? "DEBUG" : \
                     (level) == CLOGGER_INFO ? "INFO" : \
                     (level) == CLOGGER_WARNING ? "WARNING" : "ERROR"); \
