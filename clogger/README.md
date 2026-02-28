@@ -1,6 +1,6 @@
 # CLogger — Lightweight File Logger
 
-A minimal, zero-dependency file logging utility in C with automatic function name capture and four severity levels.
+A minimal file logging utility in C with automatic function name capture, four severity levels, and optional thread safety.
 
 ---
 
@@ -12,6 +12,7 @@ A minimal, zero-dependency file logging utility in C with automatic function nam
   - [Initialization & Cleanup](#initialization--cleanup)
   - [Logging Operations](#logging-operations)
 - [Log Output Format](#log-output-format)
+- [Thread Safety](#thread-safety)
 - [Memory Architecture](#memory-architecture)
 - [Build & Usage](#build--usage)
 
@@ -30,7 +31,13 @@ void process_data(clogger *log) {
 
 int main(void) {
     clogger log;
-    clogger_init(&log, "app.log", "w");
+    clogger_options opts = {
+        .min_level = CLOGGER_DEBUG,
+        .modes = "w",
+        .flags = CLOGGER_SHOW_ALL,  // Show time, file, func, line, and level
+        .thread_safe = 0            // Disable thread safety (no mutex overhead)
+    };
+    clogger_init(&log, "app.log", opts);
 
     clogger_log(log, CLOGGER_INFO, "Application started\n");
     process_data(&log);
@@ -63,22 +70,51 @@ typedef enum clogger_level {
     CLOGGER_ERROR       /* Error conditions */
 } clogger_level;
 
+/* Flags to control which metadata is displayed in log messages */
+typedef enum clogger_flags {
+    CLOGGER_SHOW_NONE = 0,       /* Show no metadata, only the log message */
+    CLOGGER_SHOW_TIME = 1 << 0,  /* Show timestamp (HH:MM:SS.mmm) */
+    CLOGGER_SHOW_FILE = 1 << 1,  /* Show source file name */
+    CLOGGER_SHOW_FUNC = 1 << 2,  /* Show function name */
+    CLOGGER_SHOW_LINE = 1 << 3,  /* Show line number */
+    CLOGGER_SHOW_ALL  = CLOGGER_SHOW_TIME | CLOGGER_SHOW_FILE | 
+                        CLOGGER_SHOW_FUNC | CLOGGER_SHOW_LINE
+} clogger_flags;
+
+typedef struct clogger_options {
+    clogger_level min_level;  /* Minimum logging level to log */
+    const char *modes;        /* File opening modes ("w", "a", etc.) */
+    clogger_flags flags;      /* Flags controlling which metadata to display */
+    int thread_safe;          /* Enable thread-safe logging (0 = disabled) */
+} clogger_options;
+
 typedef struct clogger {
-    FILE *fp;           /* File pointer for log output */
+    FILE *fp;                  /* File pointer for log output */
+    clogger_options options;   /* Logging options */
+    pthread_mutex_t *mutex;    /* Mutex for thread safety (NULL if disabled) */
 } clogger;
 ```
+
+**Flag Combinations:**
+
+| Flags | Output Format |
+|-------|--------------|
+| `CLOGGER_SHOW_NONE` | `message` |
+| `CLOGGER_SHOW_LEVEL` | `[LEVEL  ] message` |
+| `CLOGGER_SHOW_TIME \| CLOGGER_SHOW_LEVEL` | `HH:MM:SS.mmm [LEVEL  ] message` |
+| `CLOGGER_SHOW_ALL` | `HH:MM:SS.mmm [LEVEL  ] file.c:func():123 message` |
 
 ### Initialization & Cleanup
 
 | Function | Signature | Return | Description |
 |----------|-----------|--------|-------------|
-| `clogger_init` | `cs_codes clogger_init(clogger *logger, const char *filename, const char *modes)` | `CS_SUCCESS`, `CS_NULL`, or `CS_MEM` | Opens file for logging; `modes` follows `fopen()` semantics ("w", "a", etc.) |
-| `clogger_close` | `void clogger_close(clogger *logger)` | void | Closes log file and sets `fp` to NULL |
+| `clogger_init` | `cs_codes clogger_init(clogger *logger, const char *filename, clogger_options options)` | `CS_SUCCESS`, `CS_NULL`, or `CS_MEM` | Opens file for logging with specified options |
+| `clogger_close` | `void clogger_close(clogger *logger)` | void | Closes log file, destroys mutex (if enabled), and sets pointers to NULL |
 
 **Return codes:**
 - `CS_SUCCESS` — Initialization successful
 - `CS_NULL` — One or more arguments is NULL
-- `CS_MEM` — File could not be opened
+- `CS_MEM` — File could not be opened or mutex allocation failed
 
 ### Logging Operations
 
@@ -101,10 +137,22 @@ typedef struct clogger {
 
 ## Log Output Format
 
-Each log entry follows this format:
+The log entry format depends on the `clogger_flags` set in options. With `CLOGGER_SHOW_ALL`:
 
 ```
-<function_name>: [<LEVEL>]<message>
+HH:MM:SS.mmm [LEVEL  ] file.c:func():line message
+```
+
+With `CLOGGER_SHOW_LEVEL` only:
+
+```
+[LEVEL  ] message
+```
+
+With `CLOGGER_SHOW_NONE` (minimal output):
+
+```
+message
 ```
 
 | Level | Tag |
@@ -124,6 +172,28 @@ cleanup: [ERROR]Failed to close connection: fd=5
 
 ---
 
+## Thread Safety
+
+The logger supports optional thread-safe operation via POSIX mutexes. Enable it by setting `thread_safe = 1` in options:
+
+```c
+clogger_options opts = {
+    .min_level = CLOGGER_DEBUG,
+    .modes = "a",
+    .flags = CLOGGER_SHOW_ALL,
+    .thread_safe = 1  // Enable mutex protection
+};
+```
+
+**Behavior when enabled:**
+- A mutex is allocated and initialized during `clogger_init()`
+- Each `clogger_log()` call acquires the mutex before writing and releases it after
+- `clogger_close()` destroys and frees the mutex
+
+**Performance note:** Thread safety adds overhead from mutex lock/unlock operations. Disable it for single-threaded applications.
+
+---
+
 ## Memory Architecture
 
 ### Structure Layout (64-bit)
@@ -131,13 +201,17 @@ cleanup: [ERROR]Failed to close connection: fd=5
 | Field | Type | Size | Description |
 |-------|------|------|-------------|
 | `fp` | `FILE *` | 8 bytes | Pointer to open file stream |
-
-**Total**: `sizeof(clogger)` = 8 bytes
+| `options.min_level` | `clogger_level` | 4 bytes | Minimum log level |
+| `options.modes` | `const char *` | 8 bytes | File opening mode string |
+| `options.flags` | `clogger_flags` | 4 bytes | Display flags |
+| `options.thread_safe` | `int` | 4 bytes | Thread safety flag |
+| `mutex` | `pthread_mutex_t *` | 8 bytes | Mutex pointer (NULL if disabled) |
 
 ### Resource Management
 
 - `clogger_init` opens a file handle (consumes 1 file descriptor)
-- `clogger_close` releases the file descriptor
+- If `thread_safe` is enabled, allocates and initializes a pthread mutex
+- `clogger_close` releases the file descriptor and mutex (if allocated)
 - Always call `clogger_close` before program exit to ensure logs are flushed
 
 ---
@@ -180,8 +254,14 @@ void database_query(clogger *log, const char *query) {
 
 int main(void) {
     clogger log;
+    clogger_options opts = {
+        .min_level = CLOGGER_DEBUG,
+        .modes = "a",
+        .flags = CLOGGER_SHOW_TIME | CLOGGER_SHOW_FUNC | CLOGGER_SHOW_LEVEL,
+        .thread_safe = 0  // Single-threaded, no mutex needed
+    };
     
-    if (clogger_init(&log, "debug.log", "a") != CS_SUCCESS) {
+    if (clogger_init(&log, "debug.log", opts) != CS_SUCCESS) {
         fprintf(stderr, "Failed to open log file\n");
         return 1;
     }

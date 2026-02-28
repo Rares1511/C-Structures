@@ -36,6 +36,9 @@
 // Numeric types
 #include "large_number/large_number_unittest.h"
 
+// Utilities
+#include "clogger/clogger_unittest.h"
+
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================
@@ -48,7 +51,7 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
+    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
     // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
@@ -76,6 +79,9 @@ static module_tests all_modules[] = {
 
     // // Numeric types
     // { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
+
+    // Utilities
+    { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -84,8 +90,18 @@ int main(int argc, char **argv) {
     int seed = 0, total_success = 0, total_failed = 0, total_tests = 0;
     cparser parser;
     clogger debug_logger, results_logger;
-    clogger_options debug_options = { .min_level = CLOGGER_DEBUG, .modes = "a" };
-    clogger_options results_options = { .min_level = CLOGGER_INFO, .modes = "a" };
+    clogger_options debug_options = { 
+        .min_level = CLOGGER_DEBUG, 
+        .modes = "a" ,
+        .flags = CLOGGER_SHOW_ALL,
+        .thread_safe = 0
+    };
+    clogger_options results_options = { 
+        .min_level = CLOGGER_INFO, 
+        .modes = "a",
+        .flags = CLOGGER_SHOW_NONE,
+        .thread_safe = 0
+    };
     test_arg arg;
 
     int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;

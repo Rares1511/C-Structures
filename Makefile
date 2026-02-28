@@ -69,6 +69,9 @@ DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_flat_set           := vector/vector.o deque/deque.o
 
+# Additional linker flags for specific modules
+LDLIBS_clogger          := -lpthread -rdynamic
+
 # ---------------- Derived paths ----------------
 MOD_OBJ = $1/$1.o
 ALL_MOD_OBJS := $(foreach m,$(SUBDIRS),$(call MOD_OBJ,$(m)))
@@ -98,7 +101,7 @@ objects: $(ALL_MOD_OBJS) $(CORE_OBJS)
 
 define LINK_SO_RULE
 $(LIBOUTDIR)/lib$1.so: $(call MOD_OBJ,$1) $$(DEPS_$1) | $(LIBOUTDIR)
-	$$(CC) -shared -o $$@ $$^ $$(CFLAGS) $$(LDLIBS)
+	$$(CC) -shared -o $$@ $$^ $$(CFLAGS) $$(LDLIBS) $$(LDLIBS_$1)
 endef
 $(foreach m,$(INSTALL_LIBS),$(eval $(call LINK_SO_RULE,$(m))))
 

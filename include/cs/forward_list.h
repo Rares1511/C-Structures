@@ -10,7 +10,7 @@ typedef struct forward_list_node{
     struct forward_list_node* next;
 } forward_list_node;
 
-typedef struct forward_list{
+typedef struct forward_list {
     forward_list_node* head;
     forward_list_attr_t attr;
     int size;
