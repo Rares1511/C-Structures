@@ -1,5 +1,7 @@
 #include <cs/clogger.h>
 
+#include <signal.h>
+
 cs_codes clogger_init(clogger *logger, const char *filename, clogger_options options) {
     CS_RETURN_IF(logger == NULL || filename == NULL || options.modes == NULL, CS_NULL);
     logger->fp = fopen(filename, options.modes);

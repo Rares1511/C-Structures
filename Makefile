@@ -47,12 +47,12 @@ endif
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
            unordered_map stack multiset multimap unordered_multiset \
-           unordered_multimap queue priority_queue flat_set large_number clogger
+           unordered_multimap queue priority_queue flat_set large_number clogger cstring
 
 INSTALL_LIBS := $(SUBDIRS)
 
 # ---------------- Core/Dependency objects ----------------
-CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
+CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o cstring/nfa.o
 
 # Link-time dependencies for shared libraries
 DEPS_rbt                := vector/vector.o
@@ -68,6 +68,7 @@ DEPS_multimap           := rbt/rbt.o pair/pair.o vector/vector.o
 DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_flat_set           := vector/vector.o deque/deque.o
+DEPS_cstring            := cstring/nfa.o vector/vector.o
 
 # Additional linker flags for specific modules
 LDLIBS_clogger          := -lpthread -rdynamic
@@ -92,6 +93,10 @@ $(LIBOUTDIR):
 # Generic rule: build module/module.o from module/module.c
 # Uses -I$(LOCAL_INCLUDEDIR) defined in CFLAGS
 %/%.o: %/%.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+# Explicit rule for non-standard object files (name != directory)
+cstring/nfa.o: cstring/nfa.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # Convenience target for objects
@@ -120,6 +125,7 @@ install_headers:
 	done
 	cp $(LOCAL_INCLUDEDIR)/cs/rbt.h $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/cs/hash_table.h $(PATH_INCLUDEDIR)
+	cp cstring/nfa.h $(PATH_INCLUDEDIR)
 
 install_libs:
 	@echo "Installing libraries to $(LIBDIR)..."
@@ -135,6 +141,7 @@ uninstall:
 	$(RM) $(PATH_INCLUDEDIR)/universal.h
 	$(RM) $(PATH_INCLUDEDIR)/rbt.h
 	$(RM) $(PATH_INCLUDEDIR)/hash_table.h
+	$(RM) $(PATH_INCLUDEDIR)/nfa.h
 	@for m in $(INSTALL_LIBS); do $(RM) $(LIBDIR)/lib$$m.so; done
 	rmdir --ignore-fail-on-non-empty $(PATH_INCLUDEDIR) || true
 	ldconfig
@@ -152,7 +159,7 @@ endif
 
 build_unittest: unittest-log-init libs
 	@$(CC) -o unittest unittest.c $(CFLAGS) \
-	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) -lcargs $(LDLIBS)
+	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
 run_unittest: build_unittest
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \

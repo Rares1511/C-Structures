@@ -34,3 +34,5 @@ Change *_clear to cs_codes and make it reserve the INIT_CAPACITY of the data str
 Think about having fractions on large number (from Z -> Q, have to make: mul, switch_base)
 
 Make logger logic to debug + update it to other unittests
+
+Check regex works for the special characters + optimize the regex tree afterwards (many situations with only one child that is full char* so go over and if your only child has no next or prev has only char* trasnsfer the char* to parent)

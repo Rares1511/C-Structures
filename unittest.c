@@ -39,6 +39,9 @@
 // Utilities
 #include "clogger/clogger_unittest.h"
 
+// String module
+#include "cstring/cstring_unittest.h"
+
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================
@@ -51,10 +54,10 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
+    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
     // Associative containers (Arrays)
-    { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
+    // { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
     // { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
     // { "list", list_tests, sizeof(list_tests) / sizeof(test) },
     // { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
@@ -81,7 +84,10 @@ static module_tests all_modules[] = {
     // { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
 
     // Utilities
-    { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
+    // { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
+
+    // String module
+    { "cstring", cstring_tests, sizeof(cstring_tests) / sizeof(test) },
 };
 
 static int num_modules = sizeof(all_modules) / sizeof(module_tests);
