@@ -3,11 +3,13 @@
 #include <cs/pair.h>
 #include <unittest.h>
 
+#include <sys/time.h>
+#include <valgrind/valgrind.h>
+
 // ============================================================================
 // map_init
 // ============================================================================
-
-test_res test_map_init() {
+test_res test_map_init(test_arg *arg) {
     map_attr_t key_attr = get_test_struct_attr();
     map_attr_t val_attr = get_test_struct_attr();
 
@@ -30,8 +32,7 @@ test_res test_map_init() {
 // ============================================================================
 // map_insert
 // ============================================================================
-
-test_res test_map_insert_single() {
+test_res test_map_insert_single(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "Key42", 42.0);
@@ -65,7 +66,7 @@ test_res test_map_insert_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_insert_multiple() {
+test_res test_map_insert_multiple(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -97,7 +98,7 @@ test_res test_map_insert_multiple() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_insert_duplicate_key() {
+test_res test_map_insert_duplicate_key(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "DupKey", 42.0);
@@ -146,7 +147,7 @@ test_res test_map_insert_duplicate_key() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_insert_ascending() {
+test_res test_map_insert_ascending(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -176,7 +177,7 @@ test_res test_map_insert_ascending() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_insert_descending() {
+test_res test_map_insert_descending(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -209,8 +210,7 @@ test_res test_map_insert_descending() {
 // ============================================================================
 // map_delete
 // ============================================================================
-
-test_res test_map_delete_single() {
+test_res test_map_delete_single(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "DelKey", 42.0);
@@ -252,7 +252,7 @@ test_res test_map_delete_single() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_delete_multiple() {
+test_res test_map_delete_multiple(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     int total = 50;
@@ -294,7 +294,7 @@ test_res test_map_delete_multiple() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_delete_nonexistent() {
+test_res test_map_delete_nonexistent(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -333,7 +333,7 @@ test_res test_map_delete_nonexistent() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_delete_random_order() {
+test_res test_map_delete_random_order(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     int total = 100;
@@ -378,8 +378,7 @@ test_res test_map_delete_random_order() {
 // ============================================================================
 // map_find
 // ============================================================================
-
-test_res test_map_find_existing() {
+test_res test_map_find_existing(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -414,7 +413,7 @@ test_res test_map_find_existing() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_find_nonexistent() {
+test_res test_map_find_nonexistent(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -443,7 +442,7 @@ test_res test_map_find_nonexistent() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_find_all() {
+test_res test_map_find_all(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     int total = 100;
@@ -484,8 +483,7 @@ test_res test_map_find_all() {
 // ============================================================================
 // map_empty
 // ============================================================================
-
-test_res test_map_empty_initial() {
+test_res test_map_empty_initial(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -498,7 +496,7 @@ test_res test_map_empty_initial() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_empty_after_ops() {
+test_res test_map_empty_after_ops(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "EmptyKey", 42.0);
@@ -543,8 +541,7 @@ test_res test_map_empty_after_ops() {
 // ============================================================================
 // map_size
 // ============================================================================
-
-test_res test_map_size_initial() {
+test_res test_map_size_initial(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -557,7 +554,7 @@ test_res test_map_size_initial() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_size_after_ops() {
+test_res test_map_size_after_ops(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -604,8 +601,7 @@ test_res test_map_size_after_ops() {
 // ============================================================================
 // map_swap
 // ============================================================================
-
-test_res test_map_swap() {
+test_res test_map_swap(test_arg *arg) {
     map m1;
     map_init(&m1, get_test_struct_attr(), get_test_struct_attr());
     map m2;
@@ -669,7 +665,7 @@ test_res test_map_swap() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_swap_empty() {
+test_res test_map_swap_empty(test_arg *arg) {
     map m1;
     map_init(&m1, get_test_struct_attr(), get_test_struct_attr());
     map m2;
@@ -710,8 +706,7 @@ test_res test_map_swap_empty() {
 // ============================================================================
 // map_clear
 // ============================================================================
-
-test_res test_map_clear() {
+test_res test_map_clear(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -743,7 +738,7 @@ test_res test_map_clear() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_clear_reuse() {
+test_res test_map_clear_reuse(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -790,8 +785,7 @@ test_res test_map_clear_reuse() {
 // ============================================================================
 // Complex struct integrity tests
 // ============================================================================
-
-test_res test_map_nested_data_integrity() {
+test_res test_map_nested_data_integrity(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -842,7 +836,7 @@ test_res test_map_nested_data_integrity() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_deep_copy_verification() {
+test_res test_map_deep_copy_verification(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -898,8 +892,7 @@ test_res test_map_deep_copy_verification() {
 // ============================================================================
 // Stress tests with RBT integrity
 // ============================================================================
-
-test_res test_map_stress_insert_delete() {
+test_res test_map_stress_insert_delete(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -945,7 +938,7 @@ test_res test_map_stress_insert_delete() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_interleaved_insert_delete() {
+test_res test_map_interleaved_insert_delete(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -980,7 +973,7 @@ test_res test_map_interleaved_insert_delete() {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_map_delete_all_verify_rbt() {
+test_res test_map_delete_all_verify_rbt(test_arg *arg) {
     map m;
     map_init(&m, get_test_struct_attr(), get_test_struct_attr());
 
@@ -1015,6 +1008,87 @@ test_res test_map_delete_all_verify_rbt() {
         map_free(&m);
         return (test_res){(char*)__func__, "Map not empty after deleting all", CS_UNKNOWN};
     }
+
+    map_free(&m);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+// ============================================================================
+// Stress test with timing
+// ============================================================================
+test_res test_map_stress(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
+    }
+
+    map m;
+    struct timeval start, end;
+    double elapsed, avg_time;
+
+    map_init(&m, get_int_attr(), get_test_struct_attr());
+    int total = __STRESS_TEST_SIZE;
+
+    /* INSERT timing */
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        test_struct val = create_test_struct(i, "StressVal", (double)(i * 3));
+        cs_codes result = map_insert(&m, &key, &val);
+        free_test_struct(&val);
+
+        if (result != CS_SUCCESS) {
+            map_free(&m);
+            return (test_res){(char*)__func__, "Insert failed during stress test", result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    avg_time = elapsed / total;
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG,
+        "Stress test completed: Total Insert Time = %.9f sec, Avg Insert Time = %.9f sec\n", elapsed, avg_time);
+
+    /* FIND timing */
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        void *found = map_find(m, &key);
+
+        if (found == NULL) {
+            map_free(&m);
+            return (test_res){(char*)__func__, "Find failed during stress test", CS_ELEM};
+        }
+
+        test_struct *found_val = (test_struct*)found;
+        if (found_val->id != i) {
+            map_free(&m);
+            return (test_res){(char*)__func__, "Find returned wrong value during stress test", CS_ELEM};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    avg_time = elapsed / total;
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG,
+        "Stress test completed: Total Find Time = %.9f sec, Avg Find Time = %.9f sec\n", elapsed, avg_time);
+
+    /* DELETE timing */
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        cs_codes del_result = map_delete(&m, &key);
+
+        if (del_result != CS_SUCCESS) {
+            map_free(&m);
+            return (test_res){(char*)__func__, "Delete failed during stress test", del_result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    avg_time = elapsed / total;
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG,
+        "Stress test completed: Total Delete Time = %.9f sec, Avg Delete Time = %.9f sec\n", elapsed, avg_time);
 
     map_free(&m);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -1065,5 +1139,8 @@ test map_tests[] = {
     // Stress tests with RBT integrity
     test_map_stress_insert_delete,
     test_map_interleaved_insert_delete,
-    test_map_delete_all_verify_rbt
+    test_map_delete_all_verify_rbt,
+
+    // Stress test with timing
+    test_map_stress,
 };

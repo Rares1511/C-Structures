@@ -68,7 +68,7 @@ DEPS_multimap           := rbt/rbt.o pair/pair.o vector/vector.o
 DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_flat_set           := vector/vector.o deque/deque.o
-DEPS_cstring            := cstring/nfa.o vector/vector.o
+DEPS_cstring            := cstring/nfa.o cstring/dfa.o vector/vector.o
 
 # Additional linker flags for specific modules
 LDLIBS_clogger          := -lpthread -rdynamic
@@ -99,6 +99,9 @@ $(LIBOUTDIR):
 cstring/nfa.o: cstring/nfa.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+cstring/dfa.o: cstring/dfa.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
 # Convenience target for objects
 objects: $(ALL_MOD_OBJS) $(CORE_OBJS)
 
@@ -126,6 +129,7 @@ install_headers:
 	cp $(LOCAL_INCLUDEDIR)/cs/rbt.h $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/cs/hash_table.h $(PATH_INCLUDEDIR)
 	cp cstring/nfa.h $(PATH_INCLUDEDIR)
+	cp cstring/dfa.h $(PATH_INCLUDEDIR)
 
 install_libs:
 	@echo "Installing libraries to $(LIBDIR)..."

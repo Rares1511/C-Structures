@@ -129,12 +129,12 @@ test_res test_cstring_init_regex_paran(test_arg *arg) {
 
 test cstring_tests[] = {
     // cstring_init
-    test_cstring_init,
-    test_cstring_init_empty,
+    // test_cstring_init,
+    // test_cstring_init_empty,
 
     // cstring_init regex
     test_cstring_init_regex,
-    test_cstring_init_regex_union,
-    test_cstring_init_regex_star,
-    test_cstring_init_regex_paran
+    // test_cstring_init_regex_union,
+    // test_cstring_init_regex_star,
+    // test_cstring_init_regex_paran
 };

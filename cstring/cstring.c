@@ -1,5 +1,6 @@
 #include <cs/cstring.h>
 #include <cs/nfa.h>
+#include <cs/dfa.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,9 @@ cs_codes cstring_init(cstring *str, const char *data) {
     int rc = regex_to_nfa(data, &str->_regex_nfa, &pos);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
 
+    rc = nfa_to_dfa(str->_regex_nfa, &str->_regex_dfa);
+    CS_RETURN_IF(rc != CS_SUCCESS, rc);
+
     return CS_SUCCESS;
 }
 
@@ -39,4 +43,6 @@ void cstring_free(void *v_str) {
     str->_data = NULL;
     nfa_free(str->_regex_nfa);
     str->_regex_nfa = NULL;
+    dfa_free(str->_regex_dfa);
+    str->_regex_dfa = NULL;
 }

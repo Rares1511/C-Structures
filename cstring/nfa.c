@@ -19,6 +19,12 @@ nfa_node* nfa_node_init(const char c) {
     return node;
 }
 
+void nfa_node_free(void *v_node) {
+    nfa_node *node = *(nfa_node **)v_node;
+    CS_RETURN_IF(NULL == node);
+    free(node);
+}
+
 nfa* nfa_init(const char c) {
     nfa *automaton = (nfa *)malloc(sizeof(nfa));
     CS_RETURN_IF(NULL == automaton, NULL);
@@ -26,7 +32,7 @@ nfa* nfa_init(const char c) {
         .size = sizeof(nfa_node*),
         .comp = NULL,
         .copy = NULL,
-        .fr = NULL,
+        .fr = nfa_node_free,
         .print = NULL
     };
     automaton->nodes = (vector *)malloc(sizeof(vector));
@@ -42,20 +48,31 @@ nfa* nfa_init(const char c) {
     }
     if (c == NFA_EPSILON) {
         automaton->end = automaton->start;
+        if (vector_push_back(automaton->nodes, &automaton->start) != CS_SUCCESS) {
+            free(automaton->start);
+            free(automaton->nodes);
+            free(automaton);
+            return NULL;
+        }
         return automaton;
     }
     automaton->end = nfa_node_init(NFA_EPSILON);
     if (!automaton->end) {
         free(automaton->start);
+        free(automaton->nodes);
         free(automaton);
         return NULL;
     }
     automaton->start->next1 = automaton->end;
+    if (vector_push_back(automaton->nodes, &automaton->start) != CS_SUCCESS ||
+        vector_push_back(automaton->nodes, &automaton->end) != CS_SUCCESS) {
+        free(automaton->start);
+        free(automaton->end);
+        free(automaton->nodes);
+        free(automaton);
+        return NULL;
+    }
     return automaton;
-}
-
-void nfa_node_free(nfa_node *node) {
-    CS_RETURN_IF(NULL == node);
 }
 
 nfa* nfa_concat(nfa *a, nfa *b) {
@@ -66,7 +83,8 @@ nfa* nfa_concat(nfa *a, nfa *b) {
         nfa_node *node = *(nfa_node **)vector_at((*b->nodes), i);
         vector_push_back(a->nodes, &node);
     }
-    vector_free(b->nodes);
+    free(b->nodes->vec);
+    free(b->nodes);
     free(b);
     return a;
 }
@@ -95,8 +113,10 @@ nfa* nfa_union(nfa *a, nfa *b) {
         nfa_node *node = *(nfa_node **)vector_at((*b->nodes), i);
         vector_push_back(automaton->nodes, &node);
     }
-    vector_free(a->nodes);
-    vector_free(b->nodes);
+    free(a->nodes->vec);
+    free(b->nodes->vec);
+    free(a->nodes);
+    free(b->nodes);
     free(a);
     free(b);
     return automaton;
@@ -116,7 +136,8 @@ nfa* nfa_star(nfa *a) {
         nfa_node *node = *(nfa_node **)vector_at((*a->nodes), i);
         vector_push_back(automaton->nodes, &node);
     }
-    vector_free(a->nodes);
+    free(a->nodes->vec);
+    free(a->nodes);
     free(a);
     return automaton;
 }
@@ -169,5 +190,6 @@ cs_codes regex_to_nfa(const char *regex, nfa **result, int *pos) {
 void nfa_free(nfa *automaton) {
     CS_RETURN_IF(NULL == automaton);
     vector_free(automaton->nodes);
+    free(automaton->nodes);
     free(automaton);
 }
