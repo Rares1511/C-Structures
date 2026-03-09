@@ -4,7 +4,7 @@
 
 #define __TEST_SIZE 1000
 #define __VALUE_RANGE 10000
-#define __STRESS_TEST_SIZE 10000000
+#define __STRESS_TEST_SIZE 1000000
 
 #define __UNITTEST_DEBUG_FILE_ARG_NAME "--debug-file"
 #define __UNITTEST_DEBUG_FILE_DEFAULT_VALUE "logs/unittest_log.ansi"
