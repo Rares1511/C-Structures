@@ -163,7 +163,11 @@ build_unittest: unittest-log-init libs
 	@$(CC) -o unittest unittest.c $(CFLAGS) \
 	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
+ifeq ($(memcheck),true)
+run_unittest: build_unittest
+else
 run_unittest: benchmark build_unittest
+endif
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
 	for module in $(SUBDIRS); do \
 	  if [ "$(memcheck)" = "true" ]; then \

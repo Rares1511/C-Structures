@@ -56,3 +56,4 @@ unittest_log.*
 logs/
 lib/
 unittest
+*_benchmark

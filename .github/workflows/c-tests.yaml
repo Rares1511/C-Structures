@@ -17,11 +17,10 @@ jobs:
     - name: Install Build Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential valgrind time
+        sudo apt-get install -y build-essential valgrind
 
-    - name: Build and Run Tests
+    - name: Build and Run Tests with Valgrind
       run: |
-        # No sudo needed!
         mkdir -p logs
         make unittest memcheck=true SEED=1234
         echo "MEMORY CHECK LOGS:"
@@ -30,4 +29,26 @@ jobs:
         cat logs/debug.ansi
         echo "TEST RESULTS LOGS:"
         cat logs/results.ansi
-        rm -rf logs
+
+  benchmark-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Build Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+
+    - name: Build and Run Tests with Benchmarks
+      run: |
+        mkdir -p logs
+        make unittest SEED=1234
+        echo "BENCHMARK LOGS:"
+        cat logs/benchmark.csv
+        echo "TEST DEBUG LOGS:"
+        cat logs/debug.ansi
+        echo "TEST RESULTS LOGS:"
+        cat logs/results.ansi

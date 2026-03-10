@@ -1171,6 +1171,7 @@ test_res test_map_delete_all_verify_rbt(test_arg *arg) {
 // ============================================================================
 test_res test_map_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
+        clogger_log((*arg->logger), CLOGGER_DEBUG, "Valgrind detected - skipping stress timing test to avoid false positives.\n");
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 

@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
         total_success += success;
         total_failed += failed;
 
-        if (failed == 0) {
+        if (failed == 0 && !RUNNING_ON_VALGRIND && arg.op_time_count > 0) {
             // Print performance summary for the module if all tests passed
             clogger_log(results_logger, CLOGGER_INFO, "  Performance Summary for %s:\n", mod->name);
             for (int j = 0; j < arg.op_time_count; j++) {
