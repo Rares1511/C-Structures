@@ -55,7 +55,7 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos);
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-static inline cs_codes vector_push_back(vector *vec, const void *el) { return vector_insert_at(vec, el, vector_size(*vec)); }
+cs_codes vector_push_back(vector *vec, const void *el);
 
 /*!
  * Erase the element at the position offered
@@ -71,7 +71,7 @@ cs_codes vector_erase(vector *vec, int pos);
  * @param[out] vec  Vector from which the last element will be deleted
  * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
  */
-static inline cs_codes vector_pop_back(vector *vec) { return vector_erase(vec, vector_size(*vec) - 1); }
+cs_codes vector_pop_back(vector *vec);
 
 /*!
  * Replaces the value at the position offered with the new value given

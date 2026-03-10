@@ -1,10 +1,14 @@
 #include <cs/vector.h>
+
 #include <unittest.h>
+#include <benchmark.h>
+
+#include <sys/time.h>
+#include <valgrind/valgrind.h>
 
 // ============================================================================
 // vector_init
 // ============================================================================
-
 test_res test_vector_init(test_arg *arg) {
     vector_attr_t attr = get_test_struct_attr();
     vector vec;
@@ -25,7 +29,6 @@ test_res test_vector_init(test_arg *arg) {
 // ============================================================================
 // vector_push_back
 // ============================================================================
-
 test_res test_vector_push_back_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -119,7 +122,6 @@ test_res test_vector_push_back_growth(test_arg *arg) {
 // ============================================================================
 // vector_insert_at
 // ============================================================================
-
 test_res test_vector_insert_at_front(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -221,7 +223,6 @@ test_res test_vector_insert_at_back(test_arg *arg) {
 // ============================================================================
 // vector_pop_back
 // ============================================================================
-
 test_res test_vector_pop_back_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -291,7 +292,6 @@ test_res test_vector_pop_back_empty(test_arg *arg) {
 // ============================================================================
 // vector_erase
 // ============================================================================
-
 test_res test_vector_erase_front(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -373,7 +373,6 @@ test_res test_vector_erase_back(test_arg *arg) {
 // ============================================================================
 // vector_replace
 // ============================================================================
-
 test_res test_vector_replace_single(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -465,7 +464,6 @@ test_res test_vector_replace_invalid_pos(test_arg *arg) {
 // ============================================================================
 // vector_at
 // ============================================================================
-
 test_res test_vector_at_valid(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -520,7 +518,6 @@ test_res test_vector_at_out_of_bounds(test_arg *arg) {
 // ============================================================================
 // vector_find
 // ============================================================================
-
 test_res test_vector_find_existing(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -594,7 +591,6 @@ test_res test_vector_find_first_occurrence(test_arg *arg) {
 // ============================================================================
 // vector_count
 // ============================================================================
-
 test_res test_vector_count_none(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -672,7 +668,6 @@ test_res test_vector_count_multiple(test_arg *arg) {
 // ============================================================================
 // vector_empty
 // ============================================================================
-
 test_res test_vector_empty_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -715,7 +710,6 @@ test_res test_vector_empty_after_ops(test_arg *arg) {
 // ============================================================================
 // vector_size
 // ============================================================================
-
 test_res test_vector_size_initial(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -761,7 +755,6 @@ test_res test_vector_size_after_ops(test_arg *arg) {
 // ============================================================================
 // vector_swap
 // ============================================================================
-
 test_res test_vector_swap(test_arg *arg) {
     vector vec1, vec2;
     vector_init(&vec1, get_test_struct_attr());
@@ -836,7 +829,6 @@ test_res test_vector_swap_empty(test_arg *arg) {
 // ============================================================================
 // vector_clear
 // ============================================================================
-
 test_res test_vector_clear(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -890,7 +882,6 @@ test_res test_vector_clear_reuse(test_arg *arg) {
 // ============================================================================
 // vector_sort
 // ============================================================================
-
 test_res test_vector_sort_ascending(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -1000,7 +991,6 @@ test_res test_vector_sort_by_score(test_arg *arg) {
 // ============================================================================
 // vector_set_* functions
 // ============================================================================
-
 test_res test_vector_set_attr(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -1063,7 +1053,6 @@ test_res test_vector_set_comp(test_arg *arg) {
 // ============================================================================
 // Complex struct integrity tests
 // ============================================================================
-
 test_res test_vector_nested_data_integrity(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -1160,7 +1149,6 @@ test_res test_vector_deep_copy_verification(test_arg *arg) {
 // ============================================================================
 // Stress tests
 // ============================================================================
-
 test_res test_vector_large_dataset(test_arg *arg) {
     vector vec;
     vector_init(&vec, get_test_struct_attr());
@@ -1272,6 +1260,73 @@ test_res test_vector_replace_all(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
+// ============================================================================
+// Stress test with timing
+// ============================================================================
+test_res test_vector_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
+    }
+
+    if (arg->op_time_count != 3) {
+        return (test_res){(char*)__func__, "Expected 3 timing slots for insert, find, delete", CS_UNKNOWN};
+    }
+
+    vector v;
+    struct timeval start, end;
+    double elapsed;
+
+    if (vector_init(&v, get_int_attr()) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_UNKNOWN};
+    }
+    int total = __VECTOR_STRESS_TEST_SIZE;
+
+    /* INSERT timing */
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        cs_codes result = vector_push_back(&v, &i);
+
+        if (result != CS_SUCCESS) {
+            vector_free(&v);
+            return (test_res){(char*)__func__, "Insert failed during stress test", result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "insert", elapsed);
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
+
+    /* FIND timing */
+    gettimeofday(&start, NULL);
+    int search_val = total - 1;
+    vector_find(v, &search_val);
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "find", elapsed);
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
+
+    /* DELETE timing */
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        cs_codes del_result = vector_pop_back(&v);
+
+        if (del_result != CS_SUCCESS) {
+            vector_free(&v);
+            return (test_res){(char*)__func__, "Delete failed during stress test", del_result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "delete", elapsed);
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
+
+    vector_free(&v);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
 test vector_tests[] = {
     // vector_init
     test_vector_init,
@@ -1349,5 +1404,8 @@ test vector_tests[] = {
     test_vector_large_dataset,
     test_vector_interleaved_ops,
     test_vector_erase_all,
-    test_vector_replace_all
+    test_vector_replace_all,
+
+    // Timing test
+    test_vector_stress_time,
 };

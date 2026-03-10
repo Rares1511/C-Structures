@@ -1,7 +1,9 @@
 #include <cs/map.h>
 #include <cs/rbt.h>
 #include <cs/pair.h>
+
 #include <unittest.h>
+#include <benchmark.h>
 
 #include <sys/time.h>
 #include <valgrind/valgrind.h>
@@ -1172,14 +1174,18 @@ test_res test_map_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
+    if (arg->op_time_count != 3) {
+        return (test_res){(char*)__func__, "Expected 3 timing slots for insert, find, delete", CS_UNKNOWN};
+    }
+
     map m;
     struct timeval start, end;
-    double elapsed, avg_time;
+    double elapsed;
 
     if (map_init(&m, get_int_attr(), get_test_struct_attr()) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Map initialization failed", CS_UNKNOWN};
     }
-    int total = __STRESS_TEST_SIZE;
+    int total = __MAP_STRESS_TEST_SIZE;
 
     /* INSERT timing */
     gettimeofday(&start, NULL);
@@ -1196,10 +1202,9 @@ test_res test_map_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "insert", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Insert Time = %.9f sec, Avg Insert Time = %.9f sec\n", elapsed, avg_time);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
 
     /* FIND timing */
     gettimeofday(&start, NULL);
@@ -1220,11 +1225,10 @@ test_res test_map_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "find", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Find Time = %.9f sec, Avg Find Time = %.9f sec\n", elapsed, avg_time);
-
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
+    
     /* DELETE timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
@@ -1238,10 +1242,9 @@ test_res test_map_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "delete", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Delete Time = %.9f sec, Avg Delete Time = %.9f sec\n", elapsed, avg_time);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
 
     map_free(&m);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

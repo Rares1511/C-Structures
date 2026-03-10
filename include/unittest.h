@@ -1,16 +1,19 @@
 #pragma once
+
 #define __MAX_REASON_SIZE 1024
 #define __MAX_PRINT_SIZE 75
 
 #define __TEST_SIZE 1000
 #define __VALUE_RANGE 10000
-#define __STRESS_TEST_SIZE 1000000
 
 #define __UNITTEST_DEBUG_FILE_ARG_NAME "--debug-file"
 #define __UNITTEST_DEBUG_FILE_DEFAULT_VALUE "logs/unittest_log.ansi"
 
 #define __UNITTEST_RESULTS_FILE_NAME "--results-file"
 #define __UNITTEST_RESULTS_FILE_NAME_VALUE "logs/unittest_results.ansi"
+
+#define __UNITTEST_BENCHMARK_FILE_NAME "logs/benchmark.csv"
+#define __UNITTEST_BENCHMARK_FILE_ARG_NAME "--benchmark-file"
 
 #define __UNITTEST_SEED_ARG_NAME "--seed"
 #define __UNITTEST_SEED_DEFAULT_VALUE 42
@@ -116,6 +119,12 @@ size_t hash_string(const void *key) {
 }
 #pragma endregion
 
+typedef struct operation_time {
+    const char *operation;
+    double cpp_time;
+    double c_time;
+} operation_time;
+
 typedef struct test_res {
     char *test_name;
     char *reason;
@@ -124,7 +133,11 @@ typedef struct test_res {
 
 typedef struct test_arg {
     clogger *logger;
+    operation_time *op_time; // For benchmarks to report operation times
+    int op_time_count;
 } test_arg;
+
+void post_operation_time(test_arg *arg, const char *operation, double c_time);
 
 typedef struct test_res (*test)(test_arg *arg);
 

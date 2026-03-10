@@ -2,14 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VEC_ENSURE_CAPACITY(vec) \
+#define VEC_GROW(vec) \
     do { \
-        if (vector_size(*(vec)) == (vec)->cap) { \
-            void *__new_vec = realloc((vec)->vec, ((vec)->cap + VECTOR_INIT_CAPACITY) * (vec)->attr.size); \
+        if ((vec)->size == (vec)->cap) { \
+            int __new_cap = (vec)->cap * 2; \
+            void *__new_vec = realloc((vec)->vec, __new_cap * (vec)->attr.size); \
             if (NULL == __new_vec) return CS_MEM; \
             (vec)->vec = __new_vec; \
-            (vec)->cap += VECTOR_INIT_CAPACITY; \
-        } else if ((vec)->size < (vec)->cap / (vec)->shrink_factor && (vec)->cap > VECTOR_INIT_CAPACITY) { \
+            (vec)->cap = __new_cap; \
+        } \
+    } while (0)
+
+#define VEC_SHRINK(vec) \
+    do { \
+        if ((vec)->size < (vec)->cap / (vec)->shrink_factor && (vec)->cap > VECTOR_INIT_CAPACITY) { \
             int new_cap = (vec)->cap / 2; \
             if (new_cap < VECTOR_INIT_CAPACITY) new_cap = VECTOR_INIT_CAPACITY; \
             void *__new_vec = realloc((vec)->vec, new_cap * (vec)->attr.size); \
@@ -24,20 +30,6 @@
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-
-/*!
- * Compares two elements using either the provided compare function or memcmp
- * @param[in] v1    First element to compare
- * @param[in] v2    Second element to compare
- * @param[in] comp  Compare function to use (can be NULL)
- * @param[in] size  Size of the elements
- * @return Result of the comparison
- */
-int vector_compare(const void *v1, const void *v2, comparer comp, int size) {
-    if (comp)
-        return comp(v1, v2);
-    return memcmp(v1, v2, size);
-}
 
 /*!
  * Partitions the array for quicksort
@@ -102,33 +94,58 @@ cs_codes vector_init(vector *v, vector_attr_t attr) {
 
 cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
-    int size = vector_size(*vec);
+    int size = vec->size;
     CS_RETURN_IF(pos > size || pos < 0, CS_POS);
-    VEC_ENSURE_CAPACITY(vec);
+    VEC_GROW(vec);
+    int elem_size = vec->attr.size;
     if (pos != size) {
-        memmove(vec->vec + (pos + 1) * vec->attr.size, vec->vec + pos * vec->attr.size, 
-                            (size - pos) * vec->attr.size);     
+        memmove(vec->vec + (pos + 1) * elem_size, vec->vec + pos * elem_size, 
+                            (size - pos) * elem_size);     
     }
     if (vec->attr.copy)
-        vec->attr.copy(vec->vec + vec->attr.size * pos, el);
+        vec->attr.copy(vec->vec + elem_size * pos, el);
     else
-        memcpy(vec->vec + vec->attr.size * pos, el, vec->attr.size);
+        memcpy(vec->vec + elem_size * pos, el, elem_size);
+    vec->size++;
+    return CS_SUCCESS;
+}
+
+cs_codes vector_push_back(vector *vec, const void *el) { 
+    CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
+    VEC_GROW(vec);
+    int elem_size = vec->attr.size;
+    void *dest = vec->vec + elem_size * vec->size;
+    if (vec->attr.copy)
+        vec->attr.copy(dest, el);
+    else
+        memcpy(dest, el, elem_size);
     vec->size++;
     return CS_SUCCESS;
 }
 
 cs_codes vector_erase(vector *vec, int pos) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
-    int size = vector_size(*vec);
-    CS_RETURN_IF(vector_empty(*vec), CS_EMPTY);
+    int size = vec->size;
+    CS_RETURN_IF(size == 0, CS_EMPTY);
     CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
+    int elem_size = vec->attr.size;
     if (vec->attr.fr)
-        vec->attr.fr(vec->vec + vec->attr.size * pos);
+        vec->attr.fr(vec->vec + elem_size * pos);
     if (pos != size - 1)
-        memcpy(vec->vec + vec->attr.size * pos, vec->vec + vec->attr.size * (pos + 1),
-               (size - pos - 1) * vec->attr.size);
+        memmove(vec->vec + elem_size * pos, vec->vec + elem_size * (pos + 1),
+               (size - pos - 1) * elem_size);
     vec->size--;
-    VEC_ENSURE_CAPACITY(vec);
+    VEC_SHRINK(vec);
+    return CS_SUCCESS;
+}
+
+cs_codes vector_pop_back(vector *vec) {
+    CS_RETURN_IF(vec == NULL, CS_NULL);
+    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
+    if (vec->attr.fr)
+        vec->attr.fr(vec->vec + vec->attr.size * (vec->size - 1));
+    vec->size--;
+    VEC_SHRINK(vec);
     return CS_SUCCESS;
 }
 
@@ -139,10 +156,20 @@ void *vector_at(vector vec, int pos) {
 
 int vector_count(vector vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    int count = 0, size = vector_size(vec);
-    for (int i = 0; i < size; i++) {
-        if (vector_compare(vec.vec + i * vec.attr.size, el, vec.attr.comp, vec.attr.size) == 0)
-            count++;
+    int count = 0, size = vec.size;
+    int elem_size = vec.attr.size;
+    comparer comp = vec.attr.comp;
+    void *base = vec.vec;
+    if (comp) {
+        for (int i = 0; i < size; i++) {
+            if (comp(base + i * elem_size, el) == 0)
+                count++;
+        }
+    } else {
+        for (int i = 0; i < size; i++) {
+            if (memcmp(base + i * elem_size, el, elem_size) == 0)
+                count++;
+        }
     }
     return count;
 }
@@ -163,10 +190,20 @@ cs_codes vector_replace(vector *vec, const void *el, int pos) {
 
 int vector_find(vector vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    int size = vector_size(vec);
-    for (int i = 0; i < size; i++) {
-        if (vector_compare(vec.vec + i * vec.attr.size, el, vec.attr.comp, vec.attr.size) == 0)
-            return i;
+    int size = vec.size;
+    int elem_size = vec.attr.size;
+    comparer comp = vec.attr.comp;
+    void *base = vec.vec;
+    if (comp) {
+        for (int i = 0; i < size; i++) {
+            if (comp(base + i * elem_size, el) == 0)
+                return i;
+        }
+    } else {
+        for (int i = 0; i < size; i++) {
+            if (memcmp(base + i * elem_size, el, elem_size) == 0)
+                return i;
+        }
     }
     return CS_ELEM;
 }

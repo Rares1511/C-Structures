@@ -1,5 +1,7 @@
 #include <cs/set.h>
 #include <cs/rbt.h>
+
+#include <benchmark.h>
 #include <unittest.h>
 
 #include <sys/time.h>
@@ -1182,7 +1184,7 @@ test_res test_set_stress_time(test_arg *arg) {
     if (set_init(&s, get_test_struct_attr()) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
-    int total = __STRESS_TEST_SIZE;
+    int total = __SET_STRESS_TEST_SIZE;
 
     /* INSERT timing */
     gettimeofday(&start, NULL);

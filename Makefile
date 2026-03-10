@@ -32,7 +32,7 @@ PATH_INCLUDEDIR  := /usr/local/include/cs
 
 # Flags
 # -I$(LOCAL_INCLUDEDIR) is key: it allows compilation without prior installation
-CFLAGS  := -Wall -Wextra -fPIC -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
+CFLAGS  := -Wall -Wextra -fPIC -O2 -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
 LDLIBS  := -lm
 
 # Unittest Configuration
@@ -128,8 +128,6 @@ install_headers:
 	done
 	cp $(LOCAL_INCLUDEDIR)/cs/rbt.h $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/cs/hash_table.h $(PATH_INCLUDEDIR)
-	cp cstring/nfa.h $(PATH_INCLUDEDIR)
-	cp cstring/dfa.h $(PATH_INCLUDEDIR)
 
 install_libs:
 	@echo "Installing libraries to $(LIBDIR)..."
@@ -165,7 +163,7 @@ build_unittest: unittest-log-init libs
 	@$(CC) -o unittest unittest.c $(CFLAGS) \
 	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
-run_unittest: build_unittest
+run_unittest: benchmark build_unittest
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
 	for module in $(SUBDIRS); do \
 	  if [ "$(memcheck)" = "true" ]; then \
@@ -184,6 +182,29 @@ run_unittest: build_unittest
 
 unittest: build_unittest run_unittest
 
+# ---------------- Benchmarking ----------------
+
+CXX := g++
+CXXFLAGS := -Wall -O2 -Wextra -std=c++17 -I$(LOCAL_INCLUDEDIR)
+BENCHMARK_LOG := logs/benchmark.csv
+BENCHMARK_MODULES := vector
+
+BENCHMARK_BINS := $(foreach m,$(BENCHMARK_MODULES),$(m)/$(m)_benchmark)
+
+benchmark: $(BENCHMARK_BINS)
+	@$(MKDIR_P) logs
+	@echo "module,operation,value" > $(BENCHMARK_LOG)
+	@for b in $(BENCHMARK_BINS); do \
+	    echo "Running $$b..."; \
+	    ./$$b | tee -a $(BENCHMARK_LOG); \
+	done
+
+define BENCHMARK_RULE
+$1/$1_benchmark: $1/$1_benchmark.cpp
+	$$(CXX) $$(CXXFLAGS) -o $$@ $$<
+endef
+$(foreach m,$(BENCHMARK_MODULES),$(eval $(call BENCHMARK_RULE,$(m))))
+
 # ---------------- Cleanup ----------------
 
 clean:
@@ -198,5 +219,8 @@ clean:
 	@for o in $(CORE_OBJS); do \
 	    $(RM) $$o; \
 	done
+	@for b in $(BENCHMARK_BINS); do \
+	    $(RM) $$b; \
+	done
 
-.PHONY: all libs objects install uninstall unittest clean
+.PHONY: all libs objects install uninstall unittest benchmark clean

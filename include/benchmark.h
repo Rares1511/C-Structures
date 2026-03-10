@@ -1,0 +1,4 @@
+// Stress tests parameters
+#define __MAP_STRESS_TEST_SIZE    10000000
+#define __SET_STRESS_TEST_SIZE    10000000
+#define __VECTOR_STRESS_TEST_SIZE 100000000
