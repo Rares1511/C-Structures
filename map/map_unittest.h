@@ -1181,9 +1181,10 @@ test_res test_map_stress_time(test_arg *arg) {
 
     map m;
     struct timeval start, end;
+    char value_buffer[__MAX_PRINT_SIZE];
     double elapsed;
 
-    if (map_init(&m, get_int_attr(), get_test_struct_attr()) != CS_SUCCESS) {
+    if (map_init(&m, get_int_attr(), get_string_attr()) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Map initialization failed", CS_UNKNOWN};
     }
     int total = __MAP_STRESS_TEST_SIZE;
@@ -1192,9 +1193,8 @@ test_res test_map_stress_time(test_arg *arg) {
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
         int key = i;
-        test_struct val = create_test_struct(i, "StressVal", (double)(i * 3));
-        cs_codes result = map_insert(&m, &key, &val);
-        free_test_struct(&val);
+        snprintf(value_buffer, sizeof(value_buffer), "StreesVal_%d", i);
+        cs_codes result = map_insert(&m, &key, value_buffer);
 
         if (result != CS_SUCCESS) {
             map_free(&m);
@@ -1218,8 +1218,10 @@ test_res test_map_stress_time(test_arg *arg) {
             return (test_res){(char*)__func__, "Find failed during stress test", CS_ELEM};
         }
 
-        test_struct *found_val = (test_struct*)found;
-        if (found_val->id != i) {
+        char expected[__MAX_PRINT_SIZE];
+        snprintf(expected, sizeof(expected), "StreesVal_%d", i);
+        char *found_val = (char*)found;
+        if (strcmp(found_val, expected) != 0) {
             map_free(&m);
             return (test_res){(char*)__func__, "Find returned wrong value during stress test", CS_ELEM};
         }

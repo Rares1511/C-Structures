@@ -2,6 +2,8 @@
 #define __CS_VECTOR_H__
 
 #include <cs/universal.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define VECTOR_SHRINK_FACTOR 4
 #define VECTOR_INIT_CAPACITY 1024
@@ -50,12 +52,40 @@ cs_codes vector_init(vector *v, vector_attr_t attr);
 cs_codes vector_insert_at(vector *vec, const void *el, int pos);
 
 /*!
+ * Grows the internal buffer of the vector (slow path for push_back)
+ * @param[out] vec  Vector whose buffer will be grown
+ * @return CS_MEM if a memory problem occurred or CS_SUCCESS
+ */
+cs_codes vector_grow(vector *vec);
+
+/*!
+ * Shrinks the internal buffer of the vector if underutilized (slow path for pop_back)
+ * @param[out] vec  Vector whose buffer may be shrunk
+ * @return CS_MEM if a memory problem occurred or CS_SUCCESS
+ */
+cs_codes vector_shrink(vector *vec);
+
+/*!
  * Pushes the element at the back of the vector
  * @param[out] vec  Vector in which the element will be inserted
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_push_back(vector *vec, const void *el);
+static inline cs_codes vector_push_back(vector *vec, const void *el) {
+    CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
+    if (__builtin_expect(vec->size == vec->cap, 0)) {
+        cs_codes rc = vector_grow(vec);
+        if (rc != CS_SUCCESS) return rc;
+    }
+    int elem_size = vec->attr.size;
+    char *dest = (char *)vec->vec + elem_size * vec->size;
+    if (__builtin_expect(vec->attr.copy != NULL, 0))
+        vec->attr.copy(dest, el);
+    else
+        memcpy(dest, el, elem_size);
+    vec->size++;
+    return CS_SUCCESS;
+}
 
 /*!
  * Erase the element at the position offered
@@ -71,7 +101,14 @@ cs_codes vector_erase(vector *vec, int pos);
  * @param[out] vec  Vector from which the last element will be deleted
  * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_pop_back(vector *vec);
+static inline cs_codes vector_pop_back(vector *vec) {
+    CS_RETURN_IF(vec == NULL, CS_NULL);
+    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
+    if (__builtin_expect(vec->attr.fr != NULL, 0))
+        vec->attr.fr((char *)vec->vec + vec->attr.size * (vec->size - 1));
+    vec->size--;
+    return vector_shrink(vec);
+}
 
 /*!
  * Replaces the value at the position offered with the new value given

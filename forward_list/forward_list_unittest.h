@@ -703,6 +703,76 @@ test_res test_forward_list_alternating_ops(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
+// ============================================================================
+// Stress test with time measurement
+// ============================================================================
+test_res test_forward_list_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
+        return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    }
+
+    if (arg->op_time_count != 3) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Timing stress test requires 3 time slots (push, find, pop)\n");
+        return (test_res){(char*)__func__, "Insufficient time slots for stress test", CS_UNKNOWN};
+    }
+
+    forward_list fl;
+    struct timeval start, end;
+    int total = __FORWARD_LIST_STRESS_TEST_SIZE, rc;
+    double elapsed;
+
+    rc = forward_list_init(&fl, get_int_attr());
+    if (rc != CS_SUCCESS) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to initialize forward_list\n");
+        return (test_res){(char*)__func__, "Failed to initialize forward_list", CS_UNKNOWN};
+    }
+    
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = forward_list_push_front(&fl, &i);
+        if (rc != CS_SUCCESS) {
+            forward_list_free(&fl);
+            clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to push element %d\n", i);
+            return (test_res){(char*)__func__, "Failed to push element", CS_MEM};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "insert", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Time taken to insert %d elements: %.6f seconds\n", total, elapsed);
+
+    gettimeofday(&start, NULL);
+    int search_target = total / 2;
+    if (forward_list_find(fl, &search_target) == -1) {
+        forward_list_free(&fl);
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to find element %d\n", search_target);
+        return (test_res){(char*)__func__, "Failed to find element", CS_UNKNOWN};
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "find", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = forward_list_pop_front(&fl);
+        if (rc != CS_SUCCESS) {
+            forward_list_free(&fl);
+            clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to pop element at index %d\n", i);
+            return (test_res){(char*)__func__, "Failed to pop element", CS_UNKNOWN};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "delete", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Time taken to pop %d elements: %.6f seconds\n", total, elapsed);
+
+    forward_list_free(&fl);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
 test forward_list_tests[] = {
     // forward_list_init
     test_forward_list_init,
@@ -748,5 +818,8 @@ test forward_list_tests[] = {
     test_forward_list_large_dataset,
     test_forward_list_push_pop_cycle,
     test_forward_list_pop_all,
-    test_forward_list_alternating_ops
+    test_forward_list_alternating_ops,
+
+    // Stress test with time
+    test_forward_list_stress_time,
 };

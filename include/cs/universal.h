@@ -10,10 +10,10 @@
 
 // Internal helpers
 #define RETURN_IF_1(cond) \
-    do { if (cond) return; } while (0)
+    do { if (__builtin_expect(!!(cond), 0)) return; } while (0)
 
 #define RETURN_IF_2(cond, retval) \
-    do { if (cond) return (retval); } while (0)
+    do { if (__builtin_expect(!!(cond), 0)) return (retval); } while (0)
 
 // Macro selector
 #define RETURN_IF_GET(_1, _2, NAME, ...) NAME

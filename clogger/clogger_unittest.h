@@ -15,8 +15,8 @@ static char *read_test_log_file(void) {
     
     char *content = malloc(size + 1);
     if (content) {
-        fread(content, 1, size, fp);
-        content[size] = '\0';
+        size_t n = fread(content, 1, size, fp);
+        content[n] = '\0';
     }
     fclose(fp);
     return content;

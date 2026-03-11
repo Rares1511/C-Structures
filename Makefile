@@ -189,25 +189,17 @@ unittest: build_unittest run_unittest
 # ---------------- Benchmarking ----------------
 
 CXX := g++
-CXXFLAGS := -Wall -O2 -Wextra -std=c++17 -I$(LOCAL_INCLUDEDIR)
+CXXFLAGS := -Wall -O2 -Wextra -std=c++17 -I$(LOCAL_INCLUDEDIR) -I.
 BENCHMARK_LOG := logs/benchmark.csv
-BENCHMARK_MODULES := vector
+BENCHMARK_BIN := benchmark_bin
 
-BENCHMARK_BINS := $(foreach m,$(BENCHMARK_MODULES),$(m)/$(m)_benchmark)
+$(BENCHMARK_BIN): benchmark.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
-benchmark: $(BENCHMARK_BINS)
+benchmark: $(BENCHMARK_BIN)
 	@$(MKDIR_P) logs
 	@echo "module,operation,value" > $(BENCHMARK_LOG)
-	@for b in $(BENCHMARK_BINS); do \
-	    echo "Running $$b..."; \
-	    ./$$b | tee -a $(BENCHMARK_LOG); \
-	done
-
-define BENCHMARK_RULE
-$1/$1_benchmark: $1/$1_benchmark.cpp
-	$$(CXX) $$(CXXFLAGS) -o $$@ $$<
-endef
-$(foreach m,$(BENCHMARK_MODULES),$(eval $(call BENCHMARK_RULE,$(m))))
+	@./$(BENCHMARK_BIN) | tee -a $(BENCHMARK_LOG)
 
 # ---------------- Cleanup ----------------
 
@@ -217,14 +209,12 @@ clean:
 	$(RM) unittest
 	$(RM) logs/*
 	$(RM) $(LIBOUTDIR)/*.so
+	$(RM) $(BENCHMARK_BIN)
 	@for m in $(SUBDIRS); do \
 	    $(RM) $$m/$$m.o; \
 	done
 	@for o in $(CORE_OBJS); do \
 	    $(RM) $$o; \
-	done
-	@for b in $(BENCHMARK_BINS); do \
-	    $(RM) $$b; \
 	done
 
 .PHONY: all libs objects install uninstall unittest benchmark clean

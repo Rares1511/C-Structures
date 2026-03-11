@@ -1,6 +1,9 @@
 #include <cs/list.h>
 #include <unittest.h>
 
+#include <sys/time.h>
+#include <valgrind/valgrind.h>
+
 // ============================================================================
 // list_init
 // ============================================================================
@@ -1118,6 +1121,73 @@ test_res test_list_mixed_operations(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
+// ============================================================================
+// Stress test with time measurement
+// ============================================================================
+test_res test_list_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
+        return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
+    }
+
+    if (arg->op_time_count != 3) {
+        return (test_res){(char*)__func__, "Expected 3 time measurements for stress test", CS_UNKNOWN};
+    }
+
+    list l;
+    struct timeval start, end;
+    double elapsed;
+    int total = __LIST_STRESS_TEST_SIZE, rc;
+    
+    rc = list_init(&l, get_int_attr());
+    if (rc != 0) {
+        return (test_res){(char*)__func__, "Failed to initialize list", CS_UNKNOWN};
+    }
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = list_push_back(&l, &i);
+        if (rc != 0) {
+            list_free(&l);
+            return (test_res){(char*)__func__, "Failed to push element", CS_UNKNOWN};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "insert", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements in %.6f seconds\n", total, elapsed);
+
+    gettimeofday(&start, NULL);
+    int search_target = total / 2;
+    if (list_find(l, &search_target) == -1) {
+        list_free(&l);
+        return (test_res){(char*)__func__, "Failed to find existing element", CS_UNKNOWN};
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "find", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Found element %d in %.6f seconds\n", search_target, elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = list_pop_back(&l);
+        if (rc != 0) {
+            list_free(&l);
+            return (test_res){(char*)__func__, "Failed to pop element", CS_UNKNOWN};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "delete", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popped %d elements in %.6f seconds\n", total, elapsed);
+
+    list_free(&l);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
 test list_tests[] = {
     // list_init
     test_list_init,
@@ -1187,5 +1257,8 @@ test list_tests[] = {
     test_list_alternating_push_pop,
     test_list_large_dataset,
     test_list_erase_all,
-    test_list_mixed_operations
+    test_list_mixed_operations,
+
+    // Stress test with time
+    test_list_stress_time,
 };

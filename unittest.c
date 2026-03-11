@@ -54,16 +54,16 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
+    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
 
     // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
-    // { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
-    // { "list", list_tests, sizeof(list_tests) / sizeof(test) },
-    // { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
+    { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
+    { "list", list_tests, sizeof(list_tests) / sizeof(test) },
+    { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
 
     // // Associative containers (RBT)
-    // { "set", set_tests, sizeof(set_tests) / sizeof(test) },
+    { "set", set_tests, sizeof(set_tests) / sizeof(test) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test) },
     // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
     // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
@@ -254,7 +254,8 @@ int main(int argc, char **argv) {
 
             size_t len = strlen(buffer);
             size_t max_dots = (__MAX_PRINT_SIZE > len) ? (__MAX_PRINT_SIZE - len) : 0;
-            strncat(buffer, dots, max_dots);
+            memcpy(buffer + len, dots, max_dots);
+            buffer[len + max_dots] = '\0';
 
             if (res.return_code != CS_SUCCESS) {
                 failed++;

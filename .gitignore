@@ -57,3 +57,4 @@ logs/
 lib/
 unittest
 *_benchmark
+benchmark_bin

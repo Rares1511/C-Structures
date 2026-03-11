@@ -25,6 +25,27 @@
         } \
     } while (0)
 
+cs_codes vector_grow(vector *vec) {
+    int new_cap = vec->cap * 2;
+    void *new_vec = realloc(vec->vec, (size_t)new_cap * vec->attr.size);
+    if (NULL == new_vec) return CS_MEM;
+    vec->vec = new_vec;
+    vec->cap = new_cap;
+    return CS_SUCCESS;
+}
+
+cs_codes vector_shrink(vector *vec) {
+    if (vec->size < vec->cap / vec->shrink_factor && vec->cap > VECTOR_INIT_CAPACITY) {
+        int new_cap = vec->cap / 2;
+        if (new_cap < VECTOR_INIT_CAPACITY) new_cap = VECTOR_INIT_CAPACITY;
+        void *new_vec = realloc(vec->vec, (size_t)new_cap * vec->attr.size);
+        if (NULL == new_vec) return CS_MEM;
+        vec->vec = new_vec;
+        vec->cap = new_cap;
+    }
+    return CS_SUCCESS;
+}
+
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
@@ -110,18 +131,7 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     return CS_SUCCESS;
 }
 
-cs_codes vector_push_back(vector *vec, const void *el) { 
-    CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
-    VEC_GROW(vec);
-    int elem_size = vec->attr.size;
-    void *dest = vec->vec + elem_size * vec->size;
-    if (vec->attr.copy)
-        vec->attr.copy(dest, el);
-    else
-        memcpy(dest, el, elem_size);
-    vec->size++;
-    return CS_SUCCESS;
-}
+// vector_push_back is now static inline in vector.h
 
 cs_codes vector_erase(vector *vec, int pos) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
@@ -139,15 +149,7 @@ cs_codes vector_erase(vector *vec, int pos) {
     return CS_SUCCESS;
 }
 
-cs_codes vector_pop_back(vector *vec) {
-    CS_RETURN_IF(vec == NULL, CS_NULL);
-    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
-    if (vec->attr.fr)
-        vec->attr.fr(vec->vec + vec->attr.size * (vec->size - 1));
-    vec->size--;
-    VEC_SHRINK(vec);
-    return CS_SUCCESS;
-}
+// vector_pop_back is now static inline in vector.h
 
 void *vector_at(vector vec, int pos) {
     CS_RETURN_IF(pos >= vector_size(vec) || pos < 0 || vector_empty(vec), NULL);

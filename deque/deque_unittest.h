@@ -1,6 +1,9 @@
 #include <cs/deque.h>
 #include <unittest.h>
 
+#include <sys/time.h>
+#include <valgrind/valgrind.h>
+
 // ============================================================================
 // deque_init
 // ============================================================================
@@ -1133,6 +1136,59 @@ test_res test_deque_large_random_access(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
+test_res test_deque_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping stress time test on Valgrind\n");
+        return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
+    }
+
+    if (arg->op_time_count != 2) {
+        return (test_res){(char*)__func__, "Timing requires 2 op_time slots", CS_UNKNOWN};
+    }
+
+    deque dq;
+    struct timeval start, end;
+    double elapsed_time;
+    int rc, total = __DEQUE_STRESS_TEST_SIZE;
+
+    rc = deque_init(&dq, get_int_attr());
+    if (rc != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Initialization failed for stress test", rc};
+    }
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        rc = deque_push_back(&dq, &key);
+        if (rc != CS_SUCCESS) {
+            deque_free(&dq);
+            return (test_res){(char*)__func__, "Push back failed during stress test", rc};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "insert", elapsed_time);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Completed %d push_backs in %.4f seconds\n", total, elapsed_time);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = deque_pop_back(&dq);
+        if (rc != CS_SUCCESS) {
+            deque_free(&dq);
+            return (test_res){(char*)__func__, "Pop back failed during stress test", rc};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed_time = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "delete", elapsed_time);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Completed %d pop_backs in %.4f seconds\n", total, elapsed_time);
+    
+    deque_free(&dq);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
 test deque_tests[] = {
     // deque_init
     test_deque_init,
@@ -1203,5 +1259,8 @@ test deque_tests[] = {
     test_deque_alternating_ops,
     test_deque_pop_all_front,
     test_deque_pop_all_back,
-    test_deque_large_random_access
+    test_deque_large_random_access,
+
+    // Stress test with time
+    test_deque_stress_time,
 };

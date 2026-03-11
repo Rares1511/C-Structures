@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
+#include <valgrind/valgrind.h>
 
 #include <cs/universal.h>
 #include <cs/cargs.h>
@@ -510,6 +512,16 @@ static inline univ_attr_t get_int_attr() {
         .copy = NULL,
         .print = print_int,
         .comp = comp_int_max
+    };
+}
+
+static inline univ_attr_t get_string_attr() {
+    return (univ_attr_t){
+        .size = sizeof(char) * __MAX_PRINT_SIZE,
+        .fr = NULL,
+        .copy = copy_string,
+        .print = NULL,
+        .comp = NULL
     };
 }
 

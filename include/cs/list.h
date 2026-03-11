@@ -64,6 +64,14 @@ cs_codes list_pop_back(list *l);
 cs_codes list_erase(list *l, int pos);
 
 /*!
+ * Finds the position of the first occurrence of the given element in the list
+ * @param[in] l  List in which the element will be searched for
+ * @param[in] el Element that will be searched for
+ * @return Position of the first occurrence of the element or -1 if not found
+ */
+int list_find(list l, const void *el);
+
+/*!
  * Returns if the list is emty
  * @param[in] l  List that will be checked
  * @return 1 if the list is empty, 0 otherwise 

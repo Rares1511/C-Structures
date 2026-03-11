@@ -1179,9 +1179,9 @@ test_res test_set_stress_time(test_arg *arg) {
 
     set s;
     struct timeval start, end;
-    double elapsed, avg_time;
+    double elapsed;
 
-    if (set_init(&s, get_test_struct_attr()) != CS_SUCCESS) {
+    if (set_init(&s, get_int_attr()) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     int total = __SET_STRESS_TEST_SIZE;
@@ -1189,9 +1189,8 @@ test_res test_set_stress_time(test_arg *arg) {
     /* INSERT timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        test_struct val = create_test_struct(i, "StressVal", (double)(i * 3));
+        int val = i;
         cs_codes result = set_insert(&s, &val);
-        free_test_struct(&val);
 
         if (result != CS_SUCCESS) {
             set_free(&s);
@@ -1200,15 +1199,14 @@ test_res test_set_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "insert", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Insert Time = %.9f sec, Avg Insert Time = %.9f sec\n", elapsed, avg_time);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
 
     /* FIND timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        test_struct key = create_test_struct(i, "StressVal", (double)(i * 3));
+        int key = i;
         void *found = set_find(s, &key);
 
         if (found == NULL) {
@@ -1216,26 +1214,23 @@ test_res test_set_stress_time(test_arg *arg) {
             return (test_res){(char*)__func__, "Find failed during stress test", CS_ELEM};
         }
 
-        test_struct *found_val = (test_struct*)found;
-        if (found_val->id != i) {
+        int *found_val = (int*)found;
+        if (*found_val != i) {
             set_free(&s);
             return (test_res){(char*)__func__, "Find returned wrong value during stress test", CS_ELEM};
         }
-        free_test_struct(&key);
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "find", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Find Time = %.9f sec, Avg Find Time = %.9f sec\n", elapsed, avg_time);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     /* DELETE timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        test_struct key = create_test_struct(i, "StressVal", (double)(i * 3));
+        int key = i;
         cs_codes del_result = set_delete(&s, &key);
-        free_test_struct(&key);
 
         if (del_result != CS_SUCCESS) {
             set_free(&s);
@@ -1244,10 +1239,9 @@ test_res test_set_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    avg_time = elapsed / total;
+    post_operation_time(arg, "delete", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG,
-        "Stress test completed: Total Delete Time = %.9f sec, Avg Delete Time = %.9f sec\n", elapsed, avg_time);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
 
     set_free(&s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

@@ -42,7 +42,7 @@ list_node* list_node_init(const void *el, int size, deepcopy copy) {
  * @param[in] size  Size of the elements that will be compared
  * @return Negative value if a < b, 0 if a == b, positive value if a > b
  */
-int list_compare(const void *a, const void *b, comparer comp, int size) {
+inline int list_compare(const void *a, const void *b, comparer comp, int size) {
     if (comp)
         return comp((void *)a, (void *)b);
     return memcmp(a, b, size);
@@ -186,6 +186,20 @@ cs_codes list_erase(list *l, int pos) {
     list_node_free(current, l->attr.fr);
     l->size--;
     return CS_SUCCESS;
+}
+
+int list_find(list l, const void *el) {
+    CS_RETURN_IF(el == NULL, -1);
+    CS_RETURN_IF(list_empty(l), -1);
+
+    list_node *current = l.front;
+    comparer comp = l.attr.comp;
+    int elem_size = l.attr.size;
+    for (int pos = 0; pos < list_size(l); pos++, current = current->next) {
+        if (list_compare(current->data, el, comp, elem_size) == 0)
+            return pos;
+    }
+    return -1;
 }
 
 void *list_front(list l) {

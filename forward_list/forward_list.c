@@ -90,6 +90,22 @@ cs_codes forward_list_pop_front(forward_list* list) {
     return CS_SUCCESS;
 }
 
+int forward_list_find(forward_list list, const void* data) {
+    CS_RETURN_IF(data == NULL, -1);
+    CS_RETURN_IF(forward_list_empty(list), -1);
+
+    forward_list_node* current = list.head;
+    comparer comp = list.attr.comp;
+    for (int pos = 0; pos < forward_list_size(list); pos++, current = current->next) {
+        if (comp && comp(current->data, data) == 0)
+            return pos;
+        else if (!comp && memcmp(current->data, data, list.attr.size) == 0)
+            return pos;
+    }
+
+    return -1;
+}
+
 void* forward_list_front(forward_list list) {
     CS_RETURN_IF(forward_list_empty(list), NULL);
     return list.head->data;
