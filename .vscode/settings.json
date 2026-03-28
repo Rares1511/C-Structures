@@ -51,6 +51,20 @@
         "type_traits": "c",
         "rbt.h": "c"
     },
-    "makefile.configureOnOpen": true,
-    "C_Cpp.errorSquiggles": "disabled",
+    "editor.semanticHighlighting.enabled": true,
+    "C_Cpp.enhancedColorization": "enabled",
+
+    "editor.semanticTokenColorCustomizations": {
+      "enabled": true,
+      "rules": {
+        "type": "#4ec8b1",
+        "class": "#4ec8b1",
+        "struct": "#4ec8b1",
+        "enum": "#4ec8b1",
+        "typedef": "#4ec8b1",
+
+        "variable": "#9cdcfe",
+        "parameter": "#9cdcfe"
+      }
+    }
 }
