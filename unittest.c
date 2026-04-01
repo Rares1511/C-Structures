@@ -39,9 +39,6 @@
 // Utilities
 #include "clogger/clogger_unittest.h"
 
-// String module
-#include "cstring/cstring_unittest.h"
-
 // ============================================================================
 // Module registry - list all modules to test
 // ============================================================================

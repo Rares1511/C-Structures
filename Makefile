@@ -54,12 +54,12 @@ endif
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
            unordered_map stack multiset multimap unordered_multiset \
-           unordered_multimap queue priority_queue flat_set large_number clogger cstring
+           unordered_multimap queue priority_queue flat_set large_number clogger
 
 INSTALL_LIBS := $(SUBDIRS)
 
 # ---------------- Core/Dependency objects ----------------
-CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o cstring/nfa.o
+CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
 
 # Link-time dependencies for shared libraries
 DEPS_rbt                := vector/vector.o
@@ -75,7 +75,6 @@ DEPS_multimap           := rbt/rbt.o pair/pair.o vector/vector.o
 DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_flat_set           := vector/vector.o deque/deque.o
-DEPS_cstring            := cstring/nfa.o cstring/dfa.o vector/vector.o
 
 # Additional linker flags for specific modules
 LDLIBS_clogger          := -lpthread -rdynamic
