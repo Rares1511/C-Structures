@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-cs_codes unordered_set_init(unordered_set *uset, unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity) {
+cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func, int initial_capacity) {
     CS_RETURN_IF(NULL == uset, CS_NULL);
     CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     uset->ht = malloc(sizeof(hash_table));

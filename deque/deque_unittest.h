@@ -9,10 +9,10 @@
 // ============================================================================
 
 test_res test_deque_init(test_arg *arg) {
-    deque_attr_t attr = get_test_struct_attr();
+    elem_attr_t attr = get_test_struct_attr();
     deque dq;
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing deque with element size: %zu\n", (size_t)attr.size);
-    cs_codes init_result = deque_init(&dq, attr);
+    cs_codes init_result = deque_init(&dq, attr, (deque_attr_t){0, 0});
 
     if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init failed", CS_MEM};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Deque initialized, size: %d, empty: %d\n", deque_size(dq), deque_empty(dq));
@@ -29,7 +29,9 @@ test_res test_deque_init(test_arg *arg) {
 
 test_res test_deque_push_back_single(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "TestItem42", 42.5);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing back single element with id: %d\n", ts.id);
@@ -55,7 +57,9 @@ test_res test_deque_push_back_single(test_arg *arg) {
 
 test_res test_deque_push_back_multiple(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = __TEST_SIZE;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing back %d elements\n", total);
@@ -87,7 +91,9 @@ test_res test_deque_push_back_multiple(test_arg *arg) {
 
 test_res test_deque_push_back_growth(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 3; // Force multiple block allocations
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing growth with %d elements across 3 blocks\n", total);
@@ -124,7 +130,9 @@ test_res test_deque_push_back_growth(test_arg *arg) {
 
 test_res test_deque_push_front_single(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "FrontItem", 42.0);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing front single element with id: %d\n", ts.id);
@@ -149,7 +157,9 @@ test_res test_deque_push_front_single(test_arg *arg) {
 
 test_res test_deque_push_front_multiple(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = __TEST_SIZE;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing front %d elements\n", total);
@@ -182,7 +192,9 @@ test_res test_deque_push_front_multiple(test_arg *arg) {
 
 test_res test_deque_push_front_growth(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 3;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing front growth with %d elements across 3 blocks\n", total);
@@ -211,7 +223,9 @@ test_res test_deque_push_front_growth(test_arg *arg) {
 
 test_res test_deque_insert_at_front(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 1; i <= 5; i++) {
         test_struct ts = create_test_struct(i, "InsertTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -241,7 +255,9 @@ test_res test_deque_insert_at_front(test_arg *arg) {
 
 test_res test_deque_insert_at_middle(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "MiddleTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -279,7 +295,9 @@ test_res test_deque_insert_at_middle(test_arg *arg) {
 
 test_res test_deque_insert_at_back(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "BackInsertTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -313,7 +331,9 @@ test_res test_deque_insert_at_back(test_arg *arg) {
 
 test_res test_deque_pop_back_single(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "PopBackTest", 42.0);
     deque_push_back(&dq, &ts);
     free_test_struct(&ts);
@@ -336,7 +356,9 @@ test_res test_deque_pop_back_single(test_arg *arg) {
 
 test_res test_deque_pop_back_multiple(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "PopBackMulti", (double)i);
         deque_push_back(&dq, &ts);
@@ -364,7 +386,9 @@ test_res test_deque_pop_back_multiple(test_arg *arg) {
 
 test_res test_deque_pop_back_empty(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pop_back on empty deque (should fail)\n");
     cs_codes result = deque_pop_back(&dq);
@@ -383,7 +407,9 @@ test_res test_deque_pop_back_empty(test_arg *arg) {
 
 test_res test_deque_pop_front_single(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "PopFrontTest", 42.0);
     deque_push_back(&dq, &ts);
     free_test_struct(&ts);
@@ -406,7 +432,9 @@ test_res test_deque_pop_front_single(test_arg *arg) {
 
 test_res test_deque_pop_front_multiple(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "PopFrontMulti", (double)i);
         deque_push_back(&dq, &ts);
@@ -434,7 +462,9 @@ test_res test_deque_pop_front_multiple(test_arg *arg) {
 
 test_res test_deque_pop_front_empty(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pop_front on empty deque (should fail)\n");
     cs_codes result = deque_pop_front(&dq);
@@ -453,7 +483,9 @@ test_res test_deque_pop_front_empty(test_arg *arg) {
 
 test_res test_deque_erase_front(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -480,7 +512,9 @@ test_res test_deque_erase_front(test_arg *arg) {
 
 test_res test_deque_erase_middle(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseMiddle", (double)i);
         deque_push_back(&dq, &ts);
@@ -506,7 +540,9 @@ test_res test_deque_erase_middle(test_arg *arg) {
 
 test_res test_deque_erase_back(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseBack", (double)i);
         deque_push_back(&dq, &ts);
@@ -536,7 +572,9 @@ test_res test_deque_erase_back(test_arg *arg) {
 
 test_res test_deque_back(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying deque_back after each of 10 push_backs\n");
     for (int i = 0; i < 10; i++) {
@@ -561,7 +599,9 @@ test_res test_deque_back(test_arg *arg) {
 
 test_res test_deque_front(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying deque_front after each of 10 push_fronts\n");
     for (int i = 0; i < 10; i++) {
@@ -586,7 +626,9 @@ test_res test_deque_front(test_arg *arg) {
 
 test_res test_deque_at_valid(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing deque_at with 100 sequential elements\n");
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "AtValidTest", (double)i);
@@ -608,7 +650,9 @@ test_res test_deque_at_valid(test_arg *arg) {
 
 test_res test_deque_at_out_of_bounds(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "OOBTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -637,7 +681,9 @@ test_res test_deque_at_out_of_bounds(test_arg *arg) {
 
 test_res test_deque_at_cross_block(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 3;
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "CrossBlockTest", (double)i);
@@ -674,7 +720,9 @@ test_res test_deque_at_cross_block(test_arg *arg) {
 
 test_res test_deque_empty_initial(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking empty on freshly initialized deque\n");
     if (!deque_empty(dq)) {
@@ -688,7 +736,9 @@ test_res test_deque_empty_initial(test_arg *arg) {
 
 test_res test_deque_empty_after_ops(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking empty transitions: push then pop\n");
@@ -717,7 +767,9 @@ test_res test_deque_empty_after_ops(test_arg *arg) {
 
 test_res test_deque_size_initial(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking size on freshly initialized deque: %d\n", deque_size(dq));
     if (deque_size(dq) != 0) {
@@ -731,7 +783,9 @@ test_res test_deque_size_initial(test_arg *arg) {
 
 test_res test_deque_size_after_ops(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying size consistency during 100 pushes and 100 pops\n");
     for (int i = 0; i < 100; i++) {
@@ -763,9 +817,13 @@ test_res test_deque_size_after_ops(test_arg *arg) {
 
 test_res test_deque_swap(test_arg *arg) {
     deque dq1;
-    deque_init(&dq1, get_test_struct_attr());
+    if (deque_init(&dq1, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     deque dq2;
-    deque_init(&dq2, get_test_struct_attr());
+    if (deque_init(&dq2, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "Swap1", (double)i);
@@ -804,9 +862,13 @@ test_res test_deque_swap(test_arg *arg) {
 
 test_res test_deque_swap_empty(test_arg *arg) {
     deque dq1;
-    deque_init(&dq1, get_test_struct_attr());
+    if (deque_init(&dq1, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     deque dq2;
-    deque_init(&dq2, get_test_struct_attr());
+    if (deque_init(&dq2, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "SwapEmpty", (double)i);
@@ -840,7 +902,9 @@ test_res test_deque_swap_empty(test_arg *arg) {
 
 test_res test_deque_clear(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "ClearTest", (double)i);
         deque_push_back(&dq, &ts);
@@ -861,7 +925,9 @@ test_res test_deque_clear(test_arg *arg) {
 
 test_res test_deque_clear_reuse(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 50; i++) {
         test_struct ts = create_test_struct(i, "ClearReuse", (double)i);
         deque_push_back(&dq, &ts);
@@ -894,7 +960,9 @@ test_res test_deque_clear_reuse(test_arg *arg) {
 
 test_res test_deque_nested_data_integrity(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying nested data integrity for 50 complex structs\n");
     // Push elements with complex nested data
@@ -950,7 +1018,9 @@ test_res test_deque_nested_data_integrity(test_arg *arg) {
 
 test_res test_deque_deep_copy_verification(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     test_struct original = create_test_struct(42, "DeepCopyTest", 42.42);
     deque_push_back(&dq, &original);
@@ -993,7 +1063,9 @@ test_res test_deque_deep_copy_verification(test_arg *arg) {
 
 test_res test_deque_push_both_sides(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 2;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Bidirectional push: %d elements back + %d elements front\n", total, total);
@@ -1031,7 +1103,9 @@ test_res test_deque_push_both_sides(test_arg *arg) {
 
 test_res test_deque_alternating_ops(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Running alternating push/pop operations\n");
     // Alternate push/pop operations
@@ -1059,7 +1133,9 @@ test_res test_deque_alternating_ops(test_arg *arg) {
 
 test_res test_deque_pop_all_front(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 2;
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "PopAllFront", (double)i);
@@ -1086,7 +1162,9 @@ test_res test_deque_pop_all_front(test_arg *arg) {
 
 test_res test_deque_pop_all_back(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = DEQUE_BLOCK_SIZE * 2;
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "PopAllBack", (double)i);
@@ -1113,7 +1191,9 @@ test_res test_deque_pop_all_back(test_arg *arg) {
 
 test_res test_deque_large_random_access(test_arg *arg) {
     deque dq;
-    deque_init(&dq, get_test_struct_attr());
+    if (deque_init(&dq, get_test_struct_attr(), (deque_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Deque initialization failed", CS_MEM};
+    }
     int total = __TEST_SIZE;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Large random access test with %d elements\n", total);
@@ -1142,16 +1222,12 @@ test_res test_deque_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
     }
 
-    if (arg->op_time_count != 2) {
-        return (test_res){(char*)__func__, "Timing requires 2 op_time slots", CS_UNKNOWN};
-    }
-
     deque dq;
     struct timeval start, end;
     double elapsed_time;
     int rc, total = __DEQUE_STRESS_TEST_SIZE;
 
-    rc = deque_init(&dq, get_int_attr());
+    rc = deque_init(&dq, get_int_attr(), (deque_attr_t){0, 0});
     if (rc != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Initialization failed for stress test", rc};
     }

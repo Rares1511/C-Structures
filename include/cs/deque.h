@@ -6,7 +6,13 @@
 #define DEQUE_INIT_BLOCKS 64
 #define DEQUE_BLOCK_SIZE 64
 
-typedef univ_attr_t deque_attr_t;
+/*!
+ * @brief Attributes for the deque structure controllable by the user
+ */
+typedef struct deque_attr_t {
+    int min_cap; /*!< Minimum capacity of the deque, used for optimization */
+    int block_size; /*!< Number of elements per block, used for optimization */
+} deque_attr_t;
 
 typedef struct deque_block_t {
     void* data; /*!< Pointer to the block's data */
@@ -16,9 +22,9 @@ typedef struct deque_block_t {
 
 typedef struct deque {
     deque_block_t *blocks; /*!< Array of blocks in the deque */
-    deque_attr_t attr;     /*!< Attributes of the deque */
+    elem_attr_t attr;      /*!< Attributes of the deque */
+    deque_attr_t dq_attr;  /*!< User-controllable attributes for optimization */
     int size;              /*!< Total number of elements in the deque */
-    int block_size;        /*!< Number of elements per block */
     int block_cap;         /*!< Total number of blocks allocated */
     int front;             /*!< Index of the front element in the deque, points to the first block */
     int back;              /*!< Index of the back element in the deque, points to the last block */
@@ -28,9 +34,10 @@ typedef struct deque {
  * Initializes a deque with the specified attributes.
  * @param dq Pointer to the deque to initialize.
  * @param attr Attributes for the deque.
+ * @param dq_attr User-controllable attributes for optimization.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_init(deque *dq, deque_attr_t attr);
+cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr);
 
 /*! 
  * Pushes an element to the back of the deque.

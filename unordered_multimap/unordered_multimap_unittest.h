@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_unordered_multimap_init_basic() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -15,7 +15,7 @@ test_res test_unordered_multimap_init_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -43,7 +43,7 @@ test_res test_unordered_multimap_init_basic() {
 }
 
 test_res test_unordered_multimap_init_null_pointer() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -51,7 +51,7 @@ test_res test_unordered_multimap_init_null_pointer() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -77,7 +77,7 @@ test_res test_unordered_multimap_init_null_pointer() {
 }
 
 test_res test_unordered_multimap_init_invalid_capacity() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -85,7 +85,7 @@ test_res test_unordered_multimap_init_invalid_capacity() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -122,7 +122,7 @@ test_res test_unordered_multimap_init_invalid_capacity() {
 }
 
 test_res test_unordered_multimap_init_invalid_key_size() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = 0,
         .copy = NULL,
         .fr = NULL,
@@ -130,7 +130,7 @@ test_res test_unordered_multimap_init_invalid_key_size() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -157,7 +157,7 @@ test_res test_unordered_multimap_init_invalid_key_size() {
 }
 
 test_res test_unordered_multimap_init_invalid_value_size() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -165,7 +165,7 @@ test_res test_unordered_multimap_init_invalid_value_size() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = 0,
         .copy = NULL,
         .fr = NULL,
@@ -192,7 +192,7 @@ test_res test_unordered_multimap_init_invalid_value_size() {
 }
 
 test_res test_unordered_multimap_init_null_hash() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -200,7 +200,7 @@ test_res test_unordered_multimap_init_null_hash() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -234,7 +234,7 @@ test_res test_unordered_multimap_init_null_hash() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_add_entry_basic() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -242,7 +242,7 @@ test_res test_unordered_multimap_add_entry_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -283,7 +283,7 @@ test_res test_unordered_multimap_add_entry_basic() {
 }
 
 test_res test_unordered_multimap_add_entry_multiple() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -291,7 +291,7 @@ test_res test_unordered_multimap_add_entry_multiple() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -341,7 +341,7 @@ test_res test_unordered_multimap_add_entry_multiple() {
 }
 
 test_res test_unordered_multimap_add_entry_duplicate_keys() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -349,7 +349,7 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -422,7 +422,7 @@ test_res test_unordered_multimap_add_entry_null_map() {
 }
 
 test_res test_unordered_multimap_add_entry_null_key() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -430,7 +430,7 @@ test_res test_unordered_multimap_add_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -470,7 +470,7 @@ test_res test_unordered_multimap_add_entry_null_key() {
 }
 
 test_res test_unordered_multimap_add_entry_null_value() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -478,7 +478,7 @@ test_res test_unordered_multimap_add_entry_null_value() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -522,7 +522,7 @@ test_res test_unordered_multimap_add_entry_null_value() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_get_entry_existing() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -530,7 +530,7 @@ test_res test_unordered_multimap_get_entry_existing() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -573,7 +573,7 @@ test_res test_unordered_multimap_get_entry_existing() {
 }
 
 test_res test_unordered_multimap_get_entry_nonexistent() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -581,7 +581,7 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -625,7 +625,7 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
 }
 
 test_res test_unordered_multimap_get_entry_null_key() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -633,7 +633,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -672,7 +672,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
 }
 
 test_res test_unordered_multimap_get_entry_after_many_adds() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -680,7 +680,7 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -730,7 +730,7 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_remove_entry_existing() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -738,7 +738,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -791,7 +791,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
 }
 
 test_res test_unordered_multimap_remove_entry_one_of_many() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -799,7 +799,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -855,7 +855,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
 }
 
 test_res test_unordered_multimap_remove_entry_nonexistent() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -863,7 +863,7 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -923,7 +923,7 @@ test_res test_unordered_multimap_remove_entry_null_map() {
 }
 
 test_res test_unordered_multimap_remove_entry_null_key() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -931,7 +931,7 @@ test_res test_unordered_multimap_remove_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -970,7 +970,7 @@ test_res test_unordered_multimap_remove_entry_null_key() {
 }
 
 test_res test_unordered_multimap_remove_entry_all() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -978,7 +978,7 @@ test_res test_unordered_multimap_remove_entry_all() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1037,7 +1037,7 @@ test_res test_unordered_multimap_remove_entry_all() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_count_zero() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1045,7 +1045,7 @@ test_res test_unordered_multimap_count_zero() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1085,7 +1085,7 @@ test_res test_unordered_multimap_count_zero() {
 }
 
 test_res test_unordered_multimap_count_single() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1093,7 +1093,7 @@ test_res test_unordered_multimap_count_single() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1136,7 +1136,7 @@ test_res test_unordered_multimap_count_single() {
 }
 
 test_res test_unordered_multimap_count_multiple() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1144,7 +1144,7 @@ test_res test_unordered_multimap_count_multiple() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1189,7 +1189,7 @@ test_res test_unordered_multimap_count_multiple() {
 }
 
 test_res test_unordered_multimap_count_null_key() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1197,7 +1197,7 @@ test_res test_unordered_multimap_count_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1236,7 +1236,7 @@ test_res test_unordered_multimap_count_null_key() {
 }
 
 test_res test_unordered_multimap_count_after_remove() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1244,7 +1244,7 @@ test_res test_unordered_multimap_count_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1297,7 +1297,7 @@ test_res test_unordered_multimap_count_after_remove() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_size_empty() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1305,7 +1305,7 @@ test_res test_unordered_multimap_size_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1342,7 +1342,7 @@ test_res test_unordered_multimap_size_empty() {
 }
 
 test_res test_unordered_multimap_size_after_adds() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1350,7 +1350,7 @@ test_res test_unordered_multimap_size_after_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1392,7 +1392,7 @@ test_res test_unordered_multimap_size_after_adds() {
 }
 
 test_res test_unordered_multimap_size_after_remove() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1400,7 +1400,7 @@ test_res test_unordered_multimap_size_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1446,7 +1446,7 @@ test_res test_unordered_multimap_size_after_remove() {
 }
 
 test_res test_unordered_multimap_empty_true() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1454,7 +1454,7 @@ test_res test_unordered_multimap_empty_true() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1491,7 +1491,7 @@ test_res test_unordered_multimap_empty_true() {
 }
 
 test_res test_unordered_multimap_empty_false() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1499,7 +1499,7 @@ test_res test_unordered_multimap_empty_false() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1540,7 +1540,7 @@ test_res test_unordered_multimap_empty_false() {
 }
 
 test_res test_unordered_multimap_empty_after_remove_all() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1548,7 +1548,7 @@ test_res test_unordered_multimap_empty_after_remove_all() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1598,7 +1598,7 @@ test_res test_unordered_multimap_empty_after_remove_all() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_clear_basic() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1606,7 +1606,7 @@ test_res test_unordered_multimap_clear_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1659,7 +1659,7 @@ test_res test_unordered_multimap_clear_basic() {
 }
 
 test_res test_unordered_multimap_clear_empty() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1667,7 +1667,7 @@ test_res test_unordered_multimap_clear_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1721,7 +1721,7 @@ test_res test_unordered_multimap_clear_null() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_swap_basic() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1729,7 +1729,7 @@ test_res test_unordered_multimap_swap_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1805,7 +1805,7 @@ test_res test_unordered_multimap_swap_basic() {
 }
 
 test_res test_unordered_multimap_swap_with_empty() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1813,7 +1813,7 @@ test_res test_unordered_multimap_swap_with_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1895,7 +1895,7 @@ test_res test_unordered_multimap_free_null() {
 }
 
 test_res test_unordered_multimap_free_empty() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1903,7 +1903,7 @@ test_res test_unordered_multimap_free_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1931,7 +1931,7 @@ test_res test_unordered_multimap_free_empty() {
 }
 
 test_res test_unordered_multimap_free_with_entries() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1939,7 +1939,7 @@ test_res test_unordered_multimap_free_with_entries() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1976,7 +1976,7 @@ test_res test_unordered_multimap_free_with_entries() {
 /******************************************************************************/
 
 test_res test_unordered_multimap_large_capacity() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1984,7 +1984,7 @@ test_res test_unordered_multimap_large_capacity() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2034,7 +2034,7 @@ test_res test_unordered_multimap_large_capacity() {
 }
 
 test_res test_unordered_multimap_small_capacity_many_adds() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2042,7 +2042,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2093,7 +2093,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
 }
 
 test_res test_unordered_multimap_add_remove_cycle() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2101,7 +2101,7 @@ test_res test_unordered_multimap_add_remove_cycle() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2149,7 +2149,7 @@ test_res test_unordered_multimap_add_remove_cycle() {
 }
 
 test_res test_unordered_multimap_negative_keys() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2157,7 +2157,7 @@ test_res test_unordered_multimap_negative_keys() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2218,7 +2218,7 @@ test_res test_unordered_multimap_negative_keys() {
 }
 
 test_res test_unordered_multimap_readd_after_remove() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2226,7 +2226,7 @@ test_res test_unordered_multimap_readd_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2280,7 +2280,7 @@ test_res test_unordered_multimap_readd_after_remove() {
 }
 
 test_res test_unordered_multimap_many_duplicates() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2288,7 +2288,7 @@ test_res test_unordered_multimap_many_duplicates() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2340,7 +2340,7 @@ test_res test_unordered_multimap_many_duplicates() {
 }
 
 test_res test_unordered_multimap_clear_and_reuse() {
-    unordered_multimap_attr_t key_attr = {
+    elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -2348,7 +2348,7 @@ test_res test_unordered_multimap_clear_and_reuse() {
         .comp = NULL,
     };
 
-    unordered_multimap_attr_t value_attr = {
+    elem_attr_t value_attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,

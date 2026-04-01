@@ -2,15 +2,17 @@
 #include <cs/rbt.h>
 #include <cs/pair.h>
 #include <cs/vector.h>
+
+#include <benchmark.h>
 #include <unittest.h>
 
 // ============================================================================
 // multimap_init
 // ============================================================================
 
-test_res test_multimap_init() {
-    multimap_attr_t key_attr = get_test_struct_attr();
-    multimap_attr_t value_attr = get_test_struct_attr();
+test_res test_multimap_init(test_arg *arg) {
+    elem_attr_t key_attr = get_test_struct_attr();
+    elem_attr_t value_attr = get_test_struct_attr();
     multimap mm;
     cs_codes init_result = multimap_init(&mm, key_attr, value_attr);
 
@@ -23,14 +25,16 @@ test_res test_multimap_init() {
         return (test_res){(char*)__func__, "RBT integrity violated after init", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multimap initialized and validated\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_init_invalid_key_size() {
-    multimap_attr_t key_attr = get_test_struct_attr();
+test_res test_multimap_init_invalid_key_size(test_arg *arg) {
+    elem_attr_t key_attr = get_test_struct_attr();
     key_attr.size = 0;
-    multimap_attr_t value_attr = get_test_struct_attr();
+    elem_attr_t value_attr = get_test_struct_attr();
     multimap mm;
     cs_codes init_result = multimap_init(&mm, key_attr, value_attr);
 
@@ -38,12 +42,14 @@ test_res test_multimap_init_invalid_key_size() {
         return (test_res){(char*)__func__, "Init should return CS_SIZE for invalid key size", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multimap init rejected invalid key size\n");
+
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_init_invalid_value_size() {
-    multimap_attr_t key_attr = get_test_struct_attr();
-    multimap_attr_t value_attr = get_test_struct_attr();
+test_res test_multimap_init_invalid_value_size(test_arg *arg) {
+    elem_attr_t key_attr = get_test_struct_attr();
+    elem_attr_t value_attr = get_test_struct_attr();
     value_attr.size = 0;
     multimap mm;
     cs_codes init_result = multimap_init(&mm, key_attr, value_attr);
@@ -52,6 +58,8 @@ test_res test_multimap_init_invalid_value_size() {
         return (test_res){(char*)__func__, "Init should return CS_SIZE for invalid value size", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multimap init rejected invalid value size\n");
+
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
@@ -59,7 +67,7 @@ test_res test_multimap_init_invalid_value_size() {
 // multimap_insert
 // ============================================================================
 
-test_res test_multimap_insert_single() {
+test_res test_multimap_insert_single(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(1, "Key1", 1.0);
@@ -95,13 +103,15 @@ test_res test_multimap_insert_single() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted single multimap entry successfully\n");
+
     free_test_struct(&key);
     free_test_struct(&value);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_insert_multiple_keys() {
+test_res test_multimap_insert_multiple_keys(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -130,11 +140,13 @@ test_res test_multimap_insert_multiple_keys() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d unique multimap keys\n", total);
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_insert_duplicate_keys() {
+test_res test_multimap_insert_duplicate_keys(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "SameKey", 42.0);
@@ -173,12 +185,14 @@ test_res test_multimap_insert_duplicate_keys() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted duplicate keys with 5 values\n");
+
     free_test_struct(&key);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_insert_many_duplicates() {
+test_res test_multimap_insert_many_duplicates(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int num_keys = 10;
@@ -222,11 +236,13 @@ test_res test_multimap_insert_many_duplicates() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d keys with %d values each\n", num_keys, values_per_key);
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_insert_null() {
+test_res test_multimap_insert_null(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(1, "Key", 1.0);
@@ -256,6 +272,8 @@ test_res test_multimap_insert_null() {
         return (test_res){(char*)__func__, "Insert with NULL multimap should return CS_NULL", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "NULL multimap insert cases rejected\n");
+
     free_test_struct(&key);
     free_test_struct(&value);
     multimap_free(&mm);
@@ -266,7 +284,7 @@ test_res test_multimap_insert_null() {
 // multimap_delete
 // ============================================================================
 
-test_res test_multimap_delete_single_value() {
+test_res test_multimap_delete_single_value(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "Key", 42.0);
@@ -296,13 +314,15 @@ test_res test_multimap_delete_single_value() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted the only value for a key\n");
+
     free_test_struct(&key);
     free_test_struct(&value);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_one_of_many() {
+test_res test_multimap_delete_one_of_many(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "Key", 42.0);
@@ -342,12 +362,14 @@ test_res test_multimap_delete_one_of_many() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted one value while preserving key and remaining values\n");
+
     free_test_struct(&key);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_all_values() {
+test_res test_multimap_delete_all_values(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "Key", 42.0);
@@ -381,12 +403,14 @@ test_res test_multimap_delete_all_values() {
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted all values for a key across repeated deletes\n");
+
     free_test_struct(&key);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_nonexistent() {
+test_res test_multimap_delete_nonexistent(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "NonExistent", 42.0);
@@ -398,12 +422,14 @@ test_res test_multimap_delete_nonexistent() {
         return (test_res){(char*)__func__, "Delete nonexistent should return CS_ELEM", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Delete on nonexistent key returned CS_ELEM\n");
+
     free_test_struct(&key);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_multiple_keys() {
+test_res test_multimap_delete_multiple_keys(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -439,11 +465,13 @@ test_res test_multimap_delete_multiple_keys() {
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted %d multimap keys in reverse order\n", total);
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_random_order() {
+test_res test_multimap_delete_random_order(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -487,6 +515,7 @@ test_res test_multimap_delete_random_order() {
     }
 
     free(order);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted %d multimap keys in random order\n", total);
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
@@ -495,7 +524,7 @@ test_res test_multimap_delete_random_order() {
 // multimap_clear
 // ============================================================================
 
-test_res test_multimap_clear() {
+test_res test_multimap_clear(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
 
@@ -522,11 +551,13 @@ test_res test_multimap_clear() {
         return (test_res){(char*)__func__, "RBT integrity violated after clear", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Cleared populated multimap successfully\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_clear_empty() {
+test_res test_multimap_clear_empty(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
 
@@ -537,11 +568,13 @@ test_res test_multimap_clear_empty() {
         return (test_res){(char*)__func__, "Size should still be 0", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Cleared empty multimap successfully\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_clear_reuse() {
+test_res test_multimap_clear_reuse(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
 
@@ -574,6 +607,8 @@ test_res test_multimap_clear_reuse() {
         return (test_res){(char*)__func__, "RBT integrity violated after reuse", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Cleared and reused multimap successfully\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
@@ -582,7 +617,7 @@ test_res test_multimap_clear_reuse() {
 // Complex struct integrity tests
 // ============================================================================
 
-test_res test_multimap_nested_data_integrity() {
+test_res test_multimap_nested_data_integrity(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
 
@@ -614,11 +649,13 @@ test_res test_multimap_nested_data_integrity() {
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verified nested key/value integrity for multimap\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_deep_copy_verification() {
+test_res test_multimap_deep_copy_verification(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "DeepCopyKey", 42.0);
@@ -652,6 +689,8 @@ test_res test_multimap_deep_copy_verification() {
         return (test_res){(char*)__func__, "Modified key should not be in multimap", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verified multimap deep-copy semantics for keys\n");
+
     free_test_struct(&key);
     free_test_struct(&value);
     free_test_struct(&original_key);
@@ -663,7 +702,7 @@ test_res test_multimap_deep_copy_verification() {
 // Stress tests
 // ============================================================================
 
-test_res test_multimap_stress_insert_delete() {
+test_res test_multimap_stress_insert_delete(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -709,11 +748,13 @@ test_res test_multimap_stress_insert_delete() {
         return (test_res){(char*)__func__, "RBT integrity violated after stress deletes", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress insert/delete verified for multimap\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_interleaved_insert_delete() {
+test_res test_multimap_interleaved_insert_delete(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
 
@@ -740,11 +781,13 @@ test_res test_multimap_interleaved_insert_delete() {
         }
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Interleaved multimap insert/delete rounds completed\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_all_verify_rbt() {
+test_res test_multimap_delete_all_verify_rbt(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     int total = __TEST_SIZE;
@@ -786,11 +829,13 @@ test_res test_multimap_delete_all_verify_rbt() {
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted all multimap values while preserving RBT validity\n");
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_large_value_counts() {
+test_res test_multimap_large_value_counts(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
     test_struct key = create_test_struct(42, "LargeCountKey", 42.0);
@@ -828,7 +873,80 @@ test_res test_multimap_large_value_counts() {
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Large multimap value-count scenario completed for %d values\n", large_count);
+
     free_test_struct(&key);
+    multimap_free(&mm);
+    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+}
+
+test_res test_multimap_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
+    }
+
+    multimap mm;
+    struct timeval start, end;
+    double elapsed;
+
+    if (multimap_init(&mm, get_int_attr(), get_int_attr()) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Multimap init failed", CS_MEM};
+    }
+
+    int total = __MULTIMAP_STRESS_TEST_SIZE;
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        int value = i;
+        cs_codes result = multimap_insert(&mm, &key, &value);
+
+        if (result != CS_SUCCESS) {
+            multimap_free(&mm);
+            return (test_res){(char*)__func__, "Insert failed during stress test", result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "insert", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        vector *values = multimap_get(&mm, &key);
+
+        if (values == NULL || vector_size(*values) != 1) {
+            multimap_free(&mm);
+            return (test_res){(char*)__func__, "Get failed during stress test", CS_ELEM};
+        }
+
+        int *found = vector_at(*values, 0);
+        if (found == NULL || *found != i) {
+            multimap_free(&mm);
+            return (test_res){(char*)__func__, "Get returned wrong value during stress test", CS_ELEM};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "get", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Get Time = %.9f sec\n", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int key = i;
+        cs_codes del_result = multimap_delete(&mm, &key);
+
+        if (del_result != CS_SUCCESS) {
+            multimap_free(&mm);
+            return (test_res){(char*)__func__, "Delete failed during stress test", del_result};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "delete", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
+
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
@@ -872,4 +990,5 @@ test multimap_tests[] = {
     test_multimap_interleaved_insert_delete,
     test_multimap_delete_all_verify_rbt,
     test_multimap_large_value_counts,
+    test_multimap_stress_time,
 };

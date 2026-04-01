@@ -8,17 +8,21 @@
 #define VECTOR_SHRINK_FACTOR 4
 #define VECTOR_INIT_CAPACITY 1024
 
-typedef univ_attr_t vector_attr_t;
+/*!
+ * @brief Attributes for the vector structure controllable by the user
+ */
+typedef struct {
+    int min_cap; 
+    int shrink_factor;
+} vector_attr_t;
 
 typedef struct vector {
     void *vec;            /*!< size of the datatype */
     int cap;              /*!< current maximum capacity of the vector */
     int size;             /*!< current size of the vector */
-    int shrink_factor;    /*!< threshold for shrinking the vector */
-    vector_attr_t attr;   /*!< attributes of the elements inside the vector */
+    vector_attr_t v_attr; /*!< attributes of the vector itself */
+    elem_attr_t attr;     /*!< attributes of the elements inside the vector */
 } vector;
-
-#define VECTOR_SIZE sizeof(vector)
 
 /*!
  * Checks if the vector is empty
@@ -37,10 +41,14 @@ static inline int vector_size(vector vec) { return vec.size; };
 /*!
  * Initializes the given variable with the correct vector structure datatype
  * @param[in]  attr       Attributes decribing the elements that the vector will contain
+ * @param[in]  v_attr     Attributes describing the vector itself.
+ *                        If v_attr.min_cap is 0, VECTOR_INIT_CAPACITY is used.
+ *                        If v_attr.shrink_factor is 0, VECTOR_SHRINK_FACTOR is used.
+ *                        If v_attr.shrink_factor is 1, the vector will never shrink.
  * @param[out] v          Pointer to the vector structure that will be initialized
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_init(vector *v, vector_attr_t attr);
+cs_codes vector_init(vector *v, elem_attr_t attr, vector_attr_t v_attr);
 
 /*!
  * Inserts the element at the given position in the offered vector
@@ -71,21 +79,7 @@ cs_codes vector_shrink(vector *vec);
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-static inline cs_codes vector_push_back(vector *vec, const void *el) {
-    CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
-    if (__builtin_expect(vec->size == vec->cap, 0)) {
-        cs_codes rc = vector_grow(vec);
-        if (rc != CS_SUCCESS) return rc;
-    }
-    int elem_size = vec->attr.size;
-    char *dest = (char *)vec->vec + elem_size * vec->size;
-    if (__builtin_expect(vec->attr.copy != NULL, 0))
-        vec->attr.copy(dest, el);
-    else
-        memcpy(dest, el, elem_size);
-    vec->size++;
-    return CS_SUCCESS;
-}
+cs_codes vector_push_back(vector *vec, const void *el);
 
 /*!
  * Erase the element at the position offered
@@ -101,14 +95,7 @@ cs_codes vector_erase(vector *vec, int pos);
  * @param[out] vec  Vector from which the last element will be deleted
  * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
  */
-static inline cs_codes vector_pop_back(vector *vec) {
-    CS_RETURN_IF(vec == NULL, CS_NULL);
-    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
-    if (__builtin_expect(vec->attr.fr != NULL, 0))
-        vec->attr.fr((char *)vec->vec + vec->attr.size * (vec->size - 1));
-    vec->size--;
-    return vector_shrink(vec);
-}
+cs_codes vector_pop_back(vector *vec);
 
 /*!
  * Replaces the value at the position offered with the new value given
@@ -150,7 +137,7 @@ int vector_count(vector vec, const void *el);
  * @param[out] vec  Vector whose attributes will be changed
  * @param[in]  attr The new attributes
  */
-static inline void vector_set_attr(vector *vec, vector_attr_t attr) { 
+static inline void vector_set_attr(vector *vec, elem_attr_t attr) { 
     CS_RETURN_IF(NULL == vec);
     vec->attr = attr; 
 }

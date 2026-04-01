@@ -66,7 +66,7 @@ static inline int rbt_check_black_height(rbt_node *node) {
     return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
 }
 
-static inline int rbt_check_bst(rbt_node *node, rbt_attr_t attr, void *min_key, void *max_key) {
+static inline int rbt_check_bst(rbt_node *node, elem_attr_t attr, void *min_key, void *max_key) {
     if (!node) return 1;
 
     if (min_key) {
@@ -505,8 +505,8 @@ static inline void copy_string(void *dest, const void *src) {
 }
 
 // Helper to get standard int attributes
-static inline univ_attr_t get_int_attr() {
-    return (univ_attr_t){
+static inline elem_attr_t get_int_attr() {
+    return (elem_attr_t){
         .size = sizeof(int),
         .fr = NULL,
         .copy = NULL,
@@ -515,8 +515,8 @@ static inline univ_attr_t get_int_attr() {
     };
 }
 
-static inline univ_attr_t get_string_attr() {
-    return (univ_attr_t){
+static inline elem_attr_t get_string_attr() {
+    return (elem_attr_t){
         .size = sizeof(char) * __MAX_PRINT_SIZE,
         .fr = NULL,
         .copy = copy_string,
@@ -525,8 +525,8 @@ static inline univ_attr_t get_string_attr() {
     };
 }
 
-static inline univ_attr_t get_test_struct_attr() {
-    return (univ_attr_t){
+static inline elem_attr_t get_test_struct_attr() {
+    return (elem_attr_t){
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .copy = copy_test_struct,
@@ -536,8 +536,8 @@ static inline univ_attr_t get_test_struct_attr() {
 }
 
 // Get test_struct attr with custom comparator
-static inline univ_attr_t get_test_struct_attr_by_score() {
-    return (univ_attr_t){
+static inline elem_attr_t get_test_struct_attr_by_score() {
+    return (elem_attr_t){
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .copy = copy_test_struct,
@@ -547,8 +547,8 @@ static inline univ_attr_t get_test_struct_attr_by_score() {
 }
 
 // Get test_struct attr with name comparator
-static inline univ_attr_t get_test_struct_attr_by_name() {
-    return (univ_attr_t){
+static inline elem_attr_t get_test_struct_attr_by_name() {
+    return (elem_attr_t){
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .copy = copy_test_struct,
@@ -558,8 +558,8 @@ static inline univ_attr_t get_test_struct_attr_by_name() {
 }
 
 // Get test_struct attr for min-heap ordering
-static inline univ_attr_t get_test_struct_attr_min() {
-    return (univ_attr_t){
+static inline elem_attr_t get_test_struct_attr_min() {
+    return (elem_attr_t){
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .copy = copy_test_struct,

@@ -44,13 +44,13 @@ typedef void (*freer)(void *);
 typedef int (*comparer)(const void *, const void *);
 typedef void (*deepcopy)(void *, const void *);
 
-typedef struct univ_attr_t {
+typedef struct elem_attr_t {
     int size;      /*!< size of the datatype */
     freer fr;      /*!< freer function for the datatype */
     deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
     printer print; /*!< printer function for the datatype */
     comparer comp; /*!< compare function for the datatype */
-} univ_attr_t;
+} elem_attr_t;
 
 /*!
  * A simple universal hash function for byte arrays.

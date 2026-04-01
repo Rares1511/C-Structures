@@ -3,7 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t set_attr_t;
 typedef struct rbt rbt;
 
 typedef struct set {
@@ -16,7 +15,7 @@ typedef struct set {
  * @param s Pointer to the set to be initialized.
  * @return cs_codes Status code indicating success or type of error.
  */
-cs_codes set_init(set *s, set_attr_t attr);
+cs_codes set_init(set *s, elem_attr_t attr);
 
 /*!
  * Inserts a new element into the set.

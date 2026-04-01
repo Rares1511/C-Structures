@@ -28,7 +28,7 @@ void nfa_node_free(void *v_node) {
 nfa* nfa_init(const char c) {
     nfa *automaton = (nfa *)malloc(sizeof(nfa));
     CS_RETURN_IF(NULL == automaton, NULL);
-    vector_attr_t node_attr = {
+    elem_attr_t node_attr = {
         .size = sizeof(nfa_node*),
         .comp = NULL,
         .copy = NULL,
@@ -40,7 +40,8 @@ nfa* nfa_init(const char c) {
         free(automaton);
         return NULL;
     }
-    CS_RETURN_IF(CS_SUCCESS != vector_init(automaton->nodes, node_attr), NULL);
+    vector_attr_t v_attr = { .min_cap = 0, .shrink_factor = 0 };
+    CS_RETURN_IF(CS_SUCCESS != vector_init(automaton->nodes, node_attr, v_attr), NULL);
     automaton->start = nfa_node_init(c);
     if (!automaton->start) {
         free(automaton);

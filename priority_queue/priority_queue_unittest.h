@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_priority_queue_init_vector() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -35,7 +35,7 @@ test_res test_priority_queue_init_vector() {
 }
 
 test_res test_priority_queue_init_deque() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -63,7 +63,7 @@ test_res test_priority_queue_init_deque() {
 }
 
 test_res test_priority_queue_init_default() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -91,7 +91,7 @@ test_res test_priority_queue_init_default() {
 }
 
 test_res test_priority_queue_init_null_pointer() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -117,7 +117,7 @@ test_res test_priority_queue_init_null_pointer() {
 }
 
 test_res test_priority_queue_init_invalid_size() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = 0,
         .comp = comp_int_max,
         .print = print_int,
@@ -148,7 +148,7 @@ test_res test_priority_queue_init_invalid_size() {
 /******************************************************************************/
 
 test_res test_priority_queue_push_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -196,7 +196,7 @@ test_res test_priority_queue_push_basic() {
 }
 
 test_res test_priority_queue_push_multiple() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -264,7 +264,7 @@ test_res test_priority_queue_push_null_pq() {
 }
 
 test_res test_priority_queue_push_null_data() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -305,7 +305,7 @@ test_res test_priority_queue_push_null_data() {
 /******************************************************************************/
 
 test_res test_priority_queue_pop_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -355,7 +355,7 @@ test_res test_priority_queue_pop_basic() {
 }
 
 test_res test_priority_queue_pop_multiple() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -408,7 +408,7 @@ test_res test_priority_queue_pop_multiple() {
 }
 
 test_res test_priority_queue_pop_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -467,7 +467,7 @@ test_res test_priority_queue_pop_null_pq() {
 /******************************************************************************/
 
 test_res test_priority_queue_top_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -517,7 +517,7 @@ test_res test_priority_queue_top_basic() {
 }
 
 test_res test_priority_queue_top_max_heap() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -562,7 +562,7 @@ test_res test_priority_queue_top_max_heap() {
 }
 
 test_res test_priority_queue_top_min_heap() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_min,
         .print = print_int,
@@ -607,7 +607,7 @@ test_res test_priority_queue_top_min_heap() {
 }
 
 test_res test_priority_queue_top_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -644,7 +644,7 @@ test_res test_priority_queue_top_empty() {
 }
 
 test_res test_priority_queue_top_does_not_pop() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -693,7 +693,7 @@ test_res test_priority_queue_top_does_not_pop() {
 /******************************************************************************/
 
 test_res test_priority_queue_max_heap_order() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -740,7 +740,7 @@ test_res test_priority_queue_max_heap_order() {
 }
 
 test_res test_priority_queue_min_heap_order() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_min,
         .print = print_int,
@@ -787,7 +787,7 @@ test_res test_priority_queue_min_heap_order() {
 }
 
 test_res test_priority_queue_random_order_max() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -842,7 +842,7 @@ test_res test_priority_queue_random_order_max() {
 /******************************************************************************/
 
 test_res test_priority_queue_size_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -879,7 +879,7 @@ test_res test_priority_queue_size_empty() {
 }
 
 test_res test_priority_queue_size_after_push() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -919,7 +919,7 @@ test_res test_priority_queue_size_after_push() {
 }
 
 test_res test_priority_queue_size_after_pop() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -963,7 +963,7 @@ test_res test_priority_queue_size_after_pop() {
 }
 
 test_res test_priority_queue_empty_true() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1000,7 +1000,7 @@ test_res test_priority_queue_empty_true() {
 }
 
 test_res test_priority_queue_empty_false() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1040,7 +1040,7 @@ test_res test_priority_queue_empty_false() {
 }
 
 test_res test_priority_queue_empty_after_pop_all() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1089,7 +1089,7 @@ test_res test_priority_queue_empty_after_pop_all() {
 /******************************************************************************/
 
 test_res test_priority_queue_clear_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1141,7 +1141,7 @@ test_res test_priority_queue_clear_basic() {
 }
 
 test_res test_priority_queue_clear_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1196,7 +1196,7 @@ test_res test_priority_queue_clear_null() {
 /******************************************************************************/
 
 test_res test_priority_queue_swap_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1284,7 +1284,7 @@ test_res test_priority_queue_swap_basic() {
 }
 
 test_res test_priority_queue_swap_with_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1358,7 +1358,7 @@ test_res test_priority_queue_free_null() {
 }
 
 test_res test_priority_queue_free_empty() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1386,7 +1386,7 @@ test_res test_priority_queue_free_empty() {
 }
 
 test_res test_priority_queue_free_with_elements() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1422,7 +1422,7 @@ test_res test_priority_queue_free_with_elements() {
 /******************************************************************************/
 
 test_res test_priority_queue_deque_operations() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1474,7 +1474,7 @@ test_res test_priority_queue_deque_operations() {
 /******************************************************************************/
 
 test_res test_priority_queue_large_capacity() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1534,7 +1534,7 @@ test_res test_priority_queue_large_capacity() {
 }
 
 test_res test_priority_queue_push_pop_cycle() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1597,7 +1597,7 @@ test_res test_priority_queue_push_pop_cycle() {
 }
 
 test_res test_priority_queue_negative_values() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1655,7 +1655,7 @@ test_res test_priority_queue_negative_values() {
 }
 
 test_res test_priority_queue_clear_and_reuse() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1722,7 +1722,7 @@ test_res test_priority_queue_clear_and_reuse() {
 }
 
 test_res test_priority_queue_duplicate_values() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1779,7 +1779,7 @@ test_res test_priority_queue_duplicate_values() {
 }
 
 test_res test_priority_queue_interleaved_push_pop() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .print = print_int,
@@ -1833,7 +1833,7 @@ test_res test_priority_queue_interleaved_push_pop() {
 /******************************************************************************/
 
 test_res test_priority_queue_struct_basic() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -1883,7 +1883,7 @@ test_res test_priority_queue_struct_basic() {
 }
 
 test_res test_priority_queue_struct_multiple() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -1935,7 +1935,7 @@ test_res test_priority_queue_struct_multiple() {
 }
 
 test_res test_priority_queue_struct_max_heap_order() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -1985,7 +1985,7 @@ test_res test_priority_queue_struct_max_heap_order() {
 }
 
 test_res test_priority_queue_struct_min_heap_order() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_min,
         .print = print_test_struct_compact,
@@ -2035,7 +2035,7 @@ test_res test_priority_queue_struct_min_heap_order() {
 }
 
 test_res test_priority_queue_struct_simple() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2093,7 +2093,7 @@ test_res test_priority_queue_struct_simple() {
 }
 
 test_res test_priority_queue_struct_deque_container() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2152,7 +2152,7 @@ test_res test_priority_queue_struct_deque_container() {
 }
 
 test_res test_priority_queue_struct_clear() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2226,7 +2226,7 @@ test_res test_priority_queue_struct_clear() {
 }
 
 test_res test_priority_queue_struct_swap() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2318,7 +2318,7 @@ test_res test_priority_queue_struct_swap() {
 }
 
 test_res test_priority_queue_struct_deep_copy_verify() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2387,7 +2387,7 @@ test_res test_priority_queue_struct_deep_copy_verify() {
 }
 
 test_res test_priority_queue_struct_interleaved() {
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .print = print_test_struct_compact,
@@ -2440,7 +2440,7 @@ test_res test_priority_queue_struct_interleaved() {
 
 test_res test_priority_queue_struct_by_score() {
     // Test with score-based comparison
-    priority_queue_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_by_score,
         .print = print_test_struct_compact,

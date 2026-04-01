@@ -65,26 +65,26 @@ static module_tests all_modules[] = {
     // // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test) },
-    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
-    // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
+    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
+    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
 
     // // Unordered associative containers (Hash Table)
-    // { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
-    // { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
-    // { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
-    // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
+    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
+    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
+    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
+    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
 
     // // Container adapters
-    // { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
-    // { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
-    // { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
-    // { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
+    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
+    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
+    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
+    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
 
     // // Numeric types
     // { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
 
     // Utilities
-    // { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
+    { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
 
     // String module
     // { "cstring", cstring_tests, sizeof(cstring_tests) / sizeof(test) },

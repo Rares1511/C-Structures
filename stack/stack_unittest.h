@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_stack_init_array() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -35,7 +35,7 @@ test_res test_stack_init_array() {
 }
 
 test_res test_stack_init_deque() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -63,7 +63,7 @@ test_res test_stack_init_deque() {
 }
 
 test_res test_stack_init_list() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -91,7 +91,7 @@ test_res test_stack_init_list() {
 }
 
 test_res test_stack_init_default() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -119,7 +119,7 @@ test_res test_stack_init_default() {
 }
 
 test_res test_stack_init_null_pointer() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -145,7 +145,7 @@ test_res test_stack_init_null_pointer() {
 }
 
 test_res test_stack_init_invalid_size() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = 0,
         .copy = NULL,
         .fr = NULL,
@@ -176,7 +176,7 @@ test_res test_stack_init_invalid_size() {
 /******************************************************************************/
 
 test_res test_stack_push_basic() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -216,7 +216,7 @@ test_res test_stack_push_basic() {
 }
 
 test_res test_stack_push_multiple() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -284,7 +284,7 @@ test_res test_stack_push_null_stack() {
 }
 
 test_res test_stack_push_null_data() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -327,7 +327,7 @@ test_res test_stack_push_null_data() {
 /******************************************************************************/
 
 test_res test_stack_pop_basic() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -378,7 +378,7 @@ test_res test_stack_pop_basic() {
 }
 
 test_res test_stack_pop_multiple() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -431,7 +431,7 @@ test_res test_stack_pop_multiple() {
 }
 
 test_res test_stack_pop_empty() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -493,7 +493,7 @@ test_res test_stack_pop_null_stack() {
 /******************************************************************************/
 
 test_res test_stack_top_basic() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -544,7 +544,7 @@ test_res test_stack_top_basic() {
 }
 
 test_res test_stack_top_lifo_order() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -602,7 +602,7 @@ test_res test_stack_top_lifo_order() {
 }
 
 test_res test_stack_top_empty() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -659,7 +659,7 @@ test_res test_stack_top_null_stack() {
 }
 
 test_res test_stack_top_does_not_pop() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -709,7 +709,7 @@ test_res test_stack_top_does_not_pop() {
 /******************************************************************************/
 
 test_res test_stack_size_empty() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -746,7 +746,7 @@ test_res test_stack_size_empty() {
 }
 
 test_res test_stack_size_after_push() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -787,7 +787,7 @@ test_res test_stack_size_after_push() {
 }
 
 test_res test_stack_size_after_pop() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -850,7 +850,7 @@ test_res test_stack_size_null_stack() {
 }
 
 test_res test_stack_empty_true() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -887,7 +887,7 @@ test_res test_stack_empty_true() {
 }
 
 test_res test_stack_empty_false() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -927,7 +927,7 @@ test_res test_stack_empty_false() {
 }
 
 test_res test_stack_empty_after_pop_all() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -994,7 +994,7 @@ test_res test_stack_empty_null_stack() {
 /******************************************************************************/
 
 test_res test_stack_clear_basic() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1046,7 +1046,7 @@ test_res test_stack_clear_basic() {
 }
 
 test_res test_stack_clear_empty() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1111,7 +1111,7 @@ test_res test_stack_free_null() {
 }
 
 test_res test_stack_free_empty() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1139,7 +1139,7 @@ test_res test_stack_free_empty() {
 }
 
 test_res test_stack_free_with_elements() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1175,7 +1175,7 @@ test_res test_stack_free_with_elements() {
 /******************************************************************************/
 
 test_res test_stack_deque_operations() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1222,7 +1222,7 @@ test_res test_stack_deque_operations() {
 }
 
 test_res test_stack_list_operations() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1273,7 +1273,7 @@ test_res test_stack_list_operations() {
 /******************************************************************************/
 
 test_res test_stack_large_capacity() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1322,7 +1322,7 @@ test_res test_stack_large_capacity() {
 }
 
 test_res test_stack_push_pop_cycle() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1369,7 +1369,7 @@ test_res test_stack_push_pop_cycle() {
 }
 
 test_res test_stack_negative_values() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1420,7 +1420,7 @@ test_res test_stack_negative_values() {
 }
 
 test_res test_stack_clear_and_reuse() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .fr = NULL,
@@ -1491,7 +1491,7 @@ test_res test_stack_clear_and_reuse() {
 /******************************************************************************/
 
 test_res test_stack_struct_basic() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1541,7 +1541,7 @@ test_res test_stack_struct_basic() {
 }
 
 test_res test_stack_struct_multiple() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1593,7 +1593,7 @@ test_res test_stack_struct_multiple() {
 }
 
 test_res test_stack_struct_top() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1638,7 +1638,7 @@ test_res test_stack_struct_top() {
 }
 
 test_res test_stack_struct_lifo_order() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1696,7 +1696,7 @@ test_res test_stack_struct_lifo_order() {
 }
 
 test_res test_stack_struct_simple() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1754,7 +1754,7 @@ test_res test_stack_struct_simple() {
 }
 
 test_res test_stack_struct_deque_container() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1812,7 +1812,7 @@ test_res test_stack_struct_deque_container() {
 }
 
 test_res test_stack_struct_list_container() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1870,7 +1870,7 @@ test_res test_stack_struct_list_container() {
 }
 
 test_res test_stack_struct_clear() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -1944,7 +1944,7 @@ test_res test_stack_struct_clear() {
 }
 
 test_res test_stack_struct_deep_copy_verify() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,
@@ -2013,7 +2013,7 @@ test_res test_stack_struct_deep_copy_verify() {
 }
 
 test_res test_stack_struct_interleaved() {
-    stack_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .copy = copy_test_struct,
         .fr = free_test_struct,

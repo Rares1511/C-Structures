@@ -54,7 +54,7 @@ inline int list_compare(const void *a, const void *b, comparer comp, int size) {
  * @param[in] start Starting node for the sort
  * @param[in] end   Ending node for the sort
  */
-void list_sort_helper(list_attr_t attr, list_node *start, list_node *end) {
+void list_sort_helper(elem_attr_t attr, list_node *start, list_node *end) {
     if (start == end)
         return;
     void *pivot = end->data;
@@ -96,7 +96,7 @@ void list_node_free(list_node *node, freer fr) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes list_init(list *l, list_attr_t attr) {
+cs_codes list_init(list *l, elem_attr_t attr) {
     CS_RETURN_IF(NULL == l, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     l->attr = attr;
@@ -220,7 +220,7 @@ void list_sort(list *l) {
 void list_swap(list *l1, list *l2) {
     CS_RETURN_IF(l1 == NULL || l2 == NULL);
 
-    list_attr_t attr = l1->attr;
+    elem_attr_t attr = l1->attr;
     list_node *front = l1->front;
     int size = l1->size;
 

@@ -22,7 +22,7 @@ jobs:
     - name: Build and Run Tests with Valgrind
       run: |
         mkdir -p logs
-        make unittest memcheck=true SEED=1234
+        make unittest SEED=1234 memcheck=true modular=true
         echo "MEMORY CHECK LOGS:"
         cat logs/memcheck.ansi
         echo "TEST DEBUG LOGS:"
@@ -45,7 +45,7 @@ jobs:
     - name: Build and Run Tests with Benchmarks
       run: |
         mkdir -p logs
-        make unittest SEED=1234
+        make unittest SEED=1234 memcheck=false modular=false
         echo "BENCHMARK LOGS:"
         cat logs/benchmark.csv
         echo "TEST DEBUG LOGS:"

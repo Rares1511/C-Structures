@@ -53,7 +53,7 @@ void forward_list_node_free(forward_list_node* node, freer fr){
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes forward_list_init(forward_list *list, forward_list_attr_t attr) {
+cs_codes forward_list_init(forward_list *list, elem_attr_t attr) {
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(list == NULL, CS_NULL);
 
@@ -116,7 +116,7 @@ void forward_list_swap(forward_list* list1, forward_list* list2) {
 
     forward_list_node* temp_head = list1->head;
     int temp_size = list1->size;
-    forward_list_attr_t temp_attr = list1->attr;
+    elem_attr_t temp_attr = list1->attr;
 
     list1->head = list2->head;
     list1->size = list2->size;

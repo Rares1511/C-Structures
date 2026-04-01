@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-cs_codes queue_init(queue *q, queue_attr attr, queue_type type) {
+cs_codes queue_init(queue *q, elem_attr_t attr, queue_type type) {
     CS_RETURN_IF(NULL == q, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     q->type = type;
@@ -16,7 +16,8 @@ cs_codes queue_init(queue *q, queue_attr attr, queue_type type) {
         case CS_QUEUE_DEQUE:
             q->container = malloc(sizeof(deque));
             CS_RETURN_IF(NULL == q->container, CS_MEM);
-            return deque_init(q->container, attr);
+            deque_attr_t dq_attr = { .min_cap = 0, .block_size = 0 };
+            return deque_init(q->container, attr, dq_attr);
         default:
             return CS_ELEM;
     }

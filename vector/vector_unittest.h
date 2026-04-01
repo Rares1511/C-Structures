@@ -10,9 +10,9 @@
 // vector_init
 // ============================================================================
 test_res test_vector_init(test_arg *arg) {
-    vector_attr_t attr = get_test_struct_attr();
+    elem_attr_t attr = get_test_struct_attr();
     vector vec;
-    cs_codes rc = vector_init(&vec, attr);
+    cs_codes rc = vector_init(&vec, attr, (vector_attr_t){0, 0});
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized vector with element size: %zu\n", (size_t)attr.size);
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
@@ -31,7 +31,9 @@ test_res test_vector_init(test_arg *arg) {
 // ============================================================================
 test_res test_vector_push_back_single(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "TestItem42", 42.5);
 
     cs_codes result = vector_push_back(&vec, &ts);
@@ -57,7 +59,9 @@ test_res test_vector_push_back_single(test_arg *arg) {
 
 test_res test_vector_push_back_multiple(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     int total = __TEST_SIZE;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing back %d elements\n", total);
@@ -91,7 +95,9 @@ test_res test_vector_push_back_multiple(test_arg *arg) {
 
 test_res test_vector_push_back_growth(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     int total = 100; // Force multiple reallocations
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing growth with %d elements to force reallocations\n", total);
 
@@ -124,7 +130,9 @@ test_res test_vector_push_back_growth(test_arg *arg) {
 // ============================================================================
 test_res test_vector_insert_at_front(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 1; i <= 5; i++) {
         test_struct ts = create_test_struct(i, "InsertTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -154,7 +162,9 @@ test_res test_vector_insert_at_front(test_arg *arg) {
 
 test_res test_vector_insert_at_middle(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "MiddleTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -192,7 +202,9 @@ test_res test_vector_insert_at_middle(test_arg *arg) {
 
 test_res test_vector_insert_at_back(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "BackInsertTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -225,7 +237,9 @@ test_res test_vector_insert_at_back(test_arg *arg) {
 // ============================================================================
 test_res test_vector_pop_back_single(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "PopBackTest", 42.0);
     vector_push_back(&vec, &ts);
     free_test_struct(&ts);
@@ -248,7 +262,9 @@ test_res test_vector_pop_back_single(test_arg *arg) {
 
 test_res test_vector_pop_back_multiple(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "PopBackMulti", (double)i);
         vector_push_back(&vec, &ts);
@@ -276,7 +292,9 @@ test_res test_vector_pop_back_multiple(test_arg *arg) {
 
 test_res test_vector_pop_back_empty(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pop_back on empty vector (should fail)\n");
 
     cs_codes result = vector_pop_back(&vec);
@@ -294,7 +312,9 @@ test_res test_vector_pop_back_empty(test_arg *arg) {
 // ============================================================================
 test_res test_vector_erase_front(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -320,7 +340,9 @@ test_res test_vector_erase_front(test_arg *arg) {
 
 test_res test_vector_erase_middle(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseMiddle", (double)i);
         vector_push_back(&vec, &ts);
@@ -346,7 +368,9 @@ test_res test_vector_erase_middle(test_arg *arg) {
 
 test_res test_vector_erase_back(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "EraseBack", (double)i);
         vector_push_back(&vec, &ts);
@@ -375,7 +399,9 @@ test_res test_vector_erase_back(test_arg *arg) {
 // ============================================================================
 test_res test_vector_replace_single(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "Original", 42.0);
     vector_push_back(&vec, &ts);
     free_test_struct(&ts);
@@ -403,7 +429,9 @@ test_res test_vector_replace_single(test_arg *arg) {
 
 test_res test_vector_replace_middle(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "ReplaceTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -442,7 +470,9 @@ test_res test_vector_replace_middle(test_arg *arg) {
 
 test_res test_vector_replace_invalid_pos(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "Test", 42.0);
     vector_push_back(&vec, &ts);
     free_test_struct(&ts);
@@ -466,7 +496,9 @@ test_res test_vector_replace_invalid_pos(test_arg *arg) {
 // ============================================================================
 test_res test_vector_at_valid(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "AtValidTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -488,7 +520,9 @@ test_res test_vector_at_valid(test_arg *arg) {
 
 test_res test_vector_at_out_of_bounds(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "OOBTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -520,7 +554,9 @@ test_res test_vector_at_out_of_bounds(test_arg *arg) {
 // ============================================================================
 test_res test_vector_find_existing(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "FindTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -543,7 +579,9 @@ test_res test_vector_find_existing(test_arg *arg) {
 
 test_res test_vector_find_not_existing(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "FindTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -566,7 +604,9 @@ test_res test_vector_find_not_existing(test_arg *arg) {
 
 test_res test_vector_find_first_occurrence(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     // Insert duplicates
     for (int i = 0; i < 3; i++) {
         test_struct ts = create_test_struct(42, "Duplicate", 42.0);
@@ -593,7 +633,9 @@ test_res test_vector_find_first_occurrence(test_arg *arg) {
 // ============================================================================
 test_res test_vector_count_none(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "CountTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -616,7 +658,9 @@ test_res test_vector_count_none(test_arg *arg) {
 
 test_res test_vector_count_single(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "CountTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -639,7 +683,9 @@ test_res test_vector_count_single(test_arg *arg) {
 
 test_res test_vector_count_multiple(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(42, "Duplicate", 42.0);
         vector_push_back(&vec, &ts);
@@ -670,7 +716,9 @@ test_res test_vector_count_multiple(test_arg *arg) {
 // ============================================================================
 test_res test_vector_empty_initial(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking if newly initialized vector is empty\n");
 
     if (!vector_empty(vec)) {
@@ -684,7 +732,9 @@ test_res test_vector_empty_initial(test_arg *arg) {
 
 test_res test_vector_empty_after_ops(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing empty state after push/pop operations\n");
 
@@ -712,7 +762,9 @@ test_res test_vector_empty_after_ops(test_arg *arg) {
 // ============================================================================
 test_res test_vector_size_initial(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking initial size is 0\n");
 
     if (vector_size(vec) != 0) {
@@ -726,7 +778,9 @@ test_res test_vector_size_initial(test_arg *arg) {
 
 test_res test_vector_size_after_ops(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing size changes during 100 push/pop operations\n");
 
     for (int i = 0; i < 100; i++) {
@@ -757,8 +811,12 @@ test_res test_vector_size_after_ops(test_arg *arg) {
 // ============================================================================
 test_res test_vector_swap(test_arg *arg) {
     vector vec1, vec2;
-    vector_init(&vec1, get_test_struct_attr());
-    vector_init(&vec2, get_test_struct_attr());
+    if (vector_init(&vec1, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
+    if (vector_init(&vec2, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping two vectors with 5 elements each\n");
 
     for (int i = 0; i < 5; i++) {
@@ -797,8 +855,12 @@ test_res test_vector_swap(test_arg *arg) {
 
 test_res test_vector_swap_empty(test_arg *arg) {
     vector vec1, vec2;
-    vector_init(&vec1, get_test_struct_attr());
-    vector_init(&vec2, get_test_struct_attr());
+    if (vector_init(&vec1, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
+    if (vector_init(&vec2, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping non-empty vector with empty vector\n");
 
     for (int i = 0; i < 5; i++) {
@@ -831,7 +893,9 @@ test_res test_vector_swap_empty(test_arg *arg) {
 // ============================================================================
 test_res test_vector_clear(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "ClearTest", (double)i);
         vector_push_back(&vec, &ts);
@@ -852,7 +916,9 @@ test_res test_vector_clear(test_arg *arg) {
 
 test_res test_vector_clear_reuse(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     for (int i = 0; i < 50; i++) {
         test_struct ts = create_test_struct(i, "ClearReuse", (double)i);
         vector_push_back(&vec, &ts);
@@ -884,7 +950,9 @@ test_res test_vector_clear_reuse(test_arg *arg) {
 // ============================================================================
 test_res test_vector_sort_ascending(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     int ids[] = {50, 10, 40, 20, 30};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting unsorted array [50,10,40,20,30]\n");
 
@@ -912,7 +980,9 @@ test_res test_vector_sort_ascending(test_arg *arg) {
 
 test_res test_vector_sort_already_sorted(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting already sorted array\n");
 
     for (int i = 0; i < 10; i++) {
@@ -937,7 +1007,9 @@ test_res test_vector_sort_already_sorted(test_arg *arg) {
 
 test_res test_vector_sort_reverse(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting reverse-ordered array\n");
 
     for (int i = 9; i >= 0; i--) {
@@ -962,7 +1034,9 @@ test_res test_vector_sort_reverse(test_arg *arg) {
 
 test_res test_vector_sort_by_score(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr_by_score());
+    if (vector_init(&vec, get_test_struct_attr_by_score(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     double scores[] = {50.5, 10.1, 40.4, 20.2, 30.3};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Sorting by score [50.5,10.1,40.4,20.2,30.3]\n");
 
@@ -993,11 +1067,13 @@ test_res test_vector_sort_by_score(test_arg *arg) {
 // ============================================================================
 test_res test_vector_set_attr(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Changing vector attributes to sort by score\n");
 
     // Change to sort by score
-    vector_attr_t new_attr = get_test_struct_attr_by_score();
+    elem_attr_t new_attr = get_test_struct_attr_by_score();
     vector_set_attr(&vec, new_attr);
 
     // Add elements
@@ -1025,7 +1101,9 @@ test_res test_vector_set_attr(test_arg *arg) {
 
 test_res test_vector_set_comp(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Changing comparator function at runtime\n");
 
     // Add elements
@@ -1055,7 +1133,9 @@ test_res test_vector_set_comp(test_arg *arg) {
 // ============================================================================
 test_res test_vector_nested_data_integrity(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing nested data integrity for 50 complex structs\n");
 
     // Push elements with complex nested data
@@ -1110,7 +1190,9 @@ test_res test_vector_nested_data_integrity(test_arg *arg) {
 
 test_res test_vector_deep_copy_verification(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
 
     test_struct original = create_test_struct(42, "DeepCopyTest", 42.42);
     vector_push_back(&vec, &original);
@@ -1151,7 +1233,9 @@ test_res test_vector_deep_copy_verification(test_arg *arg) {
 // ============================================================================
 test_res test_vector_large_dataset(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     int total = __TEST_SIZE;
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing large dataset with %d elements\n", total);
 
@@ -1176,7 +1260,9 @@ test_res test_vector_large_dataset(test_arg *arg) {
 
 test_res test_vector_interleaved_ops(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing interleaved push/pop operations\n");
 
     // Interleave pushes and pops
@@ -1206,7 +1292,9 @@ test_res test_vector_interleaved_ops(test_arg *arg) {
 
 test_res test_vector_erase_all(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
 
     for (int i = 0; i < 50; i++) {
         test_struct ts = create_test_struct(i, "EraseAll", (double)i);
@@ -1231,7 +1319,9 @@ test_res test_vector_erase_all(test_arg *arg) {
 
 test_res test_vector_replace_all(test_arg *arg) {
     vector vec;
-    vector_init(&vec, get_test_struct_attr());
+    if (vector_init(&vec, get_test_struct_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+        return (test_res){(char*)__func__, "Vector initialization failed", CS_MEM};
+    }
 
     for (int i = 0; i < 20; i++) {
         test_struct ts = create_test_struct(i, "ReplaceAll", (double)i);
@@ -1269,15 +1359,11 @@ test_res test_vector_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
-    if (arg->op_time_count != 3) {
-        return (test_res){(char*)__func__, "Expected 3 timing slots for insert, find, delete", CS_UNKNOWN};
-    }
-
     vector v;
     struct timeval start, end;
     double elapsed;
 
-    if (vector_init(&v, get_int_attr()) != CS_SUCCESS) {
+    if (vector_init(&v, get_int_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Vector initialization failed", CS_UNKNOWN};
     }
     int total = __VECTOR_STRESS_TEST_SIZE;

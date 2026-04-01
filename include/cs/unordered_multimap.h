@@ -3,15 +3,14 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t unordered_multimap_attr_t;
 typedef struct hash_table hash_table;
 typedef size_t (*hash_func_t)(const void *key);
 
 typedef struct unordered_multimap {
     hash_table *ht;
     hash_func_t hash_func;
-    unordered_multimap_attr_t key_attr;
-    unordered_multimap_attr_t value_attr;
+    elem_attr_t key_attr;
+    elem_attr_t value_attr;
 } unordered_multimap;
 
 /*!
@@ -23,8 +22,8 @@ typedef struct unordered_multimap {
  * @return A pointer to the initialized unordered multimap.
  */
 cs_codes unordered_multimap_init(unordered_multimap *ummap,
-                                unordered_multimap_attr_t key_attr,
-                                unordered_multimap_attr_t value_attr,
+                                elem_attr_t key_attr,
+                                elem_attr_t value_attr,
                                 hash_func_t hash_func,
                                 int initial_capacity);
 

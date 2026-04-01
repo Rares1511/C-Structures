@@ -3,8 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t forward_list_attr_t;
-
 typedef struct forward_list_node{
     void* data;
     struct forward_list_node* next;
@@ -12,7 +10,7 @@ typedef struct forward_list_node{
 
 typedef struct forward_list {
     forward_list_node* head;
-    forward_list_attr_t attr;
+    elem_attr_t attr;
     int size;
 } forward_list;
 
@@ -22,7 +20,7 @@ typedef struct forward_list {
  * @param[out] list Pointer to the forward list to initialize.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes forward_list_init(forward_list *list, forward_list_attr_t attr);
+cs_codes forward_list_init(forward_list *list, elem_attr_t attr);
 
 /*! 
  * Checks if the forward list is empty.
@@ -54,11 +52,19 @@ cs_codes forward_list_push_front(forward_list* list, const void* data);
 cs_codes forward_list_pop_front(forward_list* list);
 
 /*! 
+ * Finds the index of the first occurrence of the specified data in the forward list.
+ * @param list The forward list to search.
+ * @param data Pointer to the data to find.
+ * @return The index of the element if found, or -1 if not found or on error.
+ */
+int forward_list_find(forward_list list, const void* data);
+
+/*! 
  * Retrieves the size of the forward list.
  * @param list The forward list.
  * @return The number of elements in the list.
  */
-static inline void forward_list_set_attr(forward_list* list, forward_list_attr_t attr) {
+static inline void forward_list_set_attr(forward_list* list, elem_attr_t attr) {
     CS_RETURN_IF(list == NULL || attr.size <= 0 || attr.size > SIZE_TH);
     list->attr = attr;
 }

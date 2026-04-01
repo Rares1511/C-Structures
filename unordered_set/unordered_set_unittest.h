@@ -8,7 +8,7 @@
 /******************************************************************************/
 
 test_res test_unordered_set_init_basic() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -37,7 +37,7 @@ test_res test_unordered_set_init_basic() {
 }
 
 test_res test_unordered_set_init_null_pointer() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -63,7 +63,7 @@ test_res test_unordered_set_init_null_pointer() {
 }
 
 test_res test_unordered_set_init_invalid_capacity() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -100,7 +100,7 @@ test_res test_unordered_set_init_invalid_capacity() {
 }
 
 test_res test_unordered_set_init_invalid_size() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = 0,
         .comp = NULL,
         .fr = NULL,
@@ -127,7 +127,7 @@ test_res test_unordered_set_init_invalid_size() {
 }
 
 test_res test_unordered_set_init_null_hash() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -162,7 +162,7 @@ test_res test_unordered_set_init_null_hash() {
 /******************************************************************************/
 
 test_res test_unordered_set_insert_basic() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -202,7 +202,7 @@ test_res test_unordered_set_insert_basic() {
 }
 
 test_res test_unordered_set_insert_multiple() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -251,7 +251,7 @@ test_res test_unordered_set_insert_multiple() {
 }
 
 test_res test_unordered_set_insert_duplicate() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -330,7 +330,7 @@ test_res test_unordered_set_insert_null_set() {
 }
 
 test_res test_unordered_set_insert_null_key() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -373,7 +373,7 @@ test_res test_unordered_set_insert_null_key() {
 /******************************************************************************/
 
 test_res test_unordered_set_find_existing() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -424,7 +424,7 @@ test_res test_unordered_set_find_existing() {
 }
 
 test_res test_unordered_set_find_nonexistent() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -467,7 +467,7 @@ test_res test_unordered_set_find_nonexistent() {
 }
 
 test_res test_unordered_set_find_null_key() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -506,7 +506,7 @@ test_res test_unordered_set_find_null_key() {
 }
 
 test_res test_unordered_set_find_after_many_inserts() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -555,7 +555,7 @@ test_res test_unordered_set_find_after_many_inserts() {
 /******************************************************************************/
 
 test_res test_unordered_set_erase_existing() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -607,7 +607,7 @@ test_res test_unordered_set_erase_existing() {
 }
 
 test_res test_unordered_set_erase_nonexistent() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -667,7 +667,7 @@ test_res test_unordered_set_erase_null_set() {
 }
 
 test_res test_unordered_set_erase_null_key() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -706,7 +706,7 @@ test_res test_unordered_set_erase_null_key() {
 }
 
 test_res test_unordered_set_erase_all() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -764,7 +764,7 @@ test_res test_unordered_set_erase_all() {
 /******************************************************************************/
 
 test_res test_unordered_set_count_existing() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -806,7 +806,7 @@ test_res test_unordered_set_count_existing() {
 }
 
 test_res test_unordered_set_count_nonexistent() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -846,7 +846,7 @@ test_res test_unordered_set_count_nonexistent() {
 }
 
 test_res test_unordered_set_count_null_key() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -889,7 +889,7 @@ test_res test_unordered_set_count_null_key() {
 /******************************************************************************/
 
 test_res test_unordered_set_size_empty() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -926,7 +926,7 @@ test_res test_unordered_set_size_empty() {
 }
 
 test_res test_unordered_set_size_after_inserts() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -967,7 +967,7 @@ test_res test_unordered_set_size_after_inserts() {
 }
 
 test_res test_unordered_set_size_after_erase() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1012,7 +1012,7 @@ test_res test_unordered_set_size_after_erase() {
 }
 
 test_res test_unordered_set_empty_true() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1049,7 +1049,7 @@ test_res test_unordered_set_empty_true() {
 }
 
 test_res test_unordered_set_empty_false() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1089,7 +1089,7 @@ test_res test_unordered_set_empty_false() {
 }
 
 test_res test_unordered_set_empty_after_erase_all() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1138,7 +1138,7 @@ test_res test_unordered_set_empty_after_erase_all() {
 /******************************************************************************/
 
 test_res test_unordered_set_clear_basic() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1190,7 +1190,7 @@ test_res test_unordered_set_clear_basic() {
 }
 
 test_res test_unordered_set_clear_empty() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1229,7 +1229,7 @@ test_res test_unordered_set_clear_empty() {
 }
 
 test_res test_unordered_set_clear_then_insert() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1311,7 +1311,7 @@ test_res test_unordered_set_free_null() {
 }
 
 test_res test_unordered_set_free_empty() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1339,7 +1339,7 @@ test_res test_unordered_set_free_empty() {
 }
 
 test_res test_unordered_set_free_with_elements() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1375,7 +1375,7 @@ test_res test_unordered_set_free_with_elements() {
 /******************************************************************************/
 
 test_res test_unordered_set_large_capacity() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1424,7 +1424,7 @@ test_res test_unordered_set_large_capacity() {
 }
 
 test_res test_unordered_set_small_capacity_many_inserts() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1474,7 +1474,7 @@ test_res test_unordered_set_small_capacity_many_inserts() {
 }
 
 test_res test_unordered_set_insert_erase_cycle() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1521,7 +1521,7 @@ test_res test_unordered_set_insert_erase_cycle() {
 }
 
 test_res test_unordered_set_negative_values() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,
@@ -1581,7 +1581,7 @@ test_res test_unordered_set_negative_values() {
 }
 
 test_res test_unordered_set_reinsert_after_erase() {
-    unordered_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
         .fr = NULL,

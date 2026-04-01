@@ -3,8 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t queue_attr;
-
 typedef enum queue_type {
     CS_QUEUE_LIST,
     CS_QUEUE_DEQUE,
@@ -23,7 +21,7 @@ typedef struct queue {
  * @param[in] type The underlying container type for the queue.
  * @return Pointer to the initialized queue structure.
  */
-cs_codes queue_init(queue *q, queue_attr attr, queue_type type);
+cs_codes queue_init(queue *q, elem_attr_t attr, queue_type type);
 
 /*! Push an element to the back of the queue.
  * @param[in,out] q Pointer to the queue.

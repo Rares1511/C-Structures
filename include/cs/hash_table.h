@@ -4,19 +4,17 @@
 #include <cs/universal.h>
 #include <cs/vector.h>
 
-typedef univ_attr_t hash_table_attr_t;
-
 typedef size_t (*hash_func_t)(const void *key);
 
 typedef struct hash_table {
     int cap;
     int size;
-    hash_table_attr_t attr;
+    elem_attr_t attr;
     hash_func_t hash;
     vector **buckets;
 } hash_table;
 
-cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t hash, int initial_capacity);
+cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash, int initial_capacity);
 cs_codes hash_table_add_entry(hash_table *ht, const void *el);
 cs_codes hash_table_remove_entry(hash_table *ht, const void *el);
 void *hash_table_get_entry(hash_table ht, const void *el);

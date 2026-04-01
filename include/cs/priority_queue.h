@@ -9,8 +9,6 @@ typedef enum priority_queue_type {
     CS_PRIORITY_QUEUE_DEFAULT = CS_PRIORITY_QUEUE_VECTOR
 } priority_queue_type;
 
-typedef univ_attr_t priority_queue_attr_t;
-
 typedef struct priority_queue {
     void *container;
     priority_queue_type type;
@@ -23,7 +21,7 @@ typedef struct priority_queue {
  * @param[in] type The underlying container type for the priority queue.
  * @return A cs_codes value indicating success or failure.
  */
-cs_codes priority_queue_init(priority_queue *pq, priority_queue_attr_t attr, priority_queue_type type);
+cs_codes priority_queue_init(priority_queue *pq, elem_attr_t attr, priority_queue_type type);
 
 /*!
  * Pushes an element onto the priority queue.

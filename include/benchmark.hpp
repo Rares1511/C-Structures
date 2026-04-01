@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include <benchmark.h>
 
@@ -44,16 +45,25 @@ public:
         modules.push_back(std::move(mod));
     }
 
-    int run() {
-        std::cout << std::fixed << std::setprecision(9);
+    int run(const std::string &output_file) {
+        std::ofstream ofs(output_file);
+        if (!ofs.is_open()) {
+            std::cerr << "Failed to open benchmark output file: " << output_file << "\n";
+            return 1;
+        }
+        ofs << std::fixed << std::setprecision(9);
+        ofs << "module,operation,value\n";
+
         for (auto &mod : modules) {
             void *arg = mod.init_arg;
             for (auto &test : mod.tests) {
                 double elapsed = test.run(arg);
-                std::cout << test.module << "," << test.name << "," << elapsed << "\n";
+                ofs << test.module << "," << test.name << "," << elapsed << "\n";
                 arg = test.result;
             }
         }
+
+        ofs.close();
         return 0;
     }
 };

@@ -3,8 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t rbt_attr_t;
-
 #define __RBT_NODE_BLACK_COLOR 0
 #define __RBT_NODE_RED_COLOR   1
 
@@ -19,10 +17,10 @@ typedef struct rbt_node {
 typedef struct rbt {
     int size;
     rbt_node *root;
-    rbt_attr_t attr;
+    elem_attr_t attr;
 } rbt;
 
-cs_codes rbt_init(rbt *t, rbt_attr_t attr);
+cs_codes rbt_init(rbt *t, elem_attr_t attr);
 cs_codes rbt_insert(rbt *t, void *data);
 cs_codes rbt_delete(rbt *t, void *data);
 static inline int rbt_empty(rbt t) { return (t.root == NULL); }

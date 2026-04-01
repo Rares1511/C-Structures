@@ -34,7 +34,7 @@ size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes hash_table_init(hash_table *ht, hash_table_attr_t attr, hash_func_t hash, int initial_capacity) {
+cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash, int initial_capacity) {
     CS_RETURN_IF(NULL == ht, CS_NULL);
     CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
 
@@ -58,8 +58,9 @@ cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
 
     if (ht->buckets[idx] == NULL) {
         ht->buckets[idx] = malloc(sizeof(vector));
+        vector_attr_t v_attr = { .min_cap = 1, .shrink_factor = 0 };
         CS_RETURN_IF(ht->buckets[idx] == NULL, CS_MEM);
-        rc = vector_init(ht->buckets[idx], ht->attr);
+        rc = vector_init(ht->buckets[idx], ht->attr, v_attr);
         CS_RETURN_IF(rc != CS_SUCCESS, rc);
     }
 
@@ -109,7 +110,7 @@ int hash_table_count(hash_table ht, const void *el) {
 void hash_table_swap(hash_table *ht1, hash_table *ht2) {
     CS_RETURN_IF(ht1 == NULL || ht2 == NULL);
 
-    hash_table_attr_t attr = ht1->attr;
+    elem_attr_t attr = ht1->attr;
     int cap = ht1->cap;
     int size = ht1->size;
     vector **buckets = ht1->buckets;

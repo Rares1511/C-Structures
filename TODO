@@ -29,6 +29,8 @@ Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented)
 
+Modify the things that use pair just like how map_node_copy has been modified
+
 Implement shrink to deque
 Change *_clear to cs_codes and make it reserve the INIT_CAPACITY of the data structure or CS_SUCCESS if it only initialized nodes like rbt or list
 Think about having fractions on large number (from Z -> Q, have to make: mul, switch_base)

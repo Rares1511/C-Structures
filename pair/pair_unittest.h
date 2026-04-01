@@ -7,8 +7,8 @@
 
 test_res test_pair_init(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing pair with test_struct attributes\n");
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
@@ -18,8 +18,8 @@ test_res test_pair_init(test_arg *arg) {
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "pair_init succeeded\n");
 
-    if (p.first != NULL || p.second != NULL) {
-        clogger_log(*arg->logger, CLOGGER_ERROR, "Initial values should be NULL but got first=%p, second=%p\n", p.first, p.second);
+    if (pair_first(p) != NULL || pair_second(p) != NULL) {
+        clogger_log(*arg->logger, CLOGGER_ERROR, "Initial values should be NULL but got first=%p, second=%p\n", pair_first(p), pair_second(p));
         pair_free(&p);
         return (test_res){(char*)__func__, "Initial values should be NULL", CS_UNKNOWN};
     }
@@ -31,8 +31,8 @@ test_res test_pair_init(test_arg *arg) {
 
 test_res test_pair_init_different_types(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = {
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = {
         .size = sizeof(int),
         .comp = NULL,
         .copy = NULL,
@@ -53,8 +53,8 @@ test_res test_pair_init_different_types(test_arg *arg) {
 }
 
 test_res test_pair_init_null_pair(test_arg *arg) {
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_init with NULL pair pointer\n");
     cs_codes rc = pair_init(NULL, &first_attr, &second_attr);
@@ -69,7 +69,7 @@ test_res test_pair_init_null_pair(test_arg *arg) {
 
 test_res test_pair_init_null_first_attr(test_arg *arg) {
     pair p;
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_init with NULL first_attr\n");
     cs_codes rc = pair_init(&p, NULL, &second_attr);
@@ -84,7 +84,7 @@ test_res test_pair_init_null_first_attr(test_arg *arg) {
 
 test_res test_pair_init_null_second_attr(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_init with NULL second_attr\n");
     cs_codes rc = pair_init(&p, &first_attr, NULL);
@@ -99,9 +99,9 @@ test_res test_pair_init_null_second_attr(test_arg *arg) {
 
 test_res test_pair_init_zero_first_size(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
     first_attr.size = 0;
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_init with zero first size\n");
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
@@ -116,8 +116,8 @@ test_res test_pair_init_zero_first_size(test_arg *arg) {
 
 test_res test_pair_init_zero_second_size(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
     second_attr.size = 0;
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_init with zero second size\n");
@@ -152,8 +152,8 @@ test_res test_pair_set_null_pair(test_arg *arg) {
 
 test_res test_pair_set_first_only(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_int_attr();
-    pair_attr_t second_attr = get_int_attr();
+    elem_attr_t first_attr = get_int_attr();
+    elem_attr_t second_attr = get_int_attr();
     pair_init(&p, &first_attr, &second_attr);
 
     int first = 42;
@@ -163,19 +163,19 @@ test_res test_pair_set_first_only(test_arg *arg) {
         clogger_log(*arg->logger, CLOGGER_ERROR, "pair_set with first only failed with code %d\n", rc);
         return (test_res){(char*)__func__, "pair_set with first only should succeed", rc};
     }
-    if (p.first == NULL) {
+    if (pair_first(p) == NULL) {
         pair_free(&p);
         clogger_log(*arg->logger, CLOGGER_ERROR, "first should be allocated but is NULL\n");
         return (test_res){(char*)__func__, "first should be allocated", CS_UNKNOWN};
     }
-    if (p.second != NULL) {
+    if (pair_second(p) != NULL) {
         pair_free(&p);
-        clogger_log(*arg->logger, CLOGGER_ERROR, "second should remain NULL but is %p\n", p.second);
+        clogger_log(*arg->logger, CLOGGER_ERROR, "second should remain NULL but is %p\n", pair_second(p));
         return (test_res){(char*)__func__, "second should remain NULL", CS_UNKNOWN};
     }
-    if (*(int*)p.first != 42) {
+    if (*(int*)pair_first(p) != 42) {
         pair_free(&p);
-        clogger_log(*arg->logger, CLOGGER_ERROR, "first value incorrect: expected 42, got %d\n", *(int*)p.first);
+        clogger_log(*arg->logger, CLOGGER_ERROR, "first value incorrect: expected 42, got %d\n", *(int*)pair_first(p));
         return (test_res){(char*)__func__, "first value incorrect", CS_UNKNOWN};
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully set first value only\n");
@@ -186,8 +186,8 @@ test_res test_pair_set_first_only(test_arg *arg) {
 
 test_res test_pair_set_second_only(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_int_attr();
-    pair_attr_t second_attr = get_int_attr();
+    elem_attr_t first_attr = get_int_attr();
+    elem_attr_t second_attr = get_int_attr();
     pair_init(&p, &first_attr, &second_attr);
 
     int second = 100;
@@ -197,19 +197,19 @@ test_res test_pair_set_second_only(test_arg *arg) {
         clogger_log(*arg->logger, CLOGGER_ERROR, "pair_set with second only failed with code %d\n", rc);
         return (test_res){(char*)__func__, "pair_set with second only should succeed", rc};
     }
-    if (p.first != NULL) {
+    if (pair_first(p) != NULL) {
         pair_free(&p);
-        clogger_log(*arg->logger, CLOGGER_ERROR, "first should remain NULL but is %p\n", p.first);
+        clogger_log(*arg->logger, CLOGGER_ERROR, "first should remain NULL but is %p\n", pair_first(p));
         return (test_res){(char*)__func__, "first should remain NULL", CS_UNKNOWN};
     }
-    if (p.second == NULL) {
+    if (pair_second(p) == NULL) {
         pair_free(&p);
         clogger_log(*arg->logger, CLOGGER_ERROR, "second should be allocated but is NULL\n");
         return (test_res){(char*)__func__, "second should be allocated", CS_UNKNOWN};
     }
-    if (*(int*)p.second != 100) {
+    if (*(int*)pair_second(p) != 100) {
         pair_free(&p);
-        clogger_log(*arg->logger, CLOGGER_ERROR, "second value incorrect: expected 100, got %d\n", *(int*)p.second);
+        clogger_log(*arg->logger, CLOGGER_ERROR, "second value incorrect: expected 100, got %d\n", *(int*)pair_second(p));
         return (test_res){(char*)__func__, "second value incorrect", CS_UNKNOWN};
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully set second value only\n");
@@ -220,8 +220,8 @@ test_res test_pair_set_second_only(test_arg *arg) {
 
 test_res test_pair_set_single(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing pair for single set test\n");
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
@@ -252,8 +252,8 @@ test_res test_pair_set_single(test_arg *arg) {
 
 test_res test_pair_set_overwrite(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -317,8 +317,8 @@ test_res test_pair_set_overwrite(test_arg *arg) {
 
 test_res test_pair_set_multiple_overwrites(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -373,8 +373,8 @@ test_res test_pair_set_multiple_overwrites(test_arg *arg) {
 
 test_res test_pair_first(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -418,8 +418,8 @@ test_res test_pair_first(test_arg *arg) {
 
 test_res test_pair_second(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -463,8 +463,8 @@ test_res test_pair_second(test_arg *arg) {
 
 test_res test_pair_first_empty(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -488,8 +488,8 @@ test_res test_pair_first_empty(test_arg *arg) {
 
 test_res test_pair_second_empty(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -517,8 +517,8 @@ test_res test_pair_second_empty(test_arg *arg) {
 
 test_res test_pair_deep_copy_first(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -583,8 +583,8 @@ test_res test_pair_deep_copy_first(test_arg *arg) {
 
 test_res test_pair_deep_copy_second(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -653,8 +653,8 @@ test_res test_pair_deep_copy_second(test_arg *arg) {
 
 test_res test_pair_nested_data_integrity(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -738,14 +738,14 @@ test_res test_pair_nested_data_integrity(test_arg *arg) {
 
 test_res test_pair_int_and_struct(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = {
+    elem_attr_t first_attr = {
         .size = sizeof(int),
         .comp = NULL,
         .copy = NULL,
         .fr = NULL,
         .print = print_int
     };
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair with int first and struct second\n");
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
@@ -790,8 +790,8 @@ test_res test_pair_int_and_struct(test_arg *arg) {
 
 test_res test_pair_struct_and_double(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = {
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = {
         .size = sizeof(double),
         .comp = NULL,
         .copy = NULL,
@@ -842,14 +842,14 @@ test_res test_pair_struct_and_double(test_arg *arg) {
 
 test_res test_pair_string_and_struct(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = {
+    elem_attr_t first_attr = {
         .size = 64,  // capacity for the string buffer
         .comp = NULL,
         .copy = NULL,
         .fr = NULL,
         .print = NULL
     };
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair with string first and struct second\n");
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
@@ -906,8 +906,8 @@ test_res test_pair_free_null(test_arg *arg) {
 
 test_res test_pair_free_unset_values(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_int_attr();
-    pair_attr_t second_attr = get_int_attr();
+    elem_attr_t first_attr = get_int_attr();
+    elem_attr_t second_attr = get_int_attr();
     pair_init(&p, &first_attr, &second_attr);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_free on pair with unset values\n");
@@ -920,8 +920,8 @@ test_res test_pair_free_unset_values(test_arg *arg) {
 
 test_res test_pair_free_partial_first(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
     pair_init(&p, &first_attr, &second_attr);
 
     test_struct ts = create_test_struct(1, "First", 1.5);
@@ -937,8 +937,8 @@ test_res test_pair_free_partial_first(test_arg *arg) {
 
 test_res test_pair_free_partial_second(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
     pair_init(&p, &first_attr, &second_attr);
 
     test_struct ts = create_test_struct(2, "Second", 2.5);
@@ -958,8 +958,8 @@ test_res test_pair_free_partial_second(test_arg *arg) {
 
 test_res test_pair_stress_set(test_arg *arg) {
     pair p;
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     cs_codes rc = pair_init(&p, &first_attr, &second_attr);
     if (rc != CS_SUCCESS) {
@@ -1013,8 +1013,8 @@ test_res test_pair_stress_set(test_arg *arg) {
 
 test_res test_pair_multiple_pairs(test_arg *arg) {
     pair pairs[50];
-    pair_attr_t first_attr = get_test_struct_attr();
-    pair_attr_t second_attr = get_test_struct_attr();
+    elem_attr_t first_attr = get_test_struct_attr();
+    elem_attr_t second_attr = get_test_struct_attr();
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing multiple pairs: initializing 50 pairs\n");
     // Initialize all pairs

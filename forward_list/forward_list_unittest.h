@@ -6,7 +6,7 @@
 // ============================================================================
 
 test_res test_forward_list_init(test_arg *arg) {
-    forward_list_attr_t attr = get_test_struct_attr();
+    elem_attr_t attr = get_test_struct_attr();
     forward_list fl;
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing forward_list with element size: %zu\n", (size_t)attr.size);
     cs_codes init_result = forward_list_init(&fl, attr);
@@ -710,11 +710,6 @@ test_res test_forward_list_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
         clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
         return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-    }
-
-    if (arg->op_time_count != 3) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Timing stress test requires 3 time slots (push, find, pop)\n");
-        return (test_res){(char*)__func__, "Insufficient time slots for stress test", CS_UNKNOWN};
     }
 
     forward_list fl;

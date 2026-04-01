@@ -3,8 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t flat_set_attr_t;
-
 typedef enum flat_set_type {
     CS_FLAT_SET_DEQUE,
     CS_FLAT_SET_VECTOR,
@@ -23,7 +21,7 @@ typedef struct flat_set {
  * @param type The underlying container type to use (e.g., vector, deque).
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes flat_set_init(flat_set *fs, flat_set_attr_t attr, flat_set_type type);
+cs_codes flat_set_init(flat_set *fs, elem_attr_t attr, flat_set_type type);
 
 /*!
  * Inserts an element into the flat set. If the element already exists, it will not be inserted again.

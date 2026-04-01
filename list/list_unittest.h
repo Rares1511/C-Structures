@@ -9,7 +9,7 @@
 // ============================================================================
 
 test_res test_list_init(test_arg *arg) {
-    list_attr_t attr = get_test_struct_attr();
+    elem_attr_t attr = get_test_struct_attr();
     list l;
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing list with element size: %zu\n", (size_t)attr.size);
     cs_codes init_result = list_init(&l, attr);
@@ -1128,10 +1128,6 @@ test_res test_list_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
         clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
         return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
-    }
-
-    if (arg->op_time_count != 3) {
-        return (test_res){(char*)__func__, "Expected 3 time measurements for stress test", CS_UNKNOWN};
     }
 
     list l;

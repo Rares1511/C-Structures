@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_queue_init_deque() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -35,7 +35,7 @@ test_res test_queue_init_deque() {
 }
 
 test_res test_queue_init_list() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -63,7 +63,7 @@ test_res test_queue_init_list() {
 }
 
 test_res test_queue_init_default() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -91,7 +91,7 @@ test_res test_queue_init_default() {
 }
 
 test_res test_queue_init_null_pointer() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -117,7 +117,7 @@ test_res test_queue_init_null_pointer() {
 }
 
 test_res test_queue_init_invalid_size() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = 0,
         .fr = NULL,
         .print = print_int,
@@ -148,7 +148,7 @@ test_res test_queue_init_invalid_size() {
 /******************************************************************************/
 
 test_res test_queue_push_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -188,7 +188,7 @@ test_res test_queue_push_basic() {
 }
 
 test_res test_queue_push_multiple() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -256,7 +256,7 @@ test_res test_queue_push_null_queue() {
 }
 
 test_res test_queue_push_null_data() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -299,7 +299,7 @@ test_res test_queue_push_null_data() {
 /******************************************************************************/
 
 test_res test_queue_pop_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -350,7 +350,7 @@ test_res test_queue_pop_basic() {
 }
 
 test_res test_queue_pop_multiple() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -403,7 +403,7 @@ test_res test_queue_pop_multiple() {
 }
 
 test_res test_queue_pop_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -465,7 +465,7 @@ test_res test_queue_pop_null_queue() {
 /******************************************************************************/
 
 test_res test_queue_front_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -516,7 +516,7 @@ test_res test_queue_front_basic() {
 }
 
 test_res test_queue_front_fifo_order() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -574,7 +574,7 @@ test_res test_queue_front_fifo_order() {
 }
 
 test_res test_queue_front_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -631,7 +631,7 @@ test_res test_queue_front_null_queue() {
 }
 
 test_res test_queue_front_does_not_pop() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -681,7 +681,7 @@ test_res test_queue_front_does_not_pop() {
 /******************************************************************************/
 
 test_res test_queue_back_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -732,7 +732,7 @@ test_res test_queue_back_basic() {
 }
 
 test_res test_queue_back_last_pushed() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -776,7 +776,7 @@ test_res test_queue_back_last_pushed() {
 }
 
 test_res test_queue_back_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -833,7 +833,7 @@ test_res test_queue_back_null_queue() {
 }
 
 test_res test_queue_front_back_different() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -891,7 +891,7 @@ test_res test_queue_front_back_different() {
 /******************************************************************************/
 
 test_res test_queue_size_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -928,7 +928,7 @@ test_res test_queue_size_empty() {
 }
 
 test_res test_queue_size_after_push() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -969,7 +969,7 @@ test_res test_queue_size_after_push() {
 }
 
 test_res test_queue_size_after_pop() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1014,7 +1014,7 @@ test_res test_queue_size_after_pop() {
 }
 
 test_res test_queue_empty_true() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1051,7 +1051,7 @@ test_res test_queue_empty_true() {
 }
 
 test_res test_queue_empty_false() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1091,7 +1091,7 @@ test_res test_queue_empty_false() {
 }
 
 test_res test_queue_empty_after_pop_all() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1140,7 +1140,7 @@ test_res test_queue_empty_after_pop_all() {
 /******************************************************************************/
 
 test_res test_queue_clear_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1192,7 +1192,7 @@ test_res test_queue_clear_basic() {
 }
 
 test_res test_queue_clear_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1246,7 +1246,7 @@ test_res test_queue_clear_null() {
 /******************************************************************************/
 
 test_res test_queue_swap_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1320,7 +1320,7 @@ test_res test_queue_swap_basic() {
 }
 
 test_res test_queue_swap_with_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1401,7 +1401,7 @@ test_res test_queue_free_null() {
 }
 
 test_res test_queue_free_empty() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1429,7 +1429,7 @@ test_res test_queue_free_empty() {
 }
 
 test_res test_queue_free_with_elements() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1465,7 +1465,7 @@ test_res test_queue_free_with_elements() {
 /******************************************************************************/
 
 test_res test_queue_list_operations() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1516,7 +1516,7 @@ test_res test_queue_list_operations() {
 /******************************************************************************/
 
 test_res test_queue_large_capacity() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1565,7 +1565,7 @@ test_res test_queue_large_capacity() {
 }
 
 test_res test_queue_push_pop_cycle() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1612,7 +1612,7 @@ test_res test_queue_push_pop_cycle() {
 }
 
 test_res test_queue_negative_values() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1674,7 +1674,7 @@ test_res test_queue_negative_values() {
 }
 
 test_res test_queue_clear_and_reuse() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1741,7 +1741,7 @@ test_res test_queue_clear_and_reuse() {
 }
 
 test_res test_queue_interleaved_push_pop() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .fr = NULL,
         .print = print_int,
@@ -1808,7 +1808,7 @@ test_res test_queue_interleaved_push_pop() {
 /******************************************************************************/
 
 test_res test_queue_struct_basic() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -1858,7 +1858,7 @@ test_res test_queue_struct_basic() {
 }
 
 test_res test_queue_struct_multiple() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -1910,7 +1910,7 @@ test_res test_queue_struct_multiple() {
 }
 
 test_res test_queue_struct_front_back() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -1966,7 +1966,7 @@ test_res test_queue_struct_front_back() {
 }
 
 test_res test_queue_struct_fifo_order() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2024,7 +2024,7 @@ test_res test_queue_struct_fifo_order() {
 }
 
 test_res test_queue_struct_simple() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2082,7 +2082,7 @@ test_res test_queue_struct_simple() {
 }
 
 test_res test_queue_struct_list_container() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2140,7 +2140,7 @@ test_res test_queue_struct_list_container() {
 }
 
 test_res test_queue_struct_clear() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2214,7 +2214,7 @@ test_res test_queue_struct_clear() {
 }
 
 test_res test_queue_struct_swap() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2306,7 +2306,7 @@ test_res test_queue_struct_swap() {
 }
 
 test_res test_queue_struct_deep_copy_verify() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,
@@ -2375,7 +2375,7 @@ test_res test_queue_struct_deep_copy_verify() {
 }
 
 test_res test_queue_struct_interleaved() {
-    queue_attr attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .fr = free_test_struct,
         .print = print_test_struct_compact,

@@ -3,7 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t unordered_set_attr_t;
 typedef struct hash_table hash_table;
 typedef size_t (*hash_func_t)(const void *key);
 
@@ -19,7 +18,7 @@ typedef struct unordered_set {
  * @param[in] initial_capacity Initial capacity of the unordered set.
  * @return Pointer to the initialized unordered set, or NULL on failure.
  */
-cs_codes unordered_set_init(unordered_set *uset, unordered_set_attr_t attr, hash_func_t hash_func, int initial_capacity);
+cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func, int initial_capacity);
 
 /*!
  * @brief Inserts a key into the unordered set.

@@ -33,7 +33,7 @@ typedef struct {
  * @param[in] s - pointer to the rbt containing the node
  * @param[in] node - pointer to the rbt node to be freed
  */
-rbt_node* rbt_node_init(void *data, rbt_attr_t attr) {
+rbt_node* rbt_node_init(void *data, elem_attr_t attr) {
     rbt_node *node = malloc(sizeof(rbt_node));
     if (node == NULL) {
         return NULL;
@@ -64,7 +64,7 @@ rbt_node* rbt_node_init(void *data, rbt_attr_t attr) {
  * @param[in] node - pointer to the rbt node to be freed
  * @param[in] attr - attributes of the rbt datatype
  */
-void rbt_node_free(rbt_node *node, rbt_attr_t attr) {
+void rbt_node_free(rbt_node *node, elem_attr_t attr) {
     if (attr.fr != NULL) {
         attr.fr(node->data);
     }
@@ -441,7 +441,7 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes rbt_init(rbt *t, rbt_attr_t attr) {
+cs_codes rbt_init(rbt *t, elem_attr_t attr) {
     CS_RETURN_IF(NULL == t, CS_NULL);
     CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, CS_SIZE);
 
@@ -498,7 +498,7 @@ void rbt_swap(rbt *t1, rbt *t2) {
 
     rbt_node *temp_root = t1->root;
     int temp_size = t1->size;
-    rbt_attr_t temp_attr = t1->attr;
+    elem_attr_t temp_attr = t1->attr;
 
     t1->root = t2->root;
     t1->size = t2->size;

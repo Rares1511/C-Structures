@@ -58,4 +58,4 @@ lib/
 unittest
 *_benchmark
 benchmark_bin
-.vscode/
+.vscode/*.json

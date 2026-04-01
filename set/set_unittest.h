@@ -11,7 +11,7 @@
 // set_init
 // ============================================================================
 test_res test_set_init(test_arg *arg) {
-    set_attr_t attr = get_test_struct_attr();
+    elem_attr_t attr = get_test_struct_attr();
     set s;
     cs_codes init_result = set_init(&s, attr);
 

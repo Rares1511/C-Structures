@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_flat_set_init_vector() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -35,7 +35,7 @@ test_res test_flat_set_init_vector() {
 }
 
 test_res test_flat_set_init_deque() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -63,7 +63,7 @@ test_res test_flat_set_init_deque() {
 }
 
 test_res test_flat_set_init_default() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -91,7 +91,7 @@ test_res test_flat_set_init_default() {
 }
 
 test_res test_flat_set_init_null_pointer() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -117,7 +117,7 @@ test_res test_flat_set_init_null_pointer() {
 }
 
 test_res test_flat_set_init_invalid_size() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = 0,
         .comp = comp_int_max,
         .copy = NULL,
@@ -148,7 +148,7 @@ test_res test_flat_set_init_invalid_size() {
 /******************************************************************************/
 
 test_res test_flat_set_insert_basic() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -196,7 +196,7 @@ test_res test_flat_set_insert_basic() {
 }
 
 test_res test_flat_set_insert_multiple() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -245,7 +245,7 @@ test_res test_flat_set_insert_multiple() {
 }
 
 test_res test_flat_set_insert_duplicate() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -287,7 +287,7 @@ test_res test_flat_set_insert_duplicate() {
 }
 
 test_res test_flat_set_insert_sorted_order() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -353,7 +353,7 @@ test_res test_flat_set_insert_null_set() {
 }
 
 test_res test_flat_set_insert_null_data() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -394,7 +394,7 @@ test_res test_flat_set_insert_null_data() {
 /******************************************************************************/
 
 test_res test_flat_set_erase_basic() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -444,7 +444,7 @@ test_res test_flat_set_erase_basic() {
 }
 
 test_res test_flat_set_erase_multiple() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -497,7 +497,7 @@ test_res test_flat_set_erase_multiple() {
 }
 
 test_res test_flat_set_erase_nonexistent() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -570,7 +570,7 @@ test_res test_flat_set_erase_null_set() {
 }
 
 test_res test_flat_set_erase_maintains_order() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -625,7 +625,7 @@ test_res test_flat_set_erase_maintains_order() {
 /******************************************************************************/
 
 test_res test_flat_set_find_existing() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -666,7 +666,7 @@ test_res test_flat_set_find_existing() {
 }
 
 test_res test_flat_set_find_nonexistent() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -708,7 +708,7 @@ test_res test_flat_set_find_nonexistent() {
 }
 
 test_res test_flat_set_find_all() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -752,7 +752,7 @@ test_res test_flat_set_find_all() {
 }
 
 test_res test_flat_set_find_after_erase() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -814,7 +814,7 @@ test_res test_flat_set_find_after_erase() {
 /******************************************************************************/
 
 test_res test_flat_set_at_valid() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -858,7 +858,7 @@ test_res test_flat_set_at_valid() {
 }
 
 test_res test_flat_set_at_out_of_bounds() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -913,7 +913,7 @@ test_res test_flat_set_at_out_of_bounds() {
 /******************************************************************************/
 
 test_res test_flat_set_size_empty() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -950,7 +950,7 @@ test_res test_flat_set_size_empty() {
 }
 
 test_res test_flat_set_size_after_insert() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -990,7 +990,7 @@ test_res test_flat_set_size_after_insert() {
 }
 
 test_res test_flat_set_size_after_erase() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1034,7 +1034,7 @@ test_res test_flat_set_size_after_erase() {
 }
 
 test_res test_flat_set_empty_true() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1071,7 +1071,7 @@ test_res test_flat_set_empty_true() {
 }
 
 test_res test_flat_set_empty_false() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1111,7 +1111,7 @@ test_res test_flat_set_empty_false() {
 }
 
 test_res test_flat_set_empty_after_erase_all() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1160,7 +1160,7 @@ test_res test_flat_set_empty_after_erase_all() {
 /******************************************************************************/
 
 test_res test_flat_set_clear_basic() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1212,7 +1212,7 @@ test_res test_flat_set_clear_basic() {
 }
 
 test_res test_flat_set_clear_empty() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1263,7 +1263,7 @@ test_res test_flat_set_clear_null() {
 }
 
 test_res test_flat_set_clear_and_reuse() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1323,7 +1323,7 @@ test_res test_flat_set_clear_and_reuse() {
 /******************************************************************************/
 
 test_res test_flat_set_swap_basic() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1411,7 +1411,7 @@ test_res test_flat_set_swap_basic() {
 }
 
 test_res test_flat_set_swap_with_empty() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1485,7 +1485,7 @@ test_res test_flat_set_free_null() {
 }
 
 test_res test_flat_set_free_empty() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1513,7 +1513,7 @@ test_res test_flat_set_free_empty() {
 }
 
 test_res test_flat_set_free_with_elements() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1549,7 +1549,7 @@ test_res test_flat_set_free_with_elements() {
 /******************************************************************************/
 
 test_res test_flat_set_deque_operations() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1600,7 +1600,7 @@ test_res test_flat_set_deque_operations() {
 /******************************************************************************/
 
 test_res test_flat_set_large_capacity() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1649,7 +1649,7 @@ test_res test_flat_set_large_capacity() {
 }
 
 test_res test_flat_set_insert_erase_cycle() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1699,7 +1699,7 @@ test_res test_flat_set_insert_erase_cycle() {
 }
 
 test_res test_flat_set_negative_values() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1754,7 +1754,7 @@ test_res test_flat_set_negative_values() {
 }
 
 test_res test_flat_set_reinsert_after_erase() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .comp = comp_int_max,
         .copy = NULL,
@@ -1809,7 +1809,7 @@ test_res test_flat_set_reinsert_after_erase() {
 /******************************************************************************/
 
 test_res test_flat_set_struct_basic() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -1859,7 +1859,7 @@ test_res test_flat_set_struct_basic() {
 }
 
 test_res test_flat_set_struct_multiple() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -1911,7 +1911,7 @@ test_res test_flat_set_struct_multiple() {
 }
 
 test_res test_flat_set_struct_sorted_order() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -1960,7 +1960,7 @@ test_res test_flat_set_struct_sorted_order() {
 }
 
 test_res test_flat_set_struct_duplicate() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2007,7 +2007,7 @@ test_res test_flat_set_struct_duplicate() {
 }
 
 test_res test_flat_set_struct_find() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2069,7 +2069,7 @@ test_res test_flat_set_struct_find() {
 }
 
 test_res test_flat_set_struct_erase() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2140,7 +2140,7 @@ test_res test_flat_set_struct_erase() {
 }
 
 test_res test_flat_set_struct_simple() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2193,7 +2193,7 @@ test_res test_flat_set_struct_simple() {
 }
 
 test_res test_flat_set_struct_deque_container() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2251,7 +2251,7 @@ test_res test_flat_set_struct_deque_container() {
 }
 
 test_res test_flat_set_struct_clear() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2323,7 +2323,7 @@ test_res test_flat_set_struct_clear() {
 }
 
 test_res test_flat_set_struct_swap() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,
@@ -2415,7 +2415,7 @@ test_res test_flat_set_struct_swap() {
 }
 
 test_res test_flat_set_struct_deep_copy_verify() {
-    flat_set_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(test_struct),
         .comp = comp_test_struct_max,
         .copy = copy_test_struct,

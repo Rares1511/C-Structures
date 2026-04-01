@@ -3,15 +3,14 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t multimap_attr_t;
 typedef struct rbt rbt;
 typedef struct vector vector;
 
 typedef struct multimap {
     rbt *t;
-    multimap_attr_t* key_attr;
-    multimap_attr_t* value_attr;
-    multimap_attr_t* vec_attr;
+    elem_attr_t* key_attr;
+    elem_attr_t* value_attr;
+    elem_attr_t* vec_attr;
     int size;
 } multimap;
 
@@ -22,8 +21,8 @@ typedef struct multimap {
  * @param[out] mm Pointer to the multimap to initialize
  * @return CS_SUCCESS on success, or an error code on failure
  */
-cs_codes multimap_init(multimap *mm, multimap_attr_t key_attr,
-                           multimap_attr_t value_attr);
+cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
+                           elem_attr_t value_attr);
 
 /*!
  * Insert a key-value pair into the multimap

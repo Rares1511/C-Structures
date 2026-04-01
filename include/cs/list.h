@@ -3,8 +3,6 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t list_attr_t;
-
 typedef struct list_node {
     void *data;             /*!< information held inside the node */
     struct list_node *next; /*!< next node in the list */
@@ -14,7 +12,7 @@ typedef struct list_node {
 typedef struct list {
     int size;         /*!< size of the list */
     list_node *front; /*!< front element of the list */
-    list_attr_t attr; /*!< attributes for the datatype inside the list */
+    elem_attr_t attr; /*!< attributes for the datatype inside the list */
 } list;
 
 /*!
@@ -23,7 +21,7 @@ typedef struct list {
  * @param[out] l  Pointer to the list that will be initialized
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful initialization
  */
-cs_codes list_init(list *l, list_attr_t attr);
+cs_codes list_init(list *l, elem_attr_t attr);
 
 /*!
  * Pushes the element at the front of the list
@@ -110,7 +108,7 @@ void list_sort(list *l);
  * @param[out] l     List whose attributes will be changed
  * @param[in]  attr  New attributes for the elements of the list
  */
-static inline void list_set_attr(list *l, list_attr_t attr) { 
+static inline void list_set_attr(list *l, elem_attr_t attr) { 
     CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH);
     l->attr = attr; 
 }

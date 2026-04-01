@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 
-cs_codes stack_init(stack *s, stack_type type, stack_attr_t attr) {
+cs_codes stack_init(stack *s, stack_type type, elem_attr_t attr) {
     CS_RETURN_IF(NULL == s, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     s->type = type;
@@ -13,11 +13,13 @@ cs_codes stack_init(stack *s, stack_type type, stack_attr_t attr) {
         case CS_STACK_ARRAY:
             s->container = malloc(sizeof(vector));
             CS_RETURN_IF(NULL == s->container, CS_MEM);
-            return vector_init(s->container, attr);
+            vector_attr_t v_attr = { .min_cap = 0, .shrink_factor = 0 };
+            return vector_init(s->container, attr, v_attr);
         case CS_STACK_DEQUE:
             s->container = malloc(sizeof(deque));
             CS_RETURN_IF(NULL == s->container, CS_MEM);
-            return deque_init(s->container, attr);
+            deque_attr_t dq_attr = { .min_cap = 0, .block_size = 0 };
+            return deque_init(s->container, attr, dq_attr);
         case CS_STACK_LIST:
             s->container = malloc(sizeof(list));
             CS_RETURN_IF(NULL == s->container, CS_MEM);

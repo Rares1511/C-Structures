@@ -3,13 +3,12 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t multiset_attr_t;
 typedef struct rbt rbt;
 
 typedef struct multiset {
     rbt *t;               /*!< red black tree containing the multiset data */
-    multiset_attr_t* el_attr; /*!< attributes of the multiset elements */
-    multiset_attr_t* count_attr; /*!< attributes of the count elements */
+    elem_attr_t* el_attr; /*!< attributes of the multiset elements */
+    elem_attr_t* count_attr; /*!< attributes of the count elements */
     int size;             /*!< number of unique elements in the multiset */
 } multiset;
 
@@ -19,7 +18,7 @@ typedef struct multiset {
  * @param[in] attr Attributes of the multiset element datatype
  * @return CS_SUCCESS on success, or an error code on failure
  */
-cs_codes multiset_init(multiset *ms, multiset_attr_t attr);
+cs_codes multiset_init(multiset *ms, elem_attr_t attr);
 
 /*! 
  * Insert an element into the multiset

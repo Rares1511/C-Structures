@@ -15,36 +15,15 @@
 
 #define VEC_SHRINK(vec) \
     do { \
-        if ((vec)->size < (vec)->cap / (vec)->shrink_factor && (vec)->cap > VECTOR_INIT_CAPACITY) { \
+        if ((vec)->v_attr.shrink_factor > 1 && (vec)->size < (vec)->cap / (vec)->v_attr.shrink_factor && (vec)->cap > (vec)->v_attr.min_cap) { \
             int new_cap = (vec)->cap / 2; \
-            if (new_cap < VECTOR_INIT_CAPACITY) new_cap = VECTOR_INIT_CAPACITY; \
+            if (new_cap < (vec)->v_attr.min_cap) new_cap = (vec)->v_attr.min_cap; \
             void *__new_vec = realloc((vec)->vec, new_cap * (vec)->attr.size); \
             if (NULL == __new_vec) return CS_MEM; \
             (vec)->vec = __new_vec; \
             (vec)->cap = new_cap; \
         } \
     } while (0)
-
-cs_codes vector_grow(vector *vec) {
-    int new_cap = vec->cap * 2;
-    void *new_vec = realloc(vec->vec, (size_t)new_cap * vec->attr.size);
-    if (NULL == new_vec) return CS_MEM;
-    vec->vec = new_vec;
-    vec->cap = new_cap;
-    return CS_SUCCESS;
-}
-
-cs_codes vector_shrink(vector *vec) {
-    if (vec->size < vec->cap / vec->shrink_factor && vec->cap > VECTOR_INIT_CAPACITY) {
-        int new_cap = vec->cap / 2;
-        if (new_cap < VECTOR_INIT_CAPACITY) new_cap = VECTOR_INIT_CAPACITY;
-        void *new_vec = realloc(vec->vec, (size_t)new_cap * vec->attr.size);
-        if (NULL == new_vec) return CS_MEM;
-        vec->vec = new_vec;
-        vec->cap = new_cap;
-    }
-    return CS_SUCCESS;
-}
 
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -101,15 +80,27 @@ void vector_qsort(void *base, int low, int high, int size) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes vector_init(vector *v, vector_attr_t attr) {
+cs_codes vector_init(vector *v, elem_attr_t attr, vector_attr_t v_attr) {
     CS_RETURN_IF(NULL == v, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
-    v->vec = malloc(VECTOR_INIT_CAPACITY * attr.size);
-    CS_RETURN_IF(v->vec == NULL, CS_MEM);
+    CS_RETURN_IF(v_attr.min_cap < 0 || v_attr.min_cap > VECTOR_INIT_CAPACITY, CS_SIZE);
+    CS_RETURN_IF(v_attr.shrink_factor < 0 || v_attr.shrink_factor > VECTOR_INIT_CAPACITY, CS_SIZE);
+
+    if (v_attr.min_cap == 0) {
+        v_attr.min_cap = VECTOR_INIT_CAPACITY;
+    }
+    if (v_attr.shrink_factor == 0) {
+        v_attr.shrink_factor = VECTOR_SHRINK_FACTOR;
+    }
+
     v->attr = attr;
-    v->cap = VECTOR_INIT_CAPACITY;
+    v->v_attr = v_attr;
+    v->cap = v_attr.min_cap;
     v->size = 0;
-    v->shrink_factor = VECTOR_SHRINK_FACTOR;
+
+    v->vec = malloc(v->cap * attr.size);
+    CS_RETURN_IF(v->vec == NULL, CS_MEM);
+
     return CS_SUCCESS;
 }
 
@@ -131,7 +122,20 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos) {
     return CS_SUCCESS;
 }
 
-// vector_push_back is now static inline in vector.h
+cs_codes vector_push_back(vector *vec, const void *el) {
+    CS_RETURN_IF(vec == NULL || el == NULL, CS_NULL);
+    if (__builtin_expect(vec->size == vec->cap, 0)) {
+        VEC_GROW(vec);
+    }
+    int elem_size = vec->attr.size;
+    char *dest = (char *)vec->vec + elem_size * vec->size;
+    if (__builtin_expect(vec->attr.copy != NULL, 0))
+        vec->attr.copy(dest, el);
+    else
+        memcpy(dest, el, elem_size);
+    vec->size++;
+    return CS_SUCCESS;
+}
 
 cs_codes vector_erase(vector *vec, int pos) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
@@ -149,7 +153,15 @@ cs_codes vector_erase(vector *vec, int pos) {
     return CS_SUCCESS;
 }
 
-// vector_pop_back is now static inline in vector.h
+cs_codes vector_pop_back(vector *vec) {
+    CS_RETURN_IF(vec == NULL, CS_NULL);
+    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
+    if (__builtin_expect(vec->attr.fr != NULL, 0))
+        vec->attr.fr((char *)vec->vec + vec->attr.size * (vec->size - 1));
+    vec->size--;
+    VEC_SHRINK(vec);
+    return CS_SUCCESS;
+}
 
 void *vector_at(vector vec, int pos) {
     CS_RETURN_IF(pos >= vector_size(vec) || pos < 0 || vector_empty(vec), NULL);
@@ -214,16 +226,19 @@ void vector_swap(vector *v1, vector *v2) {
     CS_RETURN_IF(v1 == NULL || v2 == NULL);
 
     void *aux = v1->vec;
-    vector_attr_t attr = v1->attr;
+    elem_attr_t attr = v1->attr;
+    vector_attr_t v_attr = v1->v_attr;
     int size = v1->size;
     int cap = v1->cap;
 
     v1->attr = v2->attr;
+    v1->v_attr = v2->v_attr;
     v1->size = v2->size;
     v1->cap = v2->cap;
     v1->vec = v2->vec;
 
     v2->attr = attr;
+    v2->v_attr = v_attr;
     v2->size = size;
     v2->cap = cap;
     v2->vec = aux;
@@ -255,8 +270,9 @@ void vector_print(FILE *stream, const void *v_vec) {
     const vector *vec = (const vector *)v_vec;
     CS_RETURN_IF(vec->attr.print == NULL);
     int size = vector_size(*vec);
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
         vec->attr.print(stream, vec->vec + i * vec->attr.size);
+    }
 }
 
 void vector_free(void *v_vec) {
@@ -264,8 +280,9 @@ void vector_free(void *v_vec) {
     vector *vec = (vector *)v_vec;
     int size = vector_size(*vec);
     if (vec->attr.fr) {
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
             vec->attr.fr(vec->vec + i * vec->attr.size);
+        }
     }
     vec->size = 0;
     free(vec->vec);

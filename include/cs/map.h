@@ -3,13 +3,12 @@
 
 #include <cs/universal.h>
 
-typedef univ_attr_t map_attr_t;
 typedef struct rbt rbt;
 
 typedef struct map {
     rbt* t;
-    map_attr_t* key_attr;
-    map_attr_t* val_attr;
+    elem_attr_t* key_attr;
+    elem_attr_t* val_attr;
 } map;
 
 /*!
@@ -19,7 +18,7 @@ typedef struct map {
  * @param[out] m - pointer to the map to initialize
  * @return CS_SUCCESS on success, CS_MEM on memory allocation failure
  */
-cs_codes map_init(map *m, map_attr_t key_attr, map_attr_t val_attr);
+cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr);
 
 /*!
  * Inserts a new key-value pair into the map
@@ -80,7 +79,7 @@ void map_clear(map *m);
  * @param[in] key_attr - attributes of the key datatype
  * @param[in] val_attr - attributes of the value datatype
  */
-void map_set_attr(map *m, map_attr_t key_attr, map_attr_t val_attr);
+void map_set_attr(map *m, elem_attr_t key_attr, elem_attr_t val_attr);
 
 /*!
  * Sets the freer functions for the map
@@ -127,7 +126,7 @@ void map_set_stream(map *m, FILE *key_stream, FILE *val_stream);
  * @param[in] m - pointer to the map
  * @param[in] key_attr - attributes of the key datatype
  */
-void map_key_set_attr(map *m, map_attr_t key_attr);
+void map_key_set_attr(map *m, elem_attr_t key_attr);
 
 /*!
  * Sets the freer function for the key datatype
@@ -169,7 +168,7 @@ void map_key_set_stream(map *m, FILE *key_stream);
  * @param[in] m - pointer to the map
  * @param[in] val_attr - attributes of the value datatype
  */
-void map_val_set_attr(map *m, map_attr_t val_attr);
+void map_val_set_attr(map *m, elem_attr_t val_attr);
 
 /*!
  * Sets the freer function for the value datatype

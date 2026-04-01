@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-cs_codes flat_set_init(flat_set *fs, flat_set_attr_t attr, flat_set_type type) {
+cs_codes flat_set_init(flat_set *fs, elem_attr_t attr, flat_set_type type) {
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(NULL == fs, CS_NULL);
 
@@ -14,11 +14,13 @@ cs_codes flat_set_init(flat_set *fs, flat_set_attr_t attr, flat_set_type type) {
         case CS_FLAT_SET_DEQUE:
             fs->container = malloc(sizeof(deque));
             CS_RETURN_IF(NULL == fs->container, CS_MEM);
-            return deque_init((deque*)fs->container, attr);
+            deque_attr_t dq_attr = { .min_cap = 0, .block_size = 0 };
+            return deque_init((deque*)fs->container, attr, dq_attr);
         case CS_FLAT_SET_VECTOR:
             fs->container = malloc(sizeof(vector));
             CS_RETURN_IF(NULL == fs->container, CS_MEM);
-            return vector_init((vector*)fs->container, attr);
+            vector_attr_t v_attr = { .min_cap = 0, .shrink_factor = 0 };
+            return vector_init((vector*)fs->container, attr, v_attr);
         default:
             return CS_FUNC;
     }

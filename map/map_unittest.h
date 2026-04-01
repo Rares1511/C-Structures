@@ -12,8 +12,8 @@
 // map_init
 // ============================================================================
 test_res test_map_init(test_arg *arg) {
-    map_attr_t key_attr = get_test_struct_attr();
-    map_attr_t val_attr = get_test_struct_attr();
+    elem_attr_t key_attr = get_test_struct_attr();
+    elem_attr_t val_attr = get_test_struct_attr();
 
     map m;
     cs_codes init_result = map_init(&m, key_attr, val_attr);
@@ -1173,10 +1173,6 @@ test_res test_map_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
         clogger_log((*arg->logger), CLOGGER_DEBUG, "Valgrind detected - skipping stress timing test to avoid false positives.\n");
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
-    }
-
-    if (arg->op_time_count != 3) {
-        return (test_res){(char*)__func__, "Expected 3 timing slots for insert, find, delete", CS_UNKNOWN};
     }
 
     map m;

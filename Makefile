@@ -36,12 +36,19 @@ CFLAGS  := -Wall -Wextra -fPIC -O2 -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
 LDLIBS  := -lm
 
 # Unittest Configuration
-UNITTEST_LOG := unittest_log.ansi
 SEED ?= 42
-ARGS = --seed $(SEED)
+MODULAR ?= false
+DEBUG_FILE ?= logs/debug.ansi
+RESULTS_FILE ?= logs/results.ansi
+MEMCHECK_FILE ?= logs/memcheck.ansi
+UNITTEST_EXTRA_ARGS ?=
 
-ifeq ($(debug),true)
-  ARGS += --debug-file $(UNITTEST_LOG)
+UNITTEST_ARGS = --seed $(SEED) \
+	--debug-file $(DEBUG_FILE) \
+	--results-file $(RESULTS_FILE)
+
+ifneq ($(strip $(UNITTEST_EXTRA_ARGS)),)
+UNITTEST_ARGS += $(UNITTEST_EXTRA_ARGS)
 endif
 
 # ---------------- Modules ----------------
@@ -153,43 +160,40 @@ uninstall:
 # All libraries needed for linking (all modules that have tests)
 UNITTEST_LIBS := $(foreach m,$(INSTALL_LIBS),-l$(m))
 
-unittest-log-init:
-ifeq ($(debug),true)
-	@$(RM) $(UNITTEST_LOG)
-	@touch $(UNITTEST_LOG)
-endif
-
-build_unittest: unittest-log-init libs
+build_unittest: libs
 	@$(CC) -o unittest unittest.c $(CFLAGS) \
 	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
 ifeq ($(memcheck),true)
-run_unittest: build_unittest
+RUN_UNITTEST_DEPS = build_unittest
+UNITTEST_RUNNER = valgrind --leak-check=full ./unittest
+UNITTEST_REDIRECT = >> $(MEMCHECK_FILE) 2>&1
 else
-run_unittest: benchmark build_unittest
+RUN_UNITTEST_DEPS = benchmark build_unittest
+UNITTEST_RUNNER = ./unittest
+UNITTEST_REDIRECT =
 endif
+
+ifeq ($(MODULAR),true)
+define RUN_UNITTEST_CMD
+for module in $(SUBDIRS); do \
+	$(UNITTEST_RUNNER) $(UNITTEST_ARGS) --module $$module $(UNITTEST_REDIRECT); \
+done
+endef
+else
+RUN_UNITTEST_CMD = $(UNITTEST_RUNNER) $(UNITTEST_ARGS) $(UNITTEST_REDIRECT)
+endif
+
+run_unittest: $(RUN_UNITTEST_DEPS)
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
-	for module in $(SUBDIRS); do \
-	  if [ "$(memcheck)" = "true" ]; then \
-	      valgrind --leak-check=full ./unittest $(ARGS) \
-		  --debug-file logs/debug.ansi \
-		  --module $$module \
-		  --results-file logs/results.ansi \
-		  >> logs/memcheck.ansi 2>&1; \
-	  else \
-	    ./unittest $(ARGS) \
-		--debug-file logs/debug.ansi \
-		--module $$module \
-		--results-file logs/results.ansi; \
-	  fi \
-	done
+	$(RUN_UNITTEST_CMD)
 
 unittest: build_unittest run_unittest
 
 # ---------------- Benchmarking ----------------
 
 CXX := g++
-CXXFLAGS := -Wall -O2 -Wextra -std=c++17 -I$(LOCAL_INCLUDEDIR) -I.
+CXXFLAGS := -Wall -O2 -Wextra -std=c++20 -I$(LOCAL_INCLUDEDIR) -I.
 BENCHMARK_LOG := logs/benchmark.csv
 BENCHMARK_BIN := benchmark_bin
 
@@ -198,8 +202,7 @@ $(BENCHMARK_BIN): benchmark.cpp
 
 benchmark: $(BENCHMARK_BIN)
 	@$(MKDIR_P) logs
-	@echo "module,operation,value" > $(BENCHMARK_LOG)
-	@./$(BENCHMARK_BIN) | tee -a $(BENCHMARK_LOG)
+	@/usr/bin/time ./$(BENCHMARK_BIN)
 
 # ---------------- Cleanup ----------------
 
@@ -207,7 +210,7 @@ clean:
 	@echo "Cleaning build files..."
 	$(RM) $(UNITTEST_LOG)
 	$(RM) unittest
-	$(RM) logs/*
+	$(RM) logs/*.ansi
 	$(RM) $(LIBOUTDIR)/*.so
 	$(RM) $(BENCHMARK_BIN)
 	@for m in $(SUBDIRS); do \

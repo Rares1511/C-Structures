@@ -67,9 +67,9 @@ int unordered_map_entry_comp(const void *a, const void *b) {
     const pair* pb = eb->data;
     
     if (pa->first_attr->comp != NULL) {
-        return pa->first_attr->comp(pa->first, pb->first);
+        return pa->first_attr->comp(pair_first(*pa), pair_first(*pb));
     }
-    return memcmp(pa->first, pb->first, pa->first_attr->size);
+    return memcmp(pair_first(*pa), pair_first(*pb), pa->first_attr->size);
 }
 
 size_t unordered_map_entry_hash(const void *el) {
@@ -79,9 +79,9 @@ size_t unordered_map_entry_hash(const void *el) {
         return 0;
     }
     if (entry->hash_func == NULL) {
-        return universal_hash_bytes(entry->data->first, entry->data->first_attr->size);
+        return universal_hash_bytes(pair_first(entry->data), entry->data->first_attr->size);
     }
-    return entry->hash_func(entry->data->first);
+    return entry->hash_func(pair_first(entry->data));
 }
 
 
@@ -91,8 +91,8 @@ size_t unordered_map_entry_hash(const void *el) {
 #pragma endregion
 
 cs_codes unordered_map_init(unordered_map *umap,
-                                 unordered_map_attr_t key_attr,
-                                 unordered_map_attr_t value_attr,
+                                 elem_attr_t key_attr,
+                                 elem_attr_t value_attr,
                                  hash_func_t hash_func,
                                  int initial_capacity) {
     CS_RETURN_IF(NULL == umap, CS_NULL);
@@ -106,7 +106,7 @@ cs_codes unordered_map_init(unordered_map *umap,
     umap->value_attr = value_attr;
     umap->hash_func = hash_func;
 
-    unordered_map_attr_t entry_attr = {
+    elem_attr_t entry_attr = {
         .comp = unordered_map_entry_comp,
         .copy = unordered_map_entry_copy,
         .fr = unordered_map_entry_free,
@@ -149,7 +149,7 @@ void *unordered_map_get_entry(unordered_map umap, const void *key) {
     void *found_entry = hash_table_get_entry(*umap.ht, &entry);
     unordered_map_entry_free(&entry);
     CS_RETURN_IF(NULL == found_entry, NULL);
-    return ((unordered_map_entry *)found_entry)->data->second;
+    return pair_second(((unordered_map_entry *)found_entry)->data);
 }
 
 int unordered_map_empty(unordered_map umap) {
@@ -175,8 +175,8 @@ void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
     CS_RETURN_IF(NULL == umap1 || NULL == umap2);
     hash_table_swap(umap1->ht, umap2->ht);
 
-    unordered_map_attr_t temp_key_attr = umap1->key_attr;
-    unordered_map_attr_t temp_value_attr = umap1->value_attr;
+    elem_attr_t temp_key_attr = umap1->key_attr;
+    elem_attr_t temp_value_attr = umap1->value_attr;
     hash_func_t temp_hash_func = umap1->hash_func;
 
     umap1->key_attr = umap2->key_attr;
