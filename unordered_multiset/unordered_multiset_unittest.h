@@ -17,7 +17,7 @@ test_res test_unordered_multiset_init_basic() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -44,49 +44,12 @@ test_res test_unordered_multiset_init_null_pointer() {
         .print = print_int,
     };
 
-    cs_codes rc = unordered_multiset_init(NULL, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(NULL, attr, hash_int);
 
     if (rc != CS_NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Expected CS_NULL for NULL pointer",
-            .return_code = CS_UNKNOWN,
-        };
-    }
-
-    return (test_res){
-        .test_name = (char*) __func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS,
-    };
-}
-
-test_res test_unordered_multiset_init_invalid_capacity() {
-    unordered_multiset_attr_t attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .comp = NULL,
-        .fr = NULL,
-        .print = print_int,
-    };
-
-    unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 0);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for zero capacity",
-            .return_code = CS_UNKNOWN,
-        };
-    }
-
-    rc = unordered_multiset_init(&umset, attr, hash_int, -5);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for negative capacity",
             .return_code = CS_UNKNOWN,
         };
     }
@@ -108,7 +71,7 @@ test_res test_unordered_multiset_init_invalid_size() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -135,7 +98,7 @@ test_res test_unordered_multiset_init_null_hash() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, NULL, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, NULL);
 
     // Should succeed with default hash
     if (rc != CS_SUCCESS) {
@@ -169,7 +132,7 @@ test_res test_unordered_multiset_insert_basic() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -209,7 +172,7 @@ test_res test_unordered_multiset_insert_multiple() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -258,7 +221,7 @@ test_res test_unordered_multiset_insert_duplicates() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -329,7 +292,7 @@ test_res test_unordered_multiset_insert_null_key() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -372,7 +335,7 @@ test_res test_unordered_multiset_find_existing() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -423,7 +386,7 @@ test_res test_unordered_multiset_find_nonexistent() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -466,7 +429,7 @@ test_res test_unordered_multiset_find_null_key() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -505,7 +468,7 @@ test_res test_unordered_multiset_find_after_many_inserts() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -554,7 +517,7 @@ test_res test_unordered_multiset_erase_existing() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -606,7 +569,7 @@ test_res test_unordered_multiset_erase_one_of_many() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -661,7 +624,7 @@ test_res test_unordered_multiset_erase_nonexistent() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -721,7 +684,7 @@ test_res test_unordered_multiset_erase_null_key() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -760,7 +723,7 @@ test_res test_unordered_multiset_erase_all() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -818,7 +781,7 @@ test_res test_unordered_multiset_count_zero() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -858,7 +821,7 @@ test_res test_unordered_multiset_count_single() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -900,7 +863,7 @@ test_res test_unordered_multiset_count_multiple() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -944,7 +907,7 @@ test_res test_unordered_multiset_count_null_key() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -983,7 +946,7 @@ test_res test_unordered_multiset_count_after_erase() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1035,7 +998,7 @@ test_res test_unordered_multiset_size_empty() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1072,7 +1035,7 @@ test_res test_unordered_multiset_size_after_inserts() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1113,7 +1076,7 @@ test_res test_unordered_multiset_size_after_erase() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1158,7 +1121,7 @@ test_res test_unordered_multiset_empty_true() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1195,7 +1158,7 @@ test_res test_unordered_multiset_empty_false() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1235,7 +1198,7 @@ test_res test_unordered_multiset_empty_after_erase_all() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1284,7 +1247,7 @@ test_res test_unordered_multiset_clear_basic() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1336,7 +1299,7 @@ test_res test_unordered_multiset_clear_empty() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1401,7 +1364,7 @@ test_res test_unordered_multiset_free_empty() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1429,7 +1392,7 @@ test_res test_unordered_multiset_free_with_elements() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1465,7 +1428,7 @@ test_res test_unordered_multiset_large_capacity() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 1000);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1514,7 +1477,7 @@ test_res test_unordered_multiset_small_capacity_many_inserts() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 2);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1564,7 +1527,7 @@ test_res test_unordered_multiset_insert_erase_cycle() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1611,7 +1574,7 @@ test_res test_unordered_multiset_negative_values() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1671,7 +1634,7 @@ test_res test_unordered_multiset_reinsert_after_erase() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1723,7 +1686,7 @@ test_res test_unordered_multiset_many_duplicates() {
     };
 
     unordered_multiset umset;
-    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int, 10);
+    cs_codes rc = unordered_multiset_init(&umset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1772,7 +1735,6 @@ test unordered_multiset_tests[] = {
     // Init tests
     test_unordered_multiset_init_basic,
     test_unordered_multiset_init_null_pointer,
-    test_unordered_multiset_init_invalid_capacity,
     test_unordered_multiset_init_invalid_size,
     test_unordered_multiset_init_null_hash,
 

@@ -6,15 +6,23 @@
 
 typedef size_t (*hash_func_t)(const void *key);
 
+typedef struct hash_table_bucket {
+    vector *entries; /*!< Vector of entries in this bucket */
+    char is_oversized; /*!< Flag to indicate if this bucket is oversized */
+} hash_table_bucket;
+
 typedef struct hash_table {
     int cap;
+    int oversized_buckets;
+    int oversize_threshold;
     int size;
     elem_attr_t attr;
     hash_func_t hash;
+    char *is_oversized;
     vector **buckets;
 } hash_table;
 
-cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash, int initial_capacity);
+cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash);
 cs_codes hash_table_add_entry(hash_table *ht, const void *el);
 cs_codes hash_table_remove_entry(hash_table *ht, const void *el);
 void *hash_table_get_entry(hash_table ht, const void *el);

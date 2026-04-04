@@ -93,10 +93,8 @@ size_t unordered_map_entry_hash(const void *el) {
 cs_codes unordered_map_init(unordered_map *umap,
                                  elem_attr_t key_attr,
                                  elem_attr_t value_attr,
-                                 hash_func_t hash_func,
-                                 int initial_capacity) {
+                                 hash_func_t hash_func) {
     CS_RETURN_IF(NULL == umap, CS_NULL);
-    CS_RETURN_IF(initial_capacity <= 0, CS_SIZE);
     CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0, CS_SIZE);
     CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
    
@@ -114,7 +112,7 @@ cs_codes unordered_map_init(unordered_map *umap,
         .size = sizeof(unordered_map_entry),
     };
 
-    return hash_table_init(umap->ht, entry_attr, unordered_map_entry_hash, initial_capacity);
+    return hash_table_init(umap->ht, entry_attr, unordered_map_entry_hash);
 }
 
 cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value) {

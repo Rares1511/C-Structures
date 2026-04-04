@@ -18,14 +18,12 @@ typedef struct unordered_multimap {
  * @param[in] key_attr The attribute descriptor for the keys.
  * @param[in] value_attr The attribute descriptor for the values.
  * @param[in] hash_func The hash function to be used for hashing keys.
- * @param[in] initial_capacity The initial capacity of the unordered multimap.
  * @return A pointer to the initialized unordered multimap.
  */
 cs_codes unordered_multimap_init(unordered_multimap *ummap,
                                 elem_attr_t key_attr,
                                 elem_attr_t value_attr,
-                                hash_func_t hash_func,
-                                int initial_capacity);
+                                hash_func_t hash_func);
 
 /*!
  * @brief Adds a key-value pair to the unordered multimap.

@@ -929,8 +929,8 @@ test_res test_multimap_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    post_operation_time(arg, "get", elapsed);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Get Time = %.9f sec\n", elapsed);
+    post_operation_time(arg, "find", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
@@ -944,8 +944,8 @@ test_res test_multimap_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    post_operation_time(arg, "delete", elapsed);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
+    post_operation_time(arg, "erase", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Erase Time = %.9f sec\n", elapsed);
 
     multimap_free(&mm);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

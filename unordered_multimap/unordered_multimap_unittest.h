@@ -24,7 +24,7 @@ test_res test_unordered_multimap_init_basic() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -59,57 +59,12 @@ test_res test_unordered_multimap_init_null_pointer() {
         .comp = NULL,
     };
 
-    cs_codes rc = unordered_multimap_init(NULL, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(NULL, key_attr, value_attr, hash_int);
 
     if (rc != CS_NULL) {
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Expected CS_NULL for NULL pointer",
-            .return_code = CS_UNKNOWN,
-        };
-    }
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS,
-    };
-}
-
-test_res test_unordered_multimap_init_invalid_capacity() {
-    elem_attr_t key_attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = print_int,
-        .comp = NULL,
-    };
-
-    elem_attr_t value_attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = print_int,
-        .comp = NULL,
-    };
-
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 0);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "Expected CS_SIZE for zero capacity",
-            .return_code = CS_UNKNOWN,
-        };
-    }
-
-    rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, -5);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char *)__func__,
-            .reason = "Expected CS_SIZE for negative capacity",
             .return_code = CS_UNKNOWN,
         };
     }
@@ -139,7 +94,7 @@ test_res test_unordered_multimap_init_invalid_key_size() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -174,7 +129,7 @@ test_res test_unordered_multimap_init_invalid_value_size() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -209,7 +164,7 @@ test_res test_unordered_multimap_init_null_hash() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, NULL, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, NULL);
 
     // Should succeed with default hash
     if (rc != CS_SUCCESS) {
@@ -251,7 +206,7 @@ test_res test_unordered_multimap_add_entry_basic() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -300,7 +255,7 @@ test_res test_unordered_multimap_add_entry_multiple() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -358,7 +313,7 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -439,7 +394,7 @@ test_res test_unordered_multimap_add_entry_null_key() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -487,7 +442,7 @@ test_res test_unordered_multimap_add_entry_null_value() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -539,7 +494,7 @@ test_res test_unordered_multimap_get_entry_existing() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -590,7 +545,7 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -642,7 +597,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -689,7 +644,7 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -747,7 +702,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -808,7 +763,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -872,7 +827,7 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -940,7 +895,7 @@ test_res test_unordered_multimap_remove_entry_null_key() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -987,7 +942,7 @@ test_res test_unordered_multimap_remove_entry_all() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1054,7 +1009,7 @@ test_res test_unordered_multimap_count_zero() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1102,7 +1057,7 @@ test_res test_unordered_multimap_count_single() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1153,7 +1108,7 @@ test_res test_unordered_multimap_count_multiple() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1206,7 +1161,7 @@ test_res test_unordered_multimap_count_null_key() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1253,7 +1208,7 @@ test_res test_unordered_multimap_count_after_remove() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1314,7 +1269,7 @@ test_res test_unordered_multimap_size_empty() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1359,7 +1314,7 @@ test_res test_unordered_multimap_size_after_adds() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1409,7 +1364,7 @@ test_res test_unordered_multimap_size_after_remove() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1463,7 +1418,7 @@ test_res test_unordered_multimap_empty_true() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1508,7 +1463,7 @@ test_res test_unordered_multimap_empty_false() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1557,7 +1512,7 @@ test_res test_unordered_multimap_empty_after_remove_all() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1615,7 +1570,7 @@ test_res test_unordered_multimap_clear_basic() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1676,7 +1631,7 @@ test_res test_unordered_multimap_clear_empty() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1738,7 +1693,7 @@ test_res test_unordered_multimap_swap_basic() {
     };
 
     unordered_multimap ummap1, ummap2;
-    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1747,7 +1702,7 @@ test_res test_unordered_multimap_swap_basic() {
         };
     }
 
-    rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int, 10);
+    rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         unordered_multimap_free(&ummap1);
         return (test_res){
@@ -1822,7 +1777,7 @@ test_res test_unordered_multimap_swap_with_empty() {
     };
 
     unordered_multimap ummap1, ummap2;
-    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1831,7 +1786,7 @@ test_res test_unordered_multimap_swap_with_empty() {
         };
     }
 
-    rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int, 10);
+    rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         unordered_multimap_free(&ummap1);
         return (test_res){
@@ -1912,7 +1867,7 @@ test_res test_unordered_multimap_free_empty() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1948,7 +1903,7 @@ test_res test_unordered_multimap_free_with_entries() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1993,7 +1948,7 @@ test_res test_unordered_multimap_large_capacity() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 1000);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2051,7 +2006,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 2);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2110,7 +2065,7 @@ test_res test_unordered_multimap_add_remove_cycle() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2166,7 +2121,7 @@ test_res test_unordered_multimap_negative_keys() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2235,7 +2190,7 @@ test_res test_unordered_multimap_readd_after_remove() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2279,7 +2234,7 @@ test_res test_unordered_multimap_readd_after_remove() {
     };
 }
 
-test_res test_unordered_multimap_many_duplicates() {
+test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2297,7 +2252,7 @@ test_res test_unordered_multimap_many_duplicates() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2312,7 +2267,9 @@ test_res test_unordered_multimap_many_duplicates() {
         unordered_multimap_add_entry(&ummap, &key, &value);
     }
 
-    if (unordered_multimap_count(ummap, &key) != 100) {
+    int count = unordered_multimap_count(ummap, &key);
+    if (count != 100) {
+        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected count of 100 for duplicates, got %d", count);
         unordered_multimap_free(&ummap);
         return (test_res){
             .test_name = (char *)__func__,
@@ -2357,7 +2314,7 @@ test_res test_unordered_multimap_clear_and_reuse() {
     };
 
     unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int, 10);
+    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2413,7 +2370,6 @@ test unordered_multimap_tests[] = {
     // Init tests
     test_unordered_multimap_init_basic,
     test_unordered_multimap_init_null_pointer,
-    test_unordered_multimap_init_invalid_capacity,
     test_unordered_multimap_init_invalid_key_size,
     test_unordered_multimap_init_invalid_value_size,
     test_unordered_multimap_init_null_hash,

@@ -25,7 +25,7 @@ test_res test_unordered_map_init_basic() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SUCCESS) {
         return (test_res){
@@ -61,57 +61,12 @@ test_res test_unordered_map_init_null_pointer() {
         .comp = NULL
     };
 
-    cs_codes rc = unordered_map_init(NULL, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(NULL, key_attr, value_attr, hash_int);
 
     if (rc != CS_NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Expected CS_NULL for NULL pointer",
-            .return_code = CS_UNKNOWN
-        };
-    }
-
-    return (test_res){
-        .test_name = (char*) __func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
-    };
-}
-
-test_res test_unordered_map_init_invalid_capacity() {
-    elem_attr_t key_attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = print_int,
-        .comp = NULL
-    };
-
-    elem_attr_t value_attr = {
-        .size = sizeof(int),
-        .copy = NULL,
-        .fr = NULL,
-        .print = print_int,
-        .comp = NULL
-    };
-
-    unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 0);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for zero capacity",
-            .return_code = CS_UNKNOWN
-        };
-    }
-
-    rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, -5);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for negative capacity",
             .return_code = CS_UNKNOWN
         };
     }
@@ -141,7 +96,7 @@ test_res test_unordered_map_init_invalid_key_size() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -176,7 +131,7 @@ test_res test_unordered_map_init_invalid_value_size() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -211,7 +166,7 @@ test_res test_unordered_map_init_null_hash() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, NULL, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, NULL);
 
     // Should succeed with default hash
     if (rc != CS_SUCCESS) {
@@ -253,7 +208,7 @@ test_res test_unordered_map_add_entry_basic() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -302,7 +257,7 @@ test_res test_unordered_map_add_entry_multiple() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -360,7 +315,7 @@ test_res test_unordered_map_add_entry_duplicate_key() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -451,7 +406,7 @@ test_res test_unordered_map_add_entry_null_key() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -499,7 +454,7 @@ test_res test_unordered_map_add_entry_null_value() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -551,7 +506,7 @@ test_res test_unordered_map_get_entry_existing() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -611,7 +566,7 @@ test_res test_unordered_map_get_entry_nonexistent() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -663,7 +618,7 @@ test_res test_unordered_map_get_entry_null_key() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -710,7 +665,7 @@ test_res test_unordered_map_get_entry_after_many_adds() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -768,7 +723,7 @@ test_res test_unordered_map_remove_entry_existing() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -829,7 +784,7 @@ test_res test_unordered_map_remove_entry_nonexistent() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -897,7 +852,7 @@ test_res test_unordered_map_remove_entry_null_key() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -944,7 +899,7 @@ test_res test_unordered_map_remove_entry_all() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1011,7 +966,7 @@ test_res test_unordered_map_count_existing() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1062,7 +1017,7 @@ test_res test_unordered_map_count_nonexistent() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1110,7 +1065,7 @@ test_res test_unordered_map_count_null_key() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1161,7 +1116,7 @@ test_res test_unordered_map_size_empty() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1206,7 +1161,7 @@ test_res test_unordered_map_size_after_adds() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1256,7 +1211,7 @@ test_res test_unordered_map_size_after_removes() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1310,7 +1265,7 @@ test_res test_unordered_map_empty_true() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1355,7 +1310,7 @@ test_res test_unordered_map_empty_false() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1404,7 +1359,7 @@ test_res test_unordered_map_empty_after_remove_all() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1462,7 +1417,7 @@ test_res test_unordered_map_swap_basic() {
     };
 
     unordered_map umap1, umap2;
-    cs_codes rc = unordered_map_init(&umap1, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap1, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1471,7 +1426,7 @@ test_res test_unordered_map_swap_basic() {
         };
     }
 
-    rc = unordered_map_init(&umap2, key_attr, value_attr, hash_int, 16);
+    rc = unordered_map_init(&umap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         unordered_map_free(&umap1);
         return (test_res){
@@ -1569,7 +1524,7 @@ test_res test_unordered_map_swap_null() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1614,7 +1569,7 @@ test_res test_unordered_map_clear_basic() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1686,7 +1641,7 @@ test_res test_unordered_map_free_empty() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1722,7 +1677,7 @@ test_res test_unordered_map_free_with_entries() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1767,7 +1722,7 @@ test_res test_unordered_map_large_capacity() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 1000);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1825,7 +1780,7 @@ test_res test_unordered_map_small_capacity_many_adds() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 2);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1884,7 +1839,7 @@ test_res test_unordered_map_add_remove_cycle() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1940,7 +1895,7 @@ test_res test_unordered_map_negative_keys() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -2010,7 +1965,7 @@ test_res test_unordered_map_readd_after_remove() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -2074,7 +2029,7 @@ test_res test_unordered_map_different_value_types() {
     };
 
     unordered_map umap;
-    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int, 16);
+    cs_codes rc = unordered_map_init(&umap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -2132,7 +2087,6 @@ test unordered_map_tests[] = {
     // Init tests
     test_unordered_map_init_basic,
     test_unordered_map_init_null_pointer,
-    test_unordered_map_init_invalid_capacity,
     test_unordered_map_init_invalid_key_size,
     test_unordered_map_init_invalid_value_size,
     test_unordered_map_init_null_hash,

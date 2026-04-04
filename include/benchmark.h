@@ -7,7 +7,7 @@
 #define __SET_STRESS_TEST_SIZE                      10000000
 #define __MAP_STRESS_TEST_SIZE                      10000000
 #define __MULTISET_STRESS_TEST_SIZE                 10000000
-#define __MULTIMAP_STRESS_TEST_SIZE                 10
+#define __MULTIMAP_STRESS_TEST_SIZE                 10000000
 
 #define __UNORDERED_SET_STRESS_TEST_SIZE            100000000
 #define __UNORDERED_MAP_STRESS_TEST_SIZE            100000000

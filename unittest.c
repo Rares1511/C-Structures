@@ -78,16 +78,13 @@ static module_tests all_modules[] = {
     { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
 
     // // Numeric types
-    // { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
+    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
 
     // Utilities
     { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
-
-    // String module
-    // { "cstring", cstring_tests, sizeof(cstring_tests) / sizeof(test) },
 };
 
-static int num_modules = sizeof(all_modules) / sizeof(module_tests);
+int num_modules = sizeof(all_modules) / sizeof(module_tests);
 
 void post_operation_time(test_arg *arg, const char *operation, double c_time) {
     for (int i = 0; i < arg->op_time_count; i++) {

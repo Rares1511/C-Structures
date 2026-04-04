@@ -60,20 +60,6 @@ cs_codes vector_init(vector *v, elem_attr_t attr, vector_attr_t v_attr);
 cs_codes vector_insert_at(vector *vec, const void *el, int pos);
 
 /*!
- * Grows the internal buffer of the vector (slow path for push_back)
- * @param[out] vec  Vector whose buffer will be grown
- * @return CS_MEM if a memory problem occurred or CS_SUCCESS
- */
-cs_codes vector_grow(vector *vec);
-
-/*!
- * Shrinks the internal buffer of the vector if underutilized (slow path for pop_back)
- * @param[out] vec  Vector whose buffer may be shrunk
- * @return CS_MEM if a memory problem occurred or CS_SUCCESS
- */
-cs_codes vector_shrink(vector *vec);
-
-/*!
  * Pushes the element at the back of the vector
  * @param[out] vec  Vector in which the element will be inserted
  * @param[in]  el   The value of the element which will be inserted
@@ -106,6 +92,14 @@ cs_codes vector_pop_back(vector *vec);
  * CS_SUCCESS upon a successful deletion
  */
 cs_codes vector_replace(vector *vec, const void *el, int pos);
+
+/*!
+ * Reserves the vector to have at least the capacity given
+ * @param[out] vec      Vector which will be reserved
+ * @param[in]  new_cap  The new capacity for the vector
+ * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful reservation
+ */
+cs_codes vector_reserve(vector *vec, int new_cap);
 
 /*!
  * Find the element given in the vector

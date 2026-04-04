@@ -28,24 +28,116 @@ size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
     return (size_t) idx;
 }
 
+cs_codes __hash_table_rehash(hash_table *ht) {
+    int old_cap = ht->cap;
+    vector **old_buckets = ht->buckets;
+    char *old_is_oversized = ht->is_oversized;
+
+    ht->cap *= 2;
+    ht->buckets = realloc(ht->buckets, sizeof(vector**) * ht->cap);
+    ht->is_oversized = realloc(ht->is_oversized, sizeof(char) * ht->cap);
+    if (ht->buckets == NULL || ht->is_oversized == NULL) {
+        ht->buckets = old_buckets;
+        ht->is_oversized = old_is_oversized;
+        ht->cap = old_cap;
+        return CS_MEM;
+    }
+
+    for (int i = old_cap; i < ht->cap; i++) {
+        ht->buckets[i] = NULL;
+        ht->is_oversized[i] = 0;
+    }
+
+    ht->oversized_buckets = 0;
+    for (int i = 0; i < old_cap; i++) {
+        ht->is_oversized[i] = 0; // Reset oversize status, will be updated as we move elements
+        vector *bucket = ht->buckets[i];
+        vector *new_bucket = ht->buckets[i + old_cap];
+        if (bucket == NULL) {
+            continue;
+        }
+
+        int bucket_size = vector_size(*bucket);
+        int current_size = 0;
+        int corresponding_size = 0;
+        while (current_size + corresponding_size < bucket_size) {
+            void *el = vector_at(*bucket, current_size);
+            size_t new_idx = __hash_table_get_bucket_index(*ht, el);
+            if (new_idx == i) {
+                // Current element stays in the same bucket
+                current_size++;
+            }
+            else {
+                // Current element moves to the new bucket
+                // As to not move every element to the left by eliminating the current element
+                // we will swap the current element with the last element in the vector and then 
+                // insert it in the new bucket
+                if (corresponding_size == 0) {
+                    // First time handling this bucket, initialize the new bucket
+                    new_bucket = malloc(sizeof(vector));
+                    vector_attr_t v_attr = { .min_cap = 1, .shrink_factor = 0 };
+                    cs_codes rc = vector_init(new_bucket, ht->attr, v_attr);
+                    if (rc != CS_SUCCESS) {
+                        return rc;
+                    }
+                    rc = vector_reserve(new_bucket, bucket_size); // Reserve space for all elements that might be moved to the new bucket
+                    if (rc != CS_SUCCESS) {
+                        return rc;
+                    }
+                } 
+                void *last_el = vector_at(*bucket, vector_size(*bucket) - 1);
+                
+                memcpy(new_bucket->vec + corresponding_size * ht->attr.size, el, ht->attr.size);
+                memcpy(bucket->vec + current_size * ht->attr.size, last_el, ht->attr.size);
+                bucket->size--;
+
+                corresponding_size++;
+            }
+        }
+
+        bucket->size = current_size;
+        if (new_bucket) {
+            new_bucket->size = corresponding_size;
+            ht->buckets[i + old_cap] = new_bucket;
+        }
+        if (current_size > ht->oversize_threshold) {
+            ht->is_oversized[i] = 1;
+            ht->oversized_buckets++;
+        }
+        
+        if (corresponding_size > ht->oversize_threshold) {
+            ht->is_oversized[i + old_cap] = 1;
+            ht->oversized_buckets++;
+        }
+    }
+    
+    return CS_SUCCESS;
+}
+
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash, int initial_capacity) {
+cs_codes hash_table_init(hash_table *ht, elem_attr_t attr, hash_func_t hash) {
     CS_RETURN_IF(NULL == ht, CS_NULL);
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
 
-    ht->cap = initial_capacity;
+    ht->cap = 16; // Set a default initial capacity
+    ht->oversized_buckets = 0;
+    ht->oversize_threshold = 8; // Set a default oversize threshold
     ht->size = 0;
     ht->attr = attr;
     ht->hash = hash;
-    ht->buckets = malloc(sizeof(vector**) * initial_capacity);
+    ht->buckets = malloc(sizeof(vector**) * ht->cap);
+    ht->is_oversized = malloc(sizeof(char) * ht->cap);
     CS_RETURN_IF(NULL == ht->buckets, CS_MEM);
-    for (int i = 0; i < initial_capacity; i++) {
+    CS_RETURN_IF(NULL == ht->is_oversized, CS_MEM);
+
+    for (int i = 0; i < ht->cap; i++) {
         ht->buckets[i] = NULL;
+        ht->is_oversized[i] = 0;
     }
 
     return CS_SUCCESS;
@@ -66,7 +158,16 @@ cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
 
     rc = vector_push_back(ht->buckets[idx], el);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
+    if (vector_size(*ht->buckets[idx]) > ht->oversize_threshold && !ht->is_oversized[idx]) {
+        ht->oversized_buckets++;
+        ht->is_oversized[idx] = 1;
+    }
     ht->size++;
+
+    if (ht->oversized_buckets > ht->cap / 2) {
+        return __hash_table_rehash(ht);
+    }
+
     return CS_SUCCESS;
 }
 
@@ -82,6 +183,12 @@ cs_codes hash_table_remove_entry(hash_table *ht, const void *el) {
     int rc = vector_erase(bucket, bucket_idx);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
     ht->size--;
+
+    if (vector_size(*bucket) <= ht->oversize_threshold && ht->is_oversized[idx]) {
+        ht->oversized_buckets--;
+        ht->is_oversized[idx] = 0;
+    }
+
     return CS_SUCCESS;
 }
 

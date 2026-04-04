@@ -16,13 +16,11 @@ typedef struct unordered_multiset {
  * @param[out] umset Pointer to the unordered multiset to be initialized.
  * @param[in] attr The attributes of the unordered multiset (element size, copy, compare, free, print functions).
  * @param[in] hash_func The hash function to be used for hashing the elements.
- * @param[in] initial_capacity The initial capacity of the unordered multiset.
  * @return A pointer to the initialized unordered multiset, or NULL on failure.
  */
 cs_codes unordered_multiset_init(unordered_multiset *umset, 
                                 unordered_multiset_attr_t attr, 
-                                hash_func_t hash_func, 
-                                int initial_capacity);
+                                hash_func_t hash_func);
 
 /*!
  * @brief Inserts an element into the unordered multiset.

@@ -7,7 +7,8 @@
 /*                              INIT TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_set_init_basic() {
+test_res test_unordered_set_init_basic(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -17,7 +18,7 @@ test_res test_unordered_set_init_basic() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
 
     if (rc != CS_SUCCESS) {
         return (test_res){
@@ -36,7 +37,8 @@ test_res test_unordered_set_init_basic() {
     };
 }
 
-test_res test_unordered_set_init_null_pointer() {
+test_res test_unordered_set_init_null_pointer(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -45,7 +47,7 @@ test_res test_unordered_set_init_null_pointer() {
         .print = print_int
     };
 
-    cs_codes rc = unordered_set_init(NULL, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(NULL, attr, hash_int);
 
     if (rc != CS_NULL) {
         return (test_res){
@@ -62,44 +64,8 @@ test_res test_unordered_set_init_null_pointer() {
     };
 }
 
-test_res test_unordered_set_init_invalid_capacity() {
-    elem_attr_t attr = {
-        .size = sizeof(int),
-        .comp = NULL,
-        .fr = NULL,
-        .copy = NULL,
-        .print = print_int
-    };
-
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 0);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for zero capacity",
-            .return_code = CS_UNKNOWN
-        };
-    }
-
-    rc = unordered_set_init(&uset, attr, hash_int, -5);
-
-    if (rc != CS_SIZE) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for negative capacity",
-            .return_code = CS_UNKNOWN
-        };
-    }
-
-    return (test_res){
-        .test_name = (char*) __func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
-    };
-}
-
-test_res test_unordered_set_init_invalid_size() {
+test_res test_unordered_set_init_invalid_size(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = 0,
         .comp = NULL,
@@ -109,7 +75,7 @@ test_res test_unordered_set_init_invalid_size() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -126,7 +92,8 @@ test_res test_unordered_set_init_invalid_size() {
     };
 }
 
-test_res test_unordered_set_init_null_hash() {
+test_res test_unordered_set_init_null_hash(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -136,7 +103,7 @@ test_res test_unordered_set_init_null_hash() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, NULL, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, NULL);
 
     // Should succeed - hash_table likely has default hash
     if (rc != CS_SUCCESS) {
@@ -161,7 +128,8 @@ test_res test_unordered_set_init_null_hash() {
 /*                              INSERT TESTS                                  */
 /******************************************************************************/
 
-test_res test_unordered_set_insert_basic() {
+test_res test_unordered_set_insert_basic(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -171,7 +139,7 @@ test_res test_unordered_set_insert_basic() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -201,7 +169,8 @@ test_res test_unordered_set_insert_basic() {
     };
 }
 
-test_res test_unordered_set_insert_multiple() {
+test_res test_unordered_set_insert_multiple(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -211,7 +180,7 @@ test_res test_unordered_set_insert_multiple() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -250,7 +219,8 @@ test_res test_unordered_set_insert_multiple() {
     };
 }
 
-test_res test_unordered_set_insert_duplicate() {
+test_res test_unordered_set_insert_duplicate(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -260,7 +230,7 @@ test_res test_unordered_set_insert_duplicate() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -310,7 +280,8 @@ test_res test_unordered_set_insert_duplicate() {
     };
 }
 
-test_res test_unordered_set_insert_null_set() {
+test_res test_unordered_set_insert_null_set(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     int val = 42;
     cs_codes rc = unordered_set_insert(NULL, &val);
 
@@ -329,7 +300,8 @@ test_res test_unordered_set_insert_null_set() {
     };
 }
 
-test_res test_unordered_set_insert_null_key() {
+test_res test_unordered_set_insert_null_key(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -339,7 +311,7 @@ test_res test_unordered_set_insert_null_key() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -372,7 +344,8 @@ test_res test_unordered_set_insert_null_key() {
 /*                              FIND TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_set_find_existing() {
+test_res test_unordered_set_find_existing(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -382,7 +355,7 @@ test_res test_unordered_set_find_existing() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -423,7 +396,8 @@ test_res test_unordered_set_find_existing() {
     };
 }
 
-test_res test_unordered_set_find_nonexistent() {
+test_res test_unordered_set_find_nonexistent(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -433,7 +407,7 @@ test_res test_unordered_set_find_nonexistent() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -466,7 +440,8 @@ test_res test_unordered_set_find_nonexistent() {
     };
 }
 
-test_res test_unordered_set_find_null_key() {
+test_res test_unordered_set_find_null_key(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -476,7 +451,7 @@ test_res test_unordered_set_find_null_key() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -505,7 +480,8 @@ test_res test_unordered_set_find_null_key() {
     };
 }
 
-test_res test_unordered_set_find_after_many_inserts() {
+test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -515,7 +491,7 @@ test_res test_unordered_set_find_after_many_inserts() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -554,7 +530,8 @@ test_res test_unordered_set_find_after_many_inserts() {
 /*                              ERASE TESTS                                   */
 /******************************************************************************/
 
-test_res test_unordered_set_erase_existing() {
+test_res test_unordered_set_erase_existing(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -564,7 +541,7 @@ test_res test_unordered_set_erase_existing() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -606,7 +583,8 @@ test_res test_unordered_set_erase_existing() {
     };
 }
 
-test_res test_unordered_set_erase_nonexistent() {
+test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -616,7 +594,7 @@ test_res test_unordered_set_erase_nonexistent() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -647,7 +625,8 @@ test_res test_unordered_set_erase_nonexistent() {
     };
 }
 
-test_res test_unordered_set_erase_null_set() {
+test_res test_unordered_set_erase_null_set(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     int val = 42;
     cs_codes rc = unordered_set_erase(NULL, &val);
 
@@ -666,7 +645,8 @@ test_res test_unordered_set_erase_null_set() {
     };
 }
 
-test_res test_unordered_set_erase_null_key() {
+test_res test_unordered_set_erase_null_key(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -676,7 +656,7 @@ test_res test_unordered_set_erase_null_key() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -705,7 +685,8 @@ test_res test_unordered_set_erase_null_key() {
     };
 }
 
-test_res test_unordered_set_erase_all() {
+test_res test_unordered_set_erase_all(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -715,7 +696,7 @@ test_res test_unordered_set_erase_all() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -763,7 +744,8 @@ test_res test_unordered_set_erase_all() {
 /*                              COUNT TESTS                                   */
 /******************************************************************************/
 
-test_res test_unordered_set_count_existing() {
+test_res test_unordered_set_count_existing(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -773,7 +755,7 @@ test_res test_unordered_set_count_existing() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -805,7 +787,8 @@ test_res test_unordered_set_count_existing() {
     };
 }
 
-test_res test_unordered_set_count_nonexistent() {
+test_res test_unordered_set_count_nonexistent(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -815,7 +798,7 @@ test_res test_unordered_set_count_nonexistent() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -845,7 +828,8 @@ test_res test_unordered_set_count_nonexistent() {
     };
 }
 
-test_res test_unordered_set_count_null_key() {
+test_res test_unordered_set_count_null_key(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -855,7 +839,7 @@ test_res test_unordered_set_count_null_key() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -888,7 +872,8 @@ test_res test_unordered_set_count_null_key() {
 /*                              SIZE/EMPTY TESTS                              */
 /******************************************************************************/
 
-test_res test_unordered_set_size_empty() {
+test_res test_unordered_set_size_empty(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -898,7 +883,7 @@ test_res test_unordered_set_size_empty() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -925,7 +910,8 @@ test_res test_unordered_set_size_empty() {
     };
 }
 
-test_res test_unordered_set_size_after_inserts() {
+test_res test_unordered_set_size_after_inserts(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -935,7 +921,7 @@ test_res test_unordered_set_size_after_inserts() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -966,7 +952,8 @@ test_res test_unordered_set_size_after_inserts() {
     };
 }
 
-test_res test_unordered_set_size_after_erase() {
+test_res test_unordered_set_size_after_erase(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -976,7 +963,7 @@ test_res test_unordered_set_size_after_erase() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1011,7 +998,8 @@ test_res test_unordered_set_size_after_erase() {
     };
 }
 
-test_res test_unordered_set_empty_true() {
+test_res test_unordered_set_empty_true(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1021,7 +1009,7 @@ test_res test_unordered_set_empty_true() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1048,7 +1036,8 @@ test_res test_unordered_set_empty_true() {
     };
 }
 
-test_res test_unordered_set_empty_false() {
+test_res test_unordered_set_empty_false(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1058,7 +1047,7 @@ test_res test_unordered_set_empty_false() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1088,7 +1077,8 @@ test_res test_unordered_set_empty_false() {
     };
 }
 
-test_res test_unordered_set_empty_after_erase_all() {
+test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1098,7 +1088,7 @@ test_res test_unordered_set_empty_after_erase_all() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1137,7 +1127,8 @@ test_res test_unordered_set_empty_after_erase_all() {
 /*                              CLEAR TESTS                                   */
 /******************************************************************************/
 
-test_res test_unordered_set_clear_basic() {
+test_res test_unordered_set_clear_basic(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1147,7 +1138,7 @@ test_res test_unordered_set_clear_basic() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1189,7 +1180,8 @@ test_res test_unordered_set_clear_basic() {
     };
 }
 
-test_res test_unordered_set_clear_empty() {
+test_res test_unordered_set_clear_empty(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1199,7 +1191,7 @@ test_res test_unordered_set_clear_empty() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1228,7 +1220,8 @@ test_res test_unordered_set_clear_empty() {
     };
 }
 
-test_res test_unordered_set_clear_then_insert() {
+test_res test_unordered_set_clear_then_insert(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1238,7 +1231,7 @@ test_res test_unordered_set_clear_then_insert() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1284,7 +1277,8 @@ test_res test_unordered_set_clear_then_insert() {
     };
 }
 
-test_res test_unordered_set_clear_null() {
+test_res test_unordered_set_clear_null(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     // Clear NULL should not crash
     unordered_set_clear(NULL);
 
@@ -1299,7 +1293,8 @@ test_res test_unordered_set_clear_null() {
 /*                              FREE TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_set_free_null() {
+test_res test_unordered_set_free_null(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     // Free NULL should not crash
     unordered_set_free(NULL);
 
@@ -1310,7 +1305,8 @@ test_res test_unordered_set_free_null() {
     };
 }
 
-test_res test_unordered_set_free_empty() {
+test_res test_unordered_set_free_empty(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1320,7 +1316,7 @@ test_res test_unordered_set_free_empty() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1338,7 +1334,8 @@ test_res test_unordered_set_free_empty() {
     };
 }
 
-test_res test_unordered_set_free_with_elements() {
+test_res test_unordered_set_free_with_elements(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1348,7 +1345,7 @@ test_res test_unordered_set_free_with_elements() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1374,7 +1371,8 @@ test_res test_unordered_set_free_with_elements() {
 /*                              STRESS/EDGE TESTS                             */
 /******************************************************************************/
 
-test_res test_unordered_set_large_capacity() {
+test_res test_unordered_set_large_capacity(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1384,7 +1382,7 @@ test_res test_unordered_set_large_capacity() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 1000);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1423,7 +1421,8 @@ test_res test_unordered_set_large_capacity() {
     };
 }
 
-test_res test_unordered_set_small_capacity_many_inserts() {
+test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1433,7 +1432,7 @@ test_res test_unordered_set_small_capacity_many_inserts() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 2);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1473,7 +1472,8 @@ test_res test_unordered_set_small_capacity_many_inserts() {
     };
 }
 
-test_res test_unordered_set_insert_erase_cycle() {
+test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1483,7 +1483,7 @@ test_res test_unordered_set_insert_erase_cycle() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1520,7 +1520,8 @@ test_res test_unordered_set_insert_erase_cycle() {
     };
 }
 
-test_res test_unordered_set_negative_values() {
+test_res test_unordered_set_negative_values(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1530,7 +1531,7 @@ test_res test_unordered_set_negative_values() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1580,7 +1581,8 @@ test_res test_unordered_set_negative_values() {
     };
 }
 
-test_res test_unordered_set_reinsert_after_erase() {
+test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1590,7 +1592,7 @@ test_res test_unordered_set_reinsert_after_erase() {
     };
 
     unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int, 10);
+    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1632,6 +1634,81 @@ test_res test_unordered_set_reinsert_after_erase() {
     };
 }
 
+test_res test_unordered_set_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
+    }
+    
+    unordered_set uset;
+    struct timeval start, end;
+    double elapsed;
+
+    if (CS_SUCCESS != unordered_set_init(&uset, get_int_attr(), hash_int)) {
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Failed to initialize",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    int total = __UNORDERED_SET_STRESS_TEST_SIZE;
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (unordered_set_insert(&uset, &i) != CS_SUCCESS) {
+            unordered_set_free(&uset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to insert element",
+                .return_code = CS_UNKNOWN
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "insert", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int *found = (int*) unordered_set_find(uset, &i);
+        if (found == NULL || *found != i) {
+            unordered_set_free(&uset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to find existing element",
+                .return_code = CS_UNKNOWN
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "find", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (unordered_set_erase(&uset, &i) != CS_SUCCESS) {
+            unordered_set_free(&uset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to erase element",
+                .return_code = CS_UNKNOWN
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "delete", elapsed);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Erase Time = %.9f sec\n", elapsed);
+
+    return (test_res){
+        .test_name = (char*) __func__,
+        .reason = "",
+        .return_code = CS_SUCCESS
+    };
+}
+
 /******************************************************************************/
 /*                              TEST REGISTRY                                 */
 /******************************************************************************/
@@ -1640,7 +1717,6 @@ test unordered_set_tests[] = {
     // Init tests
     test_unordered_set_init_basic,
     test_unordered_set_init_null_pointer,
-    test_unordered_set_init_invalid_capacity,
     test_unordered_set_init_invalid_size,
     test_unordered_set_init_null_hash,
 
@@ -1694,4 +1770,7 @@ test unordered_set_tests[] = {
     test_unordered_set_insert_erase_cycle,
     test_unordered_set_negative_values,
     test_unordered_set_reinsert_after_erase,
+
+    // Stress tests with timing
+    test_unordered_set_stress_time,
 };

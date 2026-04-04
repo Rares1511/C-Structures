@@ -3,12 +3,12 @@
 
 #include <stdlib.h>
 
-cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func, int initial_capacity) {
+cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func) {
     CS_RETURN_IF(NULL == uset, CS_NULL);
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     uset->ht = malloc(sizeof(hash_table));
     CS_RETURN_IF(NULL == uset->ht, CS_MEM);
-    return hash_table_init(uset->ht, attr, hash_func, initial_capacity);
+    return hash_table_init(uset->ht, attr, hash_func);
 }
 
 cs_codes unordered_set_insert(unordered_set *uset, const void *key) {

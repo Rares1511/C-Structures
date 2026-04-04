@@ -202,6 +202,24 @@ cs_codes vector_replace(vector *vec, const void *el, int pos) {
     return CS_SUCCESS;
 }
 
+cs_codes vector_reserve(vector *vec, int new_cap) {
+    CS_RETURN_IF(vec == NULL, CS_NULL);
+    CS_RETURN_IF(new_cap <= 0, CS_SIZE);
+    if (new_cap < vec->cap) {
+        return CS_SUCCESS; // No need to shrink, use vector_shrink if you want to shrink based on size
+    }
+
+    int old_cap = vec->cap;
+    vec->cap = new_cap;
+    void *new_vec = realloc(vec->vec, vec->cap * vec->attr.size);
+    if (new_vec == NULL) {
+        vec->cap = old_cap; // Revert to old capacity on failure
+        return CS_MEM;
+    }
+    vec->vec = new_vec;
+    return CS_SUCCESS;
+}
+
 int vector_find(vector vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
     int size = vec.size;

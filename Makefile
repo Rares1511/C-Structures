@@ -101,13 +101,6 @@ $(LIBOUTDIR):
 %/%.o: %/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-# Explicit rule for non-standard object files (name != directory)
-cstring/nfa.o: cstring/nfa.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-cstring/dfa.o: cstring/dfa.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-
 # Convenience target for objects
 objects: $(ALL_MOD_OBJS) $(CORE_OBJS)
 

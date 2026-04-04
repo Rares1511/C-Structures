@@ -92,10 +92,8 @@ size_t unordered_multimap_entry_hash(const void *el) {
 cs_codes unordered_multimap_init(unordered_multimap *ummap,
                                  elem_attr_t key_attr,
                                  elem_attr_t value_attr,
-                                 hash_func_t hash_func,
-                                 int initial_capacity) {
+                                 hash_func_t hash_func) {
     CS_RETURN_IF(NULL == ummap, CS_NULL);
-    CS_RETURN_IF(initial_capacity <= 0, CS_SIZE);
     CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0, CS_SIZE);
     CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
     ummap->ht = malloc(sizeof(hash_table));
@@ -113,7 +111,7 @@ cs_codes unordered_multimap_init(unordered_multimap *ummap,
     ummap->key_attr = key_attr;
     ummap->value_attr = value_attr;
 
-    return hash_table_init(ummap->ht, ht_attr, unordered_multimap_entry_hash, initial_capacity);
+    return hash_table_init(ummap->ht, ht_attr, unordered_multimap_entry_hash);
 }
 
 cs_codes unordered_multimap_add_entry(unordered_multimap *umap, const void *key, const void *value) {

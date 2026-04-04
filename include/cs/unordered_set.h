@@ -15,10 +15,9 @@ typedef struct unordered_set {
  * @param[out] uset Pointer to the unordered set.
  * @param[in] attr Attributes for the unordered set.
  * @param[in] hash_func Hash function to use for the unordered set.
- * @param[in] initial_capacity Initial capacity of the unordered set.
  * @return Pointer to the initialized unordered set, or NULL on failure.
  */
-cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func, int initial_capacity);
+cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func);
 
 /*!
  * @brief Inserts a key into the unordered set.

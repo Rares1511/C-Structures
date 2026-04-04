@@ -6,13 +6,12 @@
 
 cs_codes unordered_multiset_init(unordered_multiset *umset, 
                             unordered_multiset_attr_t attr, 
-                            hash_func_t hash_func, 
-                            int initial_capacity) {
+                            hash_func_t hash_func) {
     CS_RETURN_IF(NULL == umset, CS_NULL);
-    CS_RETURN_IF(initial_capacity <= 0 || attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     umset->ht = malloc(sizeof(hash_table));
     CS_RETURN_IF(NULL == umset->ht, CS_MEM);
-    return hash_table_init(umset->ht, attr, hash_func, initial_capacity);
+    return hash_table_init(umset->ht, attr, hash_func);
 }
 
 cs_codes unordered_multiset_insert(unordered_multiset *umset, const void *key) {

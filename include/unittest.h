@@ -25,6 +25,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <valgrind/valgrind.h>
+#include <benchmark.h>
 
 #include <cs/universal.h>
 #include <cs/cargs.h>
