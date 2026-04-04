@@ -220,19 +220,28 @@ void hash_table_swap(hash_table *ht1, hash_table *ht2) {
     elem_attr_t attr = ht1->attr;
     int cap = ht1->cap;
     int size = ht1->size;
+    int oversized_buckets = ht1->oversized_buckets;
+    int oversize_threshold = ht1->oversize_threshold;
     vector **buckets = ht1->buckets;
+    char *is_oversized = ht1->is_oversized;
     hash_func_t hash = ht1->hash;
 
     ht1->attr = ht2->attr;
     ht1->cap = ht2->cap;
     ht1->size = ht2->size;
+    ht1->oversized_buckets = ht2->oversized_buckets;
+    ht1->oversize_threshold = ht2->oversize_threshold;
     ht1->buckets = ht2->buckets;
+    ht1->is_oversized = ht2->is_oversized;
     ht1->hash = ht2->hash;
 
     ht2->attr = attr;
     ht2->cap = cap;
     ht2->size = size;
+    ht2->oversized_buckets = oversized_buckets;
+    ht2->oversize_threshold = oversize_threshold;
     ht2->buckets = buckets;
+    ht2->is_oversized = is_oversized;
     ht2->hash = hash;
 }
 
@@ -245,7 +254,9 @@ void hash_table_clear(hash_table *ht) {
             free(ht->buckets[i]);
             ht->buckets[i] = NULL;
         }
+        ht->is_oversized[i] = 0;
     }
+    ht->oversized_buckets = 0;
     ht->size = 0;
 }
 
@@ -271,5 +282,6 @@ void hash_table_free(void *v_ht) {
             ht->buckets[i] = NULL;
         }
     }
+    free(ht->is_oversized);
     free(ht->buckets);
 }
