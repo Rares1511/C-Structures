@@ -2079,6 +2079,87 @@ test_res test_unordered_map_different_value_types() {
     };
 }
 
+test_res test_unordered_map_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind");
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Skipping time-based stress test on Valgrind",
+            .return_code = CS_SUCCESS
+        };
+    }
+
+    unordered_map umap;
+    struct timeval start, end;
+    double elapsed;
+
+    if (CS_SUCCESS != unordered_map_init(&umap, get_int_attr(), get_string_attr(), hash_int)) {
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Failed to initialize",
+            .return_code = CS_UNKNOWN
+        };
+    }
+
+    int total = __UNORDERED_MAP_STRESS_TEST_SIZE;
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        char value[25];
+        snprintf(value, sizeof(value), "StressVal_%d", i);
+        if (CS_SUCCESS != unordered_map_add_entry(&umap, &i, &value)) {
+            unordered_map_free(&umap);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to add entry during stress test",
+                .return_code = CS_UNKNOWN
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed in %.6f seconds", elapsed);
+    post_operation_time(arg, "insert", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (unordered_map_get_entry(umap, &i) == NULL) {
+            unordered_map_free(&umap);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to get entry during stress test",
+                .return_code = CS_UNKNOWN
+            };
+        };
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test get completed in %.6f seconds", elapsed);
+    post_operation_time(arg, "find", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (unordered_map_remove_entry(&umap, &i) != CS_SUCCESS) {
+            unordered_map_free(&umap);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to remove entry during stress test",
+                .return_code = CS_UNKNOWN
+            };
+        };
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test remove completed in %.6f seconds", elapsed);
+    post_operation_time(arg, "delete", elapsed);
+
+    return (test_res){
+        .test_name = (char*) __func__,
+        .reason = "",
+        .return_code = CS_SUCCESS
+    };
+}
+
 /******************************************************************************/
 /*                              TEST REGISTRY                                 */
 /******************************************************************************/
@@ -2145,4 +2226,5 @@ test unordered_map_tests[] = {
     test_unordered_map_negative_keys,
     test_unordered_map_readd_after_remove,
     test_unordered_map_different_value_types,
+    test_unordered_map_stress_time,
 };

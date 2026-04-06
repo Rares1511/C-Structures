@@ -1727,6 +1727,86 @@ test_res test_unordered_multiset_many_duplicates() {
     };
 }
 
+test_res test_unordered_multiset_stress_time(test_arg *arg) {
+    if (RUNNING_ON_VALGRIND) {
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time stress test on Valgrind");
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Skipping time stress test on Valgrind",
+            .return_code = CS_SUCCESS,
+        };
+    }
+
+    unordered_multiset umset;
+    struct timeval start, end;
+    double elapsed;
+
+    if (CS_SUCCESS != unordered_multiset_init(&umset, get_int_attr(), hash_int)) {
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Failed to initialize",
+            .return_code = CS_UNKNOWN,
+        };
+    }
+
+    int total = __UNORDERED_MULTISET_STRESS_TEST_SIZE;
+    
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (CS_SUCCESS != unordered_multiset_insert(&umset, &i)) {
+            unordered_multiset_free(&umset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to insert during stress test",
+                .return_code = CS_UNKNOWN,
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_INFO, "Inserted %d elements in %.4f seconds", total, elapsed);
+    post_operation_time(arg, "insert", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        int *found = unordered_multiset_find(umset, &i);
+        if (found == NULL || *found != i) {
+            unordered_multiset_free(&umset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to find element during stress test",
+                .return_code = CS_UNKNOWN,
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_INFO, "Found %d elements in %.4f seconds", total, elapsed);
+    post_operation_time(arg, "find", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        if (CS_SUCCESS != unordered_multiset_erase(&umset, &i)) {
+            unordered_multiset_free(&umset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to erase element during stress test",
+                .return_code = CS_UNKNOWN,
+            };
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    clogger_log(*arg->logger, CLOGGER_INFO, "Erased %d elements in %.4f seconds", total, elapsed);
+    post_operation_time(arg, "delete", elapsed);
+
+    return (test_res){
+        .test_name = (char*) __func__,
+        .reason = "",
+        .return_code = CS_SUCCESS,
+    };
+}
+
 /******************************************************************************/
 /*                              TEST REGISTRY                                 */
 /******************************************************************************/
@@ -1791,4 +1871,5 @@ test unordered_multiset_tests[] = {
     test_unordered_multiset_negative_values,
     test_unordered_multiset_reinsert_after_erase,
     test_unordered_multiset_many_duplicates,
+    test_unordered_multiset_stress_time,
 };

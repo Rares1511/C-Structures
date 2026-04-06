@@ -42,7 +42,9 @@ void multimap_node_copy(void *dest, const void *src) {
         return;
     }
     pair_init(d, s->first_attr, s->second_attr);
-    pair_set(d, pair_first(*s), pair_second(*s));
+    d->data = s->data;
+    d->has_first = s->has_first;
+    d->has_second = s->has_second;
 }
 
 
