@@ -17,6 +17,7 @@ typedef struct {
 } vector_attr_t;
 
 typedef struct vector {
+    cs_header_t header;   /*!< header for the vector structure */
     void *vec;            /*!< size of the datatype */
     int cap;              /*!< current maximum capacity of the vector */
     int size;             /*!< current size of the vector */

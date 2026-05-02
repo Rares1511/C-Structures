@@ -16,7 +16,7 @@
  * @param[in] el Pointer to the element.
  * @return The index of the bucket where the element should be located.
  */
-size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
+int __hash_table_get_bucket_index(hash_table ht, const void *el) {
     int idx;
     if (ht.hash)
         idx = ht.hash(el) % ht.cap;
@@ -25,7 +25,7 @@ size_t __hash_table_get_bucket_index(hash_table ht, const void *el) {
     if (idx < 0) {
         idx += ht.cap;
     }
-    return (size_t) idx;
+    return idx;
 }
 
 cs_codes __hash_table_rehash(hash_table *ht) {
@@ -35,9 +35,14 @@ cs_codes __hash_table_rehash(hash_table *ht) {
 
     ht->cap *= 2;
     ht->buckets = realloc(ht->buckets, sizeof(vector**) * ht->cap);
-    ht->is_oversized = realloc(ht->is_oversized, sizeof(char) * ht->cap);
-    if (ht->buckets == NULL || ht->is_oversized == NULL) {
+    if (ht->buckets == NULL) {
         ht->buckets = old_buckets;
+        ht->is_oversized = old_is_oversized;
+        ht->cap = old_cap;
+        return CS_MEM;
+    }
+    ht->is_oversized = realloc(ht->is_oversized, sizeof(char) * ht->cap);
+    if (ht->is_oversized == NULL) {
         ht->is_oversized = old_is_oversized;
         ht->cap = old_cap;
         return CS_MEM;
@@ -62,7 +67,7 @@ cs_codes __hash_table_rehash(hash_table *ht) {
         int corresponding_size = 0;
         while (current_size + corresponding_size < bucket_size) {
             void *el = vector_at(*bucket, current_size);
-            size_t new_idx = __hash_table_get_bucket_index(*ht, el);
+            int new_idx = __hash_table_get_bucket_index(*ht, el);
             if (new_idx == i) {
                 // Current element stays in the same bucket
                 current_size++;

@@ -39,6 +39,14 @@ typedef enum cs_codes {
     CS_UNINITIALIZED = -11
 } cs_codes;
 
+typedef enum {
+    VECTOR_TYPE,
+    HASHMAP_TYPE,
+    STACK_TYPE,
+    QUEUE_TYPE,
+    LIST_TYPE
+} struct_type_t;
+
 typedef void (*printer)(FILE *, const void *);
 typedef void (*freer)(void *);
 typedef int (*comparer)(const void *, const void *);
@@ -51,6 +59,11 @@ typedef struct elem_attr_t {
     printer print; /*!< printer function for the datatype */
     comparer comp; /*!< compare function for the datatype */
 } elem_attr_t;
+
+typedef struct {
+    __uint32_t magic; /*!< Magic number for validation */
+    struct_type_t type; /*!< Type of the structure */
+} cs_header_t;
 
 /*!
  * A simple universal hash function for byte arrays.
