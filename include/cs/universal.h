@@ -40,11 +40,13 @@ typedef enum cs_codes {
 } cs_codes;
 
 typedef enum {
-    VECTOR_TYPE,
-    HASHMAP_TYPE,
-    STACK_TYPE,
-    QUEUE_TYPE,
-    LIST_TYPE
+    CS_VECTOR_TYPE,
+    CS_HASHMAP_TYPE,
+    CS_STACK_TYPE,
+    CS_QUEUE_TYPE,
+    CS_LIST_TYPE,
+    CS_GRAPH_TYPE,
+    CS_DEQUE_TYPE,
 } struct_type_t;
 
 typedef void (*printer)(FILE *, const void *);

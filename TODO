@@ -30,5 +30,4 @@ Extra Modules:
     - Cargs ✔ (Implemented)
 
 Finish benchmark tests for unordered shiet and then maybe add for priority queue and the other wierd stuff
-Inspect horrible performance on unordered set
-Modify hash table with bucket
+Change all error codes to just CS_ERROR - in future maybe change them to specialized error codes when having all code
