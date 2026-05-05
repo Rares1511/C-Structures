@@ -16,7 +16,10 @@ static void *test_vector_insert(void *arg) {
 static void *test_vector_find(void *arg) {
     auto *v = static_cast<std::vector<int>*>(arg);
     int search_value = __VECTOR_STRESS_TEST_SIZE - 1;
-    std::find(v->begin(), v->end(), search_value);
+    int idx = std::find(v->begin(), v->end(), search_value) - v->begin();
+    if (idx != __VECTOR_STRESS_TEST_SIZE - 1) {
+        printf("Error: Expected to find %d at index %d but found at index %d\n", search_value, __VECTOR_STRESS_TEST_SIZE - 1, idx);
+    }
     return v;
 }
 

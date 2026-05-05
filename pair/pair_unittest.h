@@ -141,11 +141,11 @@ test_res test_pair_set_null_pair(test_arg *arg) {
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pair_set with NULL pair\n");
     cs_codes rc = pair_set(NULL, &first, &second);
-    if (rc != CS_ELEM) {
-        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected CS_ELEM but got %d\n", rc);
-        return (test_res){(char*)__func__, "pair_set with NULL pair should return CS_ELEM", CS_UNKNOWN};
+    if (rc != CS_NULL) {
+        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected CS_NULL but got %d\n", rc);
+        return (test_res){(char*)__func__, "pair_set with NULL pair should return CS_NULL", CS_UNKNOWN};
     }
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly returned CS_ELEM for NULL pair\n");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly returned CS_NULL for NULL pair\n");
 
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
