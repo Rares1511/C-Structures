@@ -89,7 +89,7 @@ test_res test_multimap_insert_single(test_arg *arg) {
     }
 
     vector *values = multimap_get(&mm, &key);
-    if (NULL == values || vector_size(*values) != 1) {
+    if (NULL == values || vector_size(values) != 1) {
         free_test_struct(&key);
         free_test_struct(&value);
         multimap_free(&mm);
@@ -173,7 +173,7 @@ test_res test_multimap_insert_duplicate_keys(test_arg *arg) {
 
     // Value vector should have 5 elements
     vector *values = multimap_get(&mm, &key);
-    if (!values || vector_size(*values) != 5) {
+    if (!values || vector_size(values) != 5) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Value vector should have 5 elements", CS_UNKNOWN};
@@ -218,7 +218,7 @@ test_res test_multimap_insert_many_duplicates(test_arg *arg) {
     for (int i = 0; i < num_keys; i++) {
         test_struct key = create_test_struct(i, "Key", (double)i);
         vector *values = multimap_get(&mm, &key);
-        if (!values || vector_size(*values) != values_per_key) {
+        if (!values || vector_size(values) != values_per_key) {
             free_test_struct(&key);
             multimap_free(&mm);
             return (test_res){(char*)__func__, "Value count mismatch", CS_UNKNOWN};
@@ -344,7 +344,7 @@ test_res test_multimap_delete_one_of_many(test_arg *arg) {
 
     // Should still have the key with 4 values
     vector *values = multimap_get(&mm, &key);
-    if (!values || vector_size(*values) != 4) {
+    if (!values || vector_size(values) != 4) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Should have 4 values after one delete", CS_UNKNOWN};
@@ -636,7 +636,7 @@ test_res test_multimap_nested_data_integrity(test_arg *arg) {
     for (int i = 0; i < 50; i++) {
         test_struct key = create_test_struct(i, "NestedKey", (double)i * 1.5);
         vector *values = multimap_get(&mm, &key);
-        if (!values || vector_size(*values) != 3) {
+        if (!values || vector_size(values) != 3) {
             free_test_struct(&key);
             multimap_free(&mm);
             return (test_res){(char*)__func__, "Value count mismatch", CS_UNKNOWN};
@@ -671,7 +671,7 @@ test_res test_multimap_deep_copy_verification(test_arg *arg) {
     // Original key should still find the value
     test_struct original_key = create_test_struct(42, "DeepCopyKey", 42.0);
     vector *values = multimap_get(&mm, &original_key);
-    if (!values || vector_size(*values) != 1) {
+    if (!values || vector_size(values) != 1) {
         free_test_struct(&key);
         free_test_struct(&value);
         free_test_struct(&original_key);
@@ -726,7 +726,7 @@ test_res test_multimap_stress_insert_delete(test_arg *arg) {
     for (int i = 0; i < 100; i++) {
         test_struct key = create_test_struct(i, "StressKey", (double)i);
         vector *values = multimap_get(&mm, &key);
-        if (!values || vector_size(*values) != expected_count) {
+        if (!values || vector_size(values) != expected_count) {
             free_test_struct(&key);
             multimap_free(&mm);
             return (test_res){(char*)__func__, "Value count mismatch", CS_UNKNOWN};
@@ -808,7 +808,7 @@ test_res test_multimap_delete_all_verify_rbt(test_arg *arg) {
     for (int i = 0; i < total; i++) {
         test_struct key = create_test_struct(i, "DeleteAllKey", (double)i);
         vector *values;
-        while ((values = multimap_get(&mm, &key)) != NULL && vector_size(*values) > 0) {
+        while ((values = multimap_get(&mm, &key)) != NULL && vector_size(values) > 0) {
             cs_codes result = multimap_delete(&mm, &key);
             if (result != CS_SUCCESS) {
                 free_test_struct(&key);
@@ -849,7 +849,7 @@ test_res test_multimap_large_value_counts(test_arg *arg) {
     }
 
     vector *values = multimap_get(&mm, &key);
-    if (!values || vector_size(*values) != large_count) {
+    if (!values || vector_size(values) != large_count) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Value count mismatch", CS_UNKNOWN};
@@ -916,12 +916,12 @@ test_res test_multimap_stress_time(test_arg *arg) {
         int key = i;
         vector *values = multimap_get(&mm, &key);
 
-        if (values == NULL || vector_size(*values) != 1) {
+        if (values == NULL || vector_size(values) != 1) {
             multimap_free(&mm);
             return (test_res){(char*)__func__, "Get failed during stress test", CS_ELEM};
         }
 
-        int *found = vector_at(*values, 0);
+        int *found = vector_at(values, 0);
         if (found == NULL || *found != i) {
             multimap_free(&mm);
             return (test_res){(char*)__func__, "Get returned wrong value during stress test", CS_ELEM};

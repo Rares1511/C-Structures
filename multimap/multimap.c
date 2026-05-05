@@ -133,7 +133,7 @@ cs_codes multimap_delete(multimap *mm, const void *key) {
     pair *p = (pair *)rbt_find(*(mm->t), &data);
     if (p != NULL) {
         vector *vec = (vector *)pair_second(*p);
-        int size = vector_size(*vec);
+        int size = vector_size(vec);
         if (size == 1) {
             rc = rbt_delete(mm->t, &data);
         } 

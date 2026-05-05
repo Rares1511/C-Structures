@@ -45,7 +45,7 @@ jobs:
     - name: Build and Run Tests with Benchmarks
       run: |
         mkdir -p logs
-        make unittest SEED=1234 memcheck=false modular=false
+        make unittest SEED=1234 memcheck=false modular=true
         echo "BENCHMARK LOGS:"
         cat logs/benchmark.csv
         echo "TEST DEBUG LOGS:"

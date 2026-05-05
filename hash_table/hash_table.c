@@ -62,11 +62,11 @@ cs_codes __hash_table_rehash(hash_table *ht) {
             continue;
         }
 
-        int bucket_size = vector_size(*bucket);
+        int bucket_size = vector_size(bucket);
         int current_size = 0;
         int corresponding_size = 0;
         while (current_size + corresponding_size < bucket_size) {
-            void *el = vector_at(*bucket, current_size);
+            void *el = vector_at(bucket, current_size);
             int new_idx = __hash_table_get_bucket_index(*ht, el);
             if (new_idx == i) {
                 // Current element stays in the same bucket
@@ -90,7 +90,7 @@ cs_codes __hash_table_rehash(hash_table *ht) {
                         return rc;
                     }
                 } 
-                void *last_el = vector_at(*bucket, vector_size(*bucket) - 1);
+                void *last_el = vector_at(bucket, vector_size(bucket) - 1);
                 
                 memcpy(new_bucket->vec + corresponding_size * ht->attr.size, el, ht->attr.size);
                 memcpy(bucket->vec + current_size * ht->attr.size, last_el, ht->attr.size);
@@ -163,7 +163,7 @@ cs_codes hash_table_add_entry(hash_table *ht, const void *el) {
 
     rc = vector_push_back(ht->buckets[idx], el);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
-    if (vector_size(*ht->buckets[idx]) > ht->oversize_threshold && !ht->is_oversized[idx]) {
+    if (vector_size(ht->buckets[idx]) > ht->oversize_threshold && !ht->is_oversized[idx]) {
         ht->oversized_buckets++;
         ht->is_oversized[idx] = 1;
     }
@@ -183,13 +183,13 @@ cs_codes hash_table_remove_entry(hash_table *ht, const void *el) {
     CS_RETURN_IF(ht->buckets[idx] == NULL, CS_ELEM);
 
     vector *bucket = ht->buckets[idx];
-    int bucket_idx = vector_find(*bucket, el);
+    int bucket_idx = vector_find(bucket, el);
     CS_RETURN_IF(bucket_idx == -1, CS_ELEM);
     int rc = vector_erase(bucket, bucket_idx);
     CS_RETURN_IF(rc != CS_SUCCESS, rc);
     ht->size--;
 
-    if (vector_size(*bucket) <= ht->oversize_threshold && ht->is_oversized[idx]) {
+    if (vector_size(bucket) <= ht->oversize_threshold && ht->is_oversized[idx]) {
         ht->oversized_buckets--;
         ht->is_oversized[idx] = 0;
     }
@@ -204,9 +204,9 @@ void* hash_table_get_entry(hash_table ht, const void *el) {
     CS_RETURN_IF(ht.buckets[idx] == NULL, NULL);
 
     vector *bucket = ht.buckets[idx];
-    int bucket_idx = vector_find(*bucket, el);
+    int bucket_idx = vector_find(bucket, el);
     CS_RETURN_IF(bucket_idx == -1, NULL);
-    return vector_at(*bucket, bucket_idx);
+    return vector_at(bucket, bucket_idx);
 }
 
 int hash_table_count(hash_table ht, const void *el) {
@@ -216,7 +216,7 @@ int hash_table_count(hash_table ht, const void *el) {
     CS_RETURN_IF(ht.buckets[idx] == NULL, 0);
 
     vector *bucket = ht.buckets[idx];
-    return vector_count(*bucket, el);
+    return vector_count(bucket, el);
 }
 
 void hash_table_swap(hash_table *ht1, hash_table *ht2) {

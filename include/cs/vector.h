@@ -30,14 +30,14 @@ typedef struct vector {
  * @param[in] vec  The vector to be checked
  * @return 1 if the vector is empty, 0 otherwise
  */
-static inline int vector_empty(vector vec) { return vec.size == 0; };
+static inline int vector_empty(vector *vec) { return vec->size == 0; };
 
 /*!
  * Returns the current size of the vector
  * @param[in] vec  The vector whose size will be returned
  * @return The size of the vector
  */
-static inline int vector_size(vector vec) { return vec.size; };
+static inline int vector_size(vector *vec) { return vec->size; };
 
 /*!
  * Initializes the given variable with the correct vector structure datatype
@@ -103,20 +103,27 @@ cs_codes vector_replace(vector *vec, const void *el, int pos);
 cs_codes vector_reserve(vector *vec, int new_cap);
 
 /*!
+ * Shrinks the vector to fit its size
+ * @param[out] vec  Vector which will be shrunk
+ * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful shrinking
+ */
+cs_codes vector_shrink_to_fit(vector *vec);
+
+/*!
  * Find the element given in the vector
  * @param[in] vec  The vector in which the search will be done
  * @param[in] el   The element searched
  * @return The position of the element, CS_COMP if no compare function has been assigned
  * or CS_ELEM if it's not in the vector
  */
-int vector_find(vector vec, const void *el);
+int vector_find(vector *vec, const void *el);
 
 /*!
  * Returns the reference at the position given
  * @param[in] vec  Vector used to be given the reference
  * @param[in] pos  Position for the reference
  */
-void *vector_at(vector vec, int pos);
+void *vector_at(vector *vec, int pos);
 
 /*!
  * Counts how many times the given element appears in the vector
@@ -125,7 +132,7 @@ void *vector_at(vector vec, int pos);
  * @return The number of times the element appears in the vector, CS_COMP if no compare function
  * has been assigned
  */
-int vector_count(vector vec, const void *el);
+int vector_count(vector *vec, const void *el);
 
 /*!
  * Sets the new attributes for the vector

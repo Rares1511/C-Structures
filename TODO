@@ -1,20 +1,20 @@
 Sequence Containers (Arrays): 
-    - Vector ✔ (Implemented + Unittest)
-    - Deque ✔ (Implemented + Unittest)
-    - List ✔ (Implemented + Unittest)
-    - Forward_list ✔ (Implemented + Unittest)
+    - Vector ✔ (Implemented + Unittest + Benchmark)
+    - Deque ✔ (Implemented + Unittest + Benchmark)
+    - List ✔ (Implemented + Unittest + Benchmark)
+    - Forward_list ✔ (Implemented + Unittest + Benchmark)
 
 Associative Containers (RBT):
-    - Set ✔ (Implemented + Unittest)
-    - Map ✔ (Implemented + Unittest)
-    - Multiset ✔ (Implemented + Unittest)
-    - Multimap ✔ (Implemented)
+    - Set ✔ (Implemented + Unittest + Benchmark)
+    - Map ✔ (Implemented + Unittest + Benchmark)
+    - Multiset ✔ (Implemented + Unittest + Benchmark)
+    - Multimap ✔ (Implemented + Unittest + Benchmark)
 
 Unordered associative containers (Hash Table):
-    - Unordered Set ✔ (Implemented + Unittest)
-    - Unordered Map ✔ (Implemented + Unittest)
-    - Unordered Multiset ✔ (Implemented + Unittest)
-    - Unordered Multimap ✔ (Implemented + Unittest)
+    - Unordered Set ✔ (Implemented + Unittest + Benchmark)
+    - Unordered Map ✔ (Implemented + Unittest + Benchmark)
+    - Unordered Multiset ✔ (Implemented + Unittest + Benchmark)
+    - Unordered Multimap ✔ (Implemented + Unittest + Benchmark)
 
 Container Adapters:
     - Stack ✔ (Implemented + Unittest)
@@ -27,7 +27,8 @@ Container Adapters:
 
 Extra Modules:
     - Pair ✔ (Implemented + Unittest)
-    - Cargs ✔ (Implemented)
+    - Cargs ✔ (Implemented + Unittest)
 
-Finish benchmark tests for unordered shiet and then maybe add for priority queue and the other wierd stuff
+add tests for priority queue and the other wierd stuff
+think about changing them from using vector or deque to be their own data
 Change all error codes to just CS_ERROR - in future maybe change them to specialized error codes when having all code

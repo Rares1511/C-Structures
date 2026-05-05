@@ -17,7 +17,7 @@
 
 #define VEC_SHRINK(vec) \
     do { \
-        if ((vec)->v_attr.shrink_factor > 1 && (vec)->size < (vec)->cap / (vec)->v_attr.shrink_factor && (vec)->cap > (vec)->v_attr.min_cap) { \
+        if ((vec)->v_attr.shrink_factor > 1 && (vec)->size < (vec)->cap / ((vec)->v_attr.shrink_factor * 2) && (vec)->cap > (vec)->v_attr.min_cap) { \
             int new_cap = (vec)->cap / 2; \
             if (new_cap < (vec)->v_attr.min_cap) new_cap = (vec)->v_attr.min_cap; \
             void *__new_vec = realloc((vec)->vec, new_cap * (vec)->attr.size); \
@@ -168,19 +168,19 @@ cs_codes vector_pop_back(vector *vec) {
     return CS_SUCCESS;
 }
 
-void *vector_at(vector vec, int pos) {
-    CS_RETURN_IF(vec.header.magic != CS_VECTOR_MAGIC, NULL);
+void *vector_at(vector *vec, int pos) {
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, NULL);
     CS_RETURN_IF(pos >= vector_size(vec) || pos < 0 || vector_empty(vec), NULL);
-    return vec.vec + vec.attr.size * pos;
+    return vec->vec + vec->attr.size * pos;
 }
 
-int vector_count(vector vec, const void *el) {
+int vector_count(vector *vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    CS_RETURN_IF(vec.header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
-    int count = 0, size = vec.size;
-    int elem_size = vec.attr.size;
-    comparer comp = vec.attr.comp;
-    void *base = vec.vec;
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
+    int count = 0, size = vec->size;
+    int elem_size = vec->attr.size;
+    comparer comp = vec->attr.comp;
+    void *base = vec->vec;
     if (comp) {
         for (int i = 0; i < size; i++) {
             if (comp(base + i * elem_size, el) == 0)
@@ -197,8 +197,8 @@ int vector_count(vector vec, const void *el) {
 
 cs_codes vector_replace(vector *vec, const void *el, int pos) {
     CS_RETURN_IF(el == NULL || vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
-    CS_RETURN_IF(vector_empty(*vec), CS_EMPTY);
-    int size = vector_size(*vec);
+    CS_RETURN_IF(vector_empty(vec), CS_EMPTY);
+    int size = vector_size(vec);
     CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
     if (vec->attr.fr)
         vec->attr.fr(vec->vec + vec->attr.size * pos);
@@ -227,12 +227,32 @@ cs_codes vector_reserve(vector *vec, int new_cap) {
     return CS_SUCCESS;
 }
 
-int vector_find(vector vec, const void *el) {
+cs_codes vector_shrink_to_fit(vector *vec) {
+    CS_RETURN_IF(vec == NULL, CS_NULL);
+    CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
+    int size = vec->size;
+    if (size >= vec->cap) {
+        return CS_SUCCESS; // No need to shrink
+    }
+
+    int old_cap = vec->cap;
+    vec->cap = size > 0 ? size : 1; // Avoid shrinking to zero capacity
+    void *new_vec = realloc(vec->vec, vec->cap * vec->attr.size);
+    if (new_vec == NULL) {
+        vec->cap = old_cap; // Revert to old capacity on failure
+        return CS_MEM;
+    }
+    vec->vec = new_vec;
+    return CS_SUCCESS;
+}
+
+int vector_find(vector *vec, const void *el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
-    int size = vec.size;
-    int elem_size = vec.attr.size;
-    comparer comp = vec.attr.comp;
-    void *base = vec.vec;
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
+    int size = vec->size;
+    int elem_size = vec->attr.size;
+    comparer comp = vec->attr.comp;
+    void *base = vec->vec;
     if (comp) {
         for (int i = 0; i < size; i++) {
             if (comp(base + i * elem_size, el) == 0)
@@ -271,7 +291,7 @@ void vector_swap(vector *v1, vector *v2) {
 
 void vector_sort(vector *vec) {
     CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(*vec);
+    int size = vector_size(vec);
     if (vec->attr.comp == NULL) {
         vector_qsort(vec->vec, 0, size - 1, vec->attr.size);
     }
@@ -282,7 +302,7 @@ void vector_sort(vector *vec) {
 
 void vector_clear(vector *vec) {
     CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(*vec);
+    int size = vector_size(vec);
     if (vec->attr.fr) {
         for (int i = 0; i < size; i++)
             vec->attr.fr(vec->vec + i * vec->attr.size);
@@ -292,10 +312,10 @@ void vector_clear(vector *vec) {
 
 void vector_print(FILE *stream, const void *v_vec) {
     CS_RETURN_IF(stream == NULL || v_vec == NULL);
-    const vector *vec = (const vector *)v_vec;
+    vector *vec = (vector *)v_vec;
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC);
     CS_RETURN_IF(vec->attr.print == NULL);
-    int size = vector_size(*vec);
+    int size = vector_size(vec);
     for (int i = 0; i < size; i++) {
         vec->attr.print(stream, vec->vec + i * vec->attr.size);
     }
@@ -305,7 +325,7 @@ void vector_free(void *v_vec) {
     CS_RETURN_IF(v_vec == NULL);
     vector *vec = (vector *)v_vec;
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(*vec);
+    int size = vector_size(vec);
     if (vec->attr.fr) {
         for (int i = 0; i < size; i++) {
             vec->attr.fr(vec->vec + i * vec->attr.size);

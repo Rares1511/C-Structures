@@ -17,9 +17,9 @@ test_res test_vector_init(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized vector with element size: %zu\n", (size_t)attr.size);
     if (rc != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", rc};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Vector initialized successfully\n");
-    if (vector_size(vec) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    if (vector_size(&vec) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Initial size is 0 as expected\n");
-    if (!vector_empty(vec)) return (test_res){(char*)__func__, "Vector not empty after init", CS_UNKNOWN};
+    if (!vector_empty(&vec)) return (test_res){(char*)__func__, "Vector not empty after init", CS_UNKNOWN};
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Vector is empty after init as expected\n");
 
     vector_free(&vec);
@@ -44,7 +44,7 @@ test_res test_vector_push_back_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Push back returned error", CS_MEM};
     }
 
-    test_struct *back = (test_struct*)vector_at(vec, 0);
+    test_struct *back = (test_struct*)vector_at(&vec, 0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Accessed back element %p with id: %d\n", back, back ? back->id : -1);
     if (!back || back->id != 42 || strcmp(back->name, "TestItem42") != 0) {
         free_test_struct(&ts);
@@ -76,13 +76,13 @@ test_res test_vector_push_back_multiple(test_arg *arg) {
     }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Finished pushing back %d elements\n", total);
-    if (vector_size(vec) != total) {
+    if (vector_size(&vec) != total) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Size mismatch after push back", CS_UNKNOWN};
     }
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size after push back is correct: %d\n", vector_size(vec));
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size after push back is correct: %d\n", vector_size(&vec));
 
-    test_struct *last = (test_struct*)vector_at(vec, total - 1);
+    test_struct *last = (test_struct*)vector_at(&vec, total - 1);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Accessed last element %p with id: %d\n", last, last ? last->id : -1);
     if (!last || last->id != total - 1) {
         vector_free(&vec);
@@ -109,7 +109,7 @@ test_res test_vector_push_back_growth(test_arg *arg) {
 
     // Verify all elements are accessible and have correct data
     for (int i = 0; i < total; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Data corruption after growth", CS_ELEM};
@@ -148,8 +148,8 @@ test_res test_vector_insert_at_front(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert at front failed", CS_MEM};
     }
 
-    test_struct *at0 = (test_struct*)vector_at(vec, 0);
-    if (!at0 || at0->id != 0 || vector_size(vec) != 6) {
+    test_struct *at0 = (test_struct*)vector_at(&vec, 0);
+    if (!at0 || at0->id != 0 || vector_size(&vec) != 6) {
         free_test_struct(&ts0);
         vector_free(&vec);
         return (test_res){(char*)__func__, "Insert at front value mismatch", CS_POS};
@@ -180,15 +180,15 @@ test_res test_vector_insert_at_middle(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert at middle failed", CS_MEM};
     }
 
-    test_struct *at5 = (test_struct*)vector_at(vec, 5);
-    if (!at5 || at5->id != 99 || vector_size(vec) != 11) {
+    test_struct *at5 = (test_struct*)vector_at(&vec, 5);
+    if (!at5 || at5->id != 99 || vector_size(&vec) != 11) {
         free_test_struct(&ts99);
         vector_free(&vec);
         return (test_res){(char*)__func__, "Insert at middle value mismatch", CS_POS};
     }
 
     // Verify elements shifted correctly
-    test_struct *at6 = (test_struct*)vector_at(vec, 6);
+    test_struct *at6 = (test_struct*)vector_at(&vec, 6);
     if (!at6 || at6->id != 5) {
         free_test_struct(&ts99);
         vector_free(&vec);
@@ -220,8 +220,8 @@ test_res test_vector_insert_at_back(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert at back failed", CS_MEM};
     }
 
-    test_struct *at5 = (test_struct*)vector_at(vec, 5);
-    if (!at5 || at5->id != 99 || vector_size(vec) != 6) {
+    test_struct *at5 = (test_struct*)vector_at(&vec, 5);
+    if (!at5 || at5->id != 99 || vector_size(&vec) != 6) {
         free_test_struct(&ts99);
         vector_free(&vec);
         return (test_res){(char*)__func__, "Insert at back value mismatch", CS_POS};
@@ -251,7 +251,7 @@ test_res test_vector_pop_back_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Pop back failed", CS_EMPTY};
     }
 
-    if (!vector_empty(vec)) {
+    if (!vector_empty(&vec)) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Vector not empty after pop", CS_UNKNOWN};
     }
@@ -273,7 +273,7 @@ test_res test_vector_pop_back_multiple(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping all 10 elements in reverse order\n");
 
     for (int i = 9; i >= 0; i--) {
-        test_struct *last = (test_struct*)vector_at(vec, i);
+        test_struct *last = (test_struct*)vector_at(&vec, i);
         if (!last || last->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Last value mismatch before pop", CS_ELEM};
@@ -281,7 +281,7 @@ test_res test_vector_pop_back_multiple(test_arg *arg) {
         vector_pop_back(&vec);
     }
 
-    if (!vector_empty(vec)) {
+    if (!vector_empty(&vec)) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Vector not empty after all pops", CS_UNKNOWN};
     }
@@ -328,8 +328,8 @@ test_res test_vector_erase_front(test_arg *arg) {
         return (test_res){(char*)__func__, "Erase front failed", CS_POS};
     }
 
-    test_struct *front = (test_struct*)vector_at(vec, 0);
-    if (vector_size(vec) != 4 || !front || front->id != 1) {
+    test_struct *front = (test_struct*)vector_at(&vec, 0);
+    if (vector_size(&vec) != 4 || !front || front->id != 1) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Erase front value mismatch", CS_ELEM};
     }
@@ -356,8 +356,8 @@ test_res test_vector_erase_middle(test_arg *arg) {
         return (test_res){(char*)__func__, "Erase middle failed", CS_POS};
     }
 
-    test_struct *at2 = (test_struct*)vector_at(vec, 2);
-    if (vector_size(vec) != 4 || !at2 || at2->id != 3) {
+    test_struct *at2 = (test_struct*)vector_at(&vec, 2);
+    if (vector_size(&vec) != 4 || !at2 || at2->id != 3) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Erase middle shift failed", CS_ELEM};
     }
@@ -384,8 +384,8 @@ test_res test_vector_erase_back(test_arg *arg) {
         return (test_res){(char*)__func__, "Erase back failed", CS_POS};
     }
 
-    test_struct *last = (test_struct*)vector_at(vec, 3);
-    if (vector_size(vec) != 4 || !last || last->id != 3) {
+    test_struct *last = (test_struct*)vector_at(&vec, 3);
+    if (vector_size(&vec) != 4 || !last || last->id != 3) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Erase back value mismatch", CS_ELEM};
     }
@@ -415,7 +415,7 @@ test_res test_vector_replace_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Replace failed", CS_POS};
     }
 
-    test_struct *at0 = (test_struct*)vector_at(vec, 0);
+    test_struct *at0 = (test_struct*)vector_at(&vec, 0);
     if (!at0 || at0->id != 99 || strcmp(at0->name, "Replaced") != 0) {
         free_test_struct(&ts_new);
         vector_free(&vec);
@@ -447,7 +447,7 @@ test_res test_vector_replace_middle(test_arg *arg) {
         return (test_res){(char*)__func__, "Replace middle failed", CS_POS};
     }
 
-    test_struct *at2 = (test_struct*)vector_at(vec, 2);
+    test_struct *at2 = (test_struct*)vector_at(&vec, 2);
     if (!at2 || at2->id != 99) {
         free_test_struct(&ts_new);
         vector_free(&vec);
@@ -455,8 +455,8 @@ test_res test_vector_replace_middle(test_arg *arg) {
     }
 
     // Verify other elements unchanged
-    test_struct *at1 = (test_struct*)vector_at(vec, 1);
-    test_struct *at3 = (test_struct*)vector_at(vec, 3);
+    test_struct *at1 = (test_struct*)vector_at(&vec, 1);
+    test_struct *at3 = (test_struct*)vector_at(&vec, 3);
     if (!at1 || at1->id != 1 || !at3 || at3->id != 3) {
         free_test_struct(&ts_new);
         vector_free(&vec);
@@ -507,7 +507,7 @@ test_res test_vector_at_valid(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing vector_at for all 100 positions\n");
 
     for (int i = 0; i < 100; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "At value mismatch", CS_ELEM};
@@ -530,17 +530,17 @@ test_res test_vector_at_out_of_bounds(test_arg *arg) {
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing out of bounds access at positions 10, -1, 1000\n");
 
-    if (vector_at(vec, 10) != NULL) {
+    if (vector_at(&vec, 10) != NULL) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "At index 10 should return NULL", CS_POS};
     }
 
-    if (vector_at(vec, -1) != NULL) {
+    if (vector_at(&vec, -1) != NULL) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "At index -1 should return NULL", CS_POS};
     }
 
-    if (vector_at(vec, 1000) != NULL) {
+    if (vector_at(&vec, 1000) != NULL) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "At index 1000 should return NULL", CS_POS};
     }
@@ -565,7 +565,7 @@ test_res test_vector_find_existing(test_arg *arg) {
 
     test_struct search = create_test_struct(5, "FindTest", 5.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Searching for element with id 5\n");
-    int pos = vector_find(vec, &search);
+    int pos = vector_find(&vec, &search);
     free_test_struct(&search);
 
     if (pos != 5) {
@@ -590,7 +590,7 @@ test_res test_vector_find_not_existing(test_arg *arg) {
 
     test_struct search = create_test_struct(99, "NotFound", 99.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Searching for non-existing element with id 99\n");
-    int pos = vector_find(vec, &search);
+    int pos = vector_find(&vec, &search);
     free_test_struct(&search);
 
     if (pos != CS_ELEM) {
@@ -616,7 +616,7 @@ test_res test_vector_find_first_occurrence(test_arg *arg) {
 
     test_struct search = create_test_struct(42, "Duplicate", 42.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Finding first occurrence of duplicate element (id 42)\n");
-    int pos = vector_find(vec, &search);
+    int pos = vector_find(&vec, &search);
     free_test_struct(&search);
 
     if (pos != 0) {
@@ -644,7 +644,7 @@ test_res test_vector_count_none(test_arg *arg) {
 
     test_struct search = create_test_struct(99, "NotFound", 99.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting non-existing element (id 99)\n");
-    int count = vector_count(vec, &search);
+    int count = vector_count(&vec, &search);
     free_test_struct(&search);
 
     if (count != 0) {
@@ -669,7 +669,7 @@ test_res test_vector_count_single(test_arg *arg) {
 
     test_struct search = create_test_struct(5, "CountTest", 5.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting single occurrence (id 5)\n");
-    int count = vector_count(vec, &search);
+    int count = vector_count(&vec, &search);
     free_test_struct(&search);
 
     if (count != 1) {
@@ -699,7 +699,7 @@ test_res test_vector_count_multiple(test_arg *arg) {
 
     test_struct search = create_test_struct(42, "Duplicate", 42.0);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Counting 5 duplicates (id 42)\n");
-    int count = vector_count(vec, &search);
+    int count = vector_count(&vec, &search);
     free_test_struct(&search);
 
     if (count != 5) {
@@ -721,7 +721,7 @@ test_res test_vector_empty_initial(test_arg *arg) {
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking if newly initialized vector is empty\n");
 
-    if (!vector_empty(vec)) {
+    if (!vector_empty(&vec)) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "New vector should be empty", CS_UNKNOWN};
     }
@@ -739,14 +739,14 @@ test_res test_vector_empty_after_ops(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing empty state after push/pop operations\n");
 
     vector_push_back(&vec, &ts);
-    if (vector_empty(vec)) {
+    if (vector_empty(&vec)) {
         free_test_struct(&ts);
         vector_free(&vec);
         return (test_res){(char*)__func__, "Vector should not be empty after push", CS_UNKNOWN};
     }
 
     vector_pop_back(&vec);
-    if (!vector_empty(vec)) {
+    if (!vector_empty(&vec)) {
         free_test_struct(&ts);
         vector_free(&vec);
         return (test_res){(char*)__func__, "Vector should be empty after pop", CS_UNKNOWN};
@@ -767,7 +767,7 @@ test_res test_vector_size_initial(test_arg *arg) {
     }
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking initial size is 0\n");
 
-    if (vector_size(vec) != 0) {
+    if (vector_size(&vec) != 0) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "New vector size should be 0", CS_UNKNOWN};
     }
@@ -786,7 +786,7 @@ test_res test_vector_size_after_ops(test_arg *arg) {
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "SizeOpsTest", (double)i);
         vector_push_back(&vec, &ts);
-        if (vector_size(vec) != i + 1) {
+        if (vector_size(&vec) != i + 1) {
             free_test_struct(&ts);
             vector_free(&vec);
             return (test_res){(char*)__func__, "Size mismatch during push", CS_UNKNOWN};
@@ -796,7 +796,7 @@ test_res test_vector_size_after_ops(test_arg *arg) {
 
     for (int i = 99; i >= 0; i--) {
         vector_pop_back(&vec);
-        if (vector_size(vec) != i) {
+        if (vector_size(&vec) != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Size mismatch during pop", CS_UNKNOWN};
         }
@@ -832,16 +832,16 @@ test_res test_vector_swap(test_arg *arg) {
 
     vector_swap(&vec1, &vec2);
 
-    test_struct *first1 = (test_struct*)vector_at(vec1, 0);
-    test_struct *last1 = (test_struct*)vector_at(vec1, 4);
+    test_struct *first1 = (test_struct*)vector_at(&vec1, 0);
+    test_struct *last1 = (test_struct*)vector_at(&vec1, 4);
     if (!first1 || first1->id != 10 || !last1 || last1->id != 14) {
         vector_free(&vec1);
         vector_free(&vec2);
         return (test_res){(char*)__func__, "Swap vec1 content mismatch", CS_ELEM};
     }
 
-    test_struct *first2 = (test_struct*)vector_at(vec2, 0);
-    test_struct *last2 = (test_struct*)vector_at(vec2, 4);
+    test_struct *first2 = (test_struct*)vector_at(&vec2, 0);
+    test_struct *last2 = (test_struct*)vector_at(&vec2, 4);
     if (!first2 || first2->id != 0 || !last2 || last2->id != 4) {
         vector_free(&vec1);
         vector_free(&vec2);
@@ -871,13 +871,13 @@ test_res test_vector_swap_empty(test_arg *arg) {
 
     vector_swap(&vec1, &vec2);
 
-    if (!vector_empty(vec1)) {
+    if (!vector_empty(&vec1)) {
         vector_free(&vec1);
         vector_free(&vec2);
         return (test_res){(char*)__func__, "vec1 should be empty after swap", CS_UNKNOWN};
     }
 
-    if (vector_size(vec2) != 5) {
+    if (vector_size(&vec2) != 5) {
         vector_free(&vec1);
         vector_free(&vec2);
         return (test_res){(char*)__func__, "vec2 should have 5 elements", CS_UNKNOWN};
@@ -905,7 +905,7 @@ test_res test_vector_clear(test_arg *arg) {
 
     vector_clear(&vec);
 
-    if (vector_size(vec) != 0 || !vector_empty(vec)) {
+    if (vector_size(&vec) != 0 || !vector_empty(&vec)) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Clear did not reset vector", CS_UNKNOWN};
     }
@@ -935,8 +935,8 @@ test_res test_vector_clear_reuse(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    test_struct *first = (test_struct*)vector_at(vec, 0);
-    if (vector_size(vec) != 50 || !first || first->id != 100) {
+    test_struct *first = (test_struct*)vector_at(&vec, 0);
+    if (vector_size(&vec) != 50 || !first || first->id != 100) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Reuse after clear failed", CS_ELEM};
     }
@@ -967,7 +967,7 @@ test_res test_vector_sort_ascending(test_arg *arg) {
     // Should be sorted by id: 10, 20, 30, 40, 50
     int expected[] = {10, 20, 30, 40, 50};
     for (int i = 0; i < 5; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != expected[i]) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Sort order incorrect", CS_ELEM};
@@ -994,7 +994,7 @@ test_res test_vector_sort_already_sorted(test_arg *arg) {
     vector_sort(&vec);
 
     for (int i = 0; i < 10; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Sort corrupted already sorted data", CS_ELEM};
@@ -1021,7 +1021,7 @@ test_res test_vector_sort_reverse(test_arg *arg) {
     vector_sort(&vec);
 
     for (int i = 0; i < 10; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Sort from reverse failed", CS_ELEM};
@@ -1051,7 +1051,7 @@ test_res test_vector_sort_by_score(test_arg *arg) {
     // Should be sorted by score: 10.1, 20.2, 30.3, 40.4, 50.5
     double expected[] = {10.1, 20.2, 30.3, 40.4, 50.5};
     for (int i = 0; i < 5; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->score != expected[i]) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Sort by score order incorrect", CS_ELEM};
@@ -1085,7 +1085,7 @@ test_res test_vector_set_attr(test_arg *arg) {
     vector_sort(&vec);
 
     // Should be sorted by score now
-    test_struct *first = (test_struct*)vector_at(vec, 0);
+    test_struct *first = (test_struct*)vector_at(&vec, 0);
     if (!first || first->score != 10.0) {
         free_test_struct(&ts1);
         free_test_struct(&ts2);
@@ -1118,7 +1118,7 @@ test_res test_vector_set_comp(test_arg *arg) {
     vector_sort(&vec);
 
     // First element should have lowest score (6.0)
-    test_struct *first = (test_struct*)vector_at(vec, 0);
+    test_struct *first = (test_struct*)vector_at(&vec, 0);
     if (!first || first->score != 6.0) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Set comp did not change sort order", CS_ELEM};
@@ -1147,7 +1147,7 @@ test_res test_vector_nested_data_integrity(test_arg *arg) {
 
     // Verify all nested structures are intact
     for (int i = 0; i < 50; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Element is NULL", CS_ELEM};
@@ -1204,7 +1204,7 @@ test_res test_vector_deep_copy_verification(test_arg *arg) {
     original.name = strdup("Modified");
     original.address->zip_code = 99999;
 
-    test_struct *stored = (test_struct*)vector_at(vec, 0);
+    test_struct *stored = (test_struct*)vector_at(&vec, 0);
     if (!stored || stored->id != 42) {
         free_test_struct(&original);
         vector_free(&vec);
@@ -1247,7 +1247,7 @@ test_res test_vector_large_dataset(test_arg *arg) {
 
     // Random access pattern
     for (int i = 0; i < total; i += 7) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Large random access failed", CS_ELEM};
@@ -1281,7 +1281,7 @@ test_res test_vector_interleaved_ops(test_arg *arg) {
 
     // Verify size is correct
     int expected_size = 100 - 17; // 50 pairs - 17 pops (i=0,3,6,...,48)
-    if (vector_size(vec) != expected_size) {
+    if (vector_size(&vec) != expected_size) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Interleaved ops size mismatch", CS_UNKNOWN};
     }
@@ -1304,11 +1304,11 @@ test_res test_vector_erase_all(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Erasing all 50 elements from front\n");
 
     // Erase from front until empty
-    while (!vector_empty(vec)) {
+    while (!vector_empty(&vec)) {
         vector_erase(&vec, 0);
     }
 
-    if (!vector_empty(vec)) {
+    if (!vector_empty(&vec)) {
         vector_free(&vec);
         return (test_res){(char*)__func__, "Vector not empty after erasing all", CS_UNKNOWN};
     }
@@ -1339,7 +1339,7 @@ test_res test_vector_replace_all(test_arg *arg) {
 
     // Verify all replaced
     for (int i = 0; i < 20; i++) {
-        test_struct *val = (test_struct*)vector_at(vec, i);
+        test_struct *val = (test_struct*)vector_at(&vec, i);
         if (!val || val->id != 100 + i) {
             vector_free(&vec);
             return (test_res){(char*)__func__, "Replace all failed", CS_ELEM};
@@ -1363,7 +1363,7 @@ test_res test_vector_stress_time(test_arg *arg) {
     struct timeval start, end;
     double elapsed;
 
-    if (vector_init(&v, get_int_attr(), (vector_attr_t){0, 0}) != CS_SUCCESS) {
+    if (vector_init(&v, get_int_attr(), (vector_attr_t){0, 1}) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Vector initialization failed", CS_UNKNOWN};
     }
     int total = __VECTOR_STRESS_TEST_SIZE;
@@ -1387,7 +1387,7 @@ test_res test_vector_stress_time(test_arg *arg) {
     /* FIND timing */
     gettimeofday(&start, NULL);
     int search_val = total - 1;
-    vector_find(v, &search_val);
+    vector_find(&v, &search_val);
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "find", elapsed);
