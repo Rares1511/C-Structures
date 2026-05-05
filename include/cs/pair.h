@@ -76,6 +76,12 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr);
  */
 static inline cs_codes pair_set(pair* p, const void* first, const void* second) {
     CS_RETURN_IF(p == NULL || (first == NULL && second == NULL), CS_ELEM);
+    if (__builtin_expect(p->data == NULL, 0)) {
+        p->data = malloc(p->first_attr->size + p->second_attr->size);
+        if (!p->data) {
+            return CS_MEM;
+        }
+    }
     if (first) {
         if (p->has_first && p->first_attr->fr) {
             p->first_attr->fr(pair_first(*p));
@@ -104,6 +110,7 @@ static inline cs_codes pair_set(pair* p, const void* first, const void* second) 
 /*!
  * Prints the contents of the pair to the specified output streams.
  * @param p The pair structure to be printed.
+ * @param stream The output stream to which the pair's contents will be printed.
  */
 void pair_print(FILE *stream, const void *v_p);
 

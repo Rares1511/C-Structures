@@ -9,10 +9,7 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr) {
     }
     p->first_attr = first_attr;
     p->second_attr = second_attr;
-    p->data = malloc(first_attr->size + second_attr->size);
-    if (!p->data) {
-        return CS_MEM;
-    }
+    p->data = NULL;
     p->has_first = 0;
     p->has_second = 0;
     return CS_SUCCESS;
