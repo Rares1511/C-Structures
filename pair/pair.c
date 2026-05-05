@@ -1,8 +1,5 @@
 #include <cs/pair.h>
 
-#include <string.h>
-#include <stdlib.h>
-
 cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr) {
     if (p == NULL || first_attr == NULL || second_attr == NULL) {
         return CS_ELEM;

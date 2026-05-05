@@ -3,6 +3,9 @@
 
 #include <cs/universal.h>
 
+#include <string.h>
+#include <stdlib.h>
+
 typedef struct pair {
     void *data;
     char has_first;
@@ -71,7 +74,7 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr);
  * @param second Pointer to the new value for the second element.
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes pair_set(pair* p, const void* first, const void* second) {
+static inline cs_codes pair_set(pair* p, const void* first, const void* second) {
     CS_RETURN_IF(p == NULL || (first == NULL && second == NULL), CS_ELEM);
     if (first) {
         if (p->has_first && p->first_attr->fr) {
