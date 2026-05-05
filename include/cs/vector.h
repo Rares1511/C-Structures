@@ -153,24 +153,44 @@ cs_codes vector_shrink_to_fit(vector *vec);
  * or CS_ELEM if it's not in the vector
  */
 static inline int vector_find(vector *vec, const void *el) {
-    CS_RETURN_IF(el == NULL, CS_NULL);
-    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
-    int size = vec->size;
-    int elem_size = vec->attr.size;
-    comparer comp = vec->attr.comp;
-    void *base = vec->vec;
-    if (comp) {
+    CS_RETURN_IF(el == NULL || vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
+    
+    const int size = vec->size;
+    const size_t elem_size = vec->attr.size;
+    const void *base = vec->vec;
+
+    // Path A: User-provided comparison (Slowest)
+    if (vec->attr.comp) {
+        comparer comp = vec->attr.comp;
         for (int i = 0; i < size; i++) {
-            if (comp(base + i * elem_size, el) == 0)
-                return i;
+            if (comp((char*)base + i * elem_size, el) == 0) return i;
         }
         return CS_ELEM;
-    } 
-    
-    for (int i = 0; i < size; i++) {
-        if (memcmp(base + i * elem_size, el, elem_size) == 0)
-            return i;
     }
+
+    // Path B: Fast Path for 4-byte types (int, float, etc.)
+    if (elem_size == sizeof(int)) {
+        const int target = *(const int *)el;
+        const int *data = (const int *)base;
+        for (int i = 0; i < size; i++) {
+            if (data[i] == target) return i; // This loop will be vectorized by the compiler!
+        }
+    } 
+    // Path C: Fast Path for 8-byte types (pointers, long, double)
+    else if (elem_size == sizeof(long)) {
+        const long target = *(const long *)el;
+        const long *data = (const long *)base;
+        for (int i = 0; i < size; i++) {
+            if (data[i] == target) return i;
+        }
+    }
+    // Path D: Generic fallback (Slowest)
+    else {
+        for (int i = 0; i < size; i++) {
+            if (memcmp((char*)base + i * elem_size, el, elem_size) == 0) return i;
+        }
+    }
+
     return CS_ELEM;
 }
 
@@ -180,9 +200,7 @@ static inline int vector_find(vector *vec, const void *el) {
  * @param[in] pos  Position for the reference
  */
 static inline void *vector_at(vector *vec, int pos) {
-    if (__builtin_expect(vec == NULL || pos < 0 || pos >= vec->size, 0)) {
-        return NULL;
-    }
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC || pos < 0 || pos >= vec->size, NULL);
     return (char *)vec->vec + ((size_t)pos * vec->attr.size);
 }
 

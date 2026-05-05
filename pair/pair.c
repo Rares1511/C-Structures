@@ -12,12 +12,14 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr) {
     p->data = NULL;
     p->has_first = 0;
     p->has_second = 0;
+    p->header.magic = CS_PAIR_MAGIC;
     return CS_SUCCESS;
 }
 
 void pair_print(FILE *stream, const void *v_p) {
     CS_RETURN_IF(NULL == v_p || NULL == stream);
     pair p = *(pair*)v_p;
+    CS_RETURN_IF(p.header.magic != CS_PAIR_MAGIC);
     if (p.first_attr->print) {
         fprintf(stream, "Key: ");
         p.first_attr->print(stream, pair_first(p));
@@ -31,9 +33,7 @@ void pair_print(FILE *stream, const void *v_p) {
 void pair_free(void *v_p) {
     CS_RETURN_IF(NULL == v_p);
     pair* p = (pair*)v_p;
-    if (p == NULL) {
-        return;
-    }
+    CS_RETURN_IF(p->header.magic != CS_PAIR_MAGIC);
     if (p->has_first) {
         if (p->first_attr->fr) {
             p->first_attr->fr(pair_first(p));
@@ -44,5 +44,6 @@ void pair_free(void *v_p) {
             p->second_attr->fr(pair_second(p));
         }
     }
+    p->header.magic = 0; // Invalidate the structure
     free(p->data);
 }

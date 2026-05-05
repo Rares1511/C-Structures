@@ -6,7 +6,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define CS_PAIR_MAGIC 0x50414952 /* 'PAIR' in ASCII */
+
 typedef struct pair {
+    cs_header_t header;
     void *data;
     char has_first;
     char has_second;
@@ -15,22 +18,22 @@ typedef struct pair {
 } pair;
 
 static inline void *pair_first_value(pair p) {
-    CS_RETURN_IF(!p.has_first, NULL);
+    CS_RETURN_IF(p.header.magic != CS_PAIR_MAGIC || !p.has_first, NULL);
     return p.data;
 }
 
 static inline void *pair_first_ptr(const pair *p) {
-    CS_RETURN_IF(p == NULL || !p->has_first, NULL);
+    CS_RETURN_IF(p == NULL || p->header.magic != CS_PAIR_MAGIC || !p->has_first, NULL);
     return p->data;
 }
 
 static inline void *pair_second_value(pair p) {
-    CS_RETURN_IF(!p.has_second, NULL);
+    CS_RETURN_IF(p.header.magic != CS_PAIR_MAGIC || !p.has_second, NULL);
     return (char*)p.data + p.first_attr->size;
 }
 
 static inline void *pair_second_ptr(const pair *p) {
-    CS_RETURN_IF(p == NULL || !p->has_second, NULL);
+    CS_RETURN_IF(p == NULL || p->header.magic != CS_PAIR_MAGIC || !p->has_second, NULL);
     return ((char*)p->data + p->first_attr->size);
 }
 
@@ -75,7 +78,9 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr);
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
 static inline cs_codes pair_set(pair* p, const void* first, const void* second) {
-    CS_RETURN_IF(p == NULL || (first == NULL && second == NULL), CS_ELEM);
+    CS_RETURN_IF(p == NULL, CS_NULL);
+    CS_RETURN_IF(p->header.magic != CS_PAIR_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(first == NULL && second == NULL, CS_ELEM);
     if (__builtin_expect(p->data == NULL, 0)) {
         p->data = malloc(p->first_attr->size + p->second_attr->size);
         if (!p->data) {
