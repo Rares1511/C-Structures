@@ -135,6 +135,7 @@ typedef struct test_res {
 } test_res;
 
 typedef struct test_arg {
+    void *data_structure; // Pointer to the data structure being tested
     clogger *logger;
     operation_time *op_time; // For benchmarks to report operation times
     int op_time_count;

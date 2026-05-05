@@ -5,8 +5,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Default values for vector attributes
 #define VECTOR_SHRINK_FACTOR 4
 #define VECTOR_INIT_CAPACITY 1024
+
+// Magic number for vector validation
+#define CS_VECTOR_MAGIC 0xB00B1E5
 
 /*!
  * @brief Attributes for the vector structure controllable by the user
@@ -24,6 +28,9 @@ typedef struct vector {
     vector_attr_t v_attr; /*!< attributes of the vector itself */
     elem_attr_t attr;     /*!< attributes of the elements inside the vector */
 } vector;
+
+cs_codes _vector_grow_internal(vector *vec);
+cs_codes _vector_shrink_internal(vector *vec);
 
 /*!
  * Checks if the vector is empty
@@ -66,7 +73,24 @@ cs_codes vector_insert_at(vector *vec, const void *el, int pos);
  * @param[in]  el   The value of the element which will be inserted
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_push_back(vector *vec, const void *el);
+static inline cs_codes vector_push_back(vector *vec, const void *el) {
+    CS_RETURN_IF(vec == NULL || el == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
+    if (__builtin_expect(vec->size == vec->cap, 0)) {
+        cs_codes res = _vector_grow_internal(vec);
+        if (res != CS_SUCCESS) return res;
+    }
+    int elem_size = vec->attr.size;
+    deepcopy copy_func = vec->attr.copy;
+    size_t offset = (size_t) vec->size * elem_size;
+    if (copy_func) {
+        copy_func((char *)vec->vec + offset, el);
+    }
+    else {
+        memcpy((char *)vec->vec + offset, el, elem_size);
+    }
+    vec->size++;
+    return CS_SUCCESS;
+}
 
 /*!
  * Erase the element at the position offered
@@ -82,7 +106,19 @@ cs_codes vector_erase(vector *vec, int pos);
  * @param[out] vec  Vector from which the last element will be deleted
  * @return CS_EMPTY if the vector is empty or CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_pop_back(vector *vec);
+static inline cs_codes vector_pop_back(vector *vec) {
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
+    CS_RETURN_IF(vec->size == 0, CS_EMPTY);
+    freer free_func = vec->attr.fr;
+    if (free_func != NULL) {
+        free_func((char *)vec->vec + vec->attr.size * (vec->size - 1));
+    }
+    vec->size--;
+    if (__builtin_expect(vec->v_attr.shrink_factor > 1 && vec->size < vec->cap / (vec->v_attr.shrink_factor * 2) && vec->cap > vec->v_attr.min_cap, 0)) {
+        _vector_shrink_internal(vec);
+    }
+    return CS_SUCCESS;
+}
 
 /*!
  * Replaces the value at the position offered with the new value given
@@ -116,14 +152,39 @@ cs_codes vector_shrink_to_fit(vector *vec);
  * @return The position of the element, CS_COMP if no compare function has been assigned
  * or CS_ELEM if it's not in the vector
  */
-int vector_find(vector *vec, const void *el);
+static inline int vector_find(vector *vec, const void *el) {
+    CS_RETURN_IF(el == NULL, CS_NULL);
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
+    int size = vec->size;
+    int elem_size = vec->attr.size;
+    comparer comp = vec->attr.comp;
+    void *base = vec->vec;
+    if (comp) {
+        for (int i = 0; i < size; i++) {
+            if (comp(base + i * elem_size, el) == 0)
+                return i;
+        }
+        return CS_ELEM;
+    } 
+    
+    for (int i = 0; i < size; i++) {
+        if (memcmp(base + i * elem_size, el, elem_size) == 0)
+            return i;
+    }
+    return CS_ELEM;
+}
 
 /*!
  * Returns the reference at the position given
  * @param[in] vec  Vector used to be given the reference
  * @param[in] pos  Position for the reference
  */
-void *vector_at(vector *vec, int pos);
+static inline void *vector_at(vector *vec, int pos) {
+    if (__builtin_expect(vec == NULL || pos < 0 || pos >= vec->size, 0)) {
+        return NULL;
+    }
+    return (char *)vec->vec + ((size_t)pos * vec->attr.size);
+}
 
 /*!
  * Counts how many times the given element appears in the vector
@@ -140,7 +201,7 @@ int vector_count(vector *vec, const void *el);
  * @param[in]  attr The new attributes
  */
 static inline void vector_set_attr(vector *vec, elem_attr_t attr) { 
-    CS_RETURN_IF(NULL == vec);
+    CS_RETURN_IF(NULL == vec || vec->header.magic != CS_VECTOR_MAGIC);
     vec->attr = attr; 
 }
 
@@ -150,7 +211,7 @@ static inline void vector_set_attr(vector *vec, elem_attr_t attr) {
  * @param[in]  fr  The new free function
  */
 static inline void vector_set_free(vector *vec, freer fr) { 
-    CS_RETURN_IF(NULL == vec);
+    CS_RETURN_IF(NULL == vec || vec->header.magic != CS_VECTOR_MAGIC);
     vec->attr.fr = fr; 
 }
 
@@ -160,7 +221,7 @@ static inline void vector_set_free(vector *vec, freer fr) {
  * @param[in]  print  The new print function
  */
 static inline void vector_set_print(vector *vec, printer print) { 
-    CS_RETURN_IF(NULL == vec);
+    CS_RETURN_IF(NULL == vec || vec->header.magic != CS_VECTOR_MAGIC);
     vec->attr.print = print; 
 }
 
@@ -170,7 +231,7 @@ static inline void vector_set_print(vector *vec, printer print) {
  * @param[in]  cp  The new copy function
  */
 static inline void vector_set_copy(vector *vec, deepcopy cp) { 
-    CS_RETURN_IF(NULL == vec);
+    CS_RETURN_IF(NULL == vec || vec->header.magic != CS_VECTOR_MAGIC);
     vec->attr.copy = cp; 
 }
 
@@ -180,7 +241,7 @@ static inline void vector_set_copy(vector *vec, deepcopy cp) {
  * @param[in]  comp  The new compare function
  */
 static inline void vector_set_comp(vector *vec, comparer comp) { 
-    CS_RETURN_IF(NULL == vec);
+    CS_RETURN_IF(NULL == vec || vec->header.magic != CS_VECTOR_MAGIC);
     vec->attr.comp = comp; 
 }
 

@@ -12,19 +12,23 @@ typedef struct pair {
 } pair;
 
 static inline void *pair_first_value(pair p) {
-    return p.has_first ? p.data : NULL;
+    CS_RETURN_IF(!p.has_first, NULL);
+    return p.data;
 }
 
 static inline void *pair_first_ptr(const pair *p) {
-    return (p != NULL && p->has_first) ? p->data : NULL;
+    CS_RETURN_IF(p == NULL || !p->has_first, NULL);
+    return p->data;
 }
 
 static inline void *pair_second_value(pair p) {
-    return p.has_second ? ((char*)p.data + p.first_attr->size) : NULL;
+    CS_RETURN_IF(!p.has_second, NULL);
+    return (char*)p.data + p.first_attr->size;
 }
 
 static inline void *pair_second_ptr(const pair *p) {
-    return (p != NULL && p->has_second) ? ((char*)p->data + p->first_attr->size) : NULL;
+    CS_RETURN_IF(p == NULL || !p->has_second, NULL);
+    return ((char*)p->data + p->first_attr->size);
 }
 
 #define pair_first(p) _Generic((p), \
@@ -67,7 +71,32 @@ cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr);
  * @param second Pointer to the new value for the second element.
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes pair_set(pair* p, const void* first, const void* second);
+cs_codes pair_set(pair* p, const void* first, const void* second) {
+    CS_RETURN_IF(p == NULL || (first == NULL && second == NULL), CS_ELEM);
+    if (first) {
+        if (p->has_first && p->first_attr->fr) {
+            p->first_attr->fr(pair_first(*p));
+        }
+        if (p->first_attr->copy) {
+            p->first_attr->copy(p->data, first);
+        } else {
+            memcpy(p->data, first, p->first_attr->size);
+        }
+        p->has_first = 1;
+    }
+    if (second) {
+        if (p->has_second && p->second_attr->fr) {
+            p->second_attr->fr(pair_second(*p));
+        }
+        if (p->second_attr->copy) {
+            p->second_attr->copy((char*)p->data + p->first_attr->size, second);
+        } else {
+            memcpy((char*)p->data + p->first_attr->size, second, p->second_attr->size);
+        }
+        p->has_second = 1;
+    }
+    return CS_SUCCESS;
+}
 
 /*!
  * Prints the contents of the pair to the specified output streams.

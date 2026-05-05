@@ -84,6 +84,28 @@ static module_tests all_modules[] = {
     { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
 };
 
+static int module_data_sizes[] = {
+    sizeof(pair),
+    sizeof(vector),
+    sizeof(deque),
+    sizeof(list),
+    sizeof(forward_list),
+    sizeof(set),
+    sizeof(map),
+    sizeof(multiset),
+    sizeof(multimap),
+    sizeof(unordered_set),
+    sizeof(unordered_map),
+    sizeof(unordered_multiset),
+    sizeof(unordered_multimap),
+    sizeof(stack),
+    sizeof(queue),
+    sizeof(priority_queue),
+    sizeof(flat_set),
+    sizeof(large_number),
+    sizeof(clogger)
+};
+
 int num_modules = sizeof(all_modules) / sizeof(module_tests);
 
 void post_operation_time(test_arg *arg, const char *operation, double c_time) {
@@ -224,6 +246,7 @@ int main(int argc, char **argv) {
     for (int m = 0; m < num_modules; m++) {
         module_tests *mod = &all_modules[m];
         int success = 0, failed = 0;
+        arg.data_structure = malloc(module_data_sizes[m]);
 
         clogger_log(results_logger, CLOGGER_INFO, "----------------------------------------\n");
         clogger_log(results_logger, CLOGGER_INFO, "  MODULE: %s (%d tests)\n", mod->name, mod->size);
@@ -265,6 +288,8 @@ int main(int argc, char **argv) {
                         i + 1, mod->size, buffer);
             }
         }
+
+        free(arg.data_structure);
 
         clogger_log(results_logger, CLOGGER_INFO, "  >> %s: %d passed, %d failed\n\n", mod->name, success, failed);
         total_success += success;
