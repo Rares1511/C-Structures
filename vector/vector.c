@@ -1,6 +1,4 @@
 #include <cs/vector.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define VEC_GROW(vec) \
     do { \
@@ -123,9 +121,6 @@ cs_codes vector_init(vector *v, elem_attr_t attr, vector_attr_t v_attr) {
     CS_RETURN_IF(v_attr.min_cap < 0 || v_attr.min_cap > VECTOR_INIT_CAPACITY, CS_SIZE);
     CS_RETURN_IF(v_attr.shrink_factor < 0 || v_attr.shrink_factor > VECTOR_INIT_CAPACITY, CS_SIZE);
 
-    v->header.magic = CS_VECTOR_MAGIC;
-    v->header.type = CS_VECTOR_TYPE;
-
     if (v_attr.min_cap == 0) {
         v_attr.min_cap = VECTOR_INIT_CAPACITY;
     }
@@ -141,6 +136,8 @@ cs_codes vector_init(vector *v, elem_attr_t attr, vector_attr_t v_attr) {
     v->vec = malloc(v->cap * attr.size);
     CS_RETURN_IF(v->vec == NULL, CS_MEM);
 
+    v->header.magic = CS_VECTOR_MAGIC;
+    v->header.type = CS_VECTOR_TYPE;
     return CS_SUCCESS;
 }
 

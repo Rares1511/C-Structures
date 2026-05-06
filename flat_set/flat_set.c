@@ -87,7 +87,7 @@ void* flat_set_at(flat_set fs, int index) {
     CS_RETURN_IF(NULL == fs.container, NULL);
     switch (fs.type) {
         case CS_FLAT_SET_DEQUE:
-            return deque_at(*((deque*)fs.container), index);
+            return deque_at(((deque*)fs.container), index);
         case CS_FLAT_SET_VECTOR:
             return vector_at(((vector*)fs.container), index);
         default:
@@ -132,7 +132,7 @@ int flat_set_empty(flat_set fs) {
     CS_RETURN_IF(NULL == fs.container, 1);
     switch (fs.type) {
         case CS_FLAT_SET_DEQUE:
-            return deque_empty(*((deque*)fs.container));
+            return deque_empty(((deque*)fs.container));
         case CS_FLAT_SET_VECTOR:
             return vector_empty(((vector*)fs.container));
         default:
@@ -144,7 +144,7 @@ int flat_set_size(flat_set fs) {
     CS_RETURN_IF(NULL == fs.container, 0);
     switch (fs.type) {
         case CS_FLAT_SET_DEQUE:
-            return deque_size(*((deque*)fs.container));
+            return deque_size(((deque*)fs.container));
         case CS_FLAT_SET_VECTOR:
             return vector_size(((vector*)fs.container));
         default:

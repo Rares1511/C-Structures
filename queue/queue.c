@@ -54,7 +54,7 @@ void *queue_front(queue *q) {
     case CS_QUEUE_LIST:
         return list_front(*((list *)q->container));
     case CS_QUEUE_DEQUE:
-        return deque_front(*((deque *)q->container));
+        return deque_front((deque *)q->container);
     default:
         return NULL;
     }
@@ -66,7 +66,7 @@ void *queue_back(queue *q) {
     case CS_QUEUE_LIST:
         return list_back(*((list *)q->container));
     case CS_QUEUE_DEQUE:
-        return deque_back(*((deque *)q->container));
+        return deque_back(((deque *)q->container));
     default:
         return NULL;
     }
@@ -77,7 +77,7 @@ int queue_empty(queue q) {
     case CS_QUEUE_LIST:
         return list_empty(*(list *)q.container);
     case CS_QUEUE_DEQUE:
-        return deque_empty(*(deque *)q.container);
+        return deque_empty((deque *)q.container);
     default:
         return 1;
     }
@@ -88,7 +88,7 @@ int queue_size(queue q) {
     case CS_QUEUE_LIST:
         return list_size(*(list *)q.container);
     case CS_QUEUE_DEQUE:
-        return deque_size(*(deque *)q.container);
+        return deque_size((deque *)q.container);
     default:
         return 0;
     }

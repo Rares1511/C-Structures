@@ -3,6 +3,8 @@
 #define __CS_UNIVERSAL_H__
 
 #include <stdio.h>
+#include <stdlib.h> // free, malloc, realloc
+#include <string.h> // memcpy, memmove, memset, strcmp
 
 #define SIZE_TH 1000
 

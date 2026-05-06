@@ -65,7 +65,7 @@ void* stack_top(const stack *s) {
         case CS_STACK_ARRAY:
             return vector_at((vector *)(s->container), vector_size((vector *)(s->container)) - 1);
         case CS_STACK_DEQUE:
-            return deque_back(*(deque *)(s->container));
+            return deque_back((deque *)(s->container));
         case CS_STACK_LIST:
             return list_back(*(list *)(s->container));
         default:
@@ -79,7 +79,7 @@ int stack_size(const stack *s) {
         case CS_STACK_ARRAY:
             return vector_size((vector *)(s->container));
         case CS_STACK_DEQUE:
-            return deque_size(*(deque *)(s->container));
+            return deque_size((deque *)(s->container));
         case CS_STACK_LIST:
             return list_size(*(list *)(s->container));
         default:
@@ -93,7 +93,7 @@ int stack_empty(const stack *s) {
         case CS_STACK_ARRAY:
             return vector_empty((vector *)(s->container));
         case CS_STACK_DEQUE:
-            return deque_empty(*(deque *)(s->container));
+            return deque_empty((deque *)(s->container));
         case CS_STACK_LIST:
             return list_empty(*(list *)(s->container));
         default:

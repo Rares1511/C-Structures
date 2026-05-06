@@ -3,8 +3,16 @@
 
 #include <cs/universal.h>
 
+// Internal values for growth direction in _deque_grow_internal
+#define __DEQUE_GROW_INTERNAL_BACK 0
+#define __DEQUE_GROW_INTERNAL_FRONT 1
+
+// Default block size and initial block count for the deque
 #define DEQUE_INIT_BLOCKS 64
 #define DEQUE_BLOCK_SIZE 64
+
+// Magic number for validating deque structures
+#define CS_DEQUE_MAGIC 0xDEC6E123
 
 /*!
  * @brief Attributes for the deque structure controllable by the user
@@ -21,6 +29,7 @@ typedef struct deque_block_t {
 } deque_block_t;
 
 typedef struct deque {
+    cs_header_t header;    /*!< Common header for all data structures */
     deque_block_t *blocks; /*!< Array of blocks in the deque */
     elem_attr_t attr;      /*!< Attributes of the deque */
     deque_attr_t dq_attr;  /*!< User-controllable attributes for optimization */
@@ -29,6 +38,8 @@ typedef struct deque {
     int front;             /*!< Index of the front element in the deque, points to the first block */
     int back;              /*!< Index of the back element in the deque, points to the last block */
 } deque;
+
+cs_codes _deque_grow_internal(deque *dq, int direction);
 
 /*!
  * Initializes a deque with the specified attributes.
@@ -45,7 +56,30 @@ cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr);
  * @param el Pointer to the element to push.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_push_back(deque *dq, const void*  el);
+static inline cs_codes deque_push_back(deque *dq, const void* el) {
+    CS_RETURN_IF(dq == NULL || el == NULL, CS_NULL);
+    CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
+
+    if (__builtin_expect(dq->blocks[dq->back].back >= dq->dq_attr.block_size, 0)) {
+        int rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_BACK);
+        if (rc != CS_SUCCESS) {
+            return rc;
+        }
+    }
+
+    deque_block_t *block = &dq->blocks[dq->back];
+    void *dest = block->data + (block->back * dq->attr.size);
+    deepcopy copy_func = dq->attr.copy;
+
+    if (copy_func) {
+        copy_func(dest, el);
+    } else {
+        memcpy(dest, el, dq->attr.size);
+    }
+    block->back++;
+    dq->size++;
+    return CS_SUCCESS;
+}
 
 /*! 
  * Pushes an element to the front of the deque.
@@ -53,7 +87,30 @@ cs_codes deque_push_back(deque *dq, const void*  el);
  * @param el Pointer to the element to push.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_push_front(deque *dq, const void*  el);
+static inline cs_codes deque_push_front(deque *dq, const void* el) {
+    CS_RETURN_IF(dq == NULL || el == NULL, CS_NULL);
+    CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
+
+    if (__builtin_expect(dq->blocks[dq->front].front <= 0, 0)) {
+        int rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_FRONT);
+        if (rc != CS_SUCCESS) {
+            return rc;
+        }
+    }
+    deque_block_t *block = &dq->blocks[dq->front];
+    void *dest = block->data + ((block->front - 1) * dq->attr.size);
+    deepcopy copy_func = dq->attr.copy;
+    block->front--;
+    
+    if (copy_func) {
+        copy_func(dest, el);
+    } else {
+        memcpy(dest, el, dq->attr.size);
+    }
+    
+    dq->size++;
+    return CS_SUCCESS;
+}
 
 /*! 
  * Inserts an element at the specified index in the deque.
@@ -91,14 +148,20 @@ cs_codes deque_erase(deque *dq, int index);
  * @param dq Pointer to the deque.
  * @return Pointer to the popped element, or NULL on failure.
  */
-void* deque_back(deque dq);
+static inline void* deque_back(deque *dq) {
+    CS_RETURN_IF(dq == NULL || dq->header.magic != CS_DEQUE_MAGIC || dq->size == 0, NULL);
+    return dq->blocks[dq->back].data + ((dq->blocks[dq->back].back - 1) * dq->attr.size);
+}
 
 /*! 
  * Pops an element from the front of the deque.
  * @param dq Pointer to the deque.
  * @return Pointer to the popped element, or NULL on failure.
  */
-void* deque_front(deque dq);
+static inline void* deque_front(deque *dq) {
+    CS_RETURN_IF(dq == NULL || dq->header.magic != CS_DEQUE_MAGIC || dq->size == 0, NULL);
+    return dq->blocks[dq->front].data + (dq->blocks[dq->front].front * dq->attr.size);
+}
 
 /*! 
  * Retrieves the element at the specified index in the deque.
@@ -106,21 +169,34 @@ void* deque_front(deque dq);
  * @param index The index of the element to retrieve.
  * @return Pointer to the element at the specified index, or NULL if index is out of bounds.
  */
-void* deque_at(deque dq, int index);
+static inline void *deque_at(deque *dq, int index) {
+    CS_RETURN_IF(dq == NULL || dq->header.magic != CS_DEQUE_MAGIC, NULL);
+    int size = dq->size;
+    CS_RETURN_IF(index < 0 || index >= size, NULL);
+
+    if (index < dq->blocks[dq->front].back - dq->blocks[dq->front].front) {
+        return dq->blocks[dq->front].data + ((dq->blocks[dq->front].front + index) * dq->attr.size);
+    }
+    index -= (dq->blocks[dq->front].back - dq->blocks[dq->front].front);
+    int offset = index % dq->dq_attr.block_size;
+    index = index / dq->dq_attr.block_size;
+
+    return dq->blocks[dq->front + 1 + index].data + (offset * dq->attr.size);
+}
 
 /*! 
  * Checks if the deque is empty.
  * @param dq The deque.
  * @return 1 if the deque is empty, 0 otherwise.
  */
-static inline int deque_empty(deque dq) { return dq.size == 0; }
+static inline int deque_empty(deque *dq) { return dq->size == 0; }
 
 /*! 
  * Returns the number of elements in the deque.
  * @param dq The deque.
  * @return The number of elements in the deque.
  */
-static inline int deque_size(deque dq) { return dq.size; }
+static inline int deque_size(deque *dq) { return dq->size; }
 
 /*! 
  * Swaps the contents of two deques.

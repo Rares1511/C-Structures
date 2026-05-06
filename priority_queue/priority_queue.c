@@ -16,7 +16,7 @@ void *priority_queue_at(priority_queue pq, int index) {
         case CS_PRIORITY_QUEUE_VECTOR:
             return vector_at(((vector*)pq.container), index);
         case CS_PRIORITY_QUEUE_DEQUE:
-            return deque_at(*((deque*)pq.container), index);
+            return deque_at(((deque*)pq.container), index);
         default:
             return NULL;
     }
@@ -202,7 +202,7 @@ int priority_queue_empty(priority_queue pq) {
         case CS_PRIORITY_QUEUE_VECTOR:
             return vector_empty(((vector*)pq.container));
         case CS_PRIORITY_QUEUE_DEQUE:
-            return deque_empty(*((deque*)pq.container));
+            return deque_empty(((deque*)pq.container));
         default:
             return 1;
     }
@@ -213,7 +213,7 @@ int priority_queue_size(priority_queue pq) {
         case CS_PRIORITY_QUEUE_VECTOR:
             return vector_size(((vector*)pq.container));
         case CS_PRIORITY_QUEUE_DEQUE:
-            return deque_size(*((deque*)pq.container));
+            return deque_size(((deque*)pq.container));
         default:
             return 0;
     }

@@ -2,8 +2,6 @@
 #define __CS_VECTOR_H__
 
 #include <cs/universal.h>
-#include <string.h>
-#include <stdlib.h>
 
 // Default values for vector attributes
 #define VECTOR_SHRINK_FACTOR 4
