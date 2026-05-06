@@ -47,63 +47,42 @@ typedef struct {
     const char *name;
     test *tests;
     int size;
+    int data_size; // Size of the module's main data structure, for memory tracking
 } module_tests;
 
 static module_tests all_modules[] = {
     // Extra modules
-    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test) },
+    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test), sizeof(pair) },
 
     // Associative containers (Arrays)
-    { "vector", vector_tests, sizeof(vector_tests) / sizeof(test) },
-    { "deque", deque_tests, sizeof(deque_tests) / sizeof(test) },
-    { "list", list_tests, sizeof(list_tests) / sizeof(test) },
-    { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test) },
+    { "vector", vector_tests, sizeof(vector_tests) / sizeof(test), sizeof(vector) },
+    { "deque", deque_tests, sizeof(deque_tests) / sizeof(test), sizeof(deque) },
+    { "list", list_tests, sizeof(list_tests) / sizeof(test), sizeof(list) },
+    { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test), sizeof(forward_list) },
 
     // // Associative containers (RBT)
-    { "set", set_tests, sizeof(set_tests) / sizeof(test) },
-    { "map", map_tests, sizeof(map_tests) / sizeof(test) },
-    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test) },
-    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test) },
+    { "set", set_tests, sizeof(set_tests) / sizeof(test), sizeof(set) },
+    { "map", map_tests, sizeof(map_tests) / sizeof(test), sizeof(map) },
+    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
+    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test), sizeof(multimap) },
 
     // // Unordered associative containers (Hash Table)
-    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test) },
-    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test) },
-    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test) },
-    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test) },
+    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
+    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
+    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
+    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
 
     // // Container adapters
-    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test) },
-    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test) },
-    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test) },
-    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test) },
+    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test), sizeof(stack) },
+    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test), sizeof(queue) },
+    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
+    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
 
     // // Numeric types
-    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test) },
+    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test), sizeof(large_number) },
 
     // Utilities
-    { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test) },
-};
-
-static int module_data_sizes[] = {
-    sizeof(pair),
-    sizeof(vector),
-    sizeof(deque),
-    sizeof(list),
-    sizeof(forward_list),
-    sizeof(set),
-    sizeof(map),
-    sizeof(multiset),
-    sizeof(multimap),
-    sizeof(unordered_set),
-    sizeof(unordered_map),
-    sizeof(unordered_multiset),
-    sizeof(unordered_multimap),
-    sizeof(stack),
-    sizeof(queue),
-    sizeof(priority_queue),
-    sizeof(flat_set),
-    sizeof(large_number),
-    sizeof(clogger)
+    { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test), sizeof(clogger) },
 };
 
 int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -246,7 +225,7 @@ int main(int argc, char **argv) {
     for (int m = 0; m < num_modules; m++) {
         module_tests *mod = &all_modules[m];
         int success = 0, failed = 0;
-        arg.data_structure = malloc(module_data_sizes[m]);
+        arg.data_structure = malloc(mod->data_size);
 
         clogger_log(results_logger, CLOGGER_INFO, "----------------------------------------\n");
         clogger_log(results_logger, CLOGGER_INFO, "  MODULE: %s (%d tests)\n", mod->name, mod->size);

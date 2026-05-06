@@ -29,6 +29,4 @@ Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented + Unittest)
 
-add tests for priority queue and the other wierd stuff
-think about changing them from using vector or deque to be their own data
-Change all error codes to just CS_ERROR - in future maybe change them to specialized error codes when having all code
+DEQUE - growth

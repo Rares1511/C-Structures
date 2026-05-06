@@ -61,7 +61,7 @@ static inline cs_codes deque_push_back(deque *dq, const void* el) {
     CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
 
     if (__builtin_expect(dq->blocks[dq->back].back >= dq->dq_attr.block_size, 0)) {
-        int rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_BACK);
+        cs_codes rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_BACK);
         if (rc != CS_SUCCESS) {
             return rc;
         }
@@ -92,15 +92,16 @@ static inline cs_codes deque_push_front(deque *dq, const void* el) {
     CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
 
     if (__builtin_expect(dq->blocks[dq->front].front <= 0, 0)) {
-        int rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_FRONT);
+        cs_codes rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_FRONT);
         if (rc != CS_SUCCESS) {
             return rc;
         }
     }
+
     deque_block_t *block = &dq->blocks[dq->front];
-    void *dest = block->data + ((block->front - 1) * dq->attr.size);
-    deepcopy copy_func = dq->attr.copy;
     block->front--;
+    void *dest = (char*)block->data + (block->front * dq->attr.size);
+    deepcopy copy_func = dq->attr.copy;
     
     if (copy_func) {
         copy_func(dest, el);
@@ -126,14 +127,71 @@ cs_codes deque_insert_at(deque *dq, const void *el, int index);
  * @param dq Pointer to the deque.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_pop_back(deque *dq);
+static inline cs_codes deque_pop_back(deque *dq) {
+    CS_RETURN_IF(dq == NULL, CS_NULL);
+    CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(dq->size == 0, CS_EMPTY);
+
+    deque_block_t *block = &dq->blocks[dq->back];
+    block->back--;
+    freer free_func = dq->attr.fr;
+    void *elem = (char *) block->data + (block->back * dq->attr.size);
+
+    if (free_func) {
+        free_func(elem);
+    }
+    dq->size--;
+
+    if (block->back == 0) {
+        dq->back--;
+        free(dq->blocks[dq->back + 1].data);
+        // Check if we deleted last available block and now deque is empty
+        if (dq->back < dq->front) {
+            dq->front = dq->block_cap / 2;
+            dq->back = dq->block_cap / 2;
+            dq->blocks[dq->front].data = malloc(dq->dq_attr.block_size * dq->attr.size);
+            if (!dq->blocks[dq->front].data) {
+                return CS_MEM;
+            }
+            dq->blocks[dq->front].front = dq->dq_attr.block_size / 2;
+            dq->blocks[dq->front].back = dq->dq_attr.block_size / 2;
+        }
+    }
+    return CS_SUCCESS;
+}
 
 /*! 
  * Pops an element from the front of the deque.
  * @param dq Pointer to the deque.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_pop_front(deque *dq);
+static inline cs_codes deque_pop_front(deque *dq) {
+    CS_RETURN_IF(dq == NULL, CS_NULL);
+    CS_RETURN_IF(dq->header.magic != CS_DEQUE_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(dq->size == 0, CS_EMPTY);
+
+    deque_block_t *block = &dq->blocks[dq->front];
+    void *elem = block->data + (block->front * dq->attr.size);
+    freer free_func = dq->attr.fr;
+
+    if (free_func) {
+        free_func(elem);
+    }
+    block->front++;
+    dq->size--;
+
+    if (block->front >= dq->dq_attr.block_size) {
+        dq->front++;
+        if (dq->front > dq->back) {
+            dq->front = dq->back;
+            dq->blocks[dq->front].front = dq->block_cap / 2;
+            dq->blocks[dq->front].back = dq->block_cap / 2;
+        } else {
+            free(dq->blocks[dq->front - 1].data);
+        }
+    }
+    return CS_SUCCESS;
+}
 
 /*! 
  * Erases the element at the specified index in the deque.
