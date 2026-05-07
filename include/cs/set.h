@@ -38,14 +38,14 @@ cs_codes set_delete(set *s, void *data);
  * @param s The set to check.
  * @return 1 if the set is empty, 0 otherwise.
  */
-int set_empty(set s);
+int set_empty(set *s);
 
 /*!
  * Returns the number of elements in the set.
  * @param s The set.
  * @return The size of the set.
  */
-int set_size(set s);
+int set_size(set *s);
 
 /*!
  * Finds an element in the set.
@@ -53,7 +53,7 @@ int set_size(set s);
  * @param data Pointer to the data to be found.
  * @return Pointer to the found data, or NULL if not found.
  */
-void* set_find(set s, void *data);
+void* set_find(set *s, void *data);
 
 /*!
  * Swaps the contents of two sets.

@@ -109,7 +109,7 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, &inital_count);
 
-    void *node = rbt_find(*(ms->t), &data);
+    void *node = rbt_find((ms->t), &data);
     if (node != NULL) {
         pair_free(&data);
         pair *p = (pair *)node;
@@ -135,7 +135,7 @@ cs_codes multiset_delete(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
-    void *node = rbt_find(*(ms->t), &data);
+    void *node = rbt_find((ms->t), &data);
     if (node != NULL) {
         pair *p = (pair *)node;
         int *count = (int *)pair_second(*p);
@@ -163,7 +163,7 @@ int multiset_count(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
-    void *node = rbt_find(*(ms->t), &data);
+    void *node = rbt_find((ms->t), &data);
     pair_free(&data);
     if (node != NULL) {
         pair *p = (pair *)node;

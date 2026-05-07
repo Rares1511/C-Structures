@@ -15,7 +15,7 @@ test_res test_multiset_init(test_arg *arg) {
 
     if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", init_result};
     if (ms.t == NULL) return (test_res){(char*)__func__, "RBT is NULL", CS_MEM};
-    if (rbt_size(*(ms.t)) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    if (rbt_size((ms.t)) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset initialized empty successfully");
 
@@ -102,7 +102,7 @@ test_res test_multiset_insert_multiple_unique(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted multiple unique elements successfully");
 
     // Verify RBT has total unique elements
-    if (rbt_size(*(ms.t)) != total) {
+    if (rbt_size((ms.t)) != total) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT size mismatch", CS_UNKNOWN};
     }
@@ -153,7 +153,7 @@ test_res test_multiset_insert_duplicates(test_arg *arg) {
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Count verified for duplicate inserts\n");
 
     // RBT should have only 1 node (element stored with count)
-    if (rbt_size(*(ms.t)) != 1) {
+    if (rbt_size((ms.t)) != 1) {
         free_test_struct(&ts);
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should have 1 node for duplicates", CS_UNKNOWN};
@@ -205,7 +205,7 @@ test_res test_multiset_insert_many_duplicates(test_arg *arg) {
     }
 
     // RBT should have num_unique nodes
-    if (rbt_size(*(ms.t)) != num_unique) {
+    if (rbt_size((ms.t)) != num_unique) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT size should equal num_unique", CS_UNKNOWN};
     }
@@ -305,7 +305,7 @@ test_res test_multiset_delete_one_of_many(test_arg *arg) {
     }
 
     // RBT should still have 1 node
-    if (rbt_size(*(ms.t)) != 1) {
+    if (rbt_size((ms.t)) != 1) {
         free_test_struct(&ts);
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should still have 1 node", CS_UNKNOWN};
@@ -356,7 +356,7 @@ test_res test_multiset_delete_all_duplicates(test_arg *arg) {
         return (test_res){(char*)__func__, "Count should be 0 after all deletes", CS_UNKNOWN};
     }
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         free_test_struct(&ts);
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
@@ -417,7 +417,7 @@ test_res test_multiset_delete_multiple(test_arg *arg) {
         }
     }
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should be empty after all deletes", CS_UNKNOWN};
     }
@@ -594,7 +594,7 @@ test_res test_multiset_clear(test_arg *arg) {
 
     multiset_clear(&ms);
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "Size should be 0 after clear", CS_UNKNOWN};
     }
@@ -616,7 +616,7 @@ test_res test_multiset_clear_empty(test_arg *arg) {
 
     multiset_clear(&ms);
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "Size should still be 0", CS_UNKNOWN};
     }
@@ -646,7 +646,7 @@ test_res test_multiset_clear_reuse(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    if (rbt_size(*(ms.t)) != 30) {
+    if (rbt_size((ms.t)) != 30) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "Size should be 30 after reuse", CS_UNKNOWN};
     }
@@ -856,7 +856,7 @@ test_res test_multiset_delete_all_verify_rbt(test_arg *arg) {
         }
     }
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
@@ -885,7 +885,7 @@ test_res test_multiset_large_counts(test_arg *arg) {
     }
 
     // RBT should still have only 1 node
-    if (rbt_size(*(ms.t)) != 1) {
+    if (rbt_size((ms.t)) != 1) {
         free_test_struct(&ts);
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should have 1 node", CS_UNKNOWN};
@@ -902,7 +902,7 @@ test_res test_multiset_large_counts(test_arg *arg) {
         return (test_res){(char*)__func__, "Count should be 0", CS_UNKNOWN};
     }
 
-    if (rbt_size(*(ms.t)) != 0) {
+    if (rbt_size((ms.t)) != 0) {
         free_test_struct(&ts);
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};

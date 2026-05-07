@@ -84,12 +84,12 @@ cs_codes map_delete(map *m, void *key) {
 
 int map_empty(map m) {
     CS_RETURN_IF(m.t == NULL, 1);
-    return rbt_empty(*(m.t));
+    return rbt_empty((m.t));
 }
 
 int map_size(map m) {
     CS_RETURN_IF(m.t == NULL, 0);
-    return rbt_size(*(m.t));
+    return rbt_size((m.t));
 }   
 
 void* map_find(map m, void *key) {
@@ -98,7 +98,7 @@ void* map_find(map m, void *key) {
     pair_init(&search_key, m.key_attr, m.val_attr);
     pair_set(&search_key, key, NULL);
 
-    pair* result = (pair*)rbt_find(*(m.t), &search_key);
+    pair* result = (pair*)rbt_find((m.t), &search_key);
     pair_free(&search_key);
     CS_RETURN_IF(result == NULL, NULL);
     return pair_second(result);

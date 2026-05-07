@@ -23,18 +23,18 @@ cs_codes set_delete(set *s, void *data) {
     return rbt_delete(s->t, data);
 }
 
-int set_empty(set s) {
-    CS_RETURN_IF(s.t == NULL, 1);
-    return rbt_empty(*s.t);
+int set_empty(set *s) {
+    CS_RETURN_IF(s->t == NULL, 1);
+    return rbt_empty(s->t);
 }
 
-int set_size(set s) {
-    CS_RETURN_IF(s.t == NULL, 0);
-    return rbt_size(*s.t);
+int set_size(set *s) {
+    CS_RETURN_IF(s->t == NULL, 0);
+    return rbt_size(s->t);
 }
 
-void* set_find(set s, void *data) {
-    return rbt_find(*s.t, data);
+void* set_find(set *s, void *data) {
+    return rbt_find(s->t, data);
 }
 
 void set_swap(set *s1, set *s2) {

@@ -16,7 +16,10 @@ static void *test_set_find(void *arg) {
     auto *s = static_cast<std::set<int>*>(arg);
     const int total = __SET_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        s->find(i);
+        int result = s->find(i) != s->end() ? *s->find(i) : -1;
+        if (result != i) {
+            return nullptr; // Indicate failure if not found or wrong value
+        }
     }
     return s;
 }

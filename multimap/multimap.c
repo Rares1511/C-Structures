@@ -97,7 +97,7 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
 
-    pair *p = (pair *)rbt_find(*(mm->t), &data);
+    pair *p = (pair *)rbt_find((mm->t), &data);
     if (p != NULL) {
         pair_free(&data);
         vector *vec = (vector *)pair_second(*p);
@@ -130,7 +130,7 @@ cs_codes multimap_delete(multimap *mm, const void *key) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
 
-    pair *p = (pair *)rbt_find(*(mm->t), &data);
+    pair *p = (pair *)rbt_find((mm->t), &data);
     if (p != NULL) {
         vector *vec = (vector *)pair_second(*p);
         int size = vector_size(vec);
@@ -158,7 +158,7 @@ vector* multimap_get(multimap *mm, const void *key) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
     
-    pair *p = (pair *)rbt_find(*(mm->t), &data);
+    pair *p = (pair *)rbt_find((mm->t), &data);
     pair_free(&data);
         
     if (p != NULL) {

@@ -251,18 +251,21 @@ cs_codes vector_shrink_to_fit(vector *vec) {
 void vector_swap(vector *v1, vector *v2) {
     CS_RETURN_IF(v1 == NULL || v2 == NULL || v1->header.magic != CS_VECTOR_MAGIC || v2->header.magic != CS_VECTOR_MAGIC);
 
+    cs_header_t temp_header = v1->header;
     void *aux = v1->vec;
     elem_attr_t attr = v1->attr;
     vector_attr_t v_attr = v1->v_attr;
     int size = v1->size;
     int cap = v1->cap;
 
+    v1->header = v2->header;
     v1->attr = v2->attr;
     v1->v_attr = v2->v_attr;
     v1->size = v2->size;
     v1->cap = v2->cap;
     v1->vec = v2->vec;
 
+    v2->header = temp_header;
     v2->attr = attr;
     v2->v_attr = v_attr;
     v2->size = size;

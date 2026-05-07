@@ -82,11 +82,11 @@ void rbt_node_free(rbt_node *node, elem_attr_t attr) {
  *         positive value if data1 is greater than data2,
  *         zero if they are equal
  */
-int rbt_node_compare(rbt s, void *data1, void *data2) {
-    if (s.attr.comp == NULL) {
-        return memcmp(data1, data2, s.attr.size);
+int rbt_node_compare(rbt *s, void *data1, void *data2) {
+    if (s->attr.comp == NULL) {
+        return memcmp(data1, data2, s->attr.size);
     }
-    return s.attr.comp(data1, data2);
+    return s->attr.comp(data1, data2);
 }
 
 /*!
@@ -95,8 +95,8 @@ int rbt_node_compare(rbt s, void *data1, void *data2) {
  * @param[in] data - pointer to the data
  * @return Pointer to the found rbt node or NULL if not found
  */
-rbt_node *rbt_node_find(rbt s, void *data) {
-    rbt_node *node = s.root;
+rbt_node *rbt_node_find(rbt *s, void *data) {
+    rbt_node *node = s->root;
 
     while (node != NULL) {
         int cmp = rbt_node_compare(s, data, node->data);
@@ -139,7 +139,7 @@ cs_codes rbt_insert_standard(rbt *t, rbt_node *new_node) {
     rbt_node *prev = NULL;
 
     while (node != NULL) {
-        int cmp = rbt_node_compare(*t, new_node->data, node->data);
+        int cmp = rbt_node_compare(t, new_node->data, node->data);
         prev = node;
         if (cmp == 0) {
             return CS_ELEM;
@@ -150,10 +150,10 @@ cs_codes rbt_insert_standard(rbt *t, rbt_node *new_node) {
         }
     }
 
-    if (rbt_empty(*t)) {
+    if (t->size == 0) {
         t->root = new_node;
     } else {
-        int cmp = rbt_node_compare(*t, new_node->data, prev->data);
+        int cmp = rbt_node_compare(t, new_node->data, prev->data);
         if (cmp < 0) {
             prev->left = new_node;
         } else {
@@ -426,11 +426,11 @@ cs_codes rbt_delete_standard(rbt *t, rbt_node *delete_node) {
         y->color = delete_node->color;
     }
 
-    rbt_node_free(delete_node, t->attr);
-
     if (original_color == __RBT_NODE_BLACK_COLOR) {
         return rbt_delete_fixup(t, x, x_father);
     }
+
+    rbt_node_free(delete_node, t->attr);
 
     return CS_SUCCESS;
 }
@@ -477,7 +477,7 @@ cs_codes rbt_insert(rbt *t, void *data) {
 
 cs_codes rbt_delete(rbt *t, void *data) {
     CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
-    rbt_node *delete_node = rbt_node_find(*t, data);
+    rbt_node *delete_node = rbt_node_find(t, data);
 
     CS_RETURN_IF(delete_node == NULL, CS_ELEM);
 
@@ -486,7 +486,7 @@ cs_codes rbt_delete(rbt *t, void *data) {
     return rc;
 }
 
-void* rbt_find(rbt t, void *data) {
+void* rbt_find(rbt *t, void *data) {
     CS_RETURN_IF(data == NULL, NULL);
     rbt_node *node = rbt_node_find(t, data);
     CS_RETURN_IF(node == NULL, NULL);
@@ -540,7 +540,7 @@ void rbt_print(FILE *stream, void *v_t) {
     CS_RETURN_IF(v_t == NULL || stream == NULL);
     rbt *t = (rbt *)v_t;
     
-    rbt_print_stack_item *stack = malloc(sizeof(rbt_print_stack_item) * (int)ceil(log2(rbt_size(*t) + 1)));
+    rbt_print_stack_item *stack = malloc(sizeof(rbt_print_stack_item) * (int)ceil(log2(t->size + 1)));
     int stack_size = 0;
 
     stack[stack_size++] = (rbt_print_stack_item){t->root, 0};

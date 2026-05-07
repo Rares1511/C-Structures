@@ -23,9 +23,9 @@ typedef struct rbt {
 cs_codes rbt_init(rbt *t, elem_attr_t attr);
 cs_codes rbt_insert(rbt *t, void *data);
 cs_codes rbt_delete(rbt *t, void *data);
-static inline int rbt_empty(rbt t) { return (t.root == NULL); }
-static inline int rbt_size(rbt t) { return t.size; }
-void* rbt_find(rbt t, void *data);
+static inline int rbt_empty(rbt *t) { return (t->root == NULL); }
+static inline int rbt_size(rbt *t) { return t->size; }
+void* rbt_find(rbt *t, void *data);
 void rbt_swap(rbt *t1, rbt *t2);
 void rbt_clear(rbt *t);
 void rbt_print(FILE *stream, void *v_t);

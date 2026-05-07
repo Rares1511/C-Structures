@@ -152,14 +152,17 @@ void list_sort(list *l) {
 void list_swap(list *l1, list *l2) {
     CS_RETURN_IF(l1 == NULL || l2 == NULL || l1->header.magic != CS_LIST_MAGIC || l2->header.magic != CS_LIST_MAGIC);
 
+    cs_header_t temp_header = l1->header;
     elem_attr_t attr = l1->attr;
     list_node *front = l1->front;
     int size = l1->size;
 
+    l1->header = l2->header;
     l1->attr = l2->attr;
     l1->front = l2->front;
     l1->size = l2->size;
 
+    l2->header = temp_header;
     l2->attr = attr;
     l2->front = front;
     l2->size = size;

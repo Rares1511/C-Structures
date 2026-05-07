@@ -18,7 +18,7 @@ test_res test_multimap_init(test_arg *arg) {
 
     if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", init_result};
     if (mm.t == NULL) return (test_res){(char*)__func__, "RBT is NULL", CS_MEM};
-    if (rbt_size(*(mm.t)) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    if (rbt_size((mm.t)) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
 
     if (!rbt_is_valid(mm.t)) {
         multimap_free(&mm);
@@ -81,7 +81,7 @@ test_res test_multimap_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert returned error", result};
     }
 
-    if (rbt_size(*(mm.t)) != 1) {
+    if (rbt_size((mm.t)) != 1) {
         free_test_struct(&key);
         free_test_struct(&value);
         multimap_free(&mm);
@@ -130,7 +130,7 @@ test_res test_multimap_insert_multiple_keys(test_arg *arg) {
         free_test_struct(&value);
     }
 
-    if (rbt_size(*(mm.t)) != total) {
+    if (rbt_size((mm.t)) != total) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT size mismatch", CS_UNKNOWN};
     }
@@ -165,7 +165,7 @@ test_res test_multimap_insert_duplicate_keys(test_arg *arg) {
     }
 
     // RBT should have only 1 node (same key)
-    if (rbt_size(*(mm.t)) != 1) {
+    if (rbt_size((mm.t)) != 1) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should have 1 node for duplicate keys", CS_UNKNOWN};
@@ -226,7 +226,7 @@ test_res test_multimap_insert_many_duplicates(test_arg *arg) {
         free_test_struct(&key);
     }
 
-    if (rbt_size(*(mm.t)) != num_keys) {
+    if (rbt_size((mm.t)) != num_keys) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT size should equal num_keys", CS_UNKNOWN};
     }
@@ -300,7 +300,7 @@ test_res test_multimap_delete_single_value(test_arg *arg) {
         return (test_res){(char*)__func__, "Delete returned error", result};
     }
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         free_test_struct(&key);
         free_test_struct(&value);
         multimap_free(&mm);
@@ -350,7 +350,7 @@ test_res test_multimap_delete_one_of_many(test_arg *arg) {
         return (test_res){(char*)__func__, "Should have 4 values after one delete", CS_UNKNOWN};
     }
 
-    if (rbt_size(*(mm.t)) != 1) {
+    if (rbt_size((mm.t)) != 1) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should still have 1 node", CS_UNKNOWN};
@@ -397,7 +397,7 @@ test_res test_multimap_delete_all_values(test_arg *arg) {
         }
     }
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
@@ -460,7 +460,7 @@ test_res test_multimap_delete_multiple_keys(test_arg *arg) {
         }
     }
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
@@ -541,7 +541,7 @@ test_res test_multimap_clear(test_arg *arg) {
 
     multimap_clear(&mm);
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Size should be 0 after clear", CS_UNKNOWN};
     }
@@ -563,7 +563,7 @@ test_res test_multimap_clear_empty(test_arg *arg) {
 
     multimap_clear(&mm);
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Size should still be 0", CS_UNKNOWN};
     }
@@ -597,7 +597,7 @@ test_res test_multimap_clear_reuse(test_arg *arg) {
         free_test_struct(&value);
     }
 
-    if (rbt_size(*(mm.t)) != 30) {
+    if (rbt_size((mm.t)) != 30) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "Size should be 30 after reuse", CS_UNKNOWN};
     }
@@ -824,7 +824,7 @@ test_res test_multimap_delete_all_verify_rbt(test_arg *arg) {
         }
     }
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
     }
@@ -856,7 +856,7 @@ test_res test_multimap_large_value_counts(test_arg *arg) {
     }
 
     // RBT should still have only 1 node
-    if (rbt_size(*(mm.t)) != 1) {
+    if (rbt_size((mm.t)) != 1) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should have 1 node", CS_UNKNOWN};
@@ -867,7 +867,7 @@ test_res test_multimap_large_value_counts(test_arg *arg) {
         multimap_delete(&mm, &key);
     }
 
-    if (rbt_size(*(mm.t)) != 0) {
+    if (rbt_size((mm.t)) != 0) {
         free_test_struct(&key);
         multimap_free(&mm);
         return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};

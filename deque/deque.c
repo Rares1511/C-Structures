@@ -195,6 +195,7 @@ cs_codes deque_erase(deque *dq, int index) {
 void deque_swap(deque *dq1, deque *dq2) {
     CS_RETURN_IF(dq1 == NULL || dq2 == NULL || dq1->header.magic != CS_DEQUE_MAGIC || dq2->header.magic != CS_DEQUE_MAGIC);
 
+    cs_header_t temp_header = dq1->header;
     elem_attr_t temp_attr = dq1->attr;
     deque_attr_t temp_dq_attr = dq1->dq_attr;
     deque_block_t *temp_blocks = dq1->blocks;
@@ -202,6 +203,7 @@ void deque_swap(deque *dq1, deque *dq2) {
     int temp_front = dq1->front;
     int temp_back = dq1->back;
 
+    dq1->header = dq2->header;
     dq1->attr = dq2->attr;
     dq1->dq_attr = dq2->dq_attr;
     dq1->blocks = dq2->blocks;
@@ -209,6 +211,7 @@ void deque_swap(deque *dq1, deque *dq2) {
     dq1->front = dq2->front;
     dq1->back = dq2->back;
 
+    dq2->header = temp_header;
     dq2->attr = temp_attr;
     dq2->dq_attr = temp_dq_attr;
     dq2->blocks = temp_blocks;
