@@ -46,10 +46,10 @@ static BenchmarkModule deque_benchmark() {
         "deque",
         &d,
         {
-            Test("deque", "insert_back", test_deque_insert_back),
-            Test("deque", "delete_back", test_deque_delete_back),
             Test("deque", "insert_front", test_deque_insert_front),
             Test("deque", "delete_front", test_deque_delete_front),
+            Test("deque", "insert_back", test_deque_insert_back),
+            Test("deque", "delete_back", test_deque_delete_back),
         }
     };
 }

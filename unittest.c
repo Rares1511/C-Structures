@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
     };
     test_arg arg;
 
-    arg.op_time = (operation_time *)malloc(sizeof(operation_time) * 10); // Allocate for up to 10 operations
+    arg.op_time = (operation_time *)malloc(sizeof(operation_time) * 64); // Allocate for up to 64 operations
     if (!arg.op_time) {
         printf("Failed to allocate memory for operation times.\n");
         return -1;

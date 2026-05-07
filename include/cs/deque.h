@@ -4,8 +4,8 @@
 #include <cs/universal.h>
 
 // Internal values for growth direction in _deque_grow_internal
-#define __DEQUE_GROW_INTERNAL_BACK 0
-#define __DEQUE_GROW_INTERNAL_FRONT 1
+#define __DEQUE_GROW_INTERNAL_BACK 1
+#define __DEQUE_GROW_INTERNAL_FRONT -1
 
 // Default block size and initial block count for the deque
 #define DEQUE_INIT_BLOCKS 64

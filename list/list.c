@@ -1,38 +1,10 @@
 #include <cs/list.h>
 
-#include <stdlib.h>
-#include <string.h>
-
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-
-/*!
- * Initializes a list node with the given element
- * @param[in] el    Element that will be added into the node
- * @param[in] size  Size of the element that will be added
- * @param[in] copy  Copy function for the datatype inside the list
- * @return Pointer to the initialized node or NULL if a memory problem occurred
- */
-list_node* list_node_init(const void *el, int size, deepcopy copy) {
-    list_node *aux = malloc(sizeof(list_node));
-    if (!aux)
-        return NULL;
-    aux->data = malloc(size);
-    if (!aux->data) {
-        free(aux);
-        return NULL;
-    }
-    if (copy)
-        copy(aux->data, el);
-    else
-        memcpy(aux->data, el, size);
-    aux->next = aux;
-    aux->prev = aux;
-    return aux;
-}
 
 /*!
  * Compares two elements using the given comp function or memcmp if comp is NULL
@@ -54,41 +26,27 @@ inline int list_compare(const void *a, const void *b, comparer comp, int size) {
  * @param[in] start Starting node for the sort
  * @param[in] end   Ending node for the sort
  */
-void list_sort_helper(elem_attr_t attr, list_node *start, list_node *end) {
-    if (start == end)
-        return;
-    void *pivot = end->data;
-    list_node *pivot_node = start;
+list_node* merge_iterative(list_node* a, list_node* b, elem_attr_t attr) {
+    list_node dummy;
+    list_node *tail = &dummy;
+    size_t sz = attr.size;
 
-    for (list_node *node = start; node != end; node = node->next) {
-        if (list_compare(node->data, pivot, attr.comp, attr.size) <= 0) {
-            void* temp = pivot_node->data;
-            pivot_node->data = node->data;
-            node->data = temp;
-            pivot_node = pivot_node->next;
+    while (a && b) {
+        if (list_compare(a->data, b->data, attr.comp, sz) <= 0) {
+            tail->next = a;
+            a->prev = tail;
+            a = a->next;
+        } else {
+            tail->next = b;
+            b->prev = tail;
+            b = b->next;
         }
+        tail = tail->next;
     }
+    tail->next = a ? a : b;
+    if (tail->next) tail->next->prev = tail;
 
-    void* temp = pivot_node->data;
-    pivot_node->data = end->data;
-    end->data = temp;
-
-    if (pivot_node != start)
-        list_sort_helper(attr, start, pivot_node->prev);
-    if (pivot_node != end)
-        list_sort_helper(attr, pivot_node->next, end);
-}
-
-/*!
- * Frees a list node and its data using the given free function
- * @param[in] node  Node that will be freed
- * @param[in] fr    Free function for the datatype inside the list
- */
-void list_node_free(list_node *node, freer fr) {
-    if (fr)
-        fr(node->data);
-    free(node->data);
-    free(node);
+    return dummy.next;
 }
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -102,80 +60,21 @@ cs_codes list_init(list *l, elem_attr_t attr) {
     l->attr = attr;
     l->size = 0;
     l->front = NULL;
-    return CS_SUCCESS;
-}
 
-cs_codes list_push_front(list *l, const void *el) {
-    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
-    list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
-    CS_RETURN_IF(aux == NULL, CS_MEM);
-    if (!list_empty(*l)) {
-        aux->prev = l->front->prev;
-        l->front->prev->next = aux;
-        l->front->prev = aux;
-        aux->next = l->front;
-    }
-    l->front = aux;
-    l->size++;
-    return CS_SUCCESS;
-}
-
-cs_codes list_push_back(list *l, const void *el) {
-    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
-    list_node *aux = list_node_init(el, l->attr.size, l->attr.copy);
-    CS_RETURN_IF(aux == NULL, CS_MEM);
-    if (!list_empty(*l)) {
-        l->front->prev->next = aux;
-        aux->prev = l->front->prev;
-        aux->next = l->front;
-        l->front->prev = aux;
-    }
-    else
-        l->front = aux;
-    l->size++;
-    return CS_SUCCESS;
-}
-
-cs_codes list_pop_front(list *l) {
-    CS_RETURN_IF(l == NULL, CS_NULL);
-    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
-    l->size--;
-    if (list_empty(*l)) {
-        list_node_free(l->front, l->attr.fr);
-        l->front = NULL;
-        return CS_SUCCESS;
-    }
-    list_node *aux = l->front;
-    l->front->prev->next = l->front->next;
-    l->front->next->prev = l->front->prev;
-    l->front = l->front->next;
-    list_node_free(aux, l->attr.fr);
-    return CS_SUCCESS;
-}
-
-cs_codes list_pop_back(list *l) {
-    CS_RETURN_IF(l == NULL, CS_NULL);
-    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
-    l->size--;
-    if (list_empty(*l)) {
-        list_node_free(l->front, l->attr.fr);
-        return CS_SUCCESS;
-    }
-    list_node *aux = l->front->prev;
-    l->front->prev->prev->next = l->front;
-    l->front->prev = l->front->prev->prev;
-    list_node_free(aux, l->attr.fr);
+    l->header.magic = CS_LIST_MAGIC;
+    l->header.type = CS_LIST_TYPE;
     return CS_SUCCESS;
 }
 
 cs_codes list_erase(list *l, int pos) {
     CS_RETURN_IF(l == NULL, CS_NULL);
-    CS_RETURN_IF(list_empty(*l), CS_EMPTY);
-    CS_RETURN_IF(pos < 0 || pos >= list_size(*l), CS_POS);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(l->size == 0, CS_EMPTY);
+    CS_RETURN_IF(pos < 0 || pos >= l->size, CS_POS);
 
     if (pos == 0)
         return list_pop_front(l);
-    if (pos == list_size(*l) - 1)
+    if (pos == l->size - 1)
         return list_pop_back(l);
 
     list_node *current = l->front;
@@ -183,42 +82,74 @@ cs_codes list_erase(list *l, int pos) {
 
     current->prev->next = current->next;
     current->next->prev = current->prev;
-    list_node_free(current, l->attr.fr);
+    freer fr = l->attr.fr;
+    if (fr)
+        fr(current->data);
+    free(current);
     l->size--;
     return CS_SUCCESS;
 }
 
 int list_find(list l, const void *el) {
     CS_RETURN_IF(el == NULL, -1);
-    CS_RETURN_IF(list_empty(l), -1);
+    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, -1);
+    CS_RETURN_IF(l.size == 0, -1);
 
     list_node *current = l.front;
     comparer comp = l.attr.comp;
     int elem_size = l.attr.size;
-    for (int pos = 0; pos < list_size(l); pos++, current = current->next) {
+    for (int pos = 0; pos < l.size; pos++, current = current->next) {
         if (list_compare(current->data, el, comp, elem_size) == 0)
             return pos;
     }
     return -1;
 }
 
-void *list_front(list l) {
-    CS_RETURN_IF(list_empty(l), NULL);
-    return l.front->data;
-}
-
-void *list_back(list l) {
-    CS_RETURN_IF(list_empty(l), NULL);
-    return l.front->prev->data;
-}
-
 void list_sort(list *l) {
-    CS_RETURN_IF(l == NULL);
-    list_sort_helper(l->attr, l->front, l->front->prev);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC || l->size < 2);
+
+    // 1. Break Circularity
+    list_node *head = l->front;
+    l->front->prev->next = NULL; 
+    head->prev = NULL;
+
+    // 2. Iterative Merge (Bottom-Up)
+    // We use a small array of bins to merge lists of size 2^i
+    list_node *bins[32] = {NULL}; // Supports up to 2^32 elements
+    list_node *curr = head;
+    list_node *next_node;
+
+    while (curr) {
+        next_node = curr->next;
+        curr->next = curr->prev = NULL;
+        
+        int i = 0;
+        while (i < 31 && bins[i] != NULL) {
+            curr = merge_iterative(bins[i], curr, l->attr);
+            bins[i] = NULL;
+            i++;
+        }
+        bins[i] = curr;
+        curr = next_node;
+    }
+
+    // 3. Final Merge of all bins
+    list_node *result = NULL;
+    for (int i = 0; i < 32; i++) {
+        result = merge_iterative(bins[i], result, l->attr);
+    }
+
+    // 4. Re-establish Circularity
+    l->front = result;
+    list_node *tail = result;
+    while (tail->next) tail = tail->next;
+    
+    tail->next = l->front;
+    l->front->prev = tail;
 }
 
 void list_swap(list *l1, list *l2) {
-    CS_RETURN_IF(l1 == NULL || l2 == NULL);
+    CS_RETURN_IF(l1 == NULL || l2 == NULL || l1->header.magic != CS_LIST_MAGIC || l2->header.magic != CS_LIST_MAGIC);
 
     elem_attr_t attr = l1->attr;
     list_node *front = l1->front;
@@ -234,14 +165,19 @@ void list_swap(list *l1, list *l2) {
 }
 
 void list_clear(list *l) {
-    CS_RETURN_IF(l == NULL);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC);
     list_node *node = l->front->next;
+    freer fr = l->attr.fr;
     while (node != l->front) {
         list_node *aux = node;
         node = node->next;
-        list_node_free(aux, l->attr.fr);
+        if (fr)
+            fr(aux->data);
+        free(aux);
     }
-    list_node_free(l->front, l->attr.fr);
+    if (fr)
+        fr(l->front->data);
+    free(l->front);
     l->front = NULL;
     l->size = 0;
 }
@@ -249,7 +185,7 @@ void list_clear(list *l) {
 void list_print(FILE *stream, void *l_p) {
     CS_RETURN_IF(l_p == NULL || stream == NULL);
     list l = *(list *)l_p;
-    CS_RETURN_IF(list_empty(l) || l.attr.print == NULL);
+    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC || l.size == 0 || l.attr.print == NULL);
     l.attr.print(stream, l.front->data);
     list_node *node = l.front->next;
     while (node != l.front) {
@@ -261,13 +197,19 @@ void list_print(FILE *stream, void *l_p) {
 void list_free(void *l_p) {
     CS_RETURN_IF(l_p == NULL);
     list *l = (list *)l_p;
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC);
+    freer fr = l->attr.fr;
     if (!list_empty(*l)) {
         list_node *node = l->front->next;
         while (node != l->front) {
             list_node *aux = node;
             node = node->next;
-            list_node_free(aux, l->attr.fr);
+            if (fr)
+                fr(aux->data);
+            free(aux);
         }
-        list_node_free(l->front, l->attr.fr);
+        if (fr)
+            fr(l->front->data);
+        free(l->front);
     }
 }

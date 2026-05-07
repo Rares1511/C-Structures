@@ -1216,7 +1216,7 @@ test_res test_deque_large_random_access(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_deque_stress_time_front(test_arg *arg) {
+test_res test_deque_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
         clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping stress time test on Valgrind\n");
         return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
@@ -1260,26 +1260,6 @@ test_res test_deque_stress_time_front(test_arg *arg) {
     post_operation_time(arg, "delete_front", elapsed_time);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Completed %d pop_fronts in %.4f seconds\n", total, elapsed_time);
-    
-    deque_free(dq);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_deque_stress_time_back(test_arg *arg) {
-    if (RUNNING_ON_VALGRIND) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping stress time test on Valgrind\n");
-        return (test_res){(char*)__func__, "Skipped on Valgrind", CS_SUCCESS};
-    }
-
-    deque *dq = (deque *)arg->data_structure;
-    struct timeval start, end;
-    double elapsed_time;
-    int rc, total = __DEQUE_STRESS_TEST_SIZE;
-
-    rc = deque_init(dq, get_int_attr(), (deque_attr_t){0, 0});
-    if (rc != CS_SUCCESS) {
-        return (test_res){(char*)__func__, "Initialization failed for stress test", rc};
-    }
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
@@ -1387,6 +1367,5 @@ test deque_tests[] = {
     test_deque_large_random_access,
 
     // Stress test with time
-    test_deque_stress_time_front,
-    test_deque_stress_time_back,
+    test_deque_stress_time,
 };

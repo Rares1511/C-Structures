@@ -31,15 +31,13 @@ cs_codes _deque_grow_internal(deque *dq, int direction) {
         dq->back = next_back;
     } 
     else if (direction == __DEQUE_GROW_INTERNAL_FRONT) {
-        int next_front = dq->front - 1;
-        if (next_front < 0) {
+        if (dq->front - 1 < 0) {
             if ((dq->block_cap - dq->back) > dq->block_cap / 4) {
                 // We have enough capacity, just need to shift blocks to the back
                 int new_front = (dq->block_cap - active_blocks) / 2;
                 memmove(&dq->blocks[new_front], &dq->blocks[dq->front], sizeof(deque_block_t) * active_blocks);
                 dq->front = new_front;
                 dq->back = dq->front + active_blocks - 1;
-                next_front = dq->front - 1;
             }
             else {
                 int old_cap = dq->block_cap;
@@ -51,9 +49,9 @@ cs_codes _deque_grow_internal(deque *dq, int direction) {
                 memmove(&dq->blocks[dq->block_cap - old_cap], &dq->blocks[0], sizeof(deque_block_t) * old_cap);
                 dq->front += dq->block_cap - old_cap;
                 dq->back += dq->block_cap - old_cap;
-                next_front = dq->front - 1;
             }
         }
+        int next_front = dq->front - 1;
         dq->blocks[next_front].data = malloc(dq->attr.size * dq->dq_attr.block_size);
         if (dq->blocks[next_front].data == NULL) {
             return CS_MEM;

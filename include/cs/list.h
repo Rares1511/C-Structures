@@ -3,17 +3,36 @@
 
 #include <cs/universal.h>
 
+#define CS_LIST_MAGIC 0x4C495354 /* "LIST" in hexadecimal */
+
 typedef struct list_node {
-    void *data;             /*!< information held inside the node */
     struct list_node *next; /*!< next node in the list */
     struct list_node *prev; /*!< previous node in the list */
+    char data[];             /*!< flexible array member to hold the data */
 } list_node;
 
 typedef struct list {
+    cs_header_t header; /*!< header for the list */
     int size;         /*!< size of the list */
     list_node *front; /*!< front element of the list */
     elem_attr_t attr; /*!< attributes for the datatype inside the list */
 } list;
+
+static inline list_node* _list_node_init(const void *el, size_t elem_size, deepcopy copy) {
+    // We allocate the struct size PLUS the data size in one block
+    list_node *node = malloc(sizeof(list_node) + elem_size);
+    if (!node) return NULL;
+
+    // We copy the bytes directly into the node's tail
+    if (copy)
+        copy(node->data, el);
+    else
+        memcpy(node->data, el, elem_size);
+
+    node->next = node->prev = node; // Initialize as circular
+    
+    return node;
+}
 
 /*!
  * Initializes the list with th given attributes for the datatype inside
@@ -29,7 +48,21 @@ cs_codes list_init(list *l, elem_attr_t attr);
  * @param[in]  el  Element that will be added
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful addition
  */
-cs_codes list_push_front(list *l, const void *el);
+static inline cs_codes list_push_front(list *l, const void *el) {
+    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, CS_UNINITIALIZED);
+    list_node *aux = _list_node_init(el, l->attr.size, l->attr.copy);
+    CS_RETURN_IF(aux == NULL, CS_MEM);
+    if (l->size > 0) {
+        aux->prev = l->front->prev;
+        l->front->prev->next = aux;
+        l->front->prev = aux;
+        aux->next = l->front;
+    }
+    l->front = aux;
+    l->size++;
+    return CS_SUCCESS;
+}
 
 /*!
  * Pushes the element at the back of the list
@@ -37,21 +70,79 @@ cs_codes list_push_front(list *l, const void *el);
  * @param[in]  el  Element that will be added
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful addition
  */
-cs_codes list_push_back(list *l, const void *el);
+static inline cs_codes list_push_back(list *l, const void *el) {
+    CS_RETURN_IF(l == NULL || el == NULL, CS_NULL);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, CS_UNINITIALIZED);
+    list_node *aux = _list_node_init(el, l->attr.size, l->attr.copy);
+    CS_RETURN_IF(aux == NULL, CS_MEM);
+    if (l->size > 0) {
+        l->front->prev->next = aux;
+        aux->prev = l->front->prev;
+        aux->next = l->front;
+        l->front->prev = aux;
+    }
+    else
+        l->front = aux;
+    l->size++;
+    return CS_SUCCESS;
+}
 
 /*!
  * Pops the element at the front list
  * @param[out] l  List whose first element will be deleted
  * @return CS_SIZE if the list is empty or CS_SUCCESS for a successful deletion
  */
-cs_codes list_pop_front(list *l);
+static inline cs_codes list_pop_front(list *l) {
+    CS_RETURN_IF(l == NULL, CS_NULL);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(l->size == 0, CS_EMPTY);
+    freer fr = l->attr.fr;
+    l->size--;
+    if (l->size == 0) {
+        if (fr)
+            fr(l->front->data);
+        free(l->front);
+        l->front = NULL;
+        return CS_SUCCESS;
+    }
+    list_node *aux = l->front;
+    l->front->prev->next = l->front->next;
+    l->front->next->prev = l->front->prev;
+    l->front = l->front->next;
+    
+    
+    if (fr)   
+        fr(aux->data);
+    free(aux);
+    return CS_SUCCESS;
+}
 
 /*!
  * Pops the element at the back list
  * @param[out] l  List whose last element will be deleted
  * @return CS_SIZE if the list is empty or CS_SUCCESS for a successful deletion
  */
-cs_codes list_pop_back(list *l);
+static inline cs_codes list_pop_back(list *l) {
+    CS_RETURN_IF(l == NULL, CS_NULL);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(l->size == 0, CS_EMPTY);
+    freer fr = l->attr.fr;
+    l->size--;
+    if (l->size == 0) {
+        if (fr)
+            fr(l->front->data);
+        free(l->front);
+        l->front = NULL;
+        return CS_SUCCESS;
+    }
+    list_node *aux = l->front->prev;
+    l->front->prev->prev->next = l->front;
+    l->front->prev = l->front->prev->prev;
+    if (fr)
+        fr(aux->data);
+    free(aux);
+    return CS_SUCCESS;
+}
 
 /*!
  * Erases the element at the given position from the list
@@ -70,7 +161,7 @@ cs_codes list_erase(list *l, int pos);
 int list_find(list l, const void *el);
 
 /*!
- * Returns if the list is emty
+ * Returns if the list is empty
  * @param[in] l  List that will be checked
  * @return 1 if the list is empty, 0 otherwise 
  */
@@ -86,13 +177,21 @@ static inline int list_size(list l) { return l.size; }
  * Gives a pointer to the information the front element in the list holds
  * @param[in] l  List whose front element will be accessed
  */
-void *list_front(list l);
+static inline void *list_front(list l) {
+    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, NULL);
+    CS_RETURN_IF(l.size == 0, NULL);
+    return l.front->data;
+}
 
 /*!
  * Gives a pointer to the information the back element in the list holds
  * @param[in] l  List whose back element will be accessed
  */
-void *list_back(list l);
+static inline void *list_back(list l) {
+    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, NULL);
+    CS_RETURN_IF(l.size == 0, NULL);
+    return l.front->prev->data;
+}
 
 /*!
  * Sorts the list if a comp function has been set

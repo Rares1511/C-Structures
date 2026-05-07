@@ -1150,7 +1150,7 @@ test_res test_list_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
-    post_operation_time(arg, "insert", elapsed);
+    post_operation_time(arg, "insert_back", elapsed);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements in %.6f seconds\n", total, elapsed);
 
@@ -1176,7 +1176,41 @@ test_res test_list_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
-    post_operation_time(arg, "delete", elapsed);
+    post_operation_time(arg, "delete_back", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popped %d elements in %.6f seconds\n", total, elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = list_push_front(&l, &i);
+        if (rc != 0) {
+            list_free(&l);
+            return (test_res){(char*)__func__, "Failed to push element", CS_UNKNOWN};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "insert_front", elapsed);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements in %.6f seconds\n", total, elapsed);
+
+    gettimeofday(&start, NULL);
+    list_sort(&l);
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "sort", elapsed);
+
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < total; i++) {
+        rc = list_pop_front(&l);
+        if (rc != 0) {
+            list_free(&l);
+            return (test_res){(char*)__func__, "Failed to pop element", CS_UNKNOWN};
+        }
+    }
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+    post_operation_time(arg, "delete_front", elapsed);
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Popped %d elements in %.6f seconds\n", total, elapsed);
 
