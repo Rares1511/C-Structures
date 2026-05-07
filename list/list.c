@@ -21,10 +21,11 @@ inline int list_compare(const void *a, const void *b, comparer comp, int size) {
 }
 
 /*!
- * Helper function for sorting the list using quicksort algorithm
- * @param[in] attr  Attributes for the datatype inside the list
- * @param[in] start Starting node for the sort
- * @param[in] end   Ending node for the sort
+ * Merges two sorted lists into one sorted list using the given attributes for comparison
+ * @param[in] a     First sorted list to be merged
+ * @param[in] b     Second sorted list to be merged
+ * @param[in] attr  Attributes for the elements in the lists (used for comparison)
+ * @return Pointer to the head of the merged sorted list
  */
 list_node* merge_iterative(list_node* a, list_node* b, elem_attr_t attr) {
     list_node dummy;
@@ -90,15 +91,15 @@ cs_codes list_erase(list *l, int pos) {
     return CS_SUCCESS;
 }
 
-int list_find(list l, const void *el) {
+int list_find(list *l, const void *el) {
     CS_RETURN_IF(el == NULL, -1);
-    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, -1);
-    CS_RETURN_IF(l.size == 0, -1);
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, -1);
+    CS_RETURN_IF(l->size == 0, -1);
 
-    list_node *current = l.front;
-    comparer comp = l.attr.comp;
-    int elem_size = l.attr.size;
-    for (int pos = 0; pos < l.size; pos++, current = current->next) {
+    list_node *current = l->front;
+    comparer comp = l->attr.comp;
+    int elem_size = l->attr.size;
+    for (int pos = 0; pos < l->size; pos++, current = current->next) {
         if (list_compare(current->data, el, comp, elem_size) == 0)
             return pos;
     }
@@ -199,7 +200,7 @@ void list_free(void *l_p) {
     list *l = (list *)l_p;
     CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC);
     freer fr = l->attr.fr;
-    if (!list_empty(*l)) {
+    if (l->size != 0) {
         list_node *node = l->front->next;
         while (node != l->front) {
             list_node *aux = node;

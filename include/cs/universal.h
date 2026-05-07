@@ -49,6 +49,7 @@ typedef enum {
     CS_LIST_TYPE,
     CS_GRAPH_TYPE,
     CS_DEQUE_TYPE,
+    CS_FORWARD_LIST_TYPE,
 } struct_type_t;
 
 typedef void (*printer)(FILE *, const void *);

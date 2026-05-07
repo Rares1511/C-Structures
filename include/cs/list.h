@@ -158,39 +158,39 @@ cs_codes list_erase(list *l, int pos);
  * @param[in] el Element that will be searched for
  * @return Position of the first occurrence of the element or -1 if not found
  */
-int list_find(list l, const void *el);
+int list_find(list *l, const void *el);
 
 /*!
  * Returns if the list is empty
  * @param[in] l  List that will be checked
  * @return 1 if the list is empty, 0 otherwise 
  */
-static inline int list_empty(list l) { return l.size == 0; }
+static inline int list_empty(list *l) { return l->size == 0; }
 
 /*!
  * Returns the number of elements in the list
  * @param[in] l  List whose size will be returned
  */
-static inline int list_size(list l) { return l.size; }
+static inline int list_size(list *l) { return l->size; }
 
 /*!
  * Gives a pointer to the information the front element in the list holds
  * @param[in] l  List whose front element will be accessed
  */
-static inline void *list_front(list l) {
-    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, NULL);
-    CS_RETURN_IF(l.size == 0, NULL);
-    return l.front->data;
+static inline void *list_front(list *l) {
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, NULL);
+    CS_RETURN_IF(l->size == 0, NULL);
+    return l->front->data;
 }
 
 /*!
  * Gives a pointer to the information the back element in the list holds
  * @param[in] l  List whose back element will be accessed
  */
-static inline void *list_back(list l) {
-    CS_RETURN_IF(l.header.magic != CS_LIST_MAGIC, NULL);
-    CS_RETURN_IF(l.size == 0, NULL);
-    return l.front->prev->data;
+static inline void *list_back(list *l) {
+    CS_RETURN_IF(l->header.magic != CS_LIST_MAGIC, NULL);
+    CS_RETURN_IF(l->size == 0, NULL);
+    return l->front->prev->data;
 }
 
 /*!
@@ -208,7 +208,7 @@ void list_sort(list *l);
  * @param[in]  attr  New attributes for the elements of the list
  */
 static inline void list_set_attr(list *l, elem_attr_t attr) { 
-    CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH);
+    CS_RETURN_IF(l == NULL || attr.size <= 0 || attr.size > SIZE_TH || l->header.magic != CS_LIST_MAGIC);
     l->attr = attr; 
 }
 
@@ -218,7 +218,7 @@ static inline void list_set_attr(list *l, elem_attr_t attr) {
  * @param[in]  fr  New free function for the datatype inside the list
  */
 static inline void list_set_free(list *l, freer fr) { 
-    CS_RETURN_IF(l == NULL);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC);
     l->attr.fr = fr; 
 }
 
@@ -228,7 +228,7 @@ static inline void list_set_free(list *l, freer fr) {
  * @param[in]  print  New print function for the datatype inside the list
  */
 static inline void list_set_print(list *l, printer print) { 
-    CS_RETURN_IF(l == NULL);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC);
     l->attr.print = print; 
 }
 
@@ -238,7 +238,7 @@ static inline void list_set_print(list *l, printer print) {
  * @param[in]  cp  New copy function for copying the elements inside the list
  */
 static inline void list_set_copy(list *l, deepcopy copy) { 
-    CS_RETURN_IF(l == NULL);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC);
     l->attr.copy = copy; 
 }
 
@@ -248,7 +248,7 @@ static inline void list_set_copy(list *l, deepcopy copy) {
  * @param[in]  print  New comp function for the datatype inside the list
  */
 static inline void list_set_comp(list *l, comparer comp) { 
-    CS_RETURN_IF(l == NULL);
+    CS_RETURN_IF(l == NULL || l->header.magic != CS_LIST_MAGIC);
     l->attr.comp = comp; 
 }
 

@@ -3,15 +3,19 @@
 
 #include <cs/universal.h>
 
+#define CS_FORWARD_LIST_MAGIC 0x464C5354 /* "FLST" in hexadecimal */
+
 typedef struct forward_list_node{
-    void* data;
-    struct forward_list_node* next;
+    struct forward_list_node* next; /*!< Pointer to the next node in the list */
+    char data[];                    /*<! Data storage for the node */
 } forward_list_node;
 
 typedef struct forward_list {
-    forward_list_node* head;
-    elem_attr_t attr;
-    int size;
+    cs_header_t header;      /*!< Header for validation and type identification */
+    forward_list_node* head; /*!< Pointer to the first node in the list */
+    forward_list_node* tail; /*!< Pointer to the last node in the list */
+    elem_attr_t attr;        /*!< Attributes for the elements stored in the list */
+    int size;                /*!< Number of elements currently in the list */
 } forward_list;
 
 /*!
@@ -27,14 +31,14 @@ cs_codes forward_list_init(forward_list *list, elem_attr_t attr);
  * @param list The forward list to check.
  * @return 1 if the list is empty, 0 otherwise.
  */
-static inline int forward_list_empty(forward_list list) { return list.size == 0; }
+static inline int forward_list_empty(forward_list *list) { return list->size == 0; }
 
 /*! 
  * Retrieves the size of the forward list.
  * @param list The forward list.
  * @return The number of elements in the list.
  */
-static inline int forward_list_size(forward_list list) { return list.size; }
+static inline int forward_list_size(forward_list *list) { return list->size; }
 
 /*! 
  * Inserts a new element at the front of the forward list.
@@ -42,14 +46,58 @@ static inline int forward_list_size(forward_list list) { return list.size; }
  * @param data Pointer to the data to insert.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes forward_list_push_front(forward_list* list, const void* data);
+cs_codes forward_list_push_front(forward_list* list, const void* data) {
+    CS_RETURN_IF(list == NULL || data == NULL, CS_NULL);
+    CS_RETURN_IF(list->header.magic != CS_FORWARD_LIST_MAGIC, CS_UNINITIALIZED);
+
+    forward_list_node *node = malloc(sizeof(forward_list_node) + list->attr.size);
+    CS_RETURN_IF(node == NULL, CS_MEM);
+
+    // We copy the bytes directly into the node's tail
+    if (list->attr.copy)
+        list->attr.copy(node->data, data);
+    else
+        memcpy(node->data, data, list->attr.size);
+
+    node->next = NULL; // Initialize next pointer to NULL
+
+    if (list->size == 0) {
+        list->tail = node;
+    }
+
+    node->next = list->head;
+    list->head = node;
+    list->size++;
+
+    return CS_SUCCESS;
+}
 
 /*! 
  * Removes the element at the front of the forward list.
  * @param list Pointer to the forward list.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes forward_list_pop_front(forward_list* list);
+cs_codes forward_list_pop_front(forward_list* list) {
+    CS_RETURN_IF(list == NULL, CS_NULL);
+    CS_RETURN_IF(list->header.magic != CS_FORWARD_LIST_MAGIC, CS_UNINITIALIZED);
+    CS_RETURN_IF(list->size == 0, CS_EMPTY);
+
+    forward_list_node* temp = list->head;
+    freer fr = list->attr.fr;
+    list->head = list->head->next;
+
+    if (fr)
+        fr(temp->data);
+    free(temp);
+    list->size--;
+
+    if (list->size == 0) {
+        list->tail = NULL; // If the list is now empty, reset the tail pointer
+        list->head = NULL; // Also reset the head pointer for safety
+    }
+
+    return CS_SUCCESS;
+}
 
 /*! 
  * Finds the index of the first occurrence of the specified data in the forward list.
@@ -57,7 +105,7 @@ cs_codes forward_list_pop_front(forward_list* list);
  * @param data Pointer to the data to find.
  * @return The index of the element if found, or -1 if not found or on error.
  */
-int forward_list_find(forward_list list, const void* data);
+int forward_list_find(forward_list *list, const void* data);
 
 /*! 
  * Retrieves the size of the forward list.
@@ -65,7 +113,7 @@ int forward_list_find(forward_list list, const void* data);
  * @return The number of elements in the list.
  */
 static inline void forward_list_set_attr(forward_list* list, elem_attr_t attr) {
-    CS_RETURN_IF(list == NULL || attr.size <= 0 || attr.size > SIZE_TH);
+    CS_RETURN_IF(list == NULL || attr.size <= 0 || attr.size > SIZE_TH || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr = attr;
 }
 
@@ -75,7 +123,7 @@ static inline void forward_list_set_attr(forward_list* list, elem_attr_t attr) {
  * @param size The new size to set.
  */
 static inline void forward_list_set_size(forward_list* list, int size) {
-    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.size = size;
 }
 
@@ -85,7 +133,7 @@ static inline void forward_list_set_size(forward_list* list, int size) {
  * @param fr The freer function to set.
  */
 static inline void forward_list_set_free(forward_list* list, freer fr) {
-    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.fr = fr;
 }
 
@@ -95,7 +143,7 @@ static inline void forward_list_set_free(forward_list* list, freer fr) {
  * @param cp The copy function to set.
  */
 static inline void forward_list_set_copy(forward_list* list, deepcopy cp) {
-    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.copy = cp;
 }
 
@@ -105,7 +153,7 @@ static inline void forward_list_set_copy(forward_list* list, deepcopy cp) {
  * @param pr The print function to set.
  */
 static inline void forward_list_set_print(forward_list* list, printer pr) {
-    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.print = pr;
 }
 
@@ -115,7 +163,7 @@ static inline void forward_list_set_print(forward_list* list, printer pr) {
  * @param cmp The compare function to set.
  */
 static inline void forward_list_set_compare(forward_list* list, comparer cmp) {
-    CS_RETURN_IF(list == NULL);
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.comp = cmp;
 }
 
@@ -124,7 +172,12 @@ static inline void forward_list_set_compare(forward_list* list, comparer cmp) {
  * @param list The forward list.
  * @return Pointer to the data at the front of the list, or NULL if the list is empty.
  */
-void* forward_list_front(forward_list list);
+void* forward_list_front(forward_list *list) {
+    CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC || list->size == 0, NULL);
+    return list->head->data;
+}
+
+void forward_list_sort(forward_list *list);
 
 /*! 
  * Swaps the contents of two forward lists.
