@@ -17,7 +17,10 @@ static void *test_map_find(void *arg) {
     auto *m = static_cast<std::map<int, std::string>*>(arg);
     const int total = __MAP_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        m->find(i);
+        int res = m->find(i) != m->end() ? 1 : 0;
+        if (res == 0) {
+            fprintf(stderr, "Error: Key %d not found in map\n", i);
+        }
     }
     return m;
 }

@@ -3,10 +3,10 @@
 
 #include <cs/universal.h>
 
-typedef struct rbt rbt;
+typedef struct __rbt __rbt;
 
 typedef struct multiset {
-    rbt *t;               /*!< red black tree containing the multiset data */
+    __rbt *t;               /*!< red black tree containing the multiset data */
     elem_attr_t* el_attr; /*!< attributes of the multiset elements */
     elem_attr_t* count_attr; /*!< attributes of the count elements */
     int size;             /*!< number of unique elements in the multiset */

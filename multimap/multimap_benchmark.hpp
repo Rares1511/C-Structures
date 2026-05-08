@@ -17,7 +17,10 @@ static void *test_multimap_find(void *arg) {
     std::multimap<int, std::string> *mm = static_cast<std::multimap<int, std::string> *>(arg);
     int total = __MULTIMAP_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        mm->find(i);
+        int res = mm->find(i) != mm->end() ? 1 : 0;
+        if (res == 0) {
+            fprintf(stderr, "Error: Key %d not found in multimap\n", i);
+        }
     }
     return mm;
 }

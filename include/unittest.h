@@ -43,7 +43,7 @@
 // Used by set, map, multiset, multimap unittests to verify RBT integrity
 // ============================================================================
 
-static inline int rbt_check_black_height(rbt_node *node) {
+static inline int rbt_check_black_height(__rbt_node *node) {
     if (node == NULL) {
         return 1;
     }
@@ -67,7 +67,7 @@ static inline int rbt_check_black_height(rbt_node *node) {
     return left_bh + (node->color == __RBT_NODE_BLACK_COLOR ? 1 : 0);
 }
 
-static inline int rbt_check_bst(rbt_node *node, elem_attr_t attr, void *min_key, void *max_key) {
+static inline int rbt_check_bst(__rbt_node *node, elem_attr_t attr, void *min_key, void *max_key) {
     if (!node) return 1;
 
     if (min_key) {
@@ -89,7 +89,7 @@ static inline int rbt_check_bst(rbt_node *node, elem_attr_t attr, void *min_key,
     return 1;
 }
 
-static inline int rbt_is_valid(rbt *t) {
+static inline int rbt_is_valid(__rbt *t) {
     if (t->root && t->root->color != __RBT_NODE_BLACK_COLOR)
         return 0;
 

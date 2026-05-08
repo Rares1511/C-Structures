@@ -3,10 +3,10 @@
 
 #include <cs/universal.h>
 
-typedef struct rbt rbt;
+typedef struct __rbt __rbt;
 
 typedef struct map {
-    rbt* t;
+    __rbt* t;
     elem_attr_t* key_attr;
     elem_attr_t* val_attr;
 } map;

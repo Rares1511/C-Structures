@@ -3,11 +3,11 @@
 
 #include <cs/universal.h>
 
-typedef struct rbt rbt;
+typedef struct __rbt __rbt;
 typedef struct vector vector;
 
 typedef struct multimap {
-    rbt *t;
+    __rbt *t;
     elem_attr_t* key_attr;
     elem_attr_t* value_attr;
     elem_attr_t* vec_attr;

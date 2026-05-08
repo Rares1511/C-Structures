@@ -97,9 +97,9 @@ cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
     memcpy(ms->el_attr, &attr, sizeof(elem_attr_t));
     memcpy(ms->count_attr, &count_attr, sizeof(elem_attr_t));
 
-    ms->t = malloc(sizeof(rbt));
+    ms->t = malloc(sizeof(__rbt));
     CS_RETURN_IF(NULL == ms->t, CS_MEM);
-    return rbt_init(ms->t, rbt_attr);
+    return __rbt_init(ms->t, rbt_attr);
 }
 
 cs_codes multiset_insert(multiset *ms, const void *elem) {
@@ -109,7 +109,7 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, &inital_count);
 
-    void *node = rbt_find((ms->t), &data);
+    void *node = __rbt_find((ms->t), &data);
     if (node != NULL) {
         pair_free(&data);
         pair *p = (pair *)node;
@@ -118,7 +118,7 @@ cs_codes multiset_insert(multiset *ms, const void *elem) {
         rc = CS_SUCCESS;
     }
     else {
-        rc = rbt_insert(ms->t, &data);
+        rc = __rbt_insert(ms->t, &data);
     }
 
     if (rc == CS_SUCCESS) {
@@ -135,7 +135,7 @@ cs_codes multiset_delete(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
-    void *node = rbt_find((ms->t), &data);
+    void *node = __rbt_find((ms->t), &data);
     if (node != NULL) {
         pair *p = (pair *)node;
         int *count = (int *)pair_second(*p);
@@ -143,7 +143,7 @@ cs_codes multiset_delete(multiset *ms, const void *elem) {
             (*count)--;
             rc = CS_SUCCESS;
         } else {
-            rc = rbt_delete(ms->t, &data);
+            rc = __rbt_delete(ms->t, &data);
         }
     } else {
         rc = CS_ELEM;
@@ -163,7 +163,7 @@ int multiset_count(multiset *ms, const void *elem) {
     pair_init(&data, ms->el_attr, ms->count_attr);
     pair_set(&data, elem, NULL);
 
-    void *node = rbt_find((ms->t), &data);
+    void *node = __rbt_find((ms->t), &data);
     pair_free(&data);
     if (node != NULL) {
         pair *p = (pair *)node;
@@ -175,14 +175,14 @@ int multiset_count(multiset *ms, const void *elem) {
 
 void multiset_clear(multiset *ms) {
     CS_RETURN_IF(ms == NULL);
-    rbt_clear(ms->t);
+    __rbt_clear(ms->t);
 }
 
 void multiset_swap(multiset *ms1, multiset *ms2) {
     CS_RETURN_IF(ms1 == NULL || ms2 == NULL);
     elem_attr_t* temp_el_attr = ms1->el_attr;
     elem_attr_t* temp_count_attr = ms1->count_attr;
-    rbt *temp_t = ms1->t;
+    __rbt *temp_t = ms1->t;
     int temp_size = ms1->size;
 
     ms1->el_attr = ms2->el_attr;
@@ -199,13 +199,13 @@ void multiset_swap(multiset *ms1, multiset *ms2) {
 void multiset_print(FILE *stream, void *v_ms) {
     CS_RETURN_IF(v_ms == NULL || stream == NULL);
     multiset *ms = (multiset *)v_ms;
-    rbt_print(stream, ms->t);
+    __rbt_print(stream, ms->t);
 }
 
 void multiset_free(void *v_ms) {
     CS_RETURN_IF(v_ms == NULL);
     multiset *ms = (multiset *)v_ms;
-    rbt_free(ms->t);
+    __rbt_free(ms->t);
     free(ms->el_attr);
     free(ms->count_attr);
     free(ms->t);

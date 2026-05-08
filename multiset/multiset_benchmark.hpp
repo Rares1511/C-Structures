@@ -15,7 +15,10 @@ static void *test_multiset_find(void *arg) {
     std::multiset<int> *ms = static_cast<std::multiset<int> *>(arg);
     int total = __MULTISET_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        ms->find(i);
+        int res = ms->find(i) != ms->end() ? 1 : 0;
+        if (res == 0) {
+            fprintf(stderr, "Error: Key %d not found in multiset\n", i);
+        }
     }
     return ms;
 }

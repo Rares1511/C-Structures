@@ -1,5 +1,4 @@
 #include <cs/set.h>
-#include <cs/rbt.h>
 
 #include <benchmark.h>
 #include <unittest.h>

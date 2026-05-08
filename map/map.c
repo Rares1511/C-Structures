@@ -57,9 +57,9 @@ cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr) {
     CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL, CS_MEM);
     memcpy(m->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(m->val_attr, &val_attr, sizeof(elem_attr_t));
-    m->t = malloc(sizeof(rbt));
+    m->t = malloc(sizeof(__rbt));
     CS_RETURN_IF(NULL == m->t, CS_MEM);
-    return rbt_init(m->t, pair_attr);
+    return __rbt_init(m->t, pair_attr);
 }
 
 cs_codes map_insert(map *m, void *key, void *val) {
@@ -68,7 +68,7 @@ cs_codes map_insert(map *m, void *key, void *val) {
     pair_init(&data, m->key_attr, m->val_attr);
     pair_set(&data, key, val);
 
-    return rbt_insert(m->t, &data);
+    return __rbt_insert(m->t, &data);
 }
 
 cs_codes map_delete(map *m, void *key) {
@@ -77,19 +77,19 @@ cs_codes map_delete(map *m, void *key) {
     pair_init(&search_key, m->key_attr, m->val_attr);
     pair_set(&search_key, key, NULL);
 
-    cs_codes result = rbt_delete(m->t, &search_key);
+    cs_codes result = __rbt_delete(m->t, &search_key);
     pair_free(&search_key);
     return result;
 }
 
 int map_empty(map m) {
     CS_RETURN_IF(m.t == NULL, 1);
-    return rbt_empty((m.t));
+    return __rbt_empty((m.t));
 }
 
 int map_size(map m) {
     CS_RETURN_IF(m.t == NULL, 0);
-    return rbt_size((m.t));
+    return __rbt_size((m.t));
 }   
 
 void* map_find(map m, void *key) {
@@ -98,7 +98,7 @@ void* map_find(map m, void *key) {
     pair_init(&search_key, m.key_attr, m.val_attr);
     pair_set(&search_key, key, NULL);
 
-    pair* result = (pair*)rbt_find((m.t), &search_key);
+    pair* result = (pair*)__rbt_find((m.t), &search_key);
     pair_free(&search_key);
     CS_RETURN_IF(result == NULL, NULL);
     return pair_second(result);
@@ -116,24 +116,24 @@ void map_swap(map *m1, map *m2) {
     m2->key_attr = temp_key_attr;
     m2->val_attr = temp_val_attr;
 
-    rbt_swap(m1->t, m2->t);
+    __rbt_swap(m1->t, m2->t);
 }
 
 void map_clear(map *m) {
     CS_RETURN_IF(m == NULL);
-    rbt_clear(m->t);
+    __rbt_clear(m->t);
 }
 
 void map_print(FILE *stream, void *v_m) {
     CS_RETURN_IF(v_m == NULL || stream == NULL);
     map *m = (map *)v_m;
-    rbt_print(stream, m->t);
+    __rbt_print(stream, m->t);
 }
 
 void map_free(void *v_m) {
     CS_RETURN_IF(v_m == NULL);
     map *m = (map *)v_m;
-    rbt_free(m->t);
+    __rbt_free(m->t);
     free(m->key_attr);
     free(m->val_attr);
     free(m->t);

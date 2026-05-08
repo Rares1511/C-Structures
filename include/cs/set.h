@@ -2,11 +2,10 @@
 #define __CS_SET_H__
 
 #include <cs/universal.h>
-
-typedef struct rbt rbt;
+#include <cs/rbt.h>
 
 typedef struct set {
-    rbt *t;                /*!< red black tree containing the set data */
+    __rbt *t;                /*!< red black tree containing the set data */
 } set;
 
 /*!
@@ -23,7 +22,10 @@ cs_codes set_init(set *s, elem_attr_t attr);
  * @param data Pointer to the data to be inserted.
  * @return cs_codes Status code indicating success or type of error.
  */
-cs_codes set_insert(set *s, void *data);
+static inline cs_codes set_insert(set *s, void *data) {
+    CS_RETURN_IF(s == NULL, CS_NULL);
+    return __rbt_insert(s->t, data);
+}
 
 /*!
  * Deletes an element from the set.
@@ -31,21 +33,30 @@ cs_codes set_insert(set *s, void *data);
  * @param data Pointer to the data to be deleted.
  * @return cs_codes Status code indicating success or type of error.
  */
-cs_codes set_delete(set *s, void *data);
+static inline cs_codes set_delete(set *s, void *data) {
+    CS_RETURN_IF(s == NULL, CS_NULL);
+    return __rbt_delete(s->t, data);
+}
 
 /*!
  * Checks if the set is empty.
  * @param s The set to check.
  * @return 1 if the set is empty, 0 otherwise.
  */
-int set_empty(set *s);
+static inline int set_empty(set *s) {
+    CS_RETURN_IF(s->t == NULL, 1);
+    return __rbt_empty(s->t);
+}
 
 /*!
  * Returns the number of elements in the set.
  * @param s The set.
  * @return The size of the set.
  */
-int set_size(set *s);
+static inline int set_size(set *s) {
+    CS_RETURN_IF(s->t == NULL, 0);
+    return __rbt_size(s->t);
+}
 
 /*!
  * Finds an element in the set.
@@ -53,7 +64,9 @@ int set_size(set *s);
  * @param data Pointer to the data to be found.
  * @return Pointer to the found data, or NULL if not found.
  */
-void* set_find(set *s, void *data);
+static inline void* set_find(set *s, void *data) {
+    return __rbt_find(s->t, data);
+}
 
 /*!
  * Swaps the contents of two sets.

@@ -59,19 +59,19 @@ SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
 INSTALL_LIBS := $(SUBDIRS)
 
 # ---------------- Core/Dependency objects ----------------
-CORE_OBJS := rbt/rbt.o pair/pair.o hash_table/hash_table.o
+CORE_OBJS := pair/pair.o hash_table/hash_table.o
 
 # Link-time dependencies for shared libraries
 DEPS_rbt                := vector/vector.o
-DEPS_map                := rbt/rbt.o pair/pair.o
-DEPS_set                := rbt/rbt.o
+DEPS_map                := pair/pair.o
+DEPS_set                := 
 DEPS_stack              := vector/vector.o deque/deque.o list/list.o
 DEPS_queue              := deque/deque.o list/list.o
 DEPS_priority_queue     := vector/vector.o deque/deque.o
 DEPS_unordered_set      := hash_table/hash_table.o vector/vector.o
 DEPS_unordered_map      := hash_table/hash_table.o vector/vector.o pair/pair.o
-DEPS_multiset           := rbt/rbt.o pair/pair.o
-DEPS_multimap           := rbt/rbt.o pair/pair.o vector/vector.o
+DEPS_multiset           := pair/pair.o
+DEPS_multimap           := pair/pair.o vector/vector.o
 DEPS_unordered_multiset := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_unordered_multimap := hash_table/hash_table.o pair/pair.o vector/vector.o
 DEPS_flat_set           := vector/vector.o deque/deque.o

@@ -83,10 +83,10 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
     memcpy(mm->value_attr, &value_attr, sizeof(elem_attr_t));
     memcpy(mm->vec_attr, &vec_attr, sizeof(elem_attr_t));
 
-    mm->t = malloc(sizeof(rbt));
+    mm->t = malloc(sizeof(__rbt));
     mm->size = 0;
     CS_RETURN_IF(NULL == mm->t, CS_MEM);
-    return rbt_init(mm->t, rbt_attr);
+    return __rbt_init(mm->t, rbt_attr);
 }
 
 cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
@@ -97,7 +97,7 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
 
-    pair *p = (pair *)rbt_find((mm->t), &data);
+    pair *p = (pair *)__rbt_find((mm->t), &data);
     if (p != NULL) {
         pair_free(&data);
         vector *vec = (vector *)pair_second(*p);
@@ -113,7 +113,7 @@ cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
         }
         vector_push_back(&vec, value);
         pair_set(&data, NULL, &vec);
-        rc = rbt_insert(mm->t, &data);
+        rc = __rbt_insert(mm->t, &data);
     }
 
     if (CS_SUCCESS == rc) {
@@ -130,12 +130,12 @@ cs_codes multimap_delete(multimap *mm, const void *key) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
 
-    pair *p = (pair *)rbt_find((mm->t), &data);
+    pair *p = (pair *)__rbt_find((mm->t), &data);
     if (p != NULL) {
         vector *vec = (vector *)pair_second(*p);
         int size = vector_size(vec);
         if (size == 1) {
-            rc = rbt_delete(mm->t, &data);
+            rc = __rbt_delete(mm->t, &data);
         } 
         else {
             rc = vector_pop_back(vec);
@@ -158,7 +158,7 @@ vector* multimap_get(multimap *mm, const void *key) {
     pair_init(&data, mm->key_attr, mm->vec_attr);
     pair_set(&data, key, NULL);
     
-    pair *p = (pair *)rbt_find((mm->t), &data);
+    pair *p = (pair *)__rbt_find((mm->t), &data);
     pair_free(&data);
         
     if (p != NULL) {
@@ -169,12 +169,12 @@ vector* multimap_get(multimap *mm, const void *key) {
 
 void multimap_clear(multimap *mm) {
     CS_RETURN_IF(mm == NULL);
-    rbt_clear(mm->t);
+    __rbt_clear(mm->t);
 }
 
 void multimap_swap(multimap *mm1, multimap *mm2) {
     CS_RETURN_IF(mm1 == NULL || mm2 == NULL);
-    rbt_swap(mm1->t, mm2->t);
+    __rbt_swap(mm1->t, mm2->t);
     elem_attr_t* temp_key_attr = mm1->key_attr;
     elem_attr_t* temp_value_attr = mm1->value_attr;
     elem_attr_t* temp_vec_attr = mm1->vec_attr;
@@ -194,13 +194,13 @@ void multimap_swap(multimap *mm1, multimap *mm2) {
 void multimap_print(FILE *stream, void *v_mm) {
     CS_RETURN_IF(v_mm == NULL);
     multimap *mm = (multimap *)v_mm;
-    rbt_print(stream, mm->t);
+    __rbt_print(stream, mm->t);
 }
 
 void multimap_free(void *v_mm) {
     CS_RETURN_IF(v_mm == NULL);
     multimap *mm = (multimap *)v_mm;
-    rbt_free(mm->t);
+    __rbt_free(mm->t);
     free(mm->key_attr);
     free(mm->value_attr);
     free(mm->vec_attr);
