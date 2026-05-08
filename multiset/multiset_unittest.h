@@ -1,6 +1,4 @@
 #include <cs/multiset.h>
-#include <cs/rbt.h>
-#include <cs/pair.h>
 
 #include <benchmark.h>
 #include <unittest.h>
@@ -15,7 +13,7 @@ test_res test_multiset_init(test_arg *arg) {
 
     if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", init_result};
     if (ms.t == NULL) return (test_res){(char*)__func__, "RBT is NULL", CS_MEM};
-    if (__rbt_size((ms.t)) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
+    if (__rbt_size(ms.t) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset initialized empty successfully");
 
@@ -441,7 +439,7 @@ test_res test_multiset_delete_random_order(test_arg *arg) {
     }
 
     // Create random order array
-    int *order = malloc(total * sizeof(int));
+    int *order = (int*)malloc(total * sizeof(int));
     for (int i = 0; i < total; i++) order[i] = i;
     for (int i = total - 1; i > 0; i--) {
         int j = rand() % (i + 1);

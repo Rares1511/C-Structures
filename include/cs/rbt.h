@@ -49,23 +49,18 @@ typedef struct {
  * @param[in] s - pointer to the rbt containing the node
  * @param[in] node - pointer to the rbt node to be freed
  */
-static inline __rbt_node* __rbt_node_init(void *data, elem_attr_t attr) {
+static inline __rbt_node* __rbt_node_init(const void *data, elem_attr_t attr) {
     __rbt_node *node = malloc(sizeof(__rbt_node) + attr.size);
-    if (node == NULL) {
-        return NULL;
-    }
+    if (!node) return NULL;
 
-    if (attr.copy != NULL) {
-        attr.copy(node->data, data);
-    } else {
-        memcpy(node->data, data, attr.size);
-    }
-
+    node->left = node->right = node->father = NULL;
     node->color = __RBT_NODE_RED_COLOR;
-    node->left = NULL;
-    node->right = NULL;
-    node->father = NULL;
 
+    if (data != NULL) {
+        if (attr.copy) attr.copy(node->data, data);
+        else memcpy(node->data, data, attr.size);
+    }
+    
     return node;
 }
 
@@ -131,47 +126,6 @@ static inline __rbt_node *__rbt_node_minimum(__rbt_node *node) {
         node = node->left;
     }
     return node;
-}
-
-/*!
- * Compares a rbt node's data with a given data using the rbt's comparison function
- * or the universal comparison if no custom function is provided
- * @param[in] s - pointer to the rbt containing the node
- * @param[in] data1 - pointer to the first data to compare
- * @param[in] data2 - pointer to the second data to compare
- * @return Negative value if data1 is less than data2,
- *         positive value if data1 is greater than data2,
- *         zero if they are equal
- */
-static inline cs_codes __rbt_insert_standard(__rbt *t, __rbt_node *new_node) {
-    __rbt_node *node = t->root;
-    __rbt_node *prev = NULL;
-
-    while (node != NULL) {
-        int cmp = __rbt_node_compare(t, new_node->data, node->data);
-        prev = node;
-        if (cmp == 0) {
-            return CS_ELEM;
-        } else if (cmp < 0) {
-            node = node->left;
-        } else {
-            node = node->right;
-        }
-    }
-
-    if (t->size == 0) {
-        t->root = new_node;
-    } else {
-        int cmp = __rbt_node_compare(t, new_node->data, prev->data);
-        if (cmp < 0) {
-            prev->left = new_node;
-        } else {
-            prev->right = new_node;
-        }
-        new_node->father = prev;
-    }
-
-    return CS_SUCCESS;
 }
 
 /*!
@@ -300,6 +254,50 @@ static inline cs_codes __rbt_insert_fixup(__rbt *t, __rbt_node *node) {
     return CS_SUCCESS;
 }
 
+
+/*!
+ * Inserts a new node into the rbt and fixes the tree properties
+ * @param[in] t - pointer to the rbt
+ * @param[in] new_node - pointer to the new node to be inserted
+ * @return Pointer to the inserted node or the existing node if a duplicate is found
+ */
+static inline __rbt_node* __rbt_insert_internal(__rbt *t, __rbt_node *new_node) {
+    __rbt_node *node = t->root;
+    __rbt_node *prev = NULL;
+
+    while (node != NULL) {
+        int cmp = __rbt_node_compare(t, new_node->data, node->data);
+        prev = node;
+        if (cmp == 0) {
+            return node;
+        } else if (cmp < 0) {
+            node = node->left;
+        } else {
+            node = node->right;
+        }
+    }
+
+    if (t->size == 0) {
+        t->root = new_node;
+    } else {
+        int cmp = __rbt_node_compare(t, new_node->data, prev->data);
+        if (cmp < 0) {
+            prev->left = new_node;
+        } else {
+            prev->right = new_node;
+        }
+        new_node->father = prev;
+    }
+
+    if (__rbt_insert_fixup(t, new_node) != CS_SUCCESS) {
+        return NULL;
+    }
+
+    t->size++;
+
+    return new_node;
+}
+
 /*!
  * Fixes the red-black tree properties after deletion
  * @param[in] t - pointer to the rbt
@@ -404,7 +402,7 @@ static inline cs_codes __rbt_delete_fixup(__rbt *t, __rbt_node *x, __rbt_node *x
  * @param[in] delete_node - pointer to the rbt node to be deleted
  * @return CS_SUCCESS on success
  */
-static inline cs_codes __rbt_delete_standard(__rbt *t, __rbt_node *delete_node) {
+static inline cs_codes __rbt_delete_internal(__rbt *t, __rbt_node *delete_node) {
     __rbt_node *y = delete_node, *x, *x_father;
     char original_color = y->color;
 
@@ -436,10 +434,15 @@ static inline cs_codes __rbt_delete_standard(__rbt *t, __rbt_node *delete_node) 
     }
 
     if (original_color == __RBT_NODE_BLACK_COLOR) {
-        return __rbt_delete_fixup(t, x, x_father);
+        cs_codes rc = __rbt_delete_fixup(t, x, x_father);
+        if (rc != CS_SUCCESS) {
+            return rc;
+        }
     }
 
     __rbt_node_free(delete_node, t->attr);
+
+    t->size--;
 
     return CS_SUCCESS;
 }
@@ -465,24 +468,22 @@ static inline cs_codes __rbt_init(__rbt *t, elem_attr_t attr) {
 static inline cs_codes __rbt_insert(__rbt *t, void *data) {
     CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
     CS_RETURN_IF(t->header.magic != CS_RBT_MAGIC, CS_UNINITIALIZED);
-    int rc;
     __rbt_node *new_node;
 
     new_node = __rbt_node_init(data, t->attr);
     CS_RETURN_IF(new_node == NULL, CS_MEM);
+    __rbt_node *inserted_node = __rbt_insert_internal(t, new_node);
 
-    rc = __rbt_insert_standard(t, new_node);
-    if (rc != CS_SUCCESS) {
+    if (inserted_node == NULL) {
         __rbt_node_free(new_node, t->attr);
-        return rc;
+        return CS_ELEM;
     }
 
-    rc = __rbt_insert_fixup(t, new_node);
-    if (rc != CS_SUCCESS) {
+    if (inserted_node != new_node) {
         __rbt_node_free(new_node, t->attr);
-        return rc;
+        return CS_ELEM;
     }
-    t->size++;
+
     return CS_SUCCESS;
 }
 
@@ -493,9 +494,7 @@ static inline cs_codes __rbt_delete(__rbt *t, void *data) {
 
     CS_RETURN_IF(delete_node == NULL, CS_ELEM);
 
-    int rc = __rbt_delete_standard(t, delete_node);
-    t->size--;
-    return rc;
+    return __rbt_delete_internal(t, delete_node);
 }
 
 static inline int __rbt_empty(__rbt *t) { return (t->root == NULL); }

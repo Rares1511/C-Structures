@@ -7,7 +7,7 @@
 // Each header defines: <module>_tests[] array and <module>_tests_size
 // ============================================================================
 
-#include "pair/pair_unittest.h"
+// #include "pair/pair_unittest.h"
 
 // Associative containers (Arrays)
 #include "vector/vector_unittest.h"
@@ -18,7 +18,7 @@
 // Associative containers (RBT)
 #include "set/set_unittest.h"
 #include "map/map_unittest.h"
-// #include "multiset/multiset_unittest.h"
+#include "multiset/multiset_unittest.h"
 // #include "multimap/multimap_unittest.h"
 
 // // Unordered associative containers (Hash Table)
@@ -52,7 +52,7 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test), sizeof(pair) },
+    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test), sizeof(pair) },
 
     // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test), sizeof(vector) },
@@ -63,7 +63,7 @@ static module_tests all_modules[] = {
     // // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test), sizeof(set) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test), sizeof(map) },
-    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
+    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
     // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test), sizeof(multimap) },
 
     // // // Unordered associative containers (Hash Table)

@@ -1,85 +1,15 @@
 #include <cs/multiset.h>
-#include <cs/pair.h>
-#include <cs/rbt.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-
-#pragma region Helper Functions
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-
-/*!
- * Compares two multiset nodes (pairs) based on their first element.
- * @param[in] a  Pointer to the first multiset node (pair)
- * @param[in] b  Pointer to the second multiset node (pair)
- * @return        Negative value if a < b, positive if a > b, zero if equal
- */
-int multiset_node_comp(const void *a, const void *b) {
-    const pair *pa = (pair*) a;
-    const pair *pb = (pair*) b;
-    if (pa->first_attr->comp != NULL) {
-        return pa->first_attr->comp(pair_first(*pa), pair_first(*pb));
-    }
-    return memcmp(pair_first(*pa), pair_first(*pb), pa->first_attr->size);
-}
-
-/*!
- * Copies a multiset node (pair) from src to dest.
- * @param[out] dest  Pointer to the destination multiset node (pair)
- * @param[in]  src   Pointer to the source multiset node (pair)
- */
-void multiset_node_copy(void *dest, const void *src) {
-    pair* d = (pair*)dest;
-    const pair* s = (const pair*)src;
-    if (d == NULL || s == NULL) {
-        return;
-    }
-    pair_init(d, s->first_attr, s->second_attr);
-    d->data = s->data;
-    d->has_first = s->has_first;
-    d->has_second = s->has_second;
-}
-
-/*!
- * Prints the elements of a multiset node (pair) to the given stream.
- * @param[in] stream  The output stream
- * @param[in] node    Pointer to the multiset node (pair)
- */
-void multiset_node_print(FILE *stream, const void *node) {
-    CS_RETURN_IF(node == NULL || stream == NULL);
-    const pair *p = (const pair *)node;
-    CS_RETURN_IF(pair_first(*p) == NULL || pair_second(*p) == NULL);
-    int count = *((int *)(pair_second(*p)));
-    CS_RETURN_IF(p->first_attr->print == NULL);
-    for (int i = 0; i < count; i++) {
-        p->first_attr->print(stream, pair_first(*p));
-        if (i < count - 1) {
-            fprintf(stream, ", ");
-        }
-    }
-}
-
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-#pragma endregion
 
 cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(NULL == ms, CS_NULL);
 
     elem_attr_t rbt_attr = {
-        .comp = multiset_node_comp,
-        .copy = multiset_node_copy,
+        .comp = __multiset_node_comp,
+        .copy = __multiset_node_copy,
         .fr = pair_free,
-        .print = multiset_node_print,
-        .size = sizeof(pair)
+        .print = __multiset_node_print,
+        .size = sizeof(pair) + attr.size + sizeof(int) // pair struct + element + count
     };
 
     elem_attr_t count_attr = {
@@ -100,77 +30,6 @@ cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
     ms->t = malloc(sizeof(__rbt));
     CS_RETURN_IF(NULL == ms->t, CS_MEM);
     return __rbt_init(ms->t, rbt_attr);
-}
-
-cs_codes multiset_insert(multiset *ms, const void *elem) {
-    CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
-    pair data;
-    int inital_count = 1, rc;
-    pair_init(&data, ms->el_attr, ms->count_attr);
-    pair_set(&data, elem, &inital_count);
-
-    void *node = __rbt_find((ms->t), &data);
-    if (node != NULL) {
-        pair_free(&data);
-        pair *p = (pair *)node;
-        int *count = (int *)pair_second(*p);
-        (*count)++;
-        rc = CS_SUCCESS;
-    }
-    else {
-        rc = __rbt_insert(ms->t, &data);
-    }
-
-    if (rc == CS_SUCCESS) {
-        ms->size++;
-    }
-
-    return rc;
-}
-
-cs_codes multiset_delete(multiset *ms, const void *elem) {
-    CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
-    pair data;
-    int rc;
-    pair_init(&data, ms->el_attr, ms->count_attr);
-    pair_set(&data, elem, NULL);
-
-    void *node = __rbt_find((ms->t), &data);
-    if (node != NULL) {
-        pair *p = (pair *)node;
-        int *count = (int *)pair_second(*p);
-        if (*count > 1) {
-            (*count)--;
-            rc = CS_SUCCESS;
-        } else {
-            rc = __rbt_delete(ms->t, &data);
-        }
-    } else {
-        rc = CS_ELEM;
-    }
-    pair_free(&data);
-
-    if (rc == CS_SUCCESS) {
-        ms->size--;
-    }
-
-    return rc;
-}
-
-int multiset_count(multiset *ms, const void *elem) {
-    CS_RETURN_IF(ms == NULL || elem == NULL, 0);
-    pair data;
-    pair_init(&data, ms->el_attr, ms->count_attr);
-    pair_set(&data, elem, NULL);
-
-    void *node = __rbt_find((ms->t), &data);
-    pair_free(&data);
-    if (node != NULL) {
-        pair *p = (pair *)node;
-        return *((int *)pair_second(*p));
-    } else {
-        return 0;
-    }
 }
 
 void multiset_clear(multiset *ms) {

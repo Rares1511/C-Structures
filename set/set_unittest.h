@@ -404,7 +404,8 @@ test_res test_set_delete_random_order(test_arg *arg) {
 
     if (set_size(s) != total - 15) {
         set_free(s);
-        return (test_res){(char*)__func__, "Size mismatch after random deletes", CS_UNKNOWN};
+        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected size after deletes: %d, actual size: %d\n", total - 15, set_size(s));
+        return (test_res){(char*)__func__, "Size mismatch after random deletes.", CS_UNKNOWN};
     }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after random deletes.\n");

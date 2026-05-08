@@ -5,8 +5,6 @@
 #include <cs/rbt.h>
 #include <cs/pair.h>
 
-typedef struct __rbt __rbt;
-
 typedef struct map {
     __rbt* t;
     elem_attr_t* key_attr;
@@ -131,7 +129,8 @@ static inline void* map_find(map *m, void *key) {
     dummy->header.magic = CS_PAIR_MAGIC;
     dummy->first_attr = m->key_attr;
     dummy->has_first = 1;
-    memcpy(dummy->data, key, k_sz);
+    if (m->key_attr->copy) m->key_attr->copy(dummy->data, key);
+    else memcpy(dummy->data, key, k_sz);
 
     // 3. Search (Pass pointer)
     pair* result = (pair*)__rbt_find(m->t, dummy);
