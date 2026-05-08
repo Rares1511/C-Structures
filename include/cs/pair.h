@@ -3,61 +3,26 @@
 
 #include <cs/universal.h>
 
-#include <string.h>
-#include <stdlib.h>
-
 #define CS_PAIR_MAGIC 0x50414952 /* 'PAIR' in ASCII */
 
 typedef struct pair {
     cs_header_t header;
-    void *data;
-    char has_first;
-    char has_second;
-    elem_attr_t* first_attr;
-    elem_attr_t* second_attr;
+    char has_first;           /* Flags to indicate if the first and second elements are set */
+    char has_second;          /* Flags to indicate if the first and second elements are set */
+    elem_attr_t* first_attr;  /* Pointers to the attributes of the first and second elements */
+    elem_attr_t* second_attr; /* Pointers to the attributes of the first and second elements */
+    char data[];              /* <! Flexible array member */
 } pair;
 
-static inline void *pair_first_value(pair p) {
-    CS_RETURN_IF(p.header.magic != CS_PAIR_MAGIC || !p.has_first, NULL);
-    return p.data;
-}
-
-static inline void *pair_first_ptr(const pair *p) {
+static inline void *pair_first(pair *p) {
     CS_RETURN_IF(p == NULL || p->header.magic != CS_PAIR_MAGIC || !p->has_first, NULL);
-    return p->data;
+    return (void*)p->data;
 }
 
-static inline void *pair_second_value(pair p) {
-    CS_RETURN_IF(p.header.magic != CS_PAIR_MAGIC || !p.has_second, NULL);
-    return (char*)p.data + p.first_attr->size;
-}
-
-static inline void *pair_second_ptr(const pair *p) {
+static inline void *pair_second(pair *p) {
     CS_RETURN_IF(p == NULL || p->header.magic != CS_PAIR_MAGIC || !p->has_second, NULL);
-    return ((char*)p->data + p->first_attr->size);
+    return (void*)(p->data + p->first_attr->size);
 }
-
-#define pair_first(p) _Generic((p), \
-    pair: pair_first_value, \
-    const pair: pair_first_value, \
-    volatile pair: pair_first_value, \
-    const volatile pair: pair_first_value, \
-    pair*: pair_first_ptr, \
-    const pair*: pair_first_ptr, \
-    volatile pair*: pair_first_ptr, \
-    const volatile pair*: pair_first_ptr \
-)(p)
-
-#define pair_second(p) _Generic((p), \
-    pair: pair_second_value, \
-    const pair: pair_second_value, \
-    volatile pair: pair_second_value, \
-    const volatile pair: pair_second_value, \
-    pair*: pair_second_ptr, \
-    const pair*: pair_second_ptr, \
-    volatile pair*: pair_second_ptr, \
-    const volatile pair*: pair_second_ptr \
-)(p)
 
 /*!
  * Initializes a pair structure with the provided elements and their attributes.
@@ -81,31 +46,27 @@ static inline cs_codes pair_set(pair* p, const void* first, const void* second) 
     CS_RETURN_IF(p == NULL, CS_NULL);
     CS_RETURN_IF(p->header.magic != CS_PAIR_MAGIC, CS_UNINITIALIZED);
     CS_RETURN_IF(first == NULL && second == NULL, CS_ELEM);
-    if (__builtin_expect(p->data == NULL, 0)) {
-        p->data = malloc(p->first_attr->size + p->second_attr->size);
-        if (!p->data) {
-            return CS_MEM;
-        }
-    }
+    void *first_val = p->data;
+    void *second_val = (char*)p->data + p->first_attr->size;
     if (first) {
         if (p->has_first && p->first_attr->fr) {
-            p->first_attr->fr(pair_first(*p));
+            p->first_attr->fr(first_val);
         }
         if (p->first_attr->copy) {
-            p->first_attr->copy(p->data, first);
+            p->first_attr->copy(first_val, first);
         } else {
-            memcpy(p->data, first, p->first_attr->size);
+            memcpy(first_val, first, p->first_attr->size);
         }
         p->has_first = 1;
     }
     if (second) {
         if (p->has_second && p->second_attr->fr) {
-            p->second_attr->fr(pair_second(*p));
+            p->second_attr->fr(second_val);
         }
         if (p->second_attr->copy) {
-            p->second_attr->copy((char*)p->data + p->first_attr->size, second);
+            p->second_attr->copy(second_val, second);
         } else {
-            memcpy((char*)p->data + p->first_attr->size, second, p->second_attr->size);
+            memcpy(second_val, second, p->second_attr->size);
         }
         p->has_second = 1;
     }

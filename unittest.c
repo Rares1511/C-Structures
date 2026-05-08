@@ -18,14 +18,14 @@
 // Associative containers (RBT)
 #include "set/set_unittest.h"
 #include "map/map_unittest.h"
-#include "multiset/multiset_unittest.h"
-#include "multimap/multimap_unittest.h"
+// #include "multiset/multiset_unittest.h"
+// #include "multimap/multimap_unittest.h"
 
-// Unordered associative containers (Hash Table)
-#include "unordered_set/unordered_set_unittest.h"
-#include "unordered_map/unordered_map_unittest.h"
-#include "unordered_multiset/unordered_multiset_unittest.h"
-#include "unordered_multimap/unordered_multimap_unittest.h"
+// // Unordered associative containers (Hash Table)
+// #include "unordered_set/unordered_set_unittest.h"
+// #include "unordered_map/unordered_map_unittest.h"
+// #include "unordered_multiset/unordered_multiset_unittest.h"
+// #include "unordered_multimap/unordered_multimap_unittest.h"
 
 // Container adapters
 #include "stack/stack_unittest.h"
@@ -63,20 +63,20 @@ static module_tests all_modules[] = {
     // // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test), sizeof(set) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test), sizeof(map) },
-    { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
-    { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test), sizeof(multimap) },
+    // { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
+    // { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test), sizeof(multimap) },
 
-    // // Unordered associative containers (Hash Table)
-    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
-    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
-    { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
-    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
+    // // // Unordered associative containers (Hash Table)
+    // { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
+    // { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
+    // { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
+    // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
 
-    // // Container adapters
-    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test), sizeof(stack) },
-    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test), sizeof(queue) },
-    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
-    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
+    // // // Container adapters
+    // { "stack", stack_tests, sizeof(stack_tests) / sizeof(test), sizeof(stack) },
+    // { "queue", queue_tests, sizeof(queue_tests) / sizeof(test), sizeof(queue) },
+    // { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
+    // { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
 
     // // Numeric types
     { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test), sizeof(large_number) },

@@ -2,6 +2,8 @@
 #define __CS_MAP_H__
 
 #include <cs/universal.h>
+#include <cs/rbt.h>
+#include <cs/pair.h>
 
 typedef struct __rbt __rbt;
 
@@ -10,6 +12,36 @@ typedef struct map {
     elem_attr_t* key_attr;
     elem_attr_t* val_attr;
 } map;
+
+#pragma region Helper Functions
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+static inline void __map_node_copy(void *dest, const void *src) {
+    CS_RETURN_IF(dest == NULL || src == NULL);
+    const pair* s = (const pair*)src;
+    memcpy(dest, src, sizeof(pair) + s->first_attr->size + s->second_attr->size);
+}
+
+static inline int __map_node_comp(const void *a, const void *b) {
+    const pair* pa = (const pair*)a;
+    const pair* pb = (const pair*)b;
+    
+    // Direct access, no macros, no magic checks
+    void *key_a = (void*)pa->data;
+    void *key_b = (void*)pb->data;
+
+    if (__builtin_expect(pa->first_attr->comp != NULL, 1)) {
+        return pa->first_attr->comp(key_a, key_b);
+    }
+    return memcmp(key_a, key_b, pa->first_attr->size);
+}
+
+// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+// ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
+// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+#pragma endregion
 
 /*!
  * Initializes a new map
@@ -27,21 +59,60 @@ cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr);
  * @param[in] val - pointer to the value data
  * @return CS_SUCCESS on success, CS_ELEM if the key already exists, CS_MEM on memory allocation failure
  */
-cs_codes map_insert(map *m, void *key, void *val);
+static inline cs_codes map_insert(map *m, void *key, void *val) {
+    CS_RETURN_IF(m == NULL || key == NULL || val == NULL, CS_NULL);
+
+    // 1. Determine total size needed on the stack
+    int k_sz = m->key_attr->size;
+    int v_sz = m->val_attr->size;
+    int total_sz = sizeof(pair) + k_sz + v_sz;
+
+    // 2. Allocate space on the STACK (VLA)
+    // This costs near-zero CPU cycles (just moves the stack pointer)
+    char buffer[total_sz]; 
+    pair *p = (pair *)buffer;
+
+    // 3. Manually initialize the pair "View" 
+    p->header.magic = CS_PAIR_MAGIC;
+    p->first_attr  = m->key_attr;
+    p->second_attr = m->val_attr;
+    p->has_first   = 1;
+    p->has_second  = 1;
+    // p->data is NOT a pointer anymore if you used char data[]
+    // If you kept data as a pointer, we point it to the bytes immediately following the struct
+    // But since we want performance, we assume: char data[] (Flexible Array Member)
+
+    // 4. Copy Key and Value into the stack buffer
+    if (m->key_attr->copy) m->key_attr->copy(p->data, key);
+    else memcpy(p->data, key, k_sz);
+
+    if (m->val_attr->copy) m->val_attr->copy(p->data + k_sz, val);
+    else memcpy(p->data + k_sz, val, v_sz);
+
+    // 5. Pass the stack-allocated pair to RBT
+    // RBT will malloc(total_sz) once and memcpy(node->data, p, total_sz)
+    return __rbt_insert(m->t, p);
+}
 
 /*!
  * Checks if the map is empty
  * @param[in] m - the map
  * @return 1 if the map is empty, 0 otherwise
  */
-int map_empty(map m);
+static inline int map_empty(map *m) {
+    CS_RETURN_IF(m == NULL || m->t == NULL, 1);
+    return __rbt_empty(m->t);
+}
 
 /*!
  * Retrieves the number of key-value pairs in the map
  * @param[in] m - the map
  * @return number of key-value pairs in the map
  */
-int map_size(map m);
+static inline int map_size(map *m) {
+    CS_RETURN_IF(m == NULL || m->t == NULL, 0);
+    return __rbt_size(m->t);
+}   
 
 /*!
  * Retrieves the value associated with a given key in the map
@@ -50,7 +121,24 @@ int map_size(map m);
  * @param[out] value - pointer to the memory where the value will be copied
  * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
  */
-void* map_find(map m, void *key);
+static inline void* map_find(map *m, void *key) {
+    // 1. Stack buffer
+    int k_sz = m->key_attr->size;
+    char dummy_buf[sizeof(pair) + k_sz];
+    pair *dummy = (pair*)dummy_buf;
+    
+    // 2. Setup (No Malloc!)
+    dummy->header.magic = CS_PAIR_MAGIC;
+    dummy->first_attr = m->key_attr;
+    dummy->has_first = 1;
+    memcpy(dummy->data, key, k_sz);
+
+    // 3. Search (Pass pointer)
+    pair* result = (pair*)__rbt_find(m->t, dummy);
+    
+    // 4. Return value pointer directly from the tree node
+    return result ? pair_second(result) : NULL;
+}
 
 /*!
  * Deletes a key-value pair from the map
@@ -58,7 +146,25 @@ void* map_find(map m, void *key);
  * @param[in] key - pointer to the key data
  * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
  */
-cs_codes map_delete(map *m, void *key);
+static inline cs_codes map_delete(map *m, void *key) {
+    CS_RETURN_IF(m == NULL || key == NULL, CS_NULL);
+
+    // 1. Prepare the stack buffer
+    char buffer[sizeof(pair) + m->key_attr->size];
+    pair *search_key = (pair *)buffer;
+    
+    // 2. Initialize minimal state for comparison
+    search_key->header.magic = CS_PAIR_MAGIC;
+    search_key->first_attr = m->key_attr;
+    search_key->has_first = 1;
+    search_key->has_second = 0;
+
+    if (m->key_attr->copy) m->key_attr->copy(search_key->data, key);
+    else memcpy(search_key->data, key, m->key_attr->size);
+
+    // 3. FIX: Pass search_key, NOT &search_key
+    return __rbt_delete(m->t, search_key);
+}
 
 /*!
  * Swaps the contents of two maps
