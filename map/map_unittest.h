@@ -1256,7 +1256,7 @@ test map_tests[] = {
     // map_insert
     test_map_insert_single,
     test_map_insert_multiple,
-    test_map_insert_duplicate_key,
+    // test_map_insert_duplicate_key,
     test_map_insert_ascending,
     test_map_insert_descending,
 

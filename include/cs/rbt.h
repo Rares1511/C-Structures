@@ -261,27 +261,33 @@ static inline cs_codes __rbt_insert_fixup(__rbt *t, __rbt_node *node) {
  * @param[in] new_node - pointer to the new node to be inserted
  * @return Pointer to the inserted node or the existing node if a duplicate is found
  */
-static inline __rbt_node* __rbt_insert_internal(__rbt *t, __rbt_node *new_node) {
+static inline __rbt_node* __rbt_insert_internal(__rbt *t, void *data) {
     __rbt_node *node = t->root;
     __rbt_node *prev = NULL;
+    int last_cmp = 0;
 
     while (node != NULL) {
-        int cmp = __rbt_node_compare(t, new_node->data, node->data);
+        last_cmp = __rbt_node_compare(t, data, node->data);
         prev = node;
-        if (cmp == 0) {
+        
+        if (last_cmp == 0) {
             return node;
-        } else if (cmp < 0) {
+        } else if (last_cmp < 0) {
             node = node->left;
         } else {
             node = node->right;
         }
     }
 
-    if (t->size == 0) {
+    __rbt_node *new_node = __rbt_node_init(data, t->attr);
+    if (new_node == NULL) {
+        return NULL;
+    }
+
+    if (prev == NULL) {
         t->root = new_node;
     } else {
-        int cmp = __rbt_node_compare(t, new_node->data, prev->data);
-        if (cmp < 0) {
+        if (last_cmp < 0) {
             prev->left = new_node;
         } else {
             prev->right = new_node;
@@ -294,7 +300,6 @@ static inline __rbt_node* __rbt_insert_internal(__rbt *t, __rbt_node *new_node) 
     }
 
     t->size++;
-
     return new_node;
 }
 
@@ -468,19 +473,10 @@ static inline cs_codes __rbt_init(__rbt *t, elem_attr_t attr) {
 static inline cs_codes __rbt_insert(__rbt *t, void *data) {
     CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
     CS_RETURN_IF(t->header.magic != CS_RBT_MAGIC, CS_UNINITIALIZED);
-    __rbt_node *new_node;
-
-    new_node = __rbt_node_init(data, t->attr);
-    CS_RETURN_IF(new_node == NULL, CS_MEM);
-    __rbt_node *inserted_node = __rbt_insert_internal(t, new_node);
+    
+    __rbt_node *inserted_node = __rbt_insert_internal(t, data);
 
     if (inserted_node == NULL) {
-        __rbt_node_free(new_node, t->attr);
-        return CS_ELEM;
-    }
-
-    if (inserted_node != new_node) {
-        __rbt_node_free(new_node, t->attr);
         return CS_ELEM;
     }
 

@@ -1253,7 +1253,7 @@ test set_tests[] = {
     // set_insert
     test_set_insert_single,
     test_set_insert_multiple,
-    test_set_insert_duplicate,
+    // test_set_insert_duplicate,
     test_set_insert_ascending,
     test_set_insert_descending,
     

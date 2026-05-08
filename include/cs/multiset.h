@@ -75,50 +75,38 @@ static inline cs_codes multiset_insert(multiset *ms, const void *elem) {
     
     size_t k_sz = ms->el_attr->size;
     size_t v_sz = sizeof(int);
-    // 1. Create a "Search Node" on the stack
-    char buffer[sizeof(__rbt_node) + sizeof(pair) + k_sz + v_sz];
-    __rbt_node *stack_node = (__rbt_node *)buffer;
-    pair *p_stack = (pair *)stack_node->data;
+    
+    // Ensure buffer is large enough for the WHOLE pair_attr.size 
+    // that the RBT comparison logic expects.
+    size_t total_sz = sizeof(pair) + k_sz + v_sz;
+    char buffer[total_sz];
+    pair *p_stack = (pair *)buffer;
 
-    // Initialize stack node for comparison
-    stack_node->left = stack_node->right = stack_node->father = NULL;
     p_stack->header.magic = CS_PAIR_MAGIC;
     p_stack->first_attr = ms->el_attr;
+    p_stack->second_attr = ms->count_attr;
     p_stack->has_first = 1;
-    
+    p_stack->has_second = 1; // Mark as having second even if it's 0
+
     if (ms->el_attr->copy) ms->el_attr->copy(p_stack->data, elem);
     else memcpy(p_stack->data, elem, k_sz);
-
-    // 2. THE SINGLE PASS: Try to find or find the insertion point
-    // We modify your insert_internal to return NULL if it SHOULD HAVE inserted
-    // but we want to handle the allocation ourselves.
-    __rbt_node *existing = __rbt_node_find(ms->t, p_stack);
-
-    if (existing) {
-        pair *p_tree = (pair *)existing->data;
-        (*(int *)(p_tree->data + k_sz))++;
-        ms->size++;
-        return CS_SUCCESS;
-    }
-
-    // 3. Not found: Allocate a REAL heap node now
-    __rbt_node *real_node = __rbt_node_init(NULL, ms->t->attr);
-    if (!real_node) return CS_MEM;
-
-    // Setup the real node's pair
-    pair *p_real = (pair *)real_node->data;
-    p_real->header.magic = CS_PAIR_MAGIC;
-    p_real->first_attr = ms->el_attr;
-    p_real->second_attr = ms->count_attr;
-    p_real->has_first = 1;
-    p_real->has_second = 1;
-    memcpy(p_real->data, p_stack->data, k_sz);
-    *(int *)(p_real->data + k_sz) = 1;
-
-    // 4. Link the REAL heap node
-    __rbt_insert_internal(ms->t, real_node);
-    ms->size++;
     
+    // Initialize count to 0 for the search phase
+    *(int *)(p_stack->data + k_sz) = 0;
+
+    __rbt_node *node = __rbt_insert_internal(ms->t, p_stack);
+    if (node == NULL) return CS_MEM;
+
+    // node->data is now a HEAP pointer. Access the count safely.
+    pair *p_tree = (pair *)node->data;
+    int *count = (int *)(p_tree->data + k_sz);
+    
+    (*count)++;
+    if (*count == 1) {
+        // This is a new node, size actually increased
+    }
+    
+    ms->size++; 
     return CS_SUCCESS;
 }
 
