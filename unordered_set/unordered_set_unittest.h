@@ -16,8 +16,8 @@ test_res test_unordered_set_init_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
 
     if (rc != CS_SUCCESS) {
         return (test_res){
@@ -27,7 +27,7 @@ test_res test_unordered_set_init_basic(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -73,8 +73,8 @@ test_res test_unordered_set_init_invalid_size(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -101,12 +101,12 @@ test_res test_unordered_set_init_null_hash(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, NULL);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, NULL);
 
     // Should succeed - hash_table likely has default hash
     if (rc != CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Init with NULL hash should work or fail gracefully",
@@ -114,7 +114,7 @@ test_res test_unordered_set_init_null_hash(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -137,8 +137,8 @@ test_res test_unordered_set_insert_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -148,10 +148,10 @@ test_res test_unordered_set_insert_basic(test_arg *arg) {
     }
 
     int val = 42;
-    rc = unordered_set_insert(&uset, &val);
+    rc = unordered_set_insert(uset, &val);
 
     if (rc != CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to insert element",
@@ -159,7 +159,7 @@ test_res test_unordered_set_insert_basic(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -178,8 +178,8 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -189,9 +189,9 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
     }
 
     for (int i = 0; i < 100; i++) {
-        rc = unordered_set_insert(&uset, &i);
+        rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert element",
@@ -201,7 +201,7 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 100) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch after multiple inserts",
@@ -209,7 +209,7 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -228,8 +228,8 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -239,9 +239,9 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
     }
 
     int val = 42;
-    rc = unordered_set_insert(&uset, &val);
+    rc = unordered_set_insert(uset, &val);
     if (rc != CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed first insert",
@@ -250,9 +250,9 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
     }
 
     // Insert duplicate - should fail with CS_ELEM
-    rc = unordered_set_insert(&uset, &val);
+    rc = unordered_set_insert(uset, &val);
     if (rc != CS_ELEM) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Expected CS_ELEM for duplicate insert",
@@ -262,7 +262,7 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
 
     // Size should still be 1
     if (unordered_set_size(uset) != 1) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size should remain 1 after duplicate insert",
@@ -270,7 +270,7 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -309,8 +309,8 @@ test_res test_unordered_set_insert_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -319,10 +319,10 @@ test_res test_unordered_set_insert_null_key(test_arg *arg) {
         };
     }
 
-    rc = unordered_set_insert(&uset, NULL);
+    rc = unordered_set_insert(uset, NULL);
 
     if (rc != CS_NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Expected CS_NULL for NULL key",
@@ -330,7 +330,7 @@ test_res test_unordered_set_insert_null_key(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -353,8 +353,8 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -364,12 +364,12 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
+    unordered_set_insert(uset, &val);
 
     void *found = unordered_set_find(uset, &val);
 
     if (found == NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to find existing element",
@@ -378,7 +378,7 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
     }
 
     if (*(int *)found != 42) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Found element value mismatch",
@@ -386,7 +386,7 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -405,8 +405,8 @@ test_res test_unordered_set_find_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -416,13 +416,13 @@ test_res test_unordered_set_find_nonexistent(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
+    unordered_set_insert(uset, &val);
 
     int search = 99;
     void *found = unordered_set_find(uset, &search);
 
     if (found != NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Should not find nonexistent element",
@@ -430,7 +430,7 @@ test_res test_unordered_set_find_nonexistent(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -449,8 +449,8 @@ test_res test_unordered_set_find_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -462,7 +462,7 @@ test_res test_unordered_set_find_null_key(test_arg *arg) {
     void *found = unordered_set_find(uset, NULL);
 
     if (found != NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Should return NULL for NULL key",
@@ -470,7 +470,7 @@ test_res test_unordered_set_find_null_key(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -489,8 +489,8 @@ test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -500,14 +500,14 @@ test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
     }
 
     for (int i = 0; i < 100; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
     // Find all inserted elements
     for (int i = 0; i < 100; i++) {
         void *found = unordered_set_find(uset, &i);
         if (found == NULL || *(int *)found != i) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to find element after many inserts",
@@ -516,7 +516,7 @@ test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
         }
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -539,8 +539,8 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -550,12 +550,12 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
+    unordered_set_insert(uset, &val);
 
-    rc = unordered_set_erase(&uset, &val);
+    rc = unordered_set_erase(uset, &val);
 
     if (rc != CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to erase element",
@@ -565,7 +565,7 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
 
     // Verify element is gone
     if (unordered_set_find(uset, &val) != NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Element still exists after erase",
@@ -573,7 +573,7 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -592,8 +592,8 @@ test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -603,11 +603,11 @@ test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
     }
 
     int val = 42;
-    rc = unordered_set_erase(&uset, &val);
+    rc = unordered_set_erase(uset, &val);
 
     // Should fail or return error code for nonexistent element
     if (rc == CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Erase should fail for nonexistent element",
@@ -615,7 +615,7 @@ test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -654,8 +654,8 @@ test_res test_unordered_set_erase_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -664,10 +664,10 @@ test_res test_unordered_set_erase_null_key(test_arg *arg) {
         };
     }
 
-    rc = unordered_set_erase(&uset, NULL);
+    rc = unordered_set_erase(uset, NULL);
 
     if (rc != CS_NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Expected CS_NULL for NULL key",
@@ -675,7 +675,7 @@ test_res test_unordered_set_erase_null_key(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -694,8 +694,8 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -705,14 +705,14 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
     }
 
     for (int i = 0; i < 50; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
     // Erase all elements
     for (int i = 0; i < 50; i++) {
-        rc = unordered_set_erase(&uset, &i);
+        rc = unordered_set_erase(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to erase element",
@@ -722,7 +722,7 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
     }
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Set should be empty after erasing all",
@@ -730,7 +730,7 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -753,8 +753,8 @@ test_res test_unordered_set_count_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -764,12 +764,12 @@ test_res test_unordered_set_count_existing(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
+    unordered_set_insert(uset, &val);
 
     int count = unordered_set_count(uset, &val);
 
     if (count != 1) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Count should be 1 for existing element",
@@ -777,7 +777,7 @@ test_res test_unordered_set_count_existing(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -796,8 +796,8 @@ test_res test_unordered_set_count_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -810,7 +810,7 @@ test_res test_unordered_set_count_nonexistent(test_arg *arg) {
     int count = unordered_set_count(uset, &val);
 
     if (count != 0) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Count should be 0 for nonexistent element",
@@ -818,7 +818,7 @@ test_res test_unordered_set_count_nonexistent(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -837,8 +837,8 @@ test_res test_unordered_set_count_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -850,7 +850,7 @@ test_res test_unordered_set_count_null_key(test_arg *arg) {
     int count = unordered_set_count(uset, NULL);
 
     if (count != 0) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Count should return 0 for NULL key",
@@ -858,7 +858,7 @@ test_res test_unordered_set_count_null_key(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -881,8 +881,8 @@ test_res test_unordered_set_size_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -892,7 +892,7 @@ test_res test_unordered_set_size_empty(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 0) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size should be 0 for empty set",
@@ -900,7 +900,7 @@ test_res test_unordered_set_size_empty(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -919,8 +919,8 @@ test_res test_unordered_set_size_after_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -930,11 +930,11 @@ test_res test_unordered_set_size_after_inserts(test_arg *arg) {
     }
 
     for (int i = 0; i < 25; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
     if (unordered_set_size(uset) != 25) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch after inserts",
@@ -942,7 +942,7 @@ test_res test_unordered_set_size_after_inserts(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -961,8 +961,8 @@ test_res test_unordered_set_size_after_erase(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -972,15 +972,15 @@ test_res test_unordered_set_size_after_erase(test_arg *arg) {
     }
 
     for (int i = 0; i < 10; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
     for (int i = 0; i < 5; i++) {
-        unordered_set_erase(&uset, &i);
+        unordered_set_erase(uset, &i);
     }
 
     if (unordered_set_size(uset) != 5) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size should be 5 after erasing 5 elements",
@@ -988,7 +988,7 @@ test_res test_unordered_set_size_after_erase(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1007,8 +1007,8 @@ test_res test_unordered_set_empty_true(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1018,7 +1018,7 @@ test_res test_unordered_set_empty_true(test_arg *arg) {
     }
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Newly created set should be empty",
@@ -1026,7 +1026,7 @@ test_res test_unordered_set_empty_true(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1045,8 +1045,8 @@ test_res test_unordered_set_empty_false(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1056,10 +1056,10 @@ test_res test_unordered_set_empty_false(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
+    unordered_set_insert(uset, &val);
 
     if (unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Set with element should not be empty",
@@ -1067,7 +1067,7 @@ test_res test_unordered_set_empty_false(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1086,8 +1086,8 @@ test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1097,15 +1097,15 @@ test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
     }
 
     for (int i = 0; i < 10; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
     for (int i = 0; i < 10; i++) {
-        unordered_set_erase(&uset, &i);
+        unordered_set_erase(uset, &i);
     }
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Set should be empty after erasing all elements",
@@ -1113,7 +1113,7 @@ test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1136,8 +1136,8 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1147,13 +1147,13 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
     }
 
     for (int i = 0; i < 50; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
-    unordered_set_clear(&uset);
+    unordered_set_clear(uset);
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Set should be empty after clear",
@@ -1162,7 +1162,7 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 0) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size should be 0 after clear",
@@ -1170,7 +1170,7 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1189,8 +1189,8 @@ test_res test_unordered_set_clear_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1199,10 +1199,10 @@ test_res test_unordered_set_clear_empty(test_arg *arg) {
         };
     }
 
-    unordered_set_clear(&uset);
+    unordered_set_clear(uset);
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Empty set should remain empty after clear",
@@ -1210,7 +1210,7 @@ test_res test_unordered_set_clear_empty(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1229,8 +1229,8 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1240,16 +1240,16 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
     }
 
     for (int i = 0; i < 10; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
-    unordered_set_clear(&uset);
+    unordered_set_clear(uset);
 
     // Insert after clear
     for (int i = 100; i < 110; i++) {
-        rc = unordered_set_insert(&uset, &i);
+        rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert after clear",
@@ -1259,7 +1259,7 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 10) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch after clear and insert",
@@ -1267,7 +1267,7 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1314,8 +1314,8 @@ test_res test_unordered_set_free_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1324,7 +1324,7 @@ test_res test_unordered_set_free_empty(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1343,8 +1343,8 @@ test_res test_unordered_set_free_with_elements(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1354,10 +1354,10 @@ test_res test_unordered_set_free_with_elements(test_arg *arg) {
     }
 
     for (int i = 0; i < 100; i++) {
-        unordered_set_insert(&uset, &i);
+        unordered_set_insert(uset, &i);
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1380,8 +1380,8 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1391,9 +1391,9 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
     }
 
     for (int i = 0; i < 5000; i++) {
-        rc = unordered_set_insert(&uset, &i);
+        rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert during stress test",
@@ -1403,7 +1403,7 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 5000) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch in stress test",
@@ -1411,7 +1411,7 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1430,8 +1430,8 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1442,9 +1442,9 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
 
     // Insert many more elements than initial capacity
     for (int i = 0; i < 100; i++) {
-        rc = unordered_set_insert(&uset, &i);
+        rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert beyond initial capacity",
@@ -1454,7 +1454,7 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 100) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch after resize",
@@ -1462,7 +1462,7 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1481,8 +1481,8 @@ test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1494,15 +1494,15 @@ test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
     // Multiple cycles of insert and erase
     for (int cycle = 0; cycle < 5; cycle++) {
         for (int i = 0; i < 20; i++) {
-            unordered_set_insert(&uset, &i);
+            unordered_set_insert(uset, &i);
         }
         for (int i = 0; i < 20; i++) {
-            unordered_set_erase(&uset, &i);
+            unordered_set_erase(uset, &i);
         }
     }
 
     if (!unordered_set_empty(uset)) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Set should be empty after cycles",
@@ -1510,7 +1510,7 @@ test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1529,8 +1529,8 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1540,9 +1540,9 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
     }
 
     for (int i = -50; i < 50; i++) {
-        rc = unordered_set_insert(&uset, &i);
+        rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert negative value",
@@ -1552,7 +1552,7 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
     }
 
     if (unordered_set_size(uset) != 100) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Size mismatch with negative values",
@@ -1563,7 +1563,7 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
     // Verify negative values can be found
     int neg = -25;
     if (unordered_set_find(uset, &neg) == NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to find negative value",
@@ -1571,7 +1571,7 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1590,8 +1590,8 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set uset;
-    cs_codes rc = unordered_set_init(&uset, attr, hash_int);
+    unordered_set *uset = (unordered_set *)arg->data_structure;
+    cs_codes rc = unordered_set_init(uset, attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char*) __func__,
@@ -1601,13 +1601,13 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
     }
 
     int val = 42;
-    unordered_set_insert(&uset, &val);
-    unordered_set_erase(&uset, &val);
+    unordered_set_insert(uset, &val);
+    unordered_set_erase(uset, &val);
 
     // Re-insert the same value
-    rc = unordered_set_insert(&uset, &val);
+    rc = unordered_set_insert(uset, &val);
     if (rc != CS_SUCCESS) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to re-insert after erase",
@@ -1616,7 +1616,7 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
     }
 
     if (unordered_set_find(uset, &val) == NULL) {
-        unordered_set_free(&uset);
+        unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to find re-inserted element",
@@ -1624,7 +1624,7 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
         };
     }
 
-    unordered_set_free(&uset);
+    unordered_set_free(uset);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1638,11 +1638,11 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
     
-    unordered_set uset;
+    unordered_set *uset = (unordered_set *)arg->data_structure;
     struct timeval start, end;
     double elapsed;
 
-    if (CS_SUCCESS != unordered_set_init(&uset, get_int_attr(), hash_int)) {
+    if (CS_SUCCESS != unordered_set_init(uset, get_int_attr(), hash_int)) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
@@ -1654,8 +1654,8 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        if (unordered_set_insert(&uset, &i) != CS_SUCCESS) {
-            unordered_set_free(&uset);
+        if (unordered_set_insert(uset, &i) != CS_SUCCESS) {
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert element",
@@ -1672,7 +1672,7 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
     for (int i = 0; i < total; i++) {
         int *found = (int*) unordered_set_find(uset, &i);
         if (found == NULL || *found != i) {
-            unordered_set_free(&uset);
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to find existing element",
@@ -1687,8 +1687,8 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        if (unordered_set_erase(&uset, &i) != CS_SUCCESS) {
-            unordered_set_free(&uset);
+        if (unordered_set_erase(uset, &i) != CS_SUCCESS) {
+            unordered_set_free(uset);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to erase element",

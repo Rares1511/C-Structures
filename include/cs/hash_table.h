@@ -2,27 +2,25 @@
 #define __CS_HASH_TABLE_H__
 
 #include <cs/universal.h>
-#include <cs/vector.h>
 
+// Default values for hash table
+#define CS_HASH_TABLE_INIT_CAP 16
+#define CS_HASH_TABLE_MAX_LOAD_FACTOR 0.75
+
+// Magic number for hash table validation
 #define CS_HASH_TABLE_MAGIC 0xDEADBEEF
 
 typedef size_t (*__hash_func_t)(const void *key);
 
 typedef struct {
-    vector *entries; /*!< Vector of entries in this bucket */
-    char is_oversized; /*!< Flag to indicate if this bucket is oversized */
-} __hash_table_bucket;
-
-typedef struct {
-    cs_header_t header; /*!< Header for the hash table structure */
-    int cap;
-    int oversized_buckets;
-    int oversize_threshold;
+    cs_header_t header;
+    int cap;                // Must be power of 2
     int size;
+    int mask;               // Precomputed (cap - 1)
     elem_attr_t attr;
     __hash_func_t hash;
-    char *is_oversized;
-    vector **buckets;
+    void *keys;             // Contiguous array of keys
+    char *occupied;         // Bitset or char array to track slot status
 } __hash_table;
 
 #pragma region Helper Functions
@@ -30,112 +28,57 @@ typedef struct {
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
-/*!
- * Computes the bucket index for a given element in the hash table.
- * @param[in] ht The hash table.
- * @param[in] el Pointer to the element.
- * @return The index of the bucket where the element should be located.
- */
-int __hash_table_get_bucket_index(__hash_table ht, const void *el) {
-    int idx;
-    if (ht.hash)
-        idx = ht.hash(el) % ht.cap;
-    else
-        idx = (int)(universal_hash_bytes(el, ht.attr.size) % ht.cap);
-    if (idx < 0) {
-        idx += ht.cap;
+static inline int __hash_table_comp(const void *a, const void *b, comparer comp, int size) {
+    if (__builtin_expect(comp != NULL, 1)) {
+        return comp(a, b);
     }
-    return idx;
+    return memcmp(a, b, size);
 }
 
-cs_codes __hash_table_rehash(__hash_table *ht) {
+static cs_codes __hash_table_rehash(__hash_table *ht) {
     int old_cap = ht->cap;
-    vector **old_buckets = ht->buckets;
-    char *old_is_oversized = ht->is_oversized;
+    void *old_keys = ht->keys;
+    char *old_occupied = ht->occupied;
 
-    ht->cap *= 2;
-    ht->buckets = realloc(ht->buckets, sizeof(vector**) * ht->cap);
-    if (ht->buckets == NULL) {
-        ht->buckets = old_buckets;
-        ht->is_oversized = old_is_oversized;
-        ht->cap = old_cap;
-        return CS_MEM;
-    }
-    ht->is_oversized = realloc(ht->is_oversized, sizeof(char) * ht->cap);
-    if (ht->is_oversized == NULL) {
-        ht->is_oversized = old_is_oversized;
-        ht->cap = old_cap;
+    int new_cap = old_cap * 2;
+    int new_mask = new_cap - 1;
+
+    char *new_occupied = calloc(new_cap, sizeof(char));
+    if (new_occupied == NULL) return CS_MEM;
+
+    void *new_keys = malloc(new_cap * ht->attr.size);
+    if (new_keys == NULL) {
+        free(new_occupied);
         return CS_MEM;
     }
 
-    for (int i = old_cap; i < ht->cap; i++) {
-        ht->buckets[i] = NULL;
-        ht->is_oversized[i] = 0;
-    }
-
-    ht->oversized_buckets = 0;
     for (int i = 0; i < old_cap; i++) {
-        ht->is_oversized[i] = 0; // Reset oversize status, will be updated as we move elements
-        vector *bucket = ht->buckets[i];
-        vector *new_bucket = ht->buckets[i + old_cap];
-        if (bucket == NULL) {
-            continue;
-        }
+        if (old_occupied[i]) {
+            void *current_el = (char *)old_keys + (i * ht->attr.size);
+            
+            size_t h = ht->hash ? ht->hash(current_el) : universal_hash_bytes(current_el, ht->attr.size);
+            int idx = (int)(h & new_mask);
 
-        int bucket_size = vector_size(bucket);
-        int current_size = 0;
-        int corresponding_size = 0;
-        while (current_size + corresponding_size < bucket_size) {
-            void *el = vector_at(bucket, current_size);
-            int new_idx = __hash_table_get_bucket_index(*ht, el);
-            if (new_idx == i) {
-                // Current element stays in the same bucket
-                current_size++;
+            while (new_occupied[idx]) {
+                idx = (idx + 1) & new_mask;
             }
-            else {
-                // Current element moves to the new bucket
-                // As to not move every element to the left by eliminating the current element
-                // we will swap the current element with the last element in the vector and then 
-                // insert it in the new bucket
-                if (corresponding_size == 0) {
-                    // First time handling this bucket, initialize the new bucket
-                    new_bucket = malloc(sizeof(vector));
-                    vector_attr_t v_attr = { .min_cap = 1, .shrink_factor = 0 };
-                    cs_codes rc = vector_init(new_bucket, ht->attr, v_attr);
-                    if (rc != CS_SUCCESS) {
-                        return rc;
-                    }
-                    rc = vector_reserve(new_bucket, bucket_size); // Reserve space for all elements that might be moved to the new bucket
-                    if (rc != CS_SUCCESS) {
-                        return rc;
-                    }
-                } 
-                void *last_el = vector_at(bucket, vector_size(bucket) - 1);
-                
-                memcpy(new_bucket->vec + corresponding_size * ht->attr.size, el, ht->attr.size);
-                memcpy(bucket->vec + current_size * ht->attr.size, last_el, ht->attr.size);
-                bucket->size--;
 
-                corresponding_size++;
-            }
-        }
+            void *old_el = (char *)old_keys + (i * ht->attr.size);
+            void *new_dest = (char *)new_keys + (idx * ht->attr.size);
 
-        bucket->size = current_size;
-        if (new_bucket) {
-            new_bucket->size = corresponding_size;
-            ht->buckets[i + old_cap] = new_bucket;
-        }
-        if (current_size > ht->oversize_threshold) {
-            ht->is_oversized[i] = 1;
-            ht->oversized_buckets++;
-        }
-        
-        if (corresponding_size > ht->oversize_threshold) {
-            ht->is_oversized[i + old_cap] = 1;
-            ht->oversized_buckets++;
+            memcpy(new_dest, old_el, ht->attr.size);
+            new_occupied[idx] = 1;
         }
     }
-    
+
+    ht->cap = new_cap;
+    ht->mask = new_mask;
+    ht->keys = new_keys;
+    ht->occupied = new_occupied;
+
+    free(old_keys);
+    free(old_occupied);
+
     return CS_SUCCESS;
 }
 
@@ -148,20 +91,19 @@ static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __h
     CS_RETURN_IF(NULL == ht, CS_NULL);
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
 
-    ht->cap = 16; // Set a default initial capacity
-    ht->oversized_buckets = 0;
-    ht->oversize_threshold = 8; // Set a default oversize threshold
+    ht->cap = CS_HASH_TABLE_INIT_CAP;
+    ht->mask = ht->cap - 1;
     ht->size = 0;
     ht->attr = attr;
     ht->hash = hash;
-    ht->buckets = malloc(sizeof(vector**) * ht->cap);
-    ht->is_oversized = malloc(sizeof(char) * ht->cap);
-    CS_RETURN_IF(NULL == ht->buckets, CS_MEM);
-    CS_RETURN_IF(NULL == ht->is_oversized, CS_MEM);
 
-    for (int i = 0; i < ht->cap; i++) {
-        ht->buckets[i] = NULL;
-        ht->is_oversized[i] = 0;
+    ht->occupied = calloc(ht->cap, sizeof(char));
+    CS_RETURN_IF(ht->occupied == NULL, CS_MEM);
+    
+    ht->keys = malloc(ht->cap * ht->attr.size);
+    if (ht->keys == NULL) {
+        free(ht->occupied);
+        return CS_MEM;
     }
 
     ht->header.magic = CS_HASH_TABLE_MAGIC;
@@ -172,75 +114,130 @@ static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __h
 
 static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
-    CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC, CS_UNINITIALIZED);
-    int idx = __hash_table_get_bucket_index(*ht, el), rc;
-    CS_RETURN_IF(idx < 0 || idx >= ht->cap, CS_SIZE);
-
-    if (ht->buckets[idx] == NULL) {
-        ht->buckets[idx] = malloc(sizeof(vector));
-        vector_attr_t v_attr = { .min_cap = 1, .shrink_factor = 0 };
-        CS_RETURN_IF(ht->buckets[idx] == NULL, CS_MEM);
-        rc = vector_init(ht->buckets[idx], ht->attr, v_attr);
-        CS_RETURN_IF(rc != CS_SUCCESS, rc);
+    
+    if (ht->size * 4 >= ht->cap * 3) {
+        cs_codes rc = __hash_table_rehash(ht);
+        if (rc != CS_SUCCESS) return rc;
     }
 
-    rc = vector_push_back(ht->buckets[idx], el);
-    CS_RETURN_IF(rc != CS_SUCCESS, rc);
-    if (vector_size(ht->buckets[idx]) > ht->oversize_threshold && !ht->is_oversized[idx]) {
-        ht->oversized_buckets++;
-        ht->is_oversized[idx] = 1;
+    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
+    int idx = (int)(h & ht->mask);
+    int first_tombstone = -1;
+
+    while (ht->occupied[idx] != 0) {
+        if (ht->occupied[idx] == 1) {
+            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+                return CS_ELEM; // Element already exists
+            }
+        }
+        if (ht->occupied[idx] == 2 && first_tombstone == -1) {
+            first_tombstone = idx;
+        }
+        idx = (idx + 1) & ht->mask;
     }
+
+    int target_idx = (first_tombstone != -1) ? first_tombstone : idx;
+    void *destination = (char *)ht->keys + (target_idx * ht->attr.size);
+
+    if (ht->attr.copy) {
+        ht->attr.copy(destination, el);
+    } else {
+        memcpy(destination, el, ht->attr.size);
+    }
+
+    ht->occupied[target_idx] = 1;
     ht->size++;
-
-    if (ht->oversized_buckets > ht->cap / 2) {
-        return __hash_table_rehash(ht);
-    }
-
     return CS_SUCCESS;
 }
 
 static inline cs_codes __hash_table_remove_entry(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
     CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC, CS_UNINITIALIZED);
-    int idx = __hash_table_get_bucket_index(*ht, el);
-    CS_RETURN_IF(idx < 0 || idx >= ht->cap, CS_SIZE);
-    CS_RETURN_IF(ht->buckets[idx] == NULL, CS_ELEM);
 
-    vector *bucket = ht->buckets[idx];
-    int bucket_idx = vector_find(bucket, el);
-    CS_RETURN_IF(bucket_idx == -1, CS_ELEM);
-    int rc = vector_erase(bucket, bucket_idx);
-    CS_RETURN_IF(rc != CS_SUCCESS, rc);
-    ht->size--;
+    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
+    int idx = (int)(h & ht->mask);
+    int start_idx = idx;
 
-    if (vector_size(bucket) <= ht->oversize_threshold && ht->is_oversized[idx]) {
-        ht->oversized_buckets--;
-        ht->is_oversized[idx] = 0;
+    while (ht->occupied[idx] != 0) {
+        // Only check slots that are currently occupied (skip tombstones)
+        if (ht->occupied[idx] == 1) {
+            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+           if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+                // DEEP FREE: Clean up the data before marking as tombstone
+                if (ht->attr.fr) {
+                    ht->attr.fr(current_el);
+                }
+                
+                ht->occupied[idx] = 2; // Tombstone
+                ht->size--;
+                return CS_SUCCESS;
+            }
+        }
+
+        idx = (idx + 1) & ht->mask;
+        
+        // Safety break to prevent infinite loops if table is full (shouldn't happen with load factor)
+        if (idx == start_idx) break;
     }
 
-    return CS_SUCCESS;
+    return CS_ELEM; // Element not found
 }
 
 static inline void* __hash_table_get_entry(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC, NULL);
-    int idx = __hash_table_get_bucket_index(*ht, el);
-    CS_RETURN_IF(idx < 0 || idx >= ht->cap, NULL);
-    CS_RETURN_IF(ht->buckets[idx] == NULL, NULL);
 
-    vector *bucket = ht->buckets[idx];
-    int bucket_idx = vector_find(bucket, el);
-    CS_RETURN_IF(bucket_idx == -1, NULL);
-    return vector_at(bucket, bucket_idx);
+    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
+    int idx = (int)(h & ht->mask);
+    int start_idx = idx;
+
+    // Linear probe until we find an empty slot
+    while (ht->occupied[idx] != 0) {
+        // State 1: Occupied slot. Check if it's the one we want.
+        if (ht->occupied[idx] == 1) {
+            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+                return current_el; // Found it
+            }
+        }
+        
+        // State 2: Tombstone (occupied == 2). 
+        // We do nothing and just move to the next index.
+
+        idx = (idx + 1) & ht->mask;
+
+        // Prevent infinite loop if the table is completely full/tombstoned
+        if (idx == start_idx) break;
+    }
+
+    return NULL; // Element not found
 }
 
 static inline int __hash_table_count(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC, 0);
-    int idx = __hash_table_get_bucket_index(*ht, el);
-    CS_RETURN_IF(idx < 0 || idx >= ht->cap, 0);
-    CS_RETURN_IF(ht->buckets[idx] == NULL, 0);
 
-    vector *bucket = ht->buckets[idx];
-    return vector_count(bucket, el);
+    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
+    int idx = (int)(h & ht->mask);
+    int start_idx = idx;
+    int count = 0;
+
+    // We must probe the entire chain until we hit a truly empty slot (0)
+    while (ht->occupied[idx] != 0) {
+        // Only compare if the slot is currently active (not a tombstone)
+        if (ht->occupied[idx] == 1) {
+            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+                count++;
+            }
+        }
+
+        idx = (idx + 1) & ht->mask;
+
+        // Safety check to prevent infinite loop in a saturated table
+        if (idx == start_idx) break;
+    }
+
+    return count;
 }
 
 static inline int __hash_table_empty(__hash_table *ht) { return ht->size == 0; };
@@ -251,45 +248,43 @@ static inline void __hash_table_swap(__hash_table *ht1, __hash_table *ht2) {
     CS_RETURN_IF(ht1 == NULL || ht2 == NULL || ht1->header.magic != CS_HASH_TABLE_MAGIC || ht2->header.magic != CS_HASH_TABLE_MAGIC);
 
     elem_attr_t attr = ht1->attr;
+    __hash_func_t hash = ht1->hash;
     int cap = ht1->cap;
     int size = ht1->size;
-    int oversized_buckets = ht1->oversized_buckets;
-    int oversize_threshold = ht1->oversize_threshold;
-    vector **buckets = ht1->buckets;
-    char *is_oversized = ht1->is_oversized;
-    __hash_func_t hash = ht1->hash;
+    int mask = ht1->mask;
+    void *keys = ht1->keys;
+    char *occupied = ht1->occupied;
 
     ht1->attr = ht2->attr;
+    ht1->hash = ht2->hash;
     ht1->cap = ht2->cap;
     ht1->size = ht2->size;
-    ht1->oversized_buckets = ht2->oversized_buckets;
-    ht1->oversize_threshold = ht2->oversize_threshold;
-    ht1->buckets = ht2->buckets;
-    ht1->is_oversized = ht2->is_oversized;
-    ht1->hash = ht2->hash;
+    ht1->mask = ht2->mask;
+    ht1->keys = ht2->keys;
+    ht1->occupied = ht2->occupied;
 
     ht2->attr = attr;
+    ht2->hash = hash;
     ht2->cap = cap;
     ht2->size = size;
-    ht2->oversized_buckets = oversized_buckets;
-    ht2->oversize_threshold = oversize_threshold;
-    ht2->buckets = buckets;
-    ht2->is_oversized = is_oversized;
-    ht2->hash = hash;
+    ht2->mask = mask;
+    ht2->keys = keys;
+    ht2->occupied = occupied;
 }
 
 static inline void __hash_table_clear(__hash_table *ht) {
     CS_RETURN_IF(ht == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC);
 
-    for (int i = 0; i < ht->cap; i++) {
-        if (ht->buckets[i] != NULL) {
-            vector_free(ht->buckets[i]);
-            free(ht->buckets[i]);
-            ht->buckets[i] = NULL;
+    // If a free function exists, we must visit every occupied slot
+    if (ht->attr.fr) {
+        for (int i = 0; i < ht->cap; i++) {
+            if (ht->occupied[i] == 1) {
+                ht->attr.fr((char *)ht->keys + (i * ht->attr.size));
+            }
         }
-        ht->is_oversized[i] = 0;
     }
-    ht->oversized_buckets = 0;
+
+    memset(ht->occupied, 0, ht->cap * sizeof(char));
     ht->size = 0;
 }
 
@@ -298,31 +293,41 @@ static inline void __hash_table_print(FILE *stream, void *v_ht) {
     __hash_table *ht = (__hash_table*)v_ht;
     CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC);
 
+    fprintf(stream, "--- Hash Table (Size: %d, Cap: %d) ---\n", ht->size, ht->cap);
+
     for (int i = 0; i < ht->cap; i++) {
-        if (ht->buckets[i] != NULL) {
-            fprintf(stream, "Bucket %d: ", i);
-            vector_print(stream, ht->buckets[i]);
+        fprintf(stream, "[%04d]: ", i);
+
+        if (ht->occupied[i] == 1) {
+            // Slot is occupied - we treat the data as a hex dump or generic bytes
+            // since we don't know the exact data type structure here.
+            unsigned char *ptr = (unsigned char *)ht->keys + (i * ht->attr.size);
+            fprintf(stream, "OCCUPIED | Data: ");
+            for (int j = 0; j < ht->attr.size; j++) {
+                fprintf(stream, "%02x ", ptr[j]);
+            }
+        } 
+        else if (ht->occupied[i] == 2) {
+            fprintf(stream, "TOMBSTONE (Deleted)");
+        } 
+        else {
+            fprintf(stream, "EMPTY");
         }
+        
+        fprintf(stream, "\n");
     }
+    fprintf(stream, "-------------------------------------\n");
 }
 
 static inline void __hash_table_free(void *v_ht) {
-    CS_RETURN_IF(v_ht == NULL);
     __hash_table *ht = (__hash_table*)v_ht;
-    CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC);
-    for (int i = 0; i < ht->cap; i++) {
-        if (ht->buckets[i] != NULL) {
-            vector_free(ht->buckets[i]);
-            free(ht->buckets[i]);
-            ht->buckets[i] = NULL;
-        }
-    }
-    free(ht->is_oversized);
-    free(ht->buckets);
+    if (!ht || ht->header.magic != CS_HASH_TABLE_MAGIC) return;
 
-    ht->header.magic = 0; // Invalidate the hash table
-    ht->buckets = NULL;
-    ht->is_oversized = NULL;
+    __hash_table_clear(ht); // This handles the individual element freeing
+    
+    free(ht->keys);
+    free(ht->occupied);
+    ht->header.magic = 0;
 }
 
 #endif

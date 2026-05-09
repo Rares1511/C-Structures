@@ -8,39 +8,6 @@ cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, __hash_func_t
     return __hash_table_init(uset->ht, attr, hash_func);
 }
 
-cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
-    CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
-    if (__hash_table_get_entry(uset->ht, key) != NULL) {
-        return CS_ELEM;
-    }
-    return __hash_table_add_entry(uset->ht, key);
-}
-
-cs_codes unordered_set_erase(unordered_set *uset, const void *key) {
-    CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
-    return __hash_table_remove_entry(uset->ht, key);
-}
-
-void* unordered_set_find(unordered_set uset, const void *key) {
-    CS_RETURN_IF(uset.ht == NULL || key == NULL, NULL);
-    return __hash_table_get_entry(uset.ht, key);
-}
-
-int unordered_set_empty(unordered_set uset) {
-    CS_RETURN_IF(uset.ht == NULL, 1);
-    return __hash_table_empty(uset.ht);
-}
-
-int unordered_set_size(unordered_set uset) {
-    CS_RETURN_IF(uset.ht == NULL, 0);
-    return __hash_table_size(uset.ht);
-}
-
-int unordered_set_count(unordered_set uset, const void *key) {
-    CS_RETURN_IF(uset.ht == NULL || key == NULL, 0);
-    return __hash_table_count(uset.ht, key);
-}
-
 void unordered_set_clear(unordered_set *uset) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL);
     __hash_table_clear(uset->ht);

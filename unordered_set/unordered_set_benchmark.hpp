@@ -14,7 +14,10 @@ static void *test_unordered_set_insert(void *arg) {
 static void *test_unordered_set_find(void *arg) {
     std::unordered_set<int> *s = static_cast<std::unordered_set<int>*>(arg);
     for (int i = 0; i < __UNORDERED_SET_STRESS_TEST_SIZE; i++) {
-        s->find(i);
+        int res = s->find(i) != s->end() ? *s->find(i) : -1;
+        if (res != i) {
+            fprintf(stderr, "Error: Expected to find %d but got %d\n", i, res);
+        }
     }
     return s;
 }
