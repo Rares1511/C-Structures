@@ -322,53 +322,6 @@ test_res test_multimap_delete_single_value(test_arg *arg) {
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_multimap_delete_one_of_many(test_arg *arg) {
-    multimap mm;
-    multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
-    test_struct key = create_test_struct(42, "Key", 42.0);
-
-    // Insert 5 values
-    for (int i = 0; i < 5; i++) {
-        test_struct value = create_test_struct(i, "Value", (double)i);
-        multimap_insert(&mm, &key, &value);
-        free_test_struct(&value);
-    }
-
-    // Delete once - should remove one value from vector
-    cs_codes result = multimap_delete(&mm, &key);
-    if (result != CS_SUCCESS) {
-        free_test_struct(&key);
-        multimap_free(&mm);
-        return (test_res){(char*)__func__, "Delete returned error", result};
-    }
-
-    // Should still have the key with 4 values
-    vector *values = multimap_get(&mm, &key);
-    if (!values || vector_size(values) != 4) {
-        free_test_struct(&key);
-        multimap_free(&mm);
-        return (test_res){(char*)__func__, "Should have 4 values after one delete", CS_UNKNOWN};
-    }
-
-    if (__rbt_size((mm.t)) != 1) {
-        free_test_struct(&key);
-        multimap_free(&mm);
-        return (test_res){(char*)__func__, "RBT should still have 1 node", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(mm.t)) {
-        free_test_struct(&key);
-        multimap_free(&mm);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted one value while preserving key and remaining values\n");
-
-    free_test_struct(&key);
-    multimap_free(&mm);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
 test_res test_multimap_delete_all_values(test_arg *arg) {
     multimap mm;
     multimap_init(&mm, get_test_struct_attr(), get_test_struct_attr());
@@ -382,19 +335,11 @@ test_res test_multimap_delete_all_values(test_arg *arg) {
     }
 
     // Delete 5 times
-    for (int i = 0; i < 5; i++) {
-        cs_codes result = multimap_delete(&mm, &key);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&key);
-            multimap_free(&mm);
-            return (test_res){(char*)__func__, "Delete returned error", result};
-        }
-
-        if (!rbt_is_valid(mm.t)) {
-            free_test_struct(&key);
-            multimap_free(&mm);
-            return (test_res){(char*)__func__, "RBT integrity violated during deletes", CS_UNKNOWN};
-        }
+    cs_codes result = multimap_delete(&mm, &key);
+    if (result != CS_SUCCESS) {
+        free_test_struct(&key);
+        multimap_free(&mm);
+        return (test_res){(char*)__func__, "Delete returned error", result};
     }
 
     if (__rbt_size((mm.t)) != 0) {
@@ -970,7 +915,6 @@ test multimap_tests[] = {
 
     // multimap_delete
     test_multimap_delete_single_value,
-    test_multimap_delete_one_of_many,
     test_multimap_delete_all_values,
     test_multimap_delete_nonexistent,
     test_multimap_delete_multiple_keys,

@@ -1,57 +1,4 @@
 #include <cs/multimap.h>
-#include <cs/rbt.h>
-#include <cs/pair.h>
-#include <cs/vector.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#pragma region Helper Functions
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-
-/*!
- * Compare function for multimap nodes (pairs).
- * @param[in] a  First pair to compare
- * @param[in] b  Second pair to compare
- * @return    Negative if a < b, zero if a == b, positive if a > b
- */
-int multimap_node_comp(const void *a, const void *b) {
-    const pair *pa = (const pair *)a;
-    const pair *pb = (const pair *)b;
-
-    if (pa->first_attr->comp) {
-        return pa->first_attr->comp(pair_first(*pa), pair_first(*pb));
-    } else {
-        return memcmp(pair_first(*pa), pair_first(*pb), pa->first_attr->size);
-    }
-}
-
-/*!
- * Copy function for multimap nodes (pairs).
- * @param[out] dest  Destination pair to copy into
- * @param[in]  src   Source pair to copy from
- */
-void multimap_node_copy(void *dest, const void *src) {
-    pair* d = (pair*)dest;
-    const pair* s = (const pair*)src;
-    if (d == NULL || s == NULL) {
-        return;
-    }
-    pair_init(d, s->first_attr, s->second_attr);
-    d->data = s->data;
-    d->has_first = s->has_first;
-    d->has_second = s->has_second;
-}
-
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       END OF HELPER FUNCTIONS SECTION                                      ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-#pragma endregion
 
 cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
                            elem_attr_t value_attr) {
@@ -59,20 +6,20 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
     CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(value_attr.size <= 0 || value_attr.size > SIZE_TH, CS_SIZE);
 
-    elem_attr_t rbt_attr = {
-        .size = sizeof(pair),
-        .fr = pair_free,
-        .print = pair_print,
-        .comp = multimap_node_comp,
-        .copy = multimap_node_copy,
-    };
-
     elem_attr_t vec_attr = {
         .size = sizeof(vector),
         .fr = vector_free,
         .print = vector_print,
         .comp = NULL,
-        .copy = NULL
+        .copy = NULL,
+    };
+
+    elem_attr_t rbt_attr = {
+        .size = sizeof(pair) + key_attr.size + vec_attr.size,
+        .fr = pair_free,
+        .print = pair_print,
+        .comp = __multimap_node_comp,
+        .copy = __multimap_node_copy,
     };
 
     mm->key_attr = malloc(sizeof(elem_attr_t));
@@ -87,84 +34,6 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
     mm->size = 0;
     CS_RETURN_IF(NULL == mm->t, CS_MEM);
     return __rbt_init(mm->t, rbt_attr);
-}
-
-cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
-    CS_RETURN_IF(mm == NULL || key == NULL || value == NULL, CS_NULL);
-    pair data;
-    int rc;
-
-    pair_init(&data, mm->key_attr, mm->vec_attr);
-    pair_set(&data, key, NULL);
-
-    pair *p = (pair *)__rbt_find((mm->t), &data);
-    if (p != NULL) {
-        pair_free(&data);
-        vector *vec = (vector *)pair_second(*p);
-        rc = vector_push_back(vec, value);
-    }
-    else {
-        vector vec;
-        vector_attr_t v_attr = { .min_cap = 1, .shrink_factor = 0 };
-        rc = vector_init(&vec, *(mm->value_attr), v_attr);
-        if (CS_SUCCESS != rc) {
-            pair_free(&data);
-            return rc;
-        }
-        vector_push_back(&vec, value);
-        pair_set(&data, NULL, &vec);
-        rc = __rbt_insert(mm->t, &data);
-    }
-
-    if (CS_SUCCESS == rc) {
-        mm->size++;
-    }
-
-    return rc;
-}
-
-cs_codes multimap_delete(multimap *mm, const void *key) {
-    CS_RETURN_IF(mm == NULL || key == NULL, CS_NULL);
-    pair data;
-    int rc;
-    pair_init(&data, mm->key_attr, mm->vec_attr);
-    pair_set(&data, key, NULL);
-
-    pair *p = (pair *)__rbt_find((mm->t), &data);
-    if (p != NULL) {
-        vector *vec = (vector *)pair_second(*p);
-        int size = vector_size(vec);
-        if (size == 1) {
-            rc = __rbt_delete(mm->t, &data);
-        } 
-        else {
-            rc = vector_pop_back(vec);
-        }
-    } else {
-        rc = CS_ELEM;
-    }
-    pair_free(&data);
-
-    if (CS_SUCCESS == rc) {
-        mm->size--;
-    }
-
-    return rc;
-}
-
-vector* multimap_get(multimap *mm, const void *key) {
-    CS_RETURN_IF(NULL == mm || NULL == key, NULL);
-    pair data;
-    pair_init(&data, mm->key_attr, mm->vec_attr);
-    pair_set(&data, key, NULL);
-    
-    pair *p = (pair *)__rbt_find((mm->t), &data);
-    pair_free(&data);
-        
-    if (p != NULL) {
-        return (vector *)pair_second(*p);
-    }
-    return NULL;
 }
 
 void multimap_clear(multimap *mm) {

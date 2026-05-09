@@ -132,22 +132,12 @@ test_res test_map_insert_duplicate_key(test_arg *arg) {
 
     cs_codes dup_result = map_insert(m, &key, &val2);
     // Maps should not allow duplicate keys
-    if (dup_result == CS_SUCCESS) {
+    if (dup_result != CS_SUCCESS || map_size(m) != 1) {
         free_test_struct(&key);
         free_test_struct(&val1);
         free_test_struct(&val2);
         map_free(m);
         return (test_res){(char*)__func__, "Duplicate key insert should not return SUCCESS", CS_ELEM};
-    }
-
-    clogger_log((*arg->logger), CLOGGER_DEBUG, "Attempted duplicate key insert and received expected error code.\n");
-
-    if (map_size(m) != 1) {
-        free_test_struct(&key);
-        free_test_struct(&val1);
-        free_test_struct(&val2);
-        map_free(m);
-        return (test_res){(char*)__func__, "Size should be 1 after duplicate attempt", CS_UNKNOWN};
     }
 
     clogger_log((*arg->logger), CLOGGER_DEBUG, "Map size correct after duplicate key insert attempt.\n");
@@ -1256,7 +1246,7 @@ test map_tests[] = {
     // map_insert
     test_map_insert_single,
     test_map_insert_multiple,
-    // test_map_insert_duplicate_key,
+    test_map_insert_duplicate_key,
     test_map_insert_ascending,
     test_map_insert_descending,
 

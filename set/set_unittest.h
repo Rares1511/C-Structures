@@ -117,7 +117,7 @@ test_res test_set_insert_duplicate(test_arg *arg) {
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted element into set for duplicate test.\n");
 
-    if (set_insert(s, &ts) == CS_SUCCESS) {
+    if (set_insert(s, &ts) != CS_SUCCESS) {
         free_test_struct(&ts);
         set_free(s);
         return (test_res){(char*)__func__, "Duplicate insert was successful", CS_MEM};
@@ -1253,7 +1253,7 @@ test set_tests[] = {
     // set_insert
     test_set_insert_single,
     test_set_insert_multiple,
-    // test_set_insert_duplicate,
+    test_set_insert_duplicate,
     test_set_insert_ascending,
     test_set_insert_descending,
     

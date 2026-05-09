@@ -53,7 +53,7 @@ endif
 
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
-            stack multiset \
+            stack multiset multimap \
             queue priority_queue flat_set large_number clogger
 
 INSTALL_LIBS := $(SUBDIRS)
