@@ -519,7 +519,7 @@ static inline elem_attr_t get_int_attr() {
 
 static inline elem_attr_t get_string_attr() {
     return (elem_attr_t){
-        .size = sizeof(char) * __MAX_PRINT_SIZE,
+        .size = sizeof(char) * 25,
         .fr = NULL,
         .copy = copy_string,
         .print = NULL,

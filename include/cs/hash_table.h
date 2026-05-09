@@ -14,9 +14,9 @@ typedef size_t (*__hash_func_t)(const void *key);
 
 typedef struct {
     cs_header_t header;
-    int cap;                // Must be power of 2
-    int size;
-    int mask;               // Precomputed (cap - 1)
+    size_t cap;   // Change from int to size_t
+    size_t size;  // Change from int to size_t
+    size_t mask;  // Change from int to size_t
     elem_attr_t attr;
     __hash_func_t hash;
     void *keys;             // Contiguous array of keys
@@ -36,41 +36,40 @@ static inline int __hash_table_comp(const void *a, const void *b, comparer comp,
 }
 
 static cs_codes __hash_table_rehash(__hash_table *ht) {
-    int old_cap = ht->cap;
+    size_t old_cap = ht->cap;
     void *old_keys = ht->keys;
     char *old_occupied = ht->occupied;
 
-    int new_cap = old_cap * 2;
-    int new_mask = new_cap - 1;
-
-    char *new_occupied = calloc(new_cap, sizeof(char));
-    if (new_occupied == NULL) return CS_MEM;
+    size_t new_cap = old_cap * 2;
+    size_t new_mask = new_cap - 1;
 
     void *new_keys = malloc(new_cap * ht->attr.size);
-    if (new_keys == NULL) {
-        free(new_occupied);
-        return CS_MEM;
+    char *new_occupied = calloc(new_cap, sizeof(char));
+    
+    if (!new_keys || !new_occupied) { 
+        return CS_MEM; 
     }
 
-    for (int i = 0; i < old_cap; i++) {
-        if (old_occupied[i]) {
-            void *current_el = (char *)old_keys + (i * ht->attr.size);
+    for (size_t i = 0; i < old_cap; i++) {
+        if (old_occupied[i] == 1) { // Only move VALID entries
+            void *old_el = (char *)old_keys + (i * ht->attr.size);
             
-            size_t h = ht->hash ? ht->hash(current_el) : universal_hash_bytes(current_el, ht->attr.size);
-            int idx = (int)(h & new_mask);
+            // 1. Recalculate hash using the NEW mask
+            size_t h = ht->hash ? ht->hash(old_el) : universal_hash_bytes(old_el, ht->attr.size);
+            size_t idx = h & new_mask;
 
+            // 2. Linear probe in the NEW occupied array
             while (new_occupied[idx]) {
                 idx = (idx + 1) & new_mask;
             }
 
-            void *old_el = (char *)old_keys + (i * ht->attr.size);
-            void *new_dest = (char *)new_keys + (idx * ht->attr.size);
-
-            memcpy(new_dest, old_el, ht->attr.size);
+            // 3. Raw memcpy the whole entry block
+            memcpy((char *)new_keys + (idx * ht->attr.size), old_el, ht->attr.size);
             new_occupied[idx] = 1;
         }
     }
 
+    // 4. CRITICAL: Swap pointers ONLY after the loop is done
     ht->cap = new_cap;
     ht->mask = new_mask;
     ht->keys = new_keys;
@@ -78,7 +77,6 @@ static cs_codes __hash_table_rehash(__hash_table *ht) {
 
     free(old_keys);
     free(old_occupied);
-
     return CS_SUCCESS;
 }
 
@@ -121,7 +119,7 @@ static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) 
     }
 
     size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
-    int idx = (int)(h & ht->mask);
+    size_t idx = (size_t)(h & ht->mask);
     int first_tombstone = -1;
 
     while (ht->occupied[idx] != 0) {
@@ -137,7 +135,7 @@ static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) 
         idx = (idx + 1) & ht->mask;
     }
 
-    int target_idx = (first_tombstone != -1) ? first_tombstone : idx;
+    size_t target_idx = (first_tombstone != -1) ? (size_t)first_tombstone : (size_t)idx;
     void *destination = (char *)ht->keys + (target_idx * ht->attr.size);
 
     if (ht->attr.copy) {
@@ -156,14 +154,14 @@ static inline cs_codes __hash_table_remove_entry(__hash_table *ht, const void *e
     CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC, CS_UNINITIALIZED);
 
     size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
-    int idx = (int)(h & ht->mask);
-    int start_idx = idx;
+    size_t idx = (h & ht->mask);
+    size_t start_idx = idx;
 
     while (ht->occupied[idx] != 0) {
         // Only check slots that are currently occupied (skip tombstones)
         if (ht->occupied[idx] == 1) {
             void *current_el = (char *)ht->keys + (idx * ht->attr.size);
-           if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
                 // DEEP FREE: Clean up the data before marking as tombstone
                 if (ht->attr.fr) {
                     ht->attr.fr(current_el);
@@ -188,37 +186,29 @@ static inline void* __hash_table_get_entry(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC, NULL);
 
     size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
-    int idx = (int)(h & ht->mask);
-    int start_idx = idx;
+    size_t idx = h & ht->mask; // Use size_t for indexing
+    size_t start_idx = idx;
 
-    // Linear probe until we find an empty slot
     while (ht->occupied[idx] != 0) {
-        // State 1: Occupied slot. Check if it's the one we want.
         if (ht->occupied[idx] == 1) {
             void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+            
             if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
-                return current_el; // Found it
+                return current_el;
             }
         }
-        
-        // State 2: Tombstone (occupied == 2). 
-        // We do nothing and just move to the next index.
-
         idx = (idx + 1) & ht->mask;
-
-        // Prevent infinite loop if the table is completely full/tombstoned
         if (idx == start_idx) break;
     }
-
-    return NULL; // Element not found
+    return NULL;
 }
 
 static inline int __hash_table_count(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC, 0);
 
     size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
-    int idx = (int)(h & ht->mask);
-    int start_idx = idx;
+    size_t idx = (h & ht->mask);
+    size_t start_idx = idx;
     int count = 0;
 
     // We must probe the entire chain until we hit a truly empty slot (0)
@@ -277,7 +267,7 @@ static inline void __hash_table_clear(__hash_table *ht) {
 
     // If a free function exists, we must visit every occupied slot
     if (ht->attr.fr) {
-        for (int i = 0; i < ht->cap; i++) {
+        for (size_t i = 0; i < ht->cap; i++) {
             if (ht->occupied[i] == 1) {
                 ht->attr.fr((char *)ht->keys + (i * ht->attr.size));
             }
@@ -293,17 +283,17 @@ static inline void __hash_table_print(FILE *stream, void *v_ht) {
     __hash_table *ht = (__hash_table*)v_ht;
     CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC);
 
-    fprintf(stream, "--- Hash Table (Size: %d, Cap: %d) ---\n", ht->size, ht->cap);
+    fprintf(stream, "--- Hash Table (Size: %ld, Cap: %ld) ---\n", ht->size, ht->cap);
 
-    for (int i = 0; i < ht->cap; i++) {
-        fprintf(stream, "[%04d]: ", i);
+    for (size_t i = 0; i < ht->cap; i++) {
+        fprintf(stream, "[%04ld]: ", i);
 
         if (ht->occupied[i] == 1) {
             // Slot is occupied - we treat the data as a hex dump or generic bytes
             // since we don't know the exact data type structure here.
             unsigned char *ptr = (unsigned char *)ht->keys + (i * ht->attr.size);
             fprintf(stream, "OCCUPIED | Data: ");
-            for (int j = 0; j < ht->attr.size; j++) {
+            for (size_t j = 0; j < (size_t) ht->attr.size; j++) {
                 fprintf(stream, "%02x ", ptr[j]);
             }
         } 

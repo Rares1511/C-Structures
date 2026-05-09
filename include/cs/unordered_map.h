@@ -2,15 +2,14 @@
 #define __CS_UNORDERED_MAP_H__
 
 #include <cs/universal.h>
-
-typedef struct hash_table hash_table;
-typedef size_t (*hash_func_t)(const void *key);
+#include <cs/hash_table.h>
+#include <cs/pair.h>
 
 typedef struct unordered_map {
-    hash_table *ht;
-    hash_func_t hash_func;
-    elem_attr_t key_attr;
-    elem_attr_t value_attr;
+    __hash_table *ht;
+    __hash_func_t hash_func;
+    elem_attr_t *key_attr;
+    elem_attr_t *value_attr;
 } unordered_map;
 
 /*!
@@ -24,7 +23,7 @@ typedef struct unordered_map {
 cs_codes unordered_map_init(unordered_map *umap,
                                  elem_attr_t key_attr,
                                  elem_attr_t value_attr,
-                                 hash_func_t hash_func);
+                                 __hash_func_t hash_func);
 
 /*!
  * Adds an entry to the unordered map.
@@ -49,21 +48,21 @@ cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key);
  * @param[in] key Pointer to the key.
  * @return Pointer to the value associated with the key, or NULL if not found.
  */
-void *unordered_map_get_entry(unordered_map umap, const void *key);
+void *unordered_map_get_entry(unordered_map *umap, const void *key);
 
 /*!
  * Shows if the unordered map is empty, its size, count of a specific key,
  * @param[in] umap Pointer to the unordered map.
  * @return 1 if empty, 0 otherwise.
  */
-int unordered_map_empty(unordered_map umap);
+int unordered_map_empty(unordered_map *umap);
 
 /*!
  * Retrieves the size of the unordered map.
  * @param[in] umap Pointer to the unordered map.
  * @return Size of the unordered map.
  */
-int unordered_map_size(unordered_map umap);
+int unordered_map_size(unordered_map *umap);
 
 /*!
  * Retrieves the count of a specific key in the unordered map.
@@ -71,7 +70,7 @@ int unordered_map_size(unordered_map umap);
  * @param[in] key Pointer to the key.
  * @return Count of the key in the unordered map.
  */
-int unordered_map_count(unordered_map umap, const void *key);
+int unordered_map_count(unordered_map *umap, const void *key);
 
 /*!
  * Swaps the contents of two unordered maps.

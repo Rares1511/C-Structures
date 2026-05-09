@@ -23,7 +23,7 @@
 
 // Unordered associative containers (Hash Table)
 #include "unordered_set/unordered_set_unittest.h"
-// #include "unordered_map/unordered_map_unittest.h"
+#include "unordered_map/unordered_map_unittest.h"
 // #include "unordered_multiset/unordered_multiset_unittest.h"
 // #include "unordered_multimap/unordered_multimap_unittest.h"
 
@@ -68,7 +68,7 @@ static module_tests all_modules[] = {
 
     // Unordered associative containers (Hash Table)
     { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
-    // { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
+    { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
     // { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
     // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
 
