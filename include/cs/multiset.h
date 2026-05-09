@@ -20,7 +20,19 @@ typedef struct multiset {
 static inline void __multiset_node_copy(void *dest, const void *src) {
     CS_RETURN_IF(dest == NULL || src == NULL);
     const pair* s = (const pair*)src;
-    memcpy(dest, src, sizeof(pair) + s->first_attr->size + s->second_attr->size);
+    pair* d = (pair*)dest;
+
+    memcpy(d, s, sizeof(pair));
+
+    void *dest_key = d->data;
+    int *dest_count = (int *)(d->data + d->first_attr->size);
+
+    if (s->first_attr->copy) 
+        s->first_attr->copy(dest_key, s->data);
+    else 
+        memcpy(dest_key, s->data, s->first_attr->size);
+
+    *dest_count = *((int *)(s->data + s->first_attr->size));
 }
 
 static inline int __multiset_node_comp(const void *a, const void *b) {
@@ -76,8 +88,6 @@ static inline cs_codes multiset_insert(multiset *ms, const void *elem) {
     size_t k_sz = ms->el_attr->size;
     size_t v_sz = sizeof(int);
     
-    // Ensure buffer is large enough for the WHOLE pair_attr.size 
-    // that the RBT comparison logic expects.
     size_t total_sz = sizeof(pair) + k_sz + v_sz;
     char buffer[total_sz];
     pair *p_stack = (pair *)buffer;
@@ -86,24 +96,20 @@ static inline cs_codes multiset_insert(multiset *ms, const void *elem) {
     p_stack->first_attr = ms->el_attr;
     p_stack->second_attr = ms->count_attr;
     p_stack->has_first = 1;
-    p_stack->has_second = 1; // Mark as having second even if it's 0
+    p_stack->has_second = 1;
 
-    if (ms->el_attr->copy) ms->el_attr->copy(p_stack->data, elem);
-    else memcpy(p_stack->data, elem, k_sz);
-    
-    // Initialize count to 0 for the search phase
+    memcpy(p_stack->data, elem, k_sz);
     *(int *)(p_stack->data + k_sz) = 0;
 
     __rbt_node *node = __rbt_insert_internal(ms->t, p_stack);
     if (node == NULL) return CS_MEM;
 
-    // node->data is now a HEAP pointer. Access the count safely.
     pair *p_tree = (pair *)node->data;
     int *count = (int *)(p_tree->data + k_sz);
     
     (*count)++;
     if (*count == 1) {
-        // This is a new node, size actually increased
+        
     }
     
     ms->size++; 
@@ -127,11 +133,7 @@ static inline cs_codes multiset_delete(multiset *ms, const void *elem) {
     data->header.magic = CS_PAIR_MAGIC;
     data->first_attr = ms->el_attr;
     data->has_first = 1;
-    if (ms->el_attr->copy) {
-        ms->el_attr->copy(data->data, elem);
-    } else {
-        memcpy(data->data, elem, ms->el_attr->size);
-    }
+    memcpy(data->data, elem, k_sz);
 
     __rbt_node *node = __rbt_node_find(ms->t, data);
     if (node != NULL) {
@@ -169,11 +171,7 @@ int multiset_count(multiset *ms, const void *elem) {
     data->header.magic = CS_PAIR_MAGIC;
     data->first_attr = ms->el_attr;
     data->has_first = 1;
-    if (ms->el_attr->copy) {
-        ms->el_attr->copy(data->data, elem);
-    } else {
-        memcpy(data->data, elem, ms->el_attr->size);
-    }
+    memcpy(data->data, elem, k_sz);
 
     void *node = __rbt_find((ms->t), data);
     if (node != NULL) {

@@ -19,7 +19,27 @@ typedef struct map {
 static inline void __map_node_copy(void *dest, const void *src) {
     CS_RETURN_IF(dest == NULL || src == NULL);
     const pair* s = (const pair*)src;
-    memcpy(dest, src, sizeof(pair) + s->first_attr->size + s->second_attr->size);
+    pair* d = (pair*)dest;
+
+    memcpy(d, s, sizeof(pair));
+
+    if (!s->first_attr->copy && !s->second_attr->copy) {
+        memcpy(d->data, s->data, s->first_attr->size + s->second_attr->size);
+        return;
+    }
+
+    void *dest_key = d->data;
+    void *dest_val = d->data + s->first_attr->size;
+
+    if (s->first_attr->copy) 
+        s->first_attr->copy(dest_key, s->data);
+    else 
+        memcpy(dest_key, s->data, s->first_attr->size);
+
+    if (s->second_attr->copy) 
+        s->second_attr->copy(dest_val, s->data + s->first_attr->size);
+    else 
+        memcpy(dest_val, s->data + s->first_attr->size, s->second_attr->size);
 }
 
 static inline int __map_node_comp(const void *a, const void *b) {
@@ -60,35 +80,22 @@ cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr);
 static inline cs_codes map_insert(map *m, void *key, void *val) {
     CS_RETURN_IF(m == NULL || key == NULL || val == NULL, CS_NULL);
 
-    // 1. Determine total size needed on the stack
     int k_sz = m->key_attr->size;
     int v_sz = m->val_attr->size;
     int total_sz = sizeof(pair) + k_sz + v_sz;
 
-    // 2. Allocate space on the STACK (VLA)
-    // This costs near-zero CPU cycles (just moves the stack pointer)
     char buffer[total_sz]; 
     pair *p = (pair *)buffer;
 
-    // 3. Manually initialize the pair "View" 
     p->header.magic = CS_PAIR_MAGIC;
     p->first_attr  = m->key_attr;
     p->second_attr = m->val_attr;
     p->has_first   = 1;
     p->has_second  = 1;
-    // p->data is NOT a pointer anymore if you used char data[]
-    // If you kept data as a pointer, we point it to the bytes immediately following the struct
-    // But since we want performance, we assume: char data[] (Flexible Array Member)
+    
+    memcpy(p->data, key, k_sz);
+    memcpy(p->data + k_sz, val, v_sz);
 
-    // 4. Copy Key and Value into the stack buffer
-    if (m->key_attr->copy) m->key_attr->copy(p->data, key);
-    else memcpy(p->data, key, k_sz);
-
-    if (m->val_attr->copy) m->val_attr->copy(p->data + k_sz, val);
-    else memcpy(p->data + k_sz, val, v_sz);
-
-    // 5. Pass the stack-allocated pair to RBT
-    // RBT will malloc(total_sz) once and memcpy(node->data, p, total_sz)
     return __rbt_insert(m->t, p);
 }
 
@@ -120,22 +127,17 @@ static inline int map_size(map *m) {
  * @return CS_SUCCESS on success, CS_ELEM if the key does not exist
  */
 static inline void* map_find(map *m, void *key) {
-    // 1. Stack buffer
     int k_sz = m->key_attr->size;
     char dummy_buf[sizeof(pair) + k_sz];
     pair *dummy = (pair*)dummy_buf;
     
-    // 2. Setup (No Malloc!)
     dummy->header.magic = CS_PAIR_MAGIC;
     dummy->first_attr = m->key_attr;
     dummy->has_first = 1;
-    if (m->key_attr->copy) m->key_attr->copy(dummy->data, key);
-    else memcpy(dummy->data, key, k_sz);
+    memcpy(dummy->data, key, k_sz);
 
-    // 3. Search (Pass pointer)
     pair* result = (pair*)__rbt_find(m->t, dummy);
     
-    // 4. Return value pointer directly from the tree node
     return result ? pair_second(result) : NULL;
 }
 
@@ -148,20 +150,16 @@ static inline void* map_find(map *m, void *key) {
 static inline cs_codes map_delete(map *m, void *key) {
     CS_RETURN_IF(m == NULL || key == NULL, CS_NULL);
 
-    // 1. Prepare the stack buffer
     char buffer[sizeof(pair) + m->key_attr->size];
     pair *search_key = (pair *)buffer;
     
-    // 2. Initialize minimal state for comparison
     search_key->header.magic = CS_PAIR_MAGIC;
     search_key->first_attr = m->key_attr;
     search_key->has_first = 1;
     search_key->has_second = 0;
 
-    if (m->key_attr->copy) m->key_attr->copy(search_key->data, key);
-    else memcpy(search_key->data, key, m->key_attr->size);
+    memcpy(search_key->data, key, m->key_attr->size);
 
-    // 3. FIX: Pass search_key, NOT &search_key
     return __rbt_delete(m->t, search_key);
 }
 
