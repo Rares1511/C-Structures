@@ -52,6 +52,7 @@ typedef enum {
     CS_FORWARD_LIST_TYPE,
     CS_RBT_TYPE,
     CS_PAIR_TYPE,
+    CS_HASH_TABLE_TYPE,
 } struct_type_t;
 
 typedef void (*printer)(FILE *, const void *);

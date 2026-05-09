@@ -15,8 +15,9 @@
  * @return Negative value if a < b, 0 if a == b, positive value if a > b
  */
 inline int forward_list_compare(const void *a, const void *b, comparer comp, int size) {
-    if (comp)
-        return comp((void *)a, (void *)b);
+    if (__builtin_expect(comp != NULL, 1)) {
+        return comp(a, b);
+    }
     return memcmp(a, b, size);
 }
 
@@ -27,13 +28,13 @@ inline int forward_list_compare(const void *a, const void *b, comparer comp, int
  * @param attr Attributes for the elements in the lists, used for comparison and copying.
  * @return Pointer to the head of the merged sorted linked list.
  */
-forward_list_node* merge_iterative(forward_list_node* a, forward_list_node* b, elem_attr_t attr) {
-    forward_list_node dummy;
+static inline forward_list_node* merge_iterative(forward_list_node* a, forward_list_node* b, 
+                                                 elem_attr_t attr, forward_list_node **out_tail) {
+    forward_list_node dummy = { .next = NULL };
     forward_list_node *tail = &dummy;
-    size_t sz = attr.size;
 
     while (a && b) {
-        if (forward_list_compare(a->data, b->data, attr.comp, sz) <= 0) {
+        if (forward_list_compare(a->data, b->data, attr.comp, attr.size) <= 0) {
             tail->next = a;
             a = a->next;
         } else {
@@ -43,7 +44,14 @@ forward_list_node* merge_iterative(forward_list_node* a, forward_list_node* b, e
         tail = tail->next;
     }
     tail->next = a ? a : b;
-
+    
+    // Find the actual end of the merged list to update out_tail
+    forward_list_node *actual_tail = tail->next ? tail->next : tail;
+    if (actual_tail->next) {
+        while (actual_tail->next) actual_tail = actual_tail->next;
+    }
+    
+    if (out_tail) *out_tail = actual_tail;
     return dummy.next;
 }
 
@@ -94,11 +102,12 @@ void forward_list_sort(forward_list *list) {
 
     while (curr) {
         next_node = curr->next;
-        curr->next = NULL; // Critical: Isolate the node
+        curr->next = NULL; 
         
         int i = 0;
         while (i < 31 && bins[i] != NULL) {
-            curr = merge_iterative(bins[i], curr, list->attr);
+            // We don't need the tail for intermediate bin merges
+            curr = merge_iterative(bins[i], curr, list->attr, NULL);
             bins[i] = NULL;
             i++;
         }
@@ -107,22 +116,25 @@ void forward_list_sort(forward_list *list) {
     }
 
     forward_list_node *result = NULL;
+    forward_list_node *final_tail = NULL;
+
     for (int i = 0; i < 32; i++) {
-        if (bins[i]) { // Minor optimization: only merge if bin is not empty
-            result = merge_iterative(bins[i], result, list->attr);
+        if (bins[i]) {
+            if (result == NULL) {
+                result = bins[i];
+                // Quick find for the first non-empty bin's tail
+                final_tail = result;
+                while (final_tail->next) final_tail = final_tail->next;
+            } else {
+                // Merge and capture the tail
+                result = merge_iterative(result, bins[i], list->attr, &final_tail);
+            }
         }
     }
 
-    // Update Head
     list->head = result;
-
-    // Optional: Update Tail if your structure maintains one
-    if (result) {
-        forward_list_node *t = result;
-        while (t->next) t = t->next;
-        list->tail = t; // Ensure your struct's tail is correct
-        t->next = NULL; // Ensure the list is NULL-terminated
-    }
+    list->tail = final_tail; 
+    if (final_tail) final_tail->next = NULL;
 }
 
 void forward_list_swap(forward_list* list1, forward_list* list2) {

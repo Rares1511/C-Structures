@@ -21,8 +21,8 @@
 #include "multiset/multiset_unittest.h"
 #include "multimap/multimap_unittest.h"
 
-// // Unordered associative containers (Hash Table)
-// #include "unordered_set/unordered_set_unittest.h"
+// Unordered associative containers (Hash Table)
+#include "unordered_set/unordered_set_unittest.h"
 // #include "unordered_map/unordered_map_unittest.h"
 // #include "unordered_multiset/unordered_multiset_unittest.h"
 // #include "unordered_multimap/unordered_multimap_unittest.h"
@@ -60,14 +60,14 @@ static module_tests all_modules[] = {
     { "list", list_tests, sizeof(list_tests) / sizeof(test), sizeof(list) },
     { "forward_list", forward_list_tests, sizeof(forward_list_tests) / sizeof(test), sizeof(forward_list) },
 
-    // // Associative containers (RBT)
+    // Associative containers (RBT)
     { "set", set_tests, sizeof(set_tests) / sizeof(test), sizeof(set) },
     { "map", map_tests, sizeof(map_tests) / sizeof(test), sizeof(map) },
     { "multiset", multiset_tests, sizeof(multiset_tests) / sizeof(test), sizeof(multiset) },
     { "multimap", multimap_tests, sizeof(multimap_tests) / sizeof(test), sizeof(multimap) },
 
-    // // // Unordered associative containers (Hash Table)
-    // { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
+    // Unordered associative containers (Hash Table)
+    { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
     // { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
     // { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
     // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },

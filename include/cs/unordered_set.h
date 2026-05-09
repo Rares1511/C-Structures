@@ -2,12 +2,10 @@
 #define __CS_UNORDERED_SET_H__
 
 #include <cs/universal.h>
-
-typedef struct hash_table hash_table;
-typedef size_t (*hash_func_t)(const void *key);
+#include <cs/hash_table.h>
 
 typedef struct unordered_set {
-    hash_table *ht;
+    __hash_table *ht;
 } unordered_set;
 
 /*!
@@ -17,7 +15,7 @@ typedef struct unordered_set {
  * @param[in] hash_func Hash function to use for the unordered set.
  * @return Pointer to the initialized unordered set, or NULL on failure.
  */
-cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, hash_func_t hash_func);
+cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, __hash_func_t hash_func);
 
 /*!
  * @brief Inserts a key into the unordered set.

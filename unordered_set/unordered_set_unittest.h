@@ -1,7 +1,6 @@
 #include <cs/unordered_set.h>
 
 #include <unittest.h>
-#include <string.h>
 
 /******************************************************************************/
 /*                              INIT TESTS                                    */
