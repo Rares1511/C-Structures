@@ -2,11 +2,11 @@
 #ifndef __CS_UNIVERSAL_H__
 #define __CS_UNIVERSAL_H__
 
-#include <stdio.h>
+#include <stdio.h>  // FILE, fprintf
 #include <stdlib.h> // free, malloc, realloc
 #include <string.h> // memcpy, memmove, memset, strcmp
 
-#define SIZE_TH 1000
+#define SIZE_TH 1024
 
 #define NULL ((void *)0)
 
@@ -61,15 +61,15 @@ typedef int (*comparer)(const void *, const void *);
 typedef void (*deepcopy)(void *, const void *);
 
 typedef struct elem_attr_t {
-    int size;      /*!< size of the datatype */
-    freer fr;      /*!< freer function for the datatype */
-    deepcopy copy; /*!< function to deepcopy data if a separate function is needed */
-    printer print; /*!< printer function for the datatype */
-    comparer comp; /*!< compare function for the datatype */
+    size_t size;    /*!< size of the datatype */
+    freer fr;       /*!< freer function for the datatype */
+    deepcopy copy;  /*!< function to deepcopy data if a separate function is needed */
+    printer print;  /*!< printer function for the datatype */
+    comparer comp;  /*!< compare function for the datatype */
 } elem_attr_t;
 
 typedef struct {
-    __uint32_t magic; /*!< Magic number for validation */
+    size_t magic; /*!< Magic number for validation */
     struct_type_t type; /*!< Type of the structure */
 } cs_header_t;
 

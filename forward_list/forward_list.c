@@ -62,7 +62,7 @@ static inline forward_list_node* merge_iterative(forward_list_node* a, forward_l
 #pragma endregion
 
 cs_codes forward_list_init(forward_list *list, elem_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(list == NULL, CS_NULL);
 
     list->head = NULL;

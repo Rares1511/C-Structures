@@ -25,7 +25,9 @@ cs_codes unordered_set_init(unordered_set *uset, elem_attr_t attr, __hash_func_t
  */
 static inline cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
-    return __hash_table_add_entry(uset->ht, key);
+    int rc;
+    __hash_table_add_entry(uset->ht, key, &rc);
+    return rc;
 }
 
 /*!

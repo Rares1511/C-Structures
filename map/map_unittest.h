@@ -22,7 +22,7 @@ test_res test_map_init(test_arg *arg) {
     if (map_size(m) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
     if (!map_empty(m)) return (test_res){(char*)__func__, "Map not empty after init", CS_UNKNOWN};
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG, "Map initialized with key size %d and value size %d\n", key_attr.size, val_attr.size);
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Map initialized with key size %ld and value size %ld\n", key_attr.size, val_attr.size);
 
     if (!rbt_is_valid(m->t)) {
         map_free(m);

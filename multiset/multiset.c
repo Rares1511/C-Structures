@@ -1,7 +1,7 @@
 #include <cs/multiset.h>
 
 cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
     CS_RETURN_IF(NULL == ms, CS_NULL);
 
     elem_attr_t rbt_attr = {

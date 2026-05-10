@@ -35,7 +35,7 @@ test_res test_unordered_map_init_basic(test_arg *arg) {
         };
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_map with key size %d and value size %d\n",
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_map with key size %ld and value size %ld\n",
             key_attr.size, value_attr.size);
 
     unordered_map_free(umap);

@@ -3,8 +3,7 @@
 cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
                            elem_attr_t value_attr) {
     CS_RETURN_IF(NULL == mm, CS_NULL);
-    CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(value_attr.size <= 0 || value_attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(key_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size == 0 || value_attr.size > SIZE_TH, CS_SIZE);
 
     elem_attr_t vec_attr = {
         .size = sizeof(vector),

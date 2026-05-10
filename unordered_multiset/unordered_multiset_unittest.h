@@ -8,7 +8,7 @@
 /******************************************************************************/
 
 test_res test_unordered_multiset_init_basic() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -36,7 +36,7 @@ test_res test_unordered_multiset_init_basic() {
 }
 
 test_res test_unordered_multiset_init_null_pointer() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -62,7 +62,7 @@ test_res test_unordered_multiset_init_null_pointer() {
 }
 
 test_res test_unordered_multiset_init_invalid_size() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = 0,
         .copy = NULL,
         .comp = NULL,
@@ -89,7 +89,7 @@ test_res test_unordered_multiset_init_invalid_size() {
 }
 
 test_res test_unordered_multiset_init_null_hash() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -123,7 +123,7 @@ test_res test_unordered_multiset_init_null_hash() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_insert_basic() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -163,7 +163,7 @@ test_res test_unordered_multiset_insert_basic() {
 }
 
 test_res test_unordered_multiset_insert_multiple() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -193,7 +193,7 @@ test_res test_unordered_multiset_insert_multiple() {
         }
     }
 
-    if (unordered_multiset_size(umset) != 100) {
+    if (unordered_multiset_size(&umset) != 100) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -212,7 +212,7 @@ test_res test_unordered_multiset_insert_multiple() {
 }
 
 test_res test_unordered_multiset_insert_duplicates() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -245,7 +245,7 @@ test_res test_unordered_multiset_insert_duplicates() {
     }
 
     // Size should be 5 (multiset allows duplicates)
-    if (unordered_multiset_size(umset) != 5) {
+    if (unordered_multiset_size(&umset) != 5) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -283,7 +283,7 @@ test_res test_unordered_multiset_insert_null_set() {
 }
 
 test_res test_unordered_multiset_insert_null_key() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -326,7 +326,7 @@ test_res test_unordered_multiset_insert_null_key() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_find_existing() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -347,7 +347,7 @@ test_res test_unordered_multiset_find_existing() {
     int val = 42;
     unordered_multiset_insert(&umset, &val);
 
-    void *found = unordered_multiset_find(umset, &val);
+    void *found = unordered_multiset_find(&umset, &val);
 
     if (found == NULL) {
         unordered_multiset_free(&umset);
@@ -377,7 +377,7 @@ test_res test_unordered_multiset_find_existing() {
 }
 
 test_res test_unordered_multiset_find_nonexistent() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -399,7 +399,7 @@ test_res test_unordered_multiset_find_nonexistent() {
     unordered_multiset_insert(&umset, &val);
 
     int search = 99;
-    void *found = unordered_multiset_find(umset, &search);
+    void *found = unordered_multiset_find(&umset, &search);
 
     if (found != NULL) {
         unordered_multiset_free(&umset);
@@ -420,7 +420,7 @@ test_res test_unordered_multiset_find_nonexistent() {
 }
 
 test_res test_unordered_multiset_find_null_key() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -438,7 +438,7 @@ test_res test_unordered_multiset_find_null_key() {
         };
     }
 
-    void *found = unordered_multiset_find(umset, NULL);
+    void *found = unordered_multiset_find(&umset, NULL);
 
     if (found != NULL) {
         unordered_multiset_free(&umset);
@@ -459,7 +459,7 @@ test_res test_unordered_multiset_find_null_key() {
 }
 
 test_res test_unordered_multiset_find_after_many_inserts() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -483,7 +483,7 @@ test_res test_unordered_multiset_find_after_many_inserts() {
 
     // Find all inserted elements
     for (int i = 0; i < 100; i++) {
-        void *found = unordered_multiset_find(umset, &i);
+        void *found = unordered_multiset_find(&umset, &i);
         if (found == NULL || *(int *)found != i) {
             unordered_multiset_free(&umset);
             return (test_res){
@@ -508,7 +508,7 @@ test_res test_unordered_multiset_find_after_many_inserts() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_erase_existing() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -541,7 +541,7 @@ test_res test_unordered_multiset_erase_existing() {
     }
 
     // Verify element is gone
-    if (unordered_multiset_find(umset, &val) != NULL) {
+    if (unordered_multiset_find(&umset, &val) != NULL) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -560,7 +560,7 @@ test_res test_unordered_multiset_erase_existing() {
 }
 
 test_res test_unordered_multiset_erase_one_of_many() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -596,7 +596,7 @@ test_res test_unordered_multiset_erase_one_of_many() {
     }
 
     // Should still have 4 elements
-    if (unordered_multiset_size(umset) != 4) {
+    if (unordered_multiset_size(&umset) != 4) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -615,7 +615,7 @@ test_res test_unordered_multiset_erase_one_of_many() {
 }
 
 test_res test_unordered_multiset_erase_nonexistent() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -675,7 +675,7 @@ test_res test_unordered_multiset_erase_null_set() {
 }
 
 test_res test_unordered_multiset_erase_null_key() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -714,7 +714,7 @@ test_res test_unordered_multiset_erase_null_key() {
 }
 
 test_res test_unordered_multiset_erase_all() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -749,7 +749,7 @@ test_res test_unordered_multiset_erase_all() {
         }
     }
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -772,7 +772,7 @@ test_res test_unordered_multiset_erase_all() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_count_zero() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -791,7 +791,7 @@ test_res test_unordered_multiset_count_zero() {
     }
 
     int val = 42;
-    int count = unordered_multiset_count(umset, &val);
+    int count = unordered_multiset_count(&umset, &val);
 
     if (count != 0) {
         unordered_multiset_free(&umset);
@@ -812,7 +812,7 @@ test_res test_unordered_multiset_count_zero() {
 }
 
 test_res test_unordered_multiset_count_single() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -833,7 +833,7 @@ test_res test_unordered_multiset_count_single() {
     int val = 42;
     unordered_multiset_insert(&umset, &val);
 
-    int count = unordered_multiset_count(umset, &val);
+    int count = unordered_multiset_count(&umset, &val);
 
     if (count != 1) {
         unordered_multiset_free(&umset);
@@ -854,7 +854,7 @@ test_res test_unordered_multiset_count_single() {
 }
 
 test_res test_unordered_multiset_count_multiple() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -877,7 +877,7 @@ test_res test_unordered_multiset_count_multiple() {
         unordered_multiset_insert(&umset, &val);
     }
 
-    int count = unordered_multiset_count(umset, &val);
+    int count = unordered_multiset_count(&umset, &val);
 
     if (count != 7) {
         unordered_multiset_free(&umset);
@@ -898,7 +898,7 @@ test_res test_unordered_multiset_count_multiple() {
 }
 
 test_res test_unordered_multiset_count_null_key() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -916,7 +916,7 @@ test_res test_unordered_multiset_count_null_key() {
         };
     }
 
-    int count = unordered_multiset_count(umset, NULL);
+    int count = unordered_multiset_count(&umset, NULL);
 
     if (count != 0) {
         unordered_multiset_free(&umset);
@@ -937,7 +937,7 @@ test_res test_unordered_multiset_count_null_key() {
 }
 
 test_res test_unordered_multiset_count_after_erase() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -964,7 +964,7 @@ test_res test_unordered_multiset_count_after_erase() {
     unordered_multiset_erase(&umset, &val);
     unordered_multiset_erase(&umset, &val);
 
-    int count = unordered_multiset_count(umset, &val);
+    int count = unordered_multiset_count(&umset, &val);
 
     if (count != 3) {
         unordered_multiset_free(&umset);
@@ -989,7 +989,7 @@ test_res test_unordered_multiset_count_after_erase() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_size_empty() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1007,7 +1007,7 @@ test_res test_unordered_multiset_size_empty() {
         };
     }
 
-    if (unordered_multiset_size(umset) != 0) {
+    if (unordered_multiset_size(&umset) != 0) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1026,7 +1026,7 @@ test_res test_unordered_multiset_size_empty() {
 }
 
 test_res test_unordered_multiset_size_after_inserts() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1048,7 +1048,7 @@ test_res test_unordered_multiset_size_after_inserts() {
         unordered_multiset_insert(&umset, &i);
     }
 
-    if (unordered_multiset_size(umset) != 25) {
+    if (unordered_multiset_size(&umset) != 25) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1067,7 +1067,7 @@ test_res test_unordered_multiset_size_after_inserts() {
 }
 
 test_res test_unordered_multiset_size_after_erase() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1093,7 +1093,7 @@ test_res test_unordered_multiset_size_after_erase() {
         unordered_multiset_erase(&umset, &i);
     }
 
-    if (unordered_multiset_size(umset) != 5) {
+    if (unordered_multiset_size(&umset) != 5) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1112,7 +1112,7 @@ test_res test_unordered_multiset_size_after_erase() {
 }
 
 test_res test_unordered_multiset_empty_true() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1130,7 +1130,7 @@ test_res test_unordered_multiset_empty_true() {
         };
     }
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1149,7 +1149,7 @@ test_res test_unordered_multiset_empty_true() {
 }
 
 test_res test_unordered_multiset_empty_false() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1170,7 +1170,7 @@ test_res test_unordered_multiset_empty_false() {
     int val = 42;
     unordered_multiset_insert(&umset, &val);
 
-    if (unordered_multiset_empty(umset)) {
+    if (unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1189,7 +1189,7 @@ test_res test_unordered_multiset_empty_false() {
 }
 
 test_res test_unordered_multiset_empty_after_erase_all() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1215,7 +1215,7 @@ test_res test_unordered_multiset_empty_after_erase_all() {
         unordered_multiset_erase(&umset, &i);
     }
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1238,7 +1238,7 @@ test_res test_unordered_multiset_empty_after_erase_all() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_clear_basic() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1262,7 +1262,7 @@ test_res test_unordered_multiset_clear_basic() {
 
     unordered_multiset_clear(&umset);
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1271,7 +1271,7 @@ test_res test_unordered_multiset_clear_basic() {
         };
     }
 
-    if (unordered_multiset_size(umset) != 0) {
+    if (unordered_multiset_size(&umset) != 0) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1290,7 +1290,7 @@ test_res test_unordered_multiset_clear_basic() {
 }
 
 test_res test_unordered_multiset_clear_empty() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1310,7 +1310,7 @@ test_res test_unordered_multiset_clear_empty() {
 
     unordered_multiset_clear(&umset);
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1355,7 +1355,7 @@ test_res test_unordered_multiset_free_null() {
 }
 
 test_res test_unordered_multiset_free_empty() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1383,7 +1383,7 @@ test_res test_unordered_multiset_free_empty() {
 }
 
 test_res test_unordered_multiset_free_with_elements() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1419,7 +1419,7 @@ test_res test_unordered_multiset_free_with_elements() {
 /******************************************************************************/
 
 test_res test_unordered_multiset_large_capacity() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1449,7 +1449,7 @@ test_res test_unordered_multiset_large_capacity() {
         }
     }
 
-    if (unordered_multiset_size(umset) != 5000) {
+    if (unordered_multiset_size(&umset) != 5000) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1468,7 +1468,7 @@ test_res test_unordered_multiset_large_capacity() {
 }
 
 test_res test_unordered_multiset_small_capacity_many_inserts() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1499,7 +1499,7 @@ test_res test_unordered_multiset_small_capacity_many_inserts() {
         }
     }
 
-    if (unordered_multiset_size(umset) != 100) {
+    if (unordered_multiset_size(&umset) != 100) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1518,7 +1518,7 @@ test_res test_unordered_multiset_small_capacity_many_inserts() {
 }
 
 test_res test_unordered_multiset_insert_erase_cycle() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1546,7 +1546,7 @@ test_res test_unordered_multiset_insert_erase_cycle() {
         }
     }
 
-    if (!unordered_multiset_empty(umset)) {
+    if (!unordered_multiset_empty(&umset)) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1565,7 +1565,7 @@ test_res test_unordered_multiset_insert_erase_cycle() {
 }
 
 test_res test_unordered_multiset_negative_values() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1595,7 +1595,7 @@ test_res test_unordered_multiset_negative_values() {
         }
     }
 
-    if (unordered_multiset_size(umset) != 100) {
+    if (unordered_multiset_size(&umset) != 100) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1606,7 +1606,7 @@ test_res test_unordered_multiset_negative_values() {
 
     // Verify negative values can be found
     int neg = -25;
-    if (unordered_multiset_find(umset, &neg) == NULL) {
+    if (unordered_multiset_find(&umset, &neg) == NULL) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1625,7 +1625,7 @@ test_res test_unordered_multiset_negative_values() {
 }
 
 test_res test_unordered_multiset_reinsert_after_erase() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1658,7 +1658,7 @@ test_res test_unordered_multiset_reinsert_after_erase() {
         };
     }
 
-    if (unordered_multiset_find(umset, &val) == NULL) {
+    if (unordered_multiset_find(&umset, &val) == NULL) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1677,7 +1677,7 @@ test_res test_unordered_multiset_reinsert_after_erase() {
 }
 
 test_res test_unordered_multiset_many_duplicates() {
-    unordered_multiset_attr_t attr = {
+    elem_attr_t attr = {
         .size = sizeof(int),
         .copy = NULL,
         .comp = NULL,
@@ -1700,7 +1700,7 @@ test_res test_unordered_multiset_many_duplicates() {
         unordered_multiset_insert(&umset, &val);
     }
 
-    if (unordered_multiset_count(umset, &val) != 100) {
+    if (unordered_multiset_count(&umset, &val) != 100) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1709,7 +1709,7 @@ test_res test_unordered_multiset_many_duplicates() {
         };
     }
 
-    if (unordered_multiset_size(umset) != 100) {
+    if (unordered_multiset_size(&umset) != 100) {
         unordered_multiset_free(&umset);
         return (test_res){
             .test_name = (char*) __func__,
@@ -1764,12 +1764,12 @@ test_res test_unordered_multiset_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(*arg->logger, CLOGGER_INFO, "Inserted %d elements in %.4f seconds", total, elapsed);
+    clogger_log(*arg->logger, CLOGGER_INFO, "Inserted %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "insert", elapsed);
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        int *found = unordered_multiset_find(umset, &i);
+        int *found = unordered_multiset_find(&umset, &i);
         if (found == NULL || *found != i) {
             unordered_multiset_free(&umset);
             return (test_res){
@@ -1781,7 +1781,7 @@ test_res test_unordered_multiset_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(*arg->logger, CLOGGER_INFO, "Found %d elements in %.4f seconds", total, elapsed);
+    clogger_log(*arg->logger, CLOGGER_INFO, "Found %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "find", elapsed);
 
     gettimeofday(&start, NULL);
@@ -1797,7 +1797,7 @@ test_res test_unordered_multiset_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(*arg->logger, CLOGGER_INFO, "Erased %d elements in %.4f seconds", total, elapsed);
+    clogger_log(*arg->logger, CLOGGER_INFO, "Erased %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "delete", elapsed);
 
     return (test_res){

@@ -2,7 +2,7 @@
 
 cs_codes set_init(set *s, elem_attr_t attr) {
     CS_RETURN_IF(NULL == s, CS_NULL);
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
     s->t = malloc(sizeof(__rbt));
     CS_RETURN_IF(NULL == s->t, CS_MEM);
     return __rbt_init(s->t, attr);

@@ -459,7 +459,7 @@ static inline cs_codes __rbt_delete_internal(__rbt *t, __rbt_node *delete_node) 
 
 static inline cs_codes __rbt_init(__rbt *t, elem_attr_t attr) {
     CS_RETURN_IF(NULL == t, CS_NULL);
-    CS_RETURN_IF(attr.size < 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
 
     t->root = NULL;
     t->size = 0;

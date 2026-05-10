@@ -5,17 +5,29 @@ cs_codes unordered_map_init(unordered_map *umap,
                                  elem_attr_t value_attr,
                                  __hash_func_t hash_func) {
     CS_RETURN_IF(NULL == umap, CS_NULL);
-    CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0, CS_SIZE);
-    CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
    
     umap->ht = malloc(sizeof(__hash_table));
     umap->key_attr = malloc(sizeof(elem_attr_t));
     umap->value_attr = malloc(sizeof(elem_attr_t));
-    CS_RETURN_IF(NULL == umap->ht || NULL == umap->key_attr || NULL == umap->value_attr, CS_MEM);
+    umap->buffer = malloc(sizeof(__unordered_map_entry) + sizeof(pair) + key_attr.size + value_attr.size);
+    CS_RETURN_IF(NULL == umap->ht || NULL == umap->key_attr || NULL == umap->value_attr || NULL == umap->buffer, CS_MEM);
     memcpy(umap->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(umap->value_attr, &value_attr, sizeof(elem_attr_t));
+    
     umap->hash_func = hash_func;
 
+    __unordered_map_entry *entry = (__unordered_map_entry *)umap->buffer;
+    pair *p = (pair *)entry->data;
+
+    entry->hash_func = hash_func;
+    p->header.magic = CS_PAIR_MAGIC;
+    p->header.type = CS_PAIR_TYPE;
+    p->has_first = 1;
+    p->has_second = 1;
+    p->first_attr = umap->key_attr;
+    p->second_attr = umap->value_attr;
+    
     elem_attr_t entry_attr = {
         .comp = __unordered_map_entry_comp,
         .copy = __unordered_map_entry_copy,
@@ -62,4 +74,5 @@ void unordered_map_free(void *v_umap) {
     free(umap->ht);
     free(umap->key_attr);
     free(umap->value_attr);
+    free(umap->buffer);
 }

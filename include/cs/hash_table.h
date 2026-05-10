@@ -42,7 +42,32 @@ static inline int __hash_table_comp(const void *a, const void *b, comparer comp,
     return memcmp(a, b, size);
 }
 
-static cs_codes __hash_table_rehash(__hash_table *ht) {
+static inline size_t __hash_table_find_index(__hash_table *ht, const void *el) {
+    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
+    size_t idx = h & ht->mask;
+
+    while (ht->occupied[idx] != __HASH_TABLE_EMPTY) {
+        if (ht->occupied[idx] == __HASH_TABLE_OCCUPIED) {
+            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
+            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
+                return idx; // Element found
+            }
+        }
+        idx = (idx + 1) & ht->mask; // Linear probing
+    }
+    return __HASH_TABLE_TOMBSTONE_VALUE; // Not found
+}
+
+static inline void __hash_table_remove_at_index(__hash_table *ht, size_t idx) {
+    if (ht->attr.fr) {
+        void *el = (char *)ht->keys + (idx * ht->attr.size);
+        ht->attr.fr(el);
+    }
+    ht->occupied[idx] = __HASH_TABLE_TOMBSTONE;
+    ht->size--;
+}
+
+static inline cs_codes __hash_table_rehash(__hash_table *ht) {
     size_t old_cap = ht->cap;
     void *old_keys = ht->keys;
     char *old_occupied = ht->occupied;
@@ -94,7 +119,7 @@ static cs_codes __hash_table_rehash(__hash_table *ht) {
 
 static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __hash_func_t hash) {
     CS_RETURN_IF(NULL == ht, CS_NULL);
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
 
     ht->cap = CS_HASH_TABLE_INIT_CAP;
     ht->mask = ht->cap - 1;
@@ -117,12 +142,14 @@ static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __h
     return CS_SUCCESS;
 }
 
-static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) {
-    CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
+static inline void *__hash_table_add_entry(__hash_table *ht, const void *el, cs_codes *rc) {
+    CS_RETURN_IF(ht == NULL || el == NULL, NULL);
+
+    *rc = CS_SUCCESS;
     
     if (ht->size * 4 >= ht->cap * 3) {
-        cs_codes rc = __hash_table_rehash(ht);
-        if (rc != CS_SUCCESS) return rc;
+        *rc = __hash_table_rehash(ht);
+        if (*rc != CS_SUCCESS) return NULL;
     }
 
     size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
@@ -133,7 +160,8 @@ static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) 
         if (ht->occupied[idx] == __HASH_TABLE_OCCUPIED) {
             void *current_el = (char *)ht->keys + (idx * ht->attr.size);
             if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
-                return CS_ELEM; // Element already exists
+                *rc = CS_ELEM;
+                return current_el; // Element already exists, return pointer to it
             }
         }
         if (ht->occupied[idx] == __HASH_TABLE_TOMBSTONE && first_tombstone == __HASH_TABLE_TOMBSTONE_VALUE) {
@@ -153,37 +181,20 @@ static inline cs_codes __hash_table_add_entry(__hash_table *ht, const void *el) 
 
     ht->occupied[target_idx] = __HASH_TABLE_OCCUPIED;
     ht->size++;
-    return CS_SUCCESS;
+    return destination;
 }
 
 static inline cs_codes __hash_table_remove_entry(__hash_table *ht, const void *el) {
     CS_RETURN_IF(ht == NULL || el == NULL, CS_NULL);
     CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC, CS_UNINITIALIZED);
 
-    size_t h = ht->hash ? ht->hash(el) : universal_hash_bytes(el, ht->attr.size);
-    size_t idx = (h & ht->mask);
-    size_t start_idx = idx;
-
-    while (ht->occupied[idx] != __HASH_TABLE_EMPTY) {
-        if (ht->occupied[idx] == __HASH_TABLE_OCCUPIED) {
-            void *current_el = (char *)ht->keys + (idx * ht->attr.size);
-            if (__hash_table_comp(current_el, el, ht->attr.comp, ht->attr.size) == 0) {
-                if (ht->attr.fr) {
-                    ht->attr.fr(current_el);
-                }
-                
-                ht->occupied[idx] = __HASH_TABLE_TOMBSTONE;
-                ht->size--;
-                return CS_SUCCESS;
-            }
-        }
-
-        idx = (idx + 1) & ht->mask;
-        
-        if (idx == start_idx) break;
+    size_t idx = __hash_table_find_index(ht, el);
+    if (idx == __HASH_TABLE_TOMBSTONE_VALUE) {
+        return CS_ELEM; 
     }
 
-    return CS_ELEM;
+    __hash_table_remove_at_index(ht, idx);
+    return CS_SUCCESS;
 }
 
 static inline void* __hash_table_get_entry(__hash_table *ht, const void *el) {

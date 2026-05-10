@@ -6,10 +6,11 @@
 #include <cs/pair.h>
 
 typedef struct unordered_map {
-    __hash_table *ht;
-    __hash_func_t hash_func;
-    elem_attr_t *key_attr;
-    elem_attr_t *value_attr;
+    __hash_table *ht;        /*<! Underlying hash table for storing entries */
+    __hash_func_t hash_func; /*<! Hash function for the keys */
+    elem_attr_t *key_attr;   /*<! Attributes for keys and values */
+    elem_attr_t *value_attr; /*<! Attributes for keys and values */
+    char *buffer;            /*<! Buffer for temporary entry construction */ 
 } unordered_map;
 
 #pragma region Helper Structs
@@ -124,23 +125,17 @@ cs_codes unordered_map_init(unordered_map *umap,
  */
 static inline cs_codes unordered_map_add_entry(unordered_map *umap, const void *key, const void *value) {
     CS_RETURN_IF(NULL == umap || NULL == key || NULL == value, CS_NULL);
-    int k_sz = umap->key_attr->size;
-    int v_sz = umap->value_attr->size;
-    char buffer[sizeof(__unordered_map_entry) + sizeof(pair) + k_sz + v_sz];
-    __unordered_map_entry *entry = (__unordered_map_entry *)buffer;
+    int rc;
+    __unordered_map_entry *entry = (__unordered_map_entry *)umap->buffer;
     pair *p = (pair *)entry->data;
 
-    entry->hash_func = umap->hash_func;
-    p->header.magic = CS_PAIR_MAGIC;
-    p->header.type = CS_PAIR_TYPE;
-    p->has_first = 1;
-    p->has_second = 1;
-    p->first_attr = umap->key_attr;
-    p->second_attr = umap->value_attr;
+    size_t k_sz = umap->key_attr->size;
+    size_t v_sz = umap->value_attr->size;
     memcpy(pair_first(p), key, k_sz);
     memcpy(pair_second(p), value, v_sz);
 
-    return __hash_table_add_entry(umap->ht, entry);
+    __hash_table_add_entry(umap->ht, entry, &rc);
+    return rc;
 }
 
 /*!
@@ -151,18 +146,9 @@ static inline cs_codes unordered_map_add_entry(unordered_map *umap, const void *
  */
 static inline cs_codes unordered_map_remove_entry(unordered_map *umap, const void *key) {
     CS_RETURN_IF(NULL == umap || NULL == key, CS_NULL);
-    int k_sz = umap->key_attr->size;
-    char buffer[sizeof(__unordered_map_entry) + sizeof(pair) + k_sz];
-    __unordered_map_entry *entry = (__unordered_map_entry *)buffer;
+    __unordered_map_entry *entry = (__unordered_map_entry *)umap->buffer;
     pair *p = (pair *)entry->data;
-
-    entry->hash_func = umap->hash_func;
-    p->header.magic = CS_PAIR_MAGIC;
-    p->header.type = CS_PAIR_TYPE;
-    p->has_first = 1;
-    p->has_second = 0;
-    p->first_attr = umap->key_attr;
-    p->second_attr = umap->value_attr;
+    size_t k_sz = umap->key_attr->size;
     memcpy(pair_first(p), key, k_sz);
     
     return __hash_table_remove_entry(umap->ht, entry);
@@ -176,18 +162,9 @@ static inline cs_codes unordered_map_remove_entry(unordered_map *umap, const voi
  */
 static inline void *unordered_map_get_entry(unordered_map *umap, const void *key) {
     CS_RETURN_IF(NULL == key, NULL);
-    int k_sz = umap->key_attr->size;
-    char buffer[sizeof(__unordered_map_entry) + sizeof(pair) + k_sz];
-    __unordered_map_entry *entry = (__unordered_map_entry *)buffer;
+    __unordered_map_entry *entry = (__unordered_map_entry *)umap->buffer;
     pair *p = (pair *)entry->data;
-
-    entry->hash_func = umap->hash_func;
-    p->header.magic = CS_PAIR_MAGIC;
-    p->header.type = CS_PAIR_TYPE;
-    p->has_first = 1;
-    p->has_second = 0;
-    p->first_attr = umap->key_attr;
-    p->second_attr = umap->value_attr;
+    size_t k_sz = umap->key_attr->size;
     memcpy(pair_first(p), key, k_sz);
     
     void *found_entry = __hash_table_get_entry(umap->ht, entry);
@@ -223,7 +200,7 @@ static inline size_t unordered_map_size(unordered_map *umap) {
  */
 static inline size_t unordered_map_count(unordered_map *umap, const void *key) {
     CS_RETURN_IF(NULL == key, 0);
-    int k_sz = umap->key_attr->size;
+    size_t k_sz = umap->key_attr->size;
     char buffer[sizeof(__unordered_map_entry) + sizeof(pair) + k_sz];
     __unordered_map_entry *entry = (__unordered_map_entry *)buffer;
     pair *p = (pair *)entry->data;

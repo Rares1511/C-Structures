@@ -15,7 +15,10 @@ static void *test_unordered_multiset_find(void *arg) {
     auto *s = static_cast<std::unordered_multiset<int>*>(arg);
     const int total = __UNORDERED_MULTISET_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        s->find(i);
+        auto val = s->find(i);
+        if (val == s->end() || *val != i) {
+            printf("Error: Value %d not found in unordered_multiset\n", i);
+        }
     }
     return s;
 }
