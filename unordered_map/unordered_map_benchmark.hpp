@@ -15,7 +15,10 @@ static void *test_unordered_map_find(void *arg) {
     auto *m = static_cast<std::unordered_map<int, std::string>*>(arg);
     const int total = __UNORDERED_MAP_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        m->find(i);
+        auto val = m->find(i);
+        if (val == m->end()) {
+            std::cerr << "Error: Key " << i << " not found in unordered_map." << std::endl;
+        }
     }
     return m;
 }

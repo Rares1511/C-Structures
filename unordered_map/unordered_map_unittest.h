@@ -1674,8 +1674,8 @@ test_res test_unordered_map_swap_basic(test_arg *arg) {
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Added 8 entries to umap2 for swap test\n");
 
-    int size1_before = unordered_map_size(umap1);
-    int size2_before = unordered_map_size(&umap2);
+    size_t size1_before = unordered_map_size(umap1);
+    size_t size2_before = unordered_map_size(&umap2);
 
     unordered_map_swap(umap1, &umap2);
 
