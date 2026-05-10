@@ -14,7 +14,7 @@
  * @param[in] size  Size of the elements that will be compared
  * @return Negative value if a < b, 0 if a == b, positive value if a > b
  */
-inline int list_compare(const void *a, const void *b, comparer comp, int size) {
+static inline int list_compare(const void *a, const void *b, comparer comp, int size) {
     if (comp)
         return comp((void *)a, (void *)b);
     return memcmp(a, b, size);

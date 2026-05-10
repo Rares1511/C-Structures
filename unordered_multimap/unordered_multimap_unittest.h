@@ -6,7 +6,7 @@
 /*                              INIT TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_multimap_init_basic() {
+test_res test_unordered_multimap_init_basic(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -23,8 +23,8 @@ test_res test_unordered_multimap_init_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -33,7 +33,9 @@ test_res test_unordered_multimap_init_basic() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_multimap with int keys and values\n");
+
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -42,7 +44,7 @@ test_res test_unordered_multimap_init_basic() {
     };
 }
 
-test_res test_unordered_multimap_init_null_pointer() {
+test_res test_unordered_multimap_init_null_pointer(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -76,7 +78,7 @@ test_res test_unordered_multimap_init_null_pointer() {
     };
 }
 
-test_res test_unordered_multimap_init_invalid_key_size() {
+test_res test_unordered_multimap_init_invalid_key_size(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = 0,
         .copy = NULL,
@@ -93,8 +95,8 @@ test_res test_unordered_multimap_init_invalid_key_size() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -111,7 +113,7 @@ test_res test_unordered_multimap_init_invalid_key_size() {
     };
 }
 
-test_res test_unordered_multimap_init_invalid_value_size() {
+test_res test_unordered_multimap_init_invalid_value_size(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -128,8 +130,8 @@ test_res test_unordered_multimap_init_invalid_value_size() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
 
     if (rc != CS_SIZE) {
         return (test_res){
@@ -146,7 +148,7 @@ test_res test_unordered_multimap_init_invalid_value_size() {
     };
 }
 
-test_res test_unordered_multimap_init_null_hash() {
+test_res test_unordered_multimap_init_null_hash(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -163,8 +165,8 @@ test_res test_unordered_multimap_init_null_hash() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, NULL);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, NULL);
 
     // Should succeed with default hash
     if (rc != CS_SUCCESS) {
@@ -175,7 +177,7 @@ test_res test_unordered_multimap_init_null_hash() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -188,7 +190,7 @@ test_res test_unordered_multimap_init_null_hash() {
 /*                              ADD ENTRY TESTS                               */
 /******************************************************************************/
 
-test_res test_unordered_multimap_add_entry_basic() {
+test_res test_unordered_multimap_add_entry_basic(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -205,8 +207,8 @@ test_res test_unordered_multimap_add_entry_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -217,10 +219,10 @@ test_res test_unordered_multimap_add_entry_basic() {
 
     int key = 42;
     int value = 100;
-    rc = unordered_multimap_add_entry(&ummap, &key, &value);
+    rc = unordered_multimap_add_entry(ummap, &key, &value);
 
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to add entry",
@@ -228,7 +230,7 @@ test_res test_unordered_multimap_add_entry_basic() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -237,7 +239,7 @@ test_res test_unordered_multimap_add_entry_basic() {
     };
 }
 
-test_res test_unordered_multimap_add_entry_multiple() {
+test_res test_unordered_multimap_add_entry_multiple(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -254,8 +256,8 @@ test_res test_unordered_multimap_add_entry_multiple() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -266,9 +268,9 @@ test_res test_unordered_multimap_add_entry_multiple() {
 
     for (int i = 0; i < 100; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &i, &value);
+        rc = unordered_multimap_add_entry(ummap, &i, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add entry",
@@ -277,8 +279,11 @@ test_res test_unordered_multimap_add_entry_multiple() {
         }
     }
 
-    if (unordered_multimap_size(ummap) != 100) {
-        unordered_multimap_free(&ummap);
+    size_t size = unordered_multimap_size(ummap);
+
+    if (size != 100) {
+        unordered_multimap_free(ummap);
+        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected size 100, got %zu\n", size);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size mismatch after multiple adds",
@@ -286,7 +291,7 @@ test_res test_unordered_multimap_add_entry_multiple() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -295,7 +300,7 @@ test_res test_unordered_multimap_add_entry_multiple() {
     };
 }
 
-test_res test_unordered_multimap_add_entry_duplicate_keys() {
+test_res test_unordered_multimap_add_entry_duplicate_keys(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -312,8 +317,8 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -326,9 +331,9 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
     // Add same key with different values - multimap should allow this
     for (int i = 0; i < 5; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &key, &value);
+        rc = unordered_multimap_add_entry(ummap, &key, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add duplicate key",
@@ -339,7 +344,7 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
 
     // Size should be 5 (multimap allows duplicate keys)
     if (unordered_multimap_size(ummap) != 5) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 5 after adding 5 entries with same key",
@@ -347,7 +352,7 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -356,7 +361,7 @@ test_res test_unordered_multimap_add_entry_duplicate_keys() {
     };
 }
 
-test_res test_unordered_multimap_add_entry_null_map() {
+test_res test_unordered_multimap_add_entry_null_map(test_arg *arg) {
     int key = 42;
     int value = 100;
     cs_codes rc = unordered_multimap_add_entry(NULL, &key, &value);
@@ -376,7 +381,7 @@ test_res test_unordered_multimap_add_entry_null_map() {
     };
 }
 
-test_res test_unordered_multimap_add_entry_null_key() {
+test_res test_unordered_multimap_add_entry_null_key(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -393,8 +398,8 @@ test_res test_unordered_multimap_add_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -404,10 +409,10 @@ test_res test_unordered_multimap_add_entry_null_key() {
     }
 
     int value = 100;
-    rc = unordered_multimap_add_entry(&ummap, NULL, &value);
+    rc = unordered_multimap_add_entry(ummap, NULL, &value);
 
     if (rc != CS_NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Expected CS_NULL for NULL key",
@@ -415,7 +420,7 @@ test_res test_unordered_multimap_add_entry_null_key() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -424,7 +429,7 @@ test_res test_unordered_multimap_add_entry_null_key() {
     };
 }
 
-test_res test_unordered_multimap_add_entry_null_value() {
+test_res test_unordered_multimap_add_entry_null_value(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -441,8 +446,8 @@ test_res test_unordered_multimap_add_entry_null_value() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -452,10 +457,10 @@ test_res test_unordered_multimap_add_entry_null_value() {
     }
 
     int key = 42;
-    rc = unordered_multimap_add_entry(&ummap, &key, NULL);
+    rc = unordered_multimap_add_entry(ummap, &key, NULL);
 
     if (rc != CS_NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Expected CS_NULL for NULL value",
@@ -463,7 +468,7 @@ test_res test_unordered_multimap_add_entry_null_value() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -476,7 +481,7 @@ test_res test_unordered_multimap_add_entry_null_value() {
 /*                              GET ENTRY TESTS                               */
 /******************************************************************************/
 
-test_res test_unordered_multimap_get_entry_existing() {
+test_res test_unordered_multimap_get_entry_existing(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -493,8 +498,8 @@ test_res test_unordered_multimap_get_entry_existing() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -505,12 +510,12 @@ test_res test_unordered_multimap_get_entry_existing() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
+    unordered_multimap_add_entry(ummap, &key, &value);
 
     void *found = unordered_multimap_get_entry(ummap, &key);
 
     if (found == NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to get existing entry",
@@ -518,7 +523,7 @@ test_res test_unordered_multimap_get_entry_existing() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -527,7 +532,7 @@ test_res test_unordered_multimap_get_entry_existing() {
     };
 }
 
-test_res test_unordered_multimap_get_entry_nonexistent() {
+test_res test_unordered_multimap_get_entry_nonexistent(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -544,8 +549,8 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -556,13 +561,13 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
+    unordered_multimap_add_entry(ummap, &key, &value);
 
     int search = 99;
     void *found = unordered_multimap_get_entry(ummap, &search);
 
     if (found != NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Should not find nonexistent entry",
@@ -570,7 +575,7 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -579,7 +584,7 @@ test_res test_unordered_multimap_get_entry_nonexistent() {
     };
 }
 
-test_res test_unordered_multimap_get_entry_null_key() {
+test_res test_unordered_multimap_get_entry_null_key(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -596,8 +601,8 @@ test_res test_unordered_multimap_get_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -609,7 +614,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
     void *found = unordered_multimap_get_entry(ummap, NULL);
 
     if (found != NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Should return NULL for NULL key",
@@ -617,7 +622,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -626,7 +631,7 @@ test_res test_unordered_multimap_get_entry_null_key() {
     };
 }
 
-test_res test_unordered_multimap_get_entry_after_many_adds() {
+test_res test_unordered_multimap_get_entry_after_many_adds(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -643,8 +648,8 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -655,14 +660,14 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
 
     for (int i = 0; i < 100; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
     // Find all entries
     for (int i = 0; i < 100; i++) {
         void *found = unordered_multimap_get_entry(ummap, &i);
         if (found == NULL) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to get entry after many adds",
@@ -671,7 +676,7 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
         }
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -684,7 +689,7 @@ test_res test_unordered_multimap_get_entry_after_many_adds() {
 /*                              REMOVE ENTRY TESTS                            */
 /******************************************************************************/
 
-test_res test_unordered_multimap_remove_entry_existing() {
+test_res test_unordered_multimap_remove_entry_existing(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -701,8 +706,8 @@ test_res test_unordered_multimap_remove_entry_existing() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -713,12 +718,12 @@ test_res test_unordered_multimap_remove_entry_existing() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
+    unordered_multimap_add_entry(ummap, &key, &value);
 
-    rc = unordered_multimap_remove_entry(&ummap, &key);
+    rc = unordered_multimap_remove_entry(ummap, &key);
 
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to remove entry",
@@ -728,7 +733,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
 
     // Verify entry is gone
     if (unordered_multimap_get_entry(ummap, &key) != NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Entry still exists after remove",
@@ -736,7 +741,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -745,7 +750,7 @@ test_res test_unordered_multimap_remove_entry_existing() {
     };
 }
 
-test_res test_unordered_multimap_remove_entry_one_of_many() {
+test_res test_unordered_multimap_remove_entry_one_of_many(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -762,8 +767,8 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -776,13 +781,13 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
     // Add 5 entries with same key
     for (int i = 0; i < 5; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &key, &value);
+        unordered_multimap_add_entry(ummap, &key, &value);
     }
 
     // Remove one
-    rc = unordered_multimap_remove_entry(&ummap, &key);
+    rc = unordered_multimap_remove_entry(ummap, &key);
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to remove entry",
@@ -792,7 +797,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
 
     // Should still have 4 entries
     if (unordered_multimap_size(ummap) != 4) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 4 after removing one of 5 duplicates",
@@ -800,7 +805,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -809,7 +814,7 @@ test_res test_unordered_multimap_remove_entry_one_of_many() {
     };
 }
 
-test_res test_unordered_multimap_remove_entry_nonexistent() {
+test_res test_unordered_multimap_remove_entry_nonexistent(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -826,8 +831,8 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -837,11 +842,11 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
     }
 
     int key = 42;
-    rc = unordered_multimap_remove_entry(&ummap, &key);
+    rc = unordered_multimap_remove_entry(ummap, &key);
 
     // Should fail for nonexistent entry
     if (rc == CS_SUCCESS) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Remove should fail for nonexistent entry",
@@ -849,7 +854,7 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -858,7 +863,7 @@ test_res test_unordered_multimap_remove_entry_nonexistent() {
     };
 }
 
-test_res test_unordered_multimap_remove_entry_null_map() {
+test_res test_unordered_multimap_remove_entry_null_map(test_arg *arg) {
     int key = 42;
     cs_codes rc = unordered_multimap_remove_entry(NULL, &key);
 
@@ -877,7 +882,7 @@ test_res test_unordered_multimap_remove_entry_null_map() {
     };
 }
 
-test_res test_unordered_multimap_remove_entry_null_key() {
+test_res test_unordered_multimap_remove_entry_null_key(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -894,8 +899,8 @@ test_res test_unordered_multimap_remove_entry_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -904,10 +909,10 @@ test_res test_unordered_multimap_remove_entry_null_key() {
         };
     }
 
-    rc = unordered_multimap_remove_entry(&ummap, NULL);
+    rc = unordered_multimap_remove_entry(ummap, NULL);
 
     if (rc != CS_NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Expected CS_NULL for NULL key",
@@ -915,7 +920,7 @@ test_res test_unordered_multimap_remove_entry_null_key() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -924,7 +929,7 @@ test_res test_unordered_multimap_remove_entry_null_key() {
     };
 }
 
-test_res test_unordered_multimap_remove_entry_all() {
+test_res test_unordered_multimap_remove_entry_all(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -941,8 +946,8 @@ test_res test_unordered_multimap_remove_entry_all() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -953,14 +958,14 @@ test_res test_unordered_multimap_remove_entry_all() {
 
     for (int i = 0; i < 50; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
     // Remove all entries
     for (int i = 0; i < 50; i++) {
-        rc = unordered_multimap_remove_entry(&ummap, &i);
+        rc = unordered_multimap_remove_entry(ummap, &i);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to remove entry",
@@ -970,7 +975,7 @@ test_res test_unordered_multimap_remove_entry_all() {
     }
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Map should be empty after removing all",
@@ -978,7 +983,7 @@ test_res test_unordered_multimap_remove_entry_all() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -991,7 +996,7 @@ test_res test_unordered_multimap_remove_entry_all() {
 /*                              COUNT TESTS                                   */
 /******************************************************************************/
 
-test_res test_unordered_multimap_count_zero() {
+test_res test_unordered_multimap_count_zero(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1008,8 +1013,8 @@ test_res test_unordered_multimap_count_zero() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1022,7 +1027,7 @@ test_res test_unordered_multimap_count_zero() {
     int count = unordered_multimap_count(ummap, &key);
 
     if (count != 0) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Count should be 0 for nonexistent key",
@@ -1030,7 +1035,7 @@ test_res test_unordered_multimap_count_zero() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1039,7 +1044,7 @@ test_res test_unordered_multimap_count_zero() {
     };
 }
 
-test_res test_unordered_multimap_count_single() {
+test_res test_unordered_multimap_count_single(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1056,8 +1061,8 @@ test_res test_unordered_multimap_count_single() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1068,12 +1073,12 @@ test_res test_unordered_multimap_count_single() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
+    unordered_multimap_add_entry(ummap, &key, &value);
 
     int count = unordered_multimap_count(ummap, &key);
 
     if (count != 1) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Count should be 1 for single entry",
@@ -1081,7 +1086,7 @@ test_res test_unordered_multimap_count_single() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1090,7 +1095,7 @@ test_res test_unordered_multimap_count_single() {
     };
 }
 
-test_res test_unordered_multimap_count_multiple() {
+test_res test_unordered_multimap_count_multiple(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1107,8 +1112,8 @@ test_res test_unordered_multimap_count_multiple() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1120,13 +1125,13 @@ test_res test_unordered_multimap_count_multiple() {
     int key = 42;
     for (int i = 0; i < 7; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &key, &value);
+        unordered_multimap_add_entry(ummap, &key, &value);
     }
 
     int count = unordered_multimap_count(ummap, &key);
 
     if (count != 7) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Count should be 7 after adding 7 entries with same key",
@@ -1134,7 +1139,7 @@ test_res test_unordered_multimap_count_multiple() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1143,7 +1148,7 @@ test_res test_unordered_multimap_count_multiple() {
     };
 }
 
-test_res test_unordered_multimap_count_null_key() {
+test_res test_unordered_multimap_count_null_key(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1160,8 +1165,8 @@ test_res test_unordered_multimap_count_null_key() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1173,7 +1178,7 @@ test_res test_unordered_multimap_count_null_key() {
     int count = unordered_multimap_count(ummap, NULL);
 
     if (count != 0) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Count should return 0 for NULL key",
@@ -1181,7 +1186,7 @@ test_res test_unordered_multimap_count_null_key() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1190,7 +1195,7 @@ test_res test_unordered_multimap_count_null_key() {
     };
 }
 
-test_res test_unordered_multimap_count_after_remove() {
+test_res test_unordered_multimap_count_after_remove(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1207,8 +1212,8 @@ test_res test_unordered_multimap_count_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1220,25 +1225,24 @@ test_res test_unordered_multimap_count_after_remove() {
     int key = 42;
     for (int i = 0; i < 5; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &key, &value);
+        unordered_multimap_add_entry(ummap, &key, &value);
     }
 
-    // Remove 2
-    unordered_multimap_remove_entry(&ummap, &key);
-    unordered_multimap_remove_entry(&ummap, &key);
+    // Remove all entries with the same key
+    unordered_multimap_remove_entry(ummap, &key);
 
     int count = unordered_multimap_count(ummap, &key);
 
-    if (count != 3) {
-        unordered_multimap_free(&ummap);
+    if (count != 0) {
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
-            .reason = "Count should be 3 after removing 2 from 5",
+            .reason = "Count should be 0 after removing all entries with the same key",
             .return_code = CS_UNKNOWN,
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1251,7 +1255,7 @@ test_res test_unordered_multimap_count_after_remove() {
 /*                              SIZE/EMPTY TESTS                              */
 /******************************************************************************/
 
-test_res test_unordered_multimap_size_empty() {
+test_res test_unordered_multimap_size_empty(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1268,8 +1272,8 @@ test_res test_unordered_multimap_size_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1279,7 +1283,7 @@ test_res test_unordered_multimap_size_empty() {
     }
 
     if (unordered_multimap_size(ummap) != 0) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 0 for empty map",
@@ -1287,7 +1291,7 @@ test_res test_unordered_multimap_size_empty() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1296,7 +1300,7 @@ test_res test_unordered_multimap_size_empty() {
     };
 }
 
-test_res test_unordered_multimap_size_after_adds() {
+test_res test_unordered_multimap_size_after_adds(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1313,8 +1317,8 @@ test_res test_unordered_multimap_size_after_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1325,11 +1329,11 @@ test_res test_unordered_multimap_size_after_adds() {
 
     for (int i = 0; i < 25; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
     if (unordered_multimap_size(ummap) != 25) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size mismatch after adds",
@@ -1337,7 +1341,7 @@ test_res test_unordered_multimap_size_after_adds() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1346,7 +1350,7 @@ test_res test_unordered_multimap_size_after_adds() {
     };
 }
 
-test_res test_unordered_multimap_size_after_remove() {
+test_res test_unordered_multimap_size_after_remove(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1363,8 +1367,8 @@ test_res test_unordered_multimap_size_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1375,15 +1379,15 @@ test_res test_unordered_multimap_size_after_remove() {
 
     for (int i = 0; i < 10; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
     for (int i = 0; i < 5; i++) {
-        unordered_multimap_remove_entry(&ummap, &i);
+        unordered_multimap_remove_entry(ummap, &i);
     }
 
     if (unordered_multimap_size(ummap) != 5) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 5 after removing 5 entries",
@@ -1391,7 +1395,7 @@ test_res test_unordered_multimap_size_after_remove() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1400,7 +1404,7 @@ test_res test_unordered_multimap_size_after_remove() {
     };
 }
 
-test_res test_unordered_multimap_empty_true() {
+test_res test_unordered_multimap_empty_true(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1417,8 +1421,8 @@ test_res test_unordered_multimap_empty_true() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1428,7 +1432,7 @@ test_res test_unordered_multimap_empty_true() {
     }
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Newly created map should be empty",
@@ -1436,7 +1440,7 @@ test_res test_unordered_multimap_empty_true() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1445,7 +1449,7 @@ test_res test_unordered_multimap_empty_true() {
     };
 }
 
-test_res test_unordered_multimap_empty_false() {
+test_res test_unordered_multimap_empty_false(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1462,8 +1466,8 @@ test_res test_unordered_multimap_empty_false() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1474,10 +1478,10 @@ test_res test_unordered_multimap_empty_false() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
+    unordered_multimap_add_entry(ummap, &key, &value);
 
     if (unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Map with entry should not be empty",
@@ -1485,7 +1489,7 @@ test_res test_unordered_multimap_empty_false() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1494,7 +1498,7 @@ test_res test_unordered_multimap_empty_false() {
     };
 }
 
-test_res test_unordered_multimap_empty_after_remove_all() {
+test_res test_unordered_multimap_empty_after_remove_all(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1511,8 +1515,8 @@ test_res test_unordered_multimap_empty_after_remove_all() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1523,15 +1527,15 @@ test_res test_unordered_multimap_empty_after_remove_all() {
 
     for (int i = 0; i < 10; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
     for (int i = 0; i < 10; i++) {
-        unordered_multimap_remove_entry(&ummap, &i);
+        unordered_multimap_remove_entry(ummap, &i);
     }
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Map should be empty after removing all entries",
@@ -1539,7 +1543,7 @@ test_res test_unordered_multimap_empty_after_remove_all() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1552,7 +1556,7 @@ test_res test_unordered_multimap_empty_after_remove_all() {
 /*                              CLEAR TESTS                                   */
 /******************************************************************************/
 
-test_res test_unordered_multimap_clear_basic() {
+test_res test_unordered_multimap_clear_basic(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1569,8 +1573,8 @@ test_res test_unordered_multimap_clear_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1581,13 +1585,13 @@ test_res test_unordered_multimap_clear_basic() {
 
     for (int i = 0; i < 50; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
-    unordered_multimap_clear(&ummap);
+    unordered_multimap_clear(ummap);
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Map should be empty after clear",
@@ -1596,7 +1600,7 @@ test_res test_unordered_multimap_clear_basic() {
     }
 
     if (unordered_multimap_size(ummap) != 0) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 0 after clear",
@@ -1604,7 +1608,7 @@ test_res test_unordered_multimap_clear_basic() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1613,7 +1617,7 @@ test_res test_unordered_multimap_clear_basic() {
     };
 }
 
-test_res test_unordered_multimap_clear_empty() {
+test_res test_unordered_multimap_clear_empty(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1630,8 +1634,8 @@ test_res test_unordered_multimap_clear_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1640,10 +1644,10 @@ test_res test_unordered_multimap_clear_empty() {
         };
     }
 
-    unordered_multimap_clear(&ummap);
+    unordered_multimap_clear(ummap);
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Empty map should remain empty after clear",
@@ -1651,7 +1655,7 @@ test_res test_unordered_multimap_clear_empty() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1660,7 +1664,7 @@ test_res test_unordered_multimap_clear_empty() {
     };
 }
 
-test_res test_unordered_multimap_clear_null() {
+test_res test_unordered_multimap_clear_null(test_arg *arg) {
     // Clear NULL should not crash
     unordered_multimap_clear(NULL);
 
@@ -1675,7 +1679,7 @@ test_res test_unordered_multimap_clear_null() {
 /*                              SWAP TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_multimap_swap_basic() {
+test_res test_unordered_multimap_swap_basic(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1692,8 +1696,9 @@ test_res test_unordered_multimap_swap_basic() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap1, ummap2;
-    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap1 = (unordered_multimap *)arg->data_structure;
+    unordered_multimap ummap2;
+    cs_codes rc = unordered_multimap_init(ummap1, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1704,7 +1709,7 @@ test_res test_unordered_multimap_swap_basic() {
 
     rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap1);
+        unordered_multimap_free(ummap1);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to initialize ummap2",
@@ -1715,7 +1720,7 @@ test_res test_unordered_multimap_swap_basic() {
     // Add entries to ummap1
     for (int i = 0; i < 5; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap1, &i, &value);
+        unordered_multimap_add_entry(ummap1, &i, &value);
     }
 
     // Add entries to ummap2
@@ -1724,13 +1729,13 @@ test_res test_unordered_multimap_swap_basic() {
         unordered_multimap_add_entry(&ummap2, &i, &value);
     }
 
-    int size1_before = unordered_multimap_size(ummap1);
-    int size2_before = unordered_multimap_size(ummap2);
+    size_t size1_before = unordered_multimap_size(ummap1);
+    size_t size2_before = unordered_multimap_size(&ummap2);
 
-    unordered_multimap_swap(&ummap1, &ummap2);
+    unordered_multimap_swap(ummap1, &ummap2);
 
     if (unordered_multimap_size(ummap1) != size2_before) {
-        unordered_multimap_free(&ummap1);
+        unordered_multimap_free(ummap1);
         unordered_multimap_free(&ummap2);
         return (test_res){
             .test_name = (char *)__func__,
@@ -1739,8 +1744,8 @@ test_res test_unordered_multimap_swap_basic() {
         };
     }
 
-    if (unordered_multimap_size(ummap2) != size1_before) {
-        unordered_multimap_free(&ummap1);
+    if (unordered_multimap_size(&ummap2) != size1_before) {
+        unordered_multimap_free(ummap1);
         unordered_multimap_free(&ummap2);
         return (test_res){
             .test_name = (char *)__func__,
@@ -1749,7 +1754,7 @@ test_res test_unordered_multimap_swap_basic() {
         };
     }
 
-    unordered_multimap_free(&ummap1);
+    unordered_multimap_free(ummap1);
     unordered_multimap_free(&ummap2);
 
     return (test_res){
@@ -1759,7 +1764,7 @@ test_res test_unordered_multimap_swap_basic() {
     };
 }
 
-test_res test_unordered_multimap_swap_with_empty() {
+test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1776,8 +1781,9 @@ test_res test_unordered_multimap_swap_with_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap1, ummap2;
-    cs_codes rc = unordered_multimap_init(&ummap1, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap1 = (unordered_multimap *)arg->data_structure;
+    unordered_multimap ummap2;
+    cs_codes rc = unordered_multimap_init(ummap1, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1788,7 +1794,7 @@ test_res test_unordered_multimap_swap_with_empty() {
 
     rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap1);
+        unordered_multimap_free(ummap1);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to initialize ummap2",
@@ -1799,13 +1805,13 @@ test_res test_unordered_multimap_swap_with_empty() {
     // Add entries only to ummap1
     for (int i = 0; i < 10; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap1, &i, &value);
+        unordered_multimap_add_entry(ummap1, &i, &value);
     }
 
-    unordered_multimap_swap(&ummap1, &ummap2);
+    unordered_multimap_swap(ummap1, &ummap2);
 
     if (!unordered_multimap_empty(ummap1)) {
-        unordered_multimap_free(&ummap1);
+        unordered_multimap_free(ummap1);
         unordered_multimap_free(&ummap2);
         return (test_res){
             .test_name = (char *)__func__,
@@ -1814,8 +1820,8 @@ test_res test_unordered_multimap_swap_with_empty() {
         };
     }
 
-    if (unordered_multimap_size(ummap2) != 10) {
-        unordered_multimap_free(&ummap1);
+    if (unordered_multimap_size(&ummap2) != 10) {
+        unordered_multimap_free(ummap1);
         unordered_multimap_free(&ummap2);
         return (test_res){
             .test_name = (char *)__func__,
@@ -1824,7 +1830,7 @@ test_res test_unordered_multimap_swap_with_empty() {
         };
     }
 
-    unordered_multimap_free(&ummap1);
+    unordered_multimap_free(ummap1);
     unordered_multimap_free(&ummap2);
 
     return (test_res){
@@ -1838,7 +1844,7 @@ test_res test_unordered_multimap_swap_with_empty() {
 /*                              FREE TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_multimap_free_null() {
+test_res test_unordered_multimap_free_null(test_arg *arg) {
     // Free NULL should not crash
     unordered_multimap_free(NULL);
 
@@ -1849,7 +1855,7 @@ test_res test_unordered_multimap_free_null() {
     };
 }
 
-test_res test_unordered_multimap_free_empty() {
+test_res test_unordered_multimap_free_empty(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1866,8 +1872,8 @@ test_res test_unordered_multimap_free_empty() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1876,7 +1882,7 @@ test_res test_unordered_multimap_free_empty() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1885,7 +1891,7 @@ test_res test_unordered_multimap_free_empty() {
     };
 }
 
-test_res test_unordered_multimap_free_with_entries() {
+test_res test_unordered_multimap_free_with_entries(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1902,8 +1908,8 @@ test_res test_unordered_multimap_free_with_entries() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1914,10 +1920,10 @@ test_res test_unordered_multimap_free_with_entries() {
 
     for (int i = 0; i < 100; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1930,7 +1936,7 @@ test_res test_unordered_multimap_free_with_entries() {
 /*                              STRESS/EDGE TESTS                             */
 /******************************************************************************/
 
-test_res test_unordered_multimap_large_capacity() {
+test_res test_unordered_multimap_large_capacity(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -1947,8 +1953,8 @@ test_res test_unordered_multimap_large_capacity() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -1959,9 +1965,9 @@ test_res test_unordered_multimap_large_capacity() {
 
     for (int i = 0; i < 5000; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &i, &value);
+        rc = unordered_multimap_add_entry(ummap, &i, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add during stress test",
@@ -1971,7 +1977,7 @@ test_res test_unordered_multimap_large_capacity() {
     }
 
     if (unordered_multimap_size(ummap) != 5000) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size mismatch in stress test",
@@ -1979,7 +1985,7 @@ test_res test_unordered_multimap_large_capacity() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1988,7 +1994,7 @@ test_res test_unordered_multimap_large_capacity() {
     };
 }
 
-test_res test_unordered_multimap_small_capacity_many_adds() {
+test_res test_unordered_multimap_small_capacity_many_adds(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2005,8 +2011,8 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2018,9 +2024,9 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
     // Add many more entries than initial capacity
     for (int i = 0; i < 100; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &i, &value);
+        rc = unordered_multimap_add_entry(ummap, &i, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add beyond initial capacity",
@@ -2030,7 +2036,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
     }
 
     if (unordered_multimap_size(ummap) != 100) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size mismatch after resize",
@@ -2038,7 +2044,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2047,7 +2053,7 @@ test_res test_unordered_multimap_small_capacity_many_adds() {
     };
 }
 
-test_res test_unordered_multimap_add_remove_cycle() {
+test_res test_unordered_multimap_add_remove_cycle(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2064,8 +2070,8 @@ test_res test_unordered_multimap_add_remove_cycle() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2078,15 +2084,15 @@ test_res test_unordered_multimap_add_remove_cycle() {
     for (int cycle = 0; cycle < 5; cycle++) {
         for (int i = 0; i < 20; i++) {
             int value = i * 10;
-            unordered_multimap_add_entry(&ummap, &i, &value);
+            unordered_multimap_add_entry(ummap, &i, &value);
         }
         for (int i = 0; i < 20; i++) {
-            unordered_multimap_remove_entry(&ummap, &i);
+            unordered_multimap_remove_entry(ummap, &i);
         }
     }
 
     if (!unordered_multimap_empty(ummap)) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Map should be empty after cycles",
@@ -2094,7 +2100,7 @@ test_res test_unordered_multimap_add_remove_cycle() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2103,7 +2109,7 @@ test_res test_unordered_multimap_add_remove_cycle() {
     };
 }
 
-test_res test_unordered_multimap_negative_keys() {
+test_res test_unordered_multimap_negative_keys(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2120,8 +2126,8 @@ test_res test_unordered_multimap_negative_keys() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2132,9 +2138,9 @@ test_res test_unordered_multimap_negative_keys() {
 
     for (int i = -50; i < 50; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &i, &value);
+        rc = unordered_multimap_add_entry(ummap, &i, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add with negative key",
@@ -2144,7 +2150,7 @@ test_res test_unordered_multimap_negative_keys() {
     }
 
     if (unordered_multimap_size(ummap) != 100) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size mismatch with negative keys",
@@ -2155,7 +2161,7 @@ test_res test_unordered_multimap_negative_keys() {
     // Verify negative keys can be found
     int neg = -25;
     if (unordered_multimap_get_entry(ummap, &neg) == NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to find negative key",
@@ -2163,7 +2169,7 @@ test_res test_unordered_multimap_negative_keys() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2172,7 +2178,7 @@ test_res test_unordered_multimap_negative_keys() {
     };
 }
 
-test_res test_unordered_multimap_readd_after_remove() {
+test_res test_unordered_multimap_readd_after_remove(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2189,8 +2195,8 @@ test_res test_unordered_multimap_readd_after_remove() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2201,14 +2207,14 @@ test_res test_unordered_multimap_readd_after_remove() {
 
     int key = 42;
     int value = 100;
-    unordered_multimap_add_entry(&ummap, &key, &value);
-    unordered_multimap_remove_entry(&ummap, &key);
+    unordered_multimap_add_entry(ummap, &key, &value);
+    unordered_multimap_remove_entry(ummap, &key);
 
     // Re-add the same key
     value = 200;
-    rc = unordered_multimap_add_entry(&ummap, &key, &value);
+    rc = unordered_multimap_add_entry(ummap, &key, &value);
     if (rc != CS_SUCCESS) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to re-add after remove",
@@ -2217,7 +2223,7 @@ test_res test_unordered_multimap_readd_after_remove() {
     }
 
     if (unordered_multimap_get_entry(ummap, &key) == NULL) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Failed to find re-added entry",
@@ -2225,7 +2231,7 @@ test_res test_unordered_multimap_readd_after_remove() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2251,8 +2257,8 @@ test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2264,13 +2270,13 @@ test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
     int key = 42;
     for (int i = 0; i < 100; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &key, &value);
+        unordered_multimap_add_entry(ummap, &key, &value);
     }
 
     int count = unordered_multimap_count(ummap, &key);
     if (count != 100) {
         clogger_log(*arg->logger, CLOGGER_ERROR, "Expected count of 100 for duplicates, got %d", count);
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Count should be 100 for 100 duplicates",
@@ -2279,7 +2285,7 @@ test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
     }
 
     if (unordered_multimap_size(ummap) != 100) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 100 for 100 duplicates",
@@ -2287,7 +2293,7 @@ test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2296,7 +2302,7 @@ test_res test_unordered_multimap_many_duplicates(test_arg *arg) {
     };
 }
 
-test_res test_unordered_multimap_clear_and_reuse() {
+test_res test_unordered_multimap_clear_and_reuse(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
         .copy = NULL,
@@ -2313,8 +2319,8 @@ test_res test_unordered_multimap_clear_and_reuse() {
         .comp = NULL,
     };
 
-    unordered_multimap ummap;
-    cs_codes rc = unordered_multimap_init(&ummap, key_attr, value_attr, hash_int);
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
+    cs_codes rc = unordered_multimap_init(ummap, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -2326,16 +2332,16 @@ test_res test_unordered_multimap_clear_and_reuse() {
     // Add, clear, and add again
     for (int i = 0; i < 50; i++) {
         int value = i * 10;
-        unordered_multimap_add_entry(&ummap, &i, &value);
+        unordered_multimap_add_entry(ummap, &i, &value);
     }
 
-    unordered_multimap_clear(&ummap);
+    unordered_multimap_clear(ummap);
 
     for (int i = 100; i < 150; i++) {
         int value = i * 10;
-        rc = unordered_multimap_add_entry(&ummap, &i, &value);
+        rc = unordered_multimap_add_entry(ummap, &i, &value);
         if (rc != CS_SUCCESS) {
-            unordered_multimap_free(&ummap);
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char *)__func__,
                 .reason = "Failed to add after clear",
@@ -2345,7 +2351,7 @@ test_res test_unordered_multimap_clear_and_reuse() {
     }
 
     if (unordered_multimap_size(ummap) != 50) {
-        unordered_multimap_free(&ummap);
+        unordered_multimap_free(ummap);
         return (test_res){
             .test_name = (char *)__func__,
             .reason = "Size should be 50 after clear and reuse",
@@ -2353,7 +2359,7 @@ test_res test_unordered_multimap_clear_and_reuse() {
         };
     }
 
-    unordered_multimap_free(&ummap);
+    unordered_multimap_free(ummap);
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2372,11 +2378,11 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
         };
     }
 
-    unordered_multimap ummap;
+    unordered_multimap *ummap = (unordered_multimap *)arg->data_structure;
     struct timeval start, end;
     double elapsed;
 
-    if (CS_SUCCESS != unordered_multimap_init(&ummap, get_int_attr(), get_int_attr(), hash_int)) {
+    if (CS_SUCCESS != unordered_multimap_init(ummap, get_int_attr(), get_int_attr(), hash_int)) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
@@ -2388,8 +2394,8 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
     
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        if (CS_SUCCESS != unordered_multimap_add_entry(&ummap, &i, &i)) {
-            unordered_multimap_free(&ummap);
+        if (CS_SUCCESS != unordered_multimap_add_entry(ummap, &i, &i)) {
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to insert during stress test",
@@ -2404,9 +2410,9 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        int *found = unordered_multimap_get_entry(ummap, &i);
-        if (found == NULL || *found != i) {
-            unordered_multimap_free(&ummap);
+        vector *found = unordered_multimap_get_entry(ummap, &i);
+        if (found == NULL || vector_size(found) == 0) {
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to find element during stress test",
@@ -2421,8 +2427,8 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        if (CS_SUCCESS != unordered_multimap_remove_entry(&ummap, &i)) {
-            unordered_multimap_free(&ummap);
+        if (CS_SUCCESS != unordered_multimap_remove_entry(ummap, &i)) {
+            unordered_multimap_free(ummap);
             return (test_res){
                 .test_name = (char*) __func__,
                 .reason = "Failed to erase element during stress test",

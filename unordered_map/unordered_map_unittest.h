@@ -2419,7 +2419,7 @@ test_res test_unordered_map_different_value_types(test_arg *arg) {
 
 test_res test_unordered_map_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind");
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Skipping time-based stress test on Valgrind",

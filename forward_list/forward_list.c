@@ -14,7 +14,7 @@
  * @param[in] size  Size of the elements that will be compared
  * @return Negative value if a < b, 0 if a == b, positive value if a > b
  */
-inline int forward_list_compare(const void *a, const void *b, comparer comp, int size) {
+static inline int forward_list_compare(const void *a, const void *b, comparer comp, int size) {
     if (__builtin_expect(comp != NULL, 1)) {
         return comp(a, b);
     }

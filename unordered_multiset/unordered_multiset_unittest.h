@@ -1729,7 +1729,7 @@ test_res test_unordered_multiset_many_duplicates() {
 
 test_res test_unordered_multiset_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time stress test on Valgrind");
+        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time stress test on Valgrind\n");
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Skipping time stress test on Valgrind",

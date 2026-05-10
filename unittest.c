@@ -25,7 +25,7 @@
 #include "unordered_set/unordered_set_unittest.h"
 #include "unordered_map/unordered_map_unittest.h"
 #include "unordered_multiset/unordered_multiset_unittest.h"
-// #include "unordered_multimap/unordered_multimap_unittest.h"
+#include "unordered_multimap/unordered_multimap_unittest.h"
 
 // Container adapters
 #include "stack/stack_unittest.h"
@@ -70,13 +70,13 @@ static module_tests all_modules[] = {
     { "unordered_set", unordered_set_tests, sizeof(unordered_set_tests) / sizeof(test), sizeof(unordered_set) },
     { "unordered_map", unordered_map_tests, sizeof(unordered_map_tests) / sizeof(test), sizeof(unordered_map) },
     { "unordered_multiset", unordered_multiset_tests, sizeof(unordered_multiset_tests) / sizeof(test), sizeof(unordered_multiset) },
-    // { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
+    { "unordered_multimap", unordered_multimap_tests, sizeof(unordered_multimap_tests) / sizeof(test), sizeof(unordered_multimap) },
 
     // // // Container adapters
-    // { "stack", stack_tests, sizeof(stack_tests) / sizeof(test), sizeof(stack) },
-    // { "queue", queue_tests, sizeof(queue_tests) / sizeof(test), sizeof(queue) },
-    // { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
-    // { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
+    { "stack", stack_tests, sizeof(stack_tests) / sizeof(test), sizeof(stack) },
+    { "queue", queue_tests, sizeof(queue_tests) / sizeof(test), sizeof(queue) },
+    { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
+    { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
 
     // // Numeric types
     { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test), sizeof(large_number) },
