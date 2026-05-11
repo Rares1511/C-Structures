@@ -1361,11 +1361,11 @@ test_res test_vector_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
-    vector v;
+    vector *v = (vector *)arg->data_structure;
     struct timeval start, end;
     double elapsed;
 
-    if (vector_init(&v, get_int_attr(), (vector_attr_t){0, 1}) != CS_SUCCESS) {
+    if (vector_init(v, get_int_attr(), (vector_attr_t){0, 1}) != CS_SUCCESS) {
         return (test_res){(char*)__func__, "Vector initialization failed", CS_UNKNOWN};
     }
     int total = __VECTOR_STRESS_TEST_SIZE;
@@ -1373,10 +1373,10 @@ test_res test_vector_stress_time(test_arg *arg) {
     /* INSERT timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        cs_codes result = vector_push_back(&v, &i);
+        cs_codes result = vector_push_back(v, &i);
 
         if (result != CS_SUCCESS) {
-            vector_free(&v);
+            vector_free(v);
             return (test_res){(char*)__func__, "Insert failed during stress test", result};
         }
     }
@@ -1389,20 +1389,28 @@ test_res test_vector_stress_time(test_arg *arg) {
     /* FIND timing */
     gettimeofday(&start, NULL);
     int search_val = total - 1;
-    vector_find(&v, &search_val);
+    vector_find(v, &search_val);
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "find", elapsed);
 
     clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
+    gettimeofday(&start, NULL);
+    vector_sort(v);
+    gettimeofday(&end, NULL);
+    elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+    post_operation_time(arg, "sort", elapsed);
+
+    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Sort Time = %.9f sec\n", elapsed);
+
     /* DELETE timing */
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
-        cs_codes del_result = vector_pop_back(&v);
+        cs_codes del_result = vector_pop_back(v);
 
         if (del_result != CS_SUCCESS) {
-            vector_free(&v);
+            vector_free(v);
             return (test_res){(char*)__func__, "Delete failed during stress test", del_result};
         }
     }
@@ -1412,7 +1420,7 @@ test_res test_vector_stress_time(test_arg *arg) {
 
     clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
 
-    vector_free(&v);
+    vector_free(v);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 

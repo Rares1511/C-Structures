@@ -23,6 +23,12 @@ static void *test_vector_find(void *arg) {
     return v;
 }
 
+static void *test_vector_sort(void *arg) {
+    auto *v = static_cast<std::vector<int>*>(arg);
+    std::sort(v->begin(), v->end());
+    return v;
+}
+
 static void *test_vector_delete(void *arg) {
     auto *v = static_cast<std::vector<int>*>(arg);
     const int total = __VECTOR_STRESS_TEST_SIZE;
@@ -40,6 +46,7 @@ static BenchmarkModule vector_benchmark() {
         {
             Test("vector", "insert", test_vector_insert),
             Test("vector", "find",   test_vector_find),
+            Test("vector", "sort",   test_vector_sort),
             Test("vector", "delete", test_vector_delete),
         }
     };

@@ -157,7 +157,6 @@ static inline int vector_find(vector *restrict vec, const void *restrict el) {
     const size_t elem_size = vec->attr.size;
     const void *base = vec->vec;
 
-    // Path A: User-provided comparison (Slowest)
     if (vec->attr.comp) {
         comparer comp = vec->attr.comp;
         for (int i = 0; i < size; i++) {
@@ -165,24 +164,6 @@ static inline int vector_find(vector *restrict vec, const void *restrict el) {
         }
         return CS_ELEM;
     }
-
-    // Path B: Fast Path for 4-byte types (int, float, etc.)
-    if (elem_size == sizeof(int)) {
-        const int target = *(const int *)el;
-        const int *data = (const int *)base;
-        for (int i = 0; i < size; i++) {
-            if (data[i] == target) return i; // This loop will be vectorized by the compiler!
-        }
-    } 
-    // Path C: Fast Path for 8-byte types (pointers, long, double)
-    else if (elem_size == sizeof(long)) {
-        const long target = *(const long *)el;
-        const long *data = (const long *)base;
-        for (int i = 0; i < size; i++) {
-            if (data[i] == target) return i;
-        }
-    }
-    // Path D: Generic fallback (Slowest)
     else {
         for (int i = 0; i < size; i++) {
             if (memcmp((char*)base + i * elem_size, el, elem_size) == 0) return i;

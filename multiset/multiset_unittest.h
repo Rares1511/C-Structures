@@ -15,14 +15,14 @@ test_res test_multiset_init(test_arg *arg) {
     if (ms.t == NULL) return (test_res){(char*)__func__, "RBT is NULL", CS_MEM};
     if (__rbt_size(ms.t) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset initialized empty successfully");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset initialized empty successfully\n");
 
     if (!rbt_is_valid(ms.t)) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT integrity violated after init", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after init");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after init\n");
 
     multiset_free(&ms);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -38,7 +38,7 @@ test_res test_multiset_init_invalid_size(test_arg *arg) {
         return (test_res){(char*)__func__, "Init should return CS_SIZE for invalid size", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset init correctly failed with invalid size");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Multiset init correctly failed with invalid size\n");
 
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
@@ -58,7 +58,7 @@ test_res test_multiset_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert returned error", result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted single element successfully");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted single element successfully\n");
 
     if (multiset_count(&ms, &ts) != 1) {
         free_test_struct(&ts);
@@ -66,7 +66,7 @@ test_res test_multiset_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Count should be 1", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Count verified after single insert");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Count verified after single insert\n");
 
     if (!rbt_is_valid(ms.t)) {
         free_test_struct(&ts);
@@ -74,7 +74,7 @@ test_res test_multiset_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "RBT integrity violated after insert", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after single insert");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after single insert\n");
 
     free_test_struct(&ts);
     multiset_free(&ms);
@@ -97,7 +97,7 @@ test_res test_multiset_insert_multiple_unique(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted multiple unique elements successfully");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted multiple unique elements successfully\n");
 
     // Verify RBT has total unique elements
     if (__rbt_size((ms.t)) != total) {
@@ -105,14 +105,14 @@ test_res test_multiset_insert_multiple_unique(test_arg *arg) {
         return (test_res){(char*)__func__, "RBT size mismatch", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT size verified after multiple unique inserts");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT size verified after multiple unique inserts\n");
 
     if (!rbt_is_valid(ms.t)) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after multiple unique inserts");
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT integrity verified after multiple unique inserts\n");
 
     multiset_free(&ms);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

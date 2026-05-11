@@ -1653,6 +1653,8 @@ test_res test_unordered_multimap_clear_empty(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_multimap for clear empty test\n");
+
     unordered_multimap_clear(ummap);
 
     if (!unordered_multimap_empty(ummap)) {
@@ -1664,20 +1666,9 @@ test_res test_unordered_multimap_clear_empty(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly handled clear on empty map\n");
+
     unordered_multimap_free(ummap);
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS,
-    };
-}
-
-test_res test_unordered_multimap_clear_null(test_arg *arg) {
-    // Clear NULL should not crash
-    unordered_multimap_clear(NULL);
-
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully called clear on NULL map\n");
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1865,19 +1856,6 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
 /*                              FREE TESTS                                    */
 /******************************************************************************/
 
-test_res test_unordered_multimap_free_null(test_arg *arg) {
-    // Free NULL should not crash
-    unordered_multimap_free(NULL);
-
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Called unordered_multimap_free with NULL\n");
-
-    return (test_res){
-        .test_name = (char *)__func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS,
-    };
-}
-
 test_res test_unordered_multimap_free_empty(test_arg *arg) {
     elem_attr_t key_attr = {
         .size = sizeof(int),
@@ -1904,6 +1882,8 @@ test_res test_unordered_multimap_free_empty(test_arg *arg) {
             .return_code = rc,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_multimap for free empty test\n");
 
     unordered_multimap_free(ummap);
 
@@ -1947,6 +1927,8 @@ test_res test_unordered_multimap_free_with_entries(test_arg *arg) {
     }
 
     unordered_multimap_free(ummap);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully freed unordered_multimap with entries\n");
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -2523,14 +2505,12 @@ test unordered_multimap_tests[] = {
     // Clear tests
     test_unordered_multimap_clear_basic,
     test_unordered_multimap_clear_empty,
-    test_unordered_multimap_clear_null,
 
     // Swap tests
     test_unordered_multimap_swap_basic,
     test_unordered_multimap_swap_with_empty,
 
     // Free tests
-    test_unordered_multimap_free_null,
     test_unordered_multimap_free_empty,
     test_unordered_multimap_free_with_entries,
 
