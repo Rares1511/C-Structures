@@ -15,7 +15,10 @@ static void *test_unordered_multimap_find(void *arg) {
     std::multimap<int, int> *mm = static_cast<std::multimap<int, int> *>(arg);
     int total = __UNORDERED_MULTIMAP_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        mm->find(i);
+        auto res = mm->find(i);
+        if (res == mm->end()) {
+            throw std::runtime_error("Find failed");
+        }
     }
     return mm;
 }

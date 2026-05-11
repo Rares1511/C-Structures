@@ -66,7 +66,7 @@ static inline void __unordered_multiset_entry_print(FILE *restrict stream, const
 static inline void __unordered_multiset_entry_free(void *el) {
     CS_RETURN_IF(NULL == el);
     __unordered_multiset_entry *entry = (__unordered_multiset_entry *)el;
-    pair_free((pair *)entry->data);
+    __pair_free_internal((pair *)entry->data);
 }
 
 static inline int __unordered_multiset_entry_comp(const void *a, const void *b) {

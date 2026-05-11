@@ -69,7 +69,7 @@ static inline void __unordered_map_entry_print(FILE *stream, const void *el) {
 static inline void __unordered_map_entry_free(void *el) {
     CS_RETURN_IF(NULL == el);
     __unordered_map_entry *entry = (__unordered_map_entry *)el;
-    pair_free((pair *)entry->data);
+    __pair_free_internal((pair *)entry->data);
 }
 
 static inline int __unordered_map_entry_comp(const void *a, const void *b) {

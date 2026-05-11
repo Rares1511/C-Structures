@@ -24,6 +24,17 @@ static inline void *pair_second(pair *p) {
     return (void*)(p->data + p->first_attr->size);
 }
 
+static inline void __pair_free_internal(void *v_p) {
+    pair *p = (pair *)v_p;
+    if (p->has_first && p->first_attr->fr) {
+        p->first_attr->fr(pair_first(p));
+    }
+    if (p->has_second && p->second_attr->fr) {
+        p->second_attr->fr(pair_second(p));
+    }
+    p->header.magic = 0; // Invalidate the structure
+}
+
 /*!
  * Initializes a pair structure with the provided elements and their attributes.
  * @param p Pointer to the pair structure to be initialized.
@@ -33,7 +44,7 @@ static inline void *pair_second(pair *p) {
  * @param second_attr Attributes for the second element (size, copy, free functions).
  * @return CS_SUCCESS on success, or an appropriate error code on failure.
  */
-cs_codes pair_init(pair* p, elem_attr_t* first_attr, elem_attr_t* second_attr);
+pair* pair_init(elem_attr_t* first_attr, elem_attr_t* second_attr);
 
 /*!
  * Sets the values of the pair's elements.

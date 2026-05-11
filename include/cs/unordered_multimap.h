@@ -69,7 +69,7 @@ static inline void __unordered_multimap_entry_print(FILE *stream, const void *el
 static inline void __unordered_multimap_entry_free(void *el) {
     CS_RETURN_IF(NULL == el);
     __unordered_multimap_entry *entry = (__unordered_multimap_entry *)el;
-    pair_free(entry->data);
+    __pair_free_internal((pair *)entry->data);
 }
 
 static inline int __unordered_multimap_entry_comp(const void *a, const void *b) {

@@ -15,7 +15,7 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
 
     elem_attr_t rbt_attr = {
         .size = sizeof(pair) + key_attr.size + vec_attr.size,
-        .fr = pair_free,
+        .fr = __pair_free_internal,
         .print = pair_print,
         .comp = __multimap_node_comp,
         .copy = __multimap_node_copy,

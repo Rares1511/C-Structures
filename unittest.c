@@ -7,7 +7,7 @@
 // Each header defines: <module>_tests[] array and <module>_tests_size
 // ============================================================================
 
-// #include "pair/pair_unittest.h"
+#include "pair/pair_unittest.h"
 
 // Associative containers (Arrays)
 #include "vector/vector_unittest.h"
@@ -52,7 +52,7 @@ typedef struct {
 
 static module_tests all_modules[] = {
     // Extra modules
-    // { "pair", pair_tests, sizeof(pair_tests) / sizeof(test), sizeof(pair) },
+    { "pair", pair_tests, sizeof(pair_tests) / sizeof(test), sizeof(pair) },
 
     // Associative containers (Arrays)
     { "vector", vector_tests, sizeof(vector_tests) / sizeof(test), sizeof(vector) },

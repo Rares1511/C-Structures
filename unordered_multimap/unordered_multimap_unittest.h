@@ -62,7 +62,6 @@ test_res test_unordered_multimap_init_null_pointer(test_arg *arg) {
     };
 
     cs_codes rc = unordered_multimap_init(NULL, key_attr, value_attr, hash_int);
-
     if (rc != CS_NULL) {
         return (test_res){
             .test_name = (char *)__func__,
@@ -70,6 +69,8 @@ test_res test_unordered_multimap_init_null_pointer(test_arg *arg) {
             .return_code = CS_UNKNOWN,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly returned CS_NULL for NULL pointer\n");
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -373,6 +374,8 @@ test_res test_unordered_multimap_add_entry_null_map(test_arg *arg) {
             .return_code = CS_UNKNOWN,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly returned CS_NULL for NULL map\n");
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -841,6 +844,8 @@ test_res test_unordered_multimap_remove_entry_nonexistent(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized unordered_multimap for remove nonexistent entry test\n");
+
     int key = 42;
     rc = unordered_multimap_remove_entry(ummap, &key);
 
@@ -853,6 +858,8 @@ test_res test_unordered_multimap_remove_entry_nonexistent(test_arg *arg) {
             .return_code = CS_UNKNOWN,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly failed to remove nonexistent entry\n");
 
     unordered_multimap_free(ummap);
 
@@ -874,6 +881,8 @@ test_res test_unordered_multimap_remove_entry_null_map(test_arg *arg) {
             .return_code = CS_UNKNOWN,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Correctly returned CS_NULL for NULL map\n");
 
     return (test_res){
         .test_name = (char *)__func__,
@@ -1668,6 +1677,8 @@ test_res test_unordered_multimap_clear_null(test_arg *arg) {
     // Clear NULL should not crash
     unordered_multimap_clear(NULL);
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully called clear on NULL map\n");
+
     return (test_res){
         .test_name = (char *)__func__,
         .reason = NULL,
@@ -1792,6 +1803,8 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized ummap1 for swap with empty test\n");
+
     rc = unordered_multimap_init(&ummap2, key_attr, value_attr, hash_int);
     if (rc != CS_SUCCESS) {
         unordered_multimap_free(ummap1);
@@ -1802,11 +1815,15 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initialized ummap2 for swap with empty test\n");
+
     // Add entries only to ummap1
     for (int i = 0; i < 10; i++) {
         int value = i * 10;
         unordered_multimap_add_entry(ummap1, &i, &value);
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Added entries to ummap1 for swap with empty test\n");
 
     unordered_multimap_swap(ummap1, &ummap2);
 
@@ -1820,6 +1837,8 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
         };
     }
 
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "ummap1 is empty after swap as expected\n");
+
     if (unordered_multimap_size(&ummap2) != 10) {
         unordered_multimap_free(ummap1);
         unordered_multimap_free(&ummap2);
@@ -1829,6 +1848,8 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
             .return_code = CS_UNKNOWN,
         };
     }
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "ummap2 has 10 entries after swap as expected\n");
 
     unordered_multimap_free(ummap1);
     unordered_multimap_free(&ummap2);
@@ -1847,6 +1868,8 @@ test_res test_unordered_multimap_swap_with_empty(test_arg *arg) {
 test_res test_unordered_multimap_free_null(test_arg *arg) {
     // Free NULL should not crash
     unordered_multimap_free(NULL);
+
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Called unordered_multimap_free with NULL\n");
 
     return (test_res){
         .test_name = (char *)__func__,

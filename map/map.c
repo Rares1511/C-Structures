@@ -7,7 +7,7 @@ cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr) {
     elem_attr_t pair_attr = {
         .comp = __map_node_comp,
         .copy = __map_node_copy,
-        .fr = pair_free,
+        .fr = __pair_free_internal,
         .print = pair_print,
         .size = sizeof(pair) + key_attr.size + val_attr.size,
     };

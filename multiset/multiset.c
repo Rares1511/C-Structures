@@ -7,7 +7,7 @@ cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
     elem_attr_t rbt_attr = {
         .comp = __multiset_node_comp,
         .copy = __multiset_node_copy,
-        .fr = pair_free,
+        .fr = __pair_free_internal,
         .print = __multiset_node_print,
         .size = sizeof(pair) + attr.size + sizeof(int) // pair struct + element + count
     };
