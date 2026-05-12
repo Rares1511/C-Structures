@@ -260,9 +260,15 @@ void cargs_parse(cparser* parser) {
                         if (i + 1 < parser->argc) {
                             switch (parser->parsed_args[j].type) {
                                 case CARG_TYPE_INT:
+                                    if (parser->parsed_args[j].value == NULL) {
+                                        parser->parsed_args[j].value = malloc(sizeof(int));
+                                    }
                                     *(int*)(parser->parsed_args[j].value) = atoi(parser->argv[i + 1]);
                                     break;
                                 case CARG_TYPE_FLOAT:
+                                    if (parser->parsed_args[j].value == NULL) {
+                                        parser->parsed_args[j].value = malloc(sizeof(float));
+                                    }
                                     *(float*)(parser->parsed_args[j].value) = atof(parser->argv[i + 1]);
                                     break;
                                 case CARG_TYPE_STRING:
