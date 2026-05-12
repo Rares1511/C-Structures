@@ -84,9 +84,9 @@ test_res test_multiset_insert_single(test_arg *arg) {
 test_res test_multiset_insert_multiple_unique(test_arg *arg) {
     multiset ms;
     multiset_init(&ms, get_test_struct_attr());
-    int total = __TEST_SIZE;
+    size_t total = __TEST_SIZE;
 
-    for (int i = 0; i < total; i++) {
+    for (size_t i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "InsertMultiple", (double)i);
         cs_codes result = multiset_insert(&ms, &ts);
         if (result != CS_SUCCESS) {
@@ -203,7 +203,7 @@ test_res test_multiset_insert_many_duplicates(test_arg *arg) {
     }
 
     // RBT should have num_unique nodes
-    if (__rbt_size((ms.t)) != num_unique) {
+    if (__rbt_size((ms.t)) != (size_t)num_unique) {
         multiset_free(&ms);
         return (test_res){(char*)__func__, "RBT size should equal num_unique", CS_UNKNOWN};
     }

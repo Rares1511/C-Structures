@@ -76,11 +76,11 @@ test_res test_vector_push_back_multiple(test_arg *arg) {
     }
 
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Finished pushing back %d elements\n", total);
-    if (vector_size(vec) != total) {
+    if (vector_size(vec) != (size_t) total) {
         vector_free(vec);
         return (test_res){(char*)__func__, "Size mismatch after push back", CS_UNKNOWN};
     }
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size after push back is correct: %d\n", vector_size(vec));
+    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size after push back is correct: %zu\n", vector_size(vec));
 
     test_struct *last = (test_struct*)vector_at(vec, total - 1);
     clogger_log(*arg->logger, CLOGGER_DEBUG, "Accessed last element %p with id: %d\n", last, last ? last->id : -1);
@@ -786,7 +786,7 @@ test_res test_vector_size_after_ops(test_arg *arg) {
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "SizeOpsTest", (double)i);
         vector_push_back(vec, &ts);
-        if (vector_size(vec) != i + 1) {
+        if (vector_size(vec) != (size_t)(i + 1)) {
             free_test_struct(&ts);
             vector_free(vec);
             return (test_res){(char*)__func__, "Size mismatch during push", CS_UNKNOWN};
@@ -796,7 +796,7 @@ test_res test_vector_size_after_ops(test_arg *arg) {
 
     for (int i = 99; i >= 0; i--) {
         vector_pop_back(vec);
-        if (vector_size(vec) != i) {
+        if (vector_size(vec) != (size_t)i) {
             vector_free(vec);
             return (test_res){(char*)__func__, "Size mismatch during pop", CS_UNKNOWN};
         }
@@ -1282,7 +1282,7 @@ test_res test_vector_interleaved_ops(test_arg *arg) {
     }
 
     // Verify size is correct
-    int expected_size = 100 - 17; // 50 pairs - 17 pops (i=0,3,6,...,48)
+    size_t expected_size = 100 - 17; // 50 pairs - 17 pops (i=0,3,6,...,48)
     if (vector_size(vec) != expected_size) {
         vector_free(vec);
         return (test_res){(char*)__func__, "Interleaved ops size mismatch", CS_UNKNOWN};

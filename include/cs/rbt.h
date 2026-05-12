@@ -19,7 +19,7 @@ typedef struct __rbt_node {
 
 typedef struct __rbt {
     cs_header_t header;
-    int size;
+    size_t size;
     __rbt_node *root;
     elem_attr_t attr;
 } __rbt;
@@ -495,7 +495,7 @@ static inline cs_codes __rbt_delete(__rbt *t, void *data) {
 
 static inline int __rbt_empty(__rbt *t) { return (t->root == NULL); }
 
-static inline int __rbt_size(__rbt *t) { return t->size; }
+static inline size_t __rbt_size(__rbt *t) { return t->size; }
 
 static inline void* __rbt_find(__rbt *t, void *data) {
     CS_RETURN_IF(data == NULL || t == NULL || t->header.magic != CS_RBT_MAGIC, NULL);
@@ -509,7 +509,7 @@ static inline void __rbt_swap(__rbt *t1, __rbt *t2) {
 
     cs_header_t temp_header = t1->header;
     __rbt_node *temp_root = t1->root;
-    int temp_size = t1->size;
+    size_t temp_size = t1->size;
     elem_attr_t temp_attr = t1->attr;
 
     t1->header = t2->header;
