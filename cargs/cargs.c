@@ -249,6 +249,9 @@ void cargs_parse(cparser* parser) {
                 (parser->parsed_args[j].short_name && strcmp(parser->argv[i], parser->parsed_args[j].short_name) == 0)) {
                 switch(parser->parsed_args[j].type) {
                     case CARG_TYPE_BOOL:
+                        if (parser->parsed_args[j].value == NULL) {
+                            parser->parsed_args[j].value = malloc(sizeof(char));
+                        }
                         *(char*)(parser->parsed_args[j].value) = 1;
                         parser->parsed_args[j].metadata |= (1 << __CARGS_PARSED_BIT);
                         break;

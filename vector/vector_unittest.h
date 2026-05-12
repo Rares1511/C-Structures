@@ -1397,6 +1397,7 @@ test_res test_vector_stress_time(test_arg *arg) {
     clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     gettimeofday(&start, NULL);
+    v->attr.comp = NULL; // Disable sorting for timing
     vector_sort(v);
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;

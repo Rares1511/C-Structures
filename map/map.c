@@ -13,9 +13,18 @@ cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr) {
     };
     m->key_attr = malloc(sizeof(elem_attr_t));
     m->val_attr = malloc(sizeof(elem_attr_t));
-    CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL, CS_MEM);
+    m->buffer = malloc(sizeof(pair) + key_attr.size + val_attr.size);
+    CS_RETURN_IF(m->key_attr == NULL || m->val_attr == NULL || m->buffer == NULL, CS_MEM);
     memcpy(m->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(m->val_attr, &val_attr, sizeof(elem_attr_t));
+
+    pair *p = (pair *)m->buffer;
+    p->header.magic = CS_PAIR_MAGIC;
+    p->first_attr = m->key_attr;
+    p->second_attr = m->val_attr;
+    p->has_first = 1;
+    p->has_second = 1;
+
     m->t = malloc(sizeof(__rbt));
     CS_RETURN_IF(NULL == m->t, CS_MEM);
     return __rbt_init(m->t, pair_attr);
@@ -53,5 +62,6 @@ void map_free(void *v_m) {
     __rbt_free(m->t);
     free(m->key_attr);
     free(m->val_attr);
+    free(m->buffer);
     free(m->t);
 }

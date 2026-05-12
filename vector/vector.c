@@ -1,77 +1,65 @@
 #include <cs/vector.h>
 
-#define VEC_GROW(vec) \
-    do { \
-        if (__builtin_expect((vec)->size == (vec)->cap, 0)) { \
-            int __new_cap = (vec)->cap * 2; \
-            void *__new_vec = realloc((vec)->vec, __new_cap * (vec)->attr.size); \
-            if (NULL == __new_vec) return CS_MEM; \
-            (vec)->vec = __new_vec; \
-            (vec)->cap = __new_cap; \
-        } \
-    } while (0)
-
-#define VEC_SHRINK(vec) \
-    do { \
-        if (__builtin_expect((vec)->v_attr.shrink_factor > 1 && (vec)->size < (vec)->cap / ((vec)->v_attr.shrink_factor * 2) && (vec)->cap > (vec)->v_attr.min_cap, 0)) { \
-            int new_cap = (vec)->cap / 2; \
-            if (new_cap < (vec)->v_attr.min_cap) new_cap = (vec)->v_attr.min_cap; \
-            void *__new_vec = realloc((vec)->vec, new_cap * (vec)->attr.size); \
-            if (NULL == __new_vec) return CS_MEM; \
-            (vec)->vec = __new_vec; \
-            (vec)->cap = new_cap; \
-        } \
-    } while (0)
-
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
+static void vector_radix_sort_generic(vector *restrict vec) {
+    size_t n = vec->size;
+    size_t sz = vec->attr.size;
+    unsigned char *restrict src = (unsigned char *)vec->vec;
+    
+    // Auxiliary buffer for stability
+    unsigned char *restrict dst = malloc(n * sz);
+    if (!dst) return; 
 
-/*!
- * Partitions the array for quicksort
- * @param[in] base  Base pointer of the array
- * @param[in] low   Low index
- * @param[in] high  High index
- * @param[in] size  Size of each element
- * @return The partition index
- */
-int vector_partition(void *base, int low, int high, int size) {
-    void* pivot = base + high * size;
-    void* temp = malloc(size);
-    int i = low - 1;
-    for (int j = low; j < high; j++) {
-        if (memcmp(base + j * size, pivot, size) < 0) {
-            i++;
-            memcpy(temp, base + i * size, size);
-            memcpy(base + i * size, base + j * size, size);
-            memcpy(base + j * size, temp, size);
+    // We sort byte-by-byte, from LSB (index 0) to MSB (index sz-1)
+    // Note: This assumes Little Endian for primitives like int/float
+    for (size_t byte_idx = 0; byte_idx < sz; byte_idx++) {
+        size_t count[256] = {0};
+
+        // 1. Count frequencies of the byte at current offset
+        for (size_t i = 0; i < n; i++) {
+            unsigned char val = src[i * sz + byte_idx];
+            count[val]++;
         }
+
+        // 2. Transform counts to indices (Prefix Sum)
+        size_t total = 0;
+        for (int j = 0; j < 256; j++) {
+            size_t old_count = count[j];
+            count[j] = total;
+            total += old_count;
+        }
+
+        // 3. Move elements to dst buffer based on the byte value
+        for (size_t i = 0; i < n; i++) {
+            unsigned char val = src[i * sz + byte_idx];
+            size_t target_pos = count[val];
+            
+            // Copy the whole element
+            memcpy(dst + (target_pos * sz), src + (i * sz), sz);
+            count[val]++;
+        }
+
+        // 4. Swap buffers: src now points to the partially sorted data
+        // We can't swap the vec->vec pointer directly, so we swap our locals
+        unsigned char *tmp = src;
+        src = dst;
+        dst = tmp;
     }
 
-    memcpy(temp, base + (i + 1) * size, size);
-    memcpy(base + (i + 1) * size, base + high * size, size);
-    memcpy(base + high * size, temp, size);
-    free(temp);
-    return i + 1;
-}
-
-/*!
- * Quicksorts the array in the case of no compare function being provided
- * @param[in] base  Base pointer of the array
- * @param[in] low   Low index
- * @param[in] high  High index
- * @param[in] size  Size of each element
- */
-void vector_qsort(void *base, int low, int high, int size) {
-    if (low < high) {
-        int pivot_index = vector_partition(base, low, high, size);
-        vector_qsort(base, low, pivot_index - 1, size);
-        vector_qsort(base, pivot_index + 1, high, size);
+    // If our final sorted data is in the allocated buffer, copy it back to vec->vec
+    if (src != (unsigned char *)vec->vec) {
+        memcpy(vec->vec, src, n * sz);
+        // src is now the 'dst' malloc'd buffer
+        free(src); 
+    } else {
+        // src is vec->vec, so dst is the malloc'd buffer
+        free(dst);
     }
 }
-
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                        END OF HELPER FUNCTIONS SECTION                                     ║
@@ -84,8 +72,8 @@ void vector_qsort(void *base, int low, int high, int size) {
  * @param[in] pos  Position for the reference
  * @return The reference at the position given or NULL if the position is invalid
  */
-cs_codes _vector_grow_internal(vector *restrict vec) {
-    int new_cap = vec->cap * 2;
+inline cs_codes _vector_grow_internal(vector *restrict vec) {
+    size_t new_cap = vec->cap * 2;
     void *new_vec = realloc(vec->vec, new_cap * vec->attr.size);
     if (new_vec == NULL) {
         return CS_MEM;
@@ -101,8 +89,8 @@ cs_codes _vector_grow_internal(vector *restrict vec) {
  * @param[in] pos  Position for the reference
  * @return The reference at the position given or NULL if the position is invalid
  */
-cs_codes _vector_shrink_internal(vector *restrict vec) {
-    int new_cap = vec->cap / 2;
+inline cs_codes _vector_shrink_internal(vector *restrict vec) {
+    size_t new_cap = vec->cap / 2;
     if (new_cap < vec->v_attr.min_cap) {
         new_cap = vec->v_attr.min_cap;
     }
@@ -118,8 +106,8 @@ cs_codes _vector_shrink_internal(vector *restrict vec) {
 cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr) {
     CS_RETURN_IF(NULL == v, CS_NULL);
     CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(v_attr.min_cap < 0 || v_attr.min_cap > VECTOR_INIT_CAPACITY, CS_SIZE);
-    CS_RETURN_IF(v_attr.shrink_factor < 0 || v_attr.shrink_factor > VECTOR_INIT_CAPACITY, CS_SIZE);
+    CS_RETURN_IF(v_attr.min_cap > VECTOR_INIT_CAPACITY, CS_SIZE);
+    CS_RETURN_IF(v_attr.shrink_factor > VECTOR_INIT_CAPACITY, CS_SIZE);
 
     if (v_attr.min_cap == 0) {
         v_attr.min_cap = VECTOR_INIT_CAPACITY;
@@ -141,12 +129,15 @@ cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr)
     return CS_SUCCESS;
 }
 
-cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, int pos) {
+cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, size_t pos) {
     CS_RETURN_IF(vec == NULL || el == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
-    int size = vec->size;
-    CS_RETURN_IF(pos > size || pos < 0, CS_POS);
-    VEC_GROW(vec);
-    int elem_size = vec->attr.size;
+    size_t size = vec->size;
+    CS_RETURN_IF(pos > size, CS_POS);
+    if (__builtin_expect(vec->size == vec->cap, 0)) {
+        cs_codes res = _vector_grow_internal(vec);
+        if (res != CS_SUCCESS) return res;
+    }
+    size_t elem_size = vec->attr.size;
     if (pos != size) {
         memmove(vec->vec + (pos + 1) * elem_size, vec->vec + pos * elem_size, 
                             (size - pos) * elem_size);     
@@ -159,12 +150,12 @@ cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, int pos
     return CS_SUCCESS;
 }
 
-cs_codes vector_erase(vector *restrict vec, int pos) {
+cs_codes vector_erase(vector *restrict vec, size_t pos) {
     CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
-    int size = vec->size;
+    size_t size = vec->size;
     CS_RETURN_IF(size == 0, CS_EMPTY);
-    CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
-    int elem_size = vec->attr.size;
+    CS_RETURN_IF(pos >= size, CS_POS);
+    size_t elem_size = vec->attr.size;
     freer free_func = vec->attr.fr;
     if (free_func)
         free_func(vec->vec + elem_size * pos);
@@ -172,24 +163,26 @@ cs_codes vector_erase(vector *restrict vec, int pos) {
         memmove(vec->vec + elem_size * pos, vec->vec + elem_size * (pos + 1),
                (size - pos - 1) * elem_size);
     vec->size--;
-    VEC_SHRINK(vec);
+    if (__builtin_expect(vec->v_attr.shrink_factor > 1 && vec->size < vec->cap / (vec->v_attr.shrink_factor * 2) && vec->cap > vec->v_attr.min_cap, 0)) {
+        _vector_shrink_internal(vec);
+    }
     return CS_SUCCESS;
 }
 
-int vector_count(vector *restrict vec, const void *restrict el) {
+size_t vector_count(vector *restrict vec, const void *restrict el) {
     CS_RETURN_IF(el == NULL, CS_NULL);
     CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
-    int count = 0, size = vec->size;
-    int elem_size = vec->attr.size;
+    size_t count = 0, size = vec->size;
+    size_t elem_size = vec->attr.size;
     comparer comp = vec->attr.comp;
     void *base = vec->vec;
     if (comp) {
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if (comp(base + i * elem_size, el) == 0)
                 count++;
         }
     } else {
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if (memcmp(base + i * elem_size, el, elem_size) == 0)
                 count++;
         }
@@ -197,11 +190,11 @@ int vector_count(vector *restrict vec, const void *restrict el) {
     return count;
 }
 
-cs_codes vector_replace(vector *restrict vec, const void *restrict el, int pos) {
+cs_codes vector_replace(vector *restrict vec, const void *restrict el, size_t pos) {
     CS_RETURN_IF(el == NULL || vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
     CS_RETURN_IF(vector_empty(vec), CS_EMPTY);
-    int size = vector_size(vec);
-    CS_RETURN_IF(pos >= size || pos < 0, CS_POS);
+    size_t size = vector_size(vec);
+    CS_RETURN_IF(pos >= size, CS_POS);
     if (vec->attr.fr)
         vec->attr.fr(vec->vec + vec->attr.size * pos);
     if (vec->attr.copy)
@@ -211,14 +204,14 @@ cs_codes vector_replace(vector *restrict vec, const void *restrict el, int pos) 
     return CS_SUCCESS;
 }
 
-cs_codes vector_reserve(vector *restrict vec, int new_cap) {
+cs_codes vector_reserve(vector *restrict vec, size_t new_cap) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
     CS_RETURN_IF(new_cap <= 0, CS_SIZE);
     if (new_cap < vec->cap) {
         return CS_SUCCESS; // No need to shrink, use vector_shrink if you want to shrink based on size
     }
 
-    int old_cap = vec->cap;
+    size_t old_cap = vec->cap;
     vec->cap = new_cap;
     void *new_vec = realloc(vec->vec, vec->cap * vec->attr.size);
     if (new_vec == NULL) {
@@ -232,12 +225,12 @@ cs_codes vector_reserve(vector *restrict vec, int new_cap) {
 cs_codes vector_shrink_to_fit(vector *restrict vec) {
     CS_RETURN_IF(vec == NULL, CS_NULL);
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC, CS_UNINITIALIZED);
-    int size = vec->size;
+    size_t size = vec->size;
     if (size >= vec->cap) {
         return CS_SUCCESS; // No need to shrink
     }
 
-    int old_cap = vec->cap;
+    size_t old_cap = vec->cap;
     vec->cap = size > 0 ? size : 1; // Avoid shrinking to zero capacity
     void *new_vec = realloc(vec->vec, vec->cap * vec->attr.size);
     if (new_vec == NULL) {
@@ -274,22 +267,22 @@ void vector_swap(vector *restrict v1, vector *restrict v2) {
 }
 
 void vector_sort(vector *restrict vec) {
-    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(vec);
-    if (vec->attr.comp == NULL) {
-        vector_qsort(vec->vec, 0, size - 1, vec->attr.size);
-    }
-    else {
-        qsort(vec->vec, size, vec->attr.size, vec->attr.comp);
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC || vec->size <= 1);
+    size_t n = vec->size;
+
+    if (vec->attr.comp != NULL) {
+        qsort(vec->vec, n, vec->attr.size, vec->attr.comp);
+    } else {
+        vector_radix_sort_generic(vec);
     }
 }
 
 void vector_clear(vector *restrict vec) {
     CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(vec);
+    size_t size = vector_size(vec);
     freer free_func = vec->attr.fr;
     if (free_func) {
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             free_func(vec->vec + i * vec->attr.size);
         }
     }
@@ -301,8 +294,8 @@ void vector_print(FILE *restrict stream, const void *restrict v_vec) {
     vector *vec = (vector *)v_vec;
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC);
     CS_RETURN_IF(vec->attr.print == NULL);
-    int size = vector_size(vec);
-    for (int i = 0; i < size; i++) {
+    size_t size = vector_size(vec);
+    for (size_t i = 0; i < size; i++) {
         vec->attr.print(stream, vec->vec + i * vec->attr.size);
     }
 }
@@ -311,10 +304,10 @@ void vector_free(void *restrict v_vec) {
     CS_RETURN_IF(v_vec == NULL);
     vector *vec = (vector *)v_vec;
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC);
-    int size = vector_size(vec);
+    size_t size = vector_size(vec);
     freer free_func = vec->attr.fr;
     if (free_func) {
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             free_func(vec->vec + i * vec->attr.size);
         }
     }

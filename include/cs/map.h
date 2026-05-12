@@ -9,6 +9,7 @@ typedef struct map {
     __rbt* t;
     elem_attr_t* key_attr;
     elem_attr_t* val_attr;
+    char *buffer; /*!< Buffer for temporary storage */
 } map;
 
 #pragma region Helper Functions
@@ -82,16 +83,7 @@ static inline cs_codes map_insert(map *m, void *key, void *val) {
 
     int k_sz = m->key_attr->size;
     int v_sz = m->val_attr->size;
-    int total_sz = sizeof(pair) + k_sz + v_sz;
-
-    char buffer[total_sz]; 
-    pair *p = (pair *)buffer;
-
-    p->header.magic = CS_PAIR_MAGIC;
-    p->first_attr  = m->key_attr;
-    p->second_attr = m->val_attr;
-    p->has_first   = 1;
-    p->has_second  = 1;
+    pair *p = (pair *)m->buffer; // Use pre-allocated buffer for temporary storage
     
     memcpy(p->data, key, k_sz);
     memcpy(p->data + k_sz, val, v_sz);
@@ -128,12 +120,8 @@ static inline int map_size(map *m) {
  */
 static inline void* map_find(map *m, void *key) {
     int k_sz = m->key_attr->size;
-    char dummy_buf[sizeof(pair) + k_sz];
-    pair *dummy = (pair*)dummy_buf;
+    pair *dummy = (pair*)m->buffer;
     
-    dummy->header.magic = CS_PAIR_MAGIC;
-    dummy->first_attr = m->key_attr;
-    dummy->has_first = 1;
     memcpy(dummy->data, key, k_sz);
 
     pair* result = (pair*)__rbt_find(m->t, dummy);
@@ -150,13 +138,7 @@ static inline void* map_find(map *m, void *key) {
 static inline cs_codes map_delete(map *m, void *key) {
     CS_RETURN_IF(m == NULL || key == NULL, CS_NULL);
 
-    char buffer[sizeof(pair) + m->key_attr->size];
-    pair *search_key = (pair *)buffer;
-    
-    search_key->header.magic = CS_PAIR_MAGIC;
-    search_key->first_attr = m->key_attr;
-    search_key->has_first = 1;
-    search_key->has_second = 0;
+    pair *search_key = (pair *)m->buffer;
 
     memcpy(search_key->data, key, m->key_attr->size);
 

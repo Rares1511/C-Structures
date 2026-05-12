@@ -14,15 +14,15 @@
  * @brief Attributes for the vector structure controllable by the user
  */
 typedef struct {
-    int min_cap; 
-    int shrink_factor;
+    size_t min_cap; 
+    size_t shrink_factor;
 } vector_attr_t;
 
 typedef struct vector {
     cs_header_t header;   /*!< header for the vector structure */
     void *vec;            /*!< size of the datatype */
-    int cap;              /*!< current maximum capacity of the vector */
-    int size;             /*!< current size of the vector */
+    size_t cap;              /*!< current maximum capacity of the vector */
+    size_t size;             /*!< current size of the vector */
     vector_attr_t v_attr; /*!< attributes of the vector itself */
     elem_attr_t attr;     /*!< attributes of the elements inside the vector */
 } vector;
@@ -42,7 +42,7 @@ static inline int vector_empty(vector *restrict vec) { return vec->size == 0; };
  * @param[in] vec  The vector whose size will be returned
  * @return The size of the vector
  */
-static inline int vector_size(vector *restrict vec) { return vec->size; };
+static inline size_t vector_size(vector *restrict vec) { return vec->size; };
 
 /*!
  * Initializes the given variable with the correct vector structure datatype
@@ -63,7 +63,7 @@ cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr)
  * @param[in]  pos  The position at which the element will be inserted at
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
  */
-cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, int pos);
+cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, size_t pos);
 
 /*!
  * Pushes the element at the back of the vector
@@ -77,7 +77,7 @@ static inline cs_codes vector_push_back(vector *restrict vec, const void *restri
         cs_codes res = _vector_grow_internal(vec);
         if (res != CS_SUCCESS) return res;
     }
-    int elem_size = vec->attr.size;
+    size_t elem_size = vec->attr.size;
     deepcopy copy_func = vec->attr.copy;
     size_t offset = (size_t) vec->size * elem_size;
     if (copy_func) {
@@ -97,7 +97,7 @@ static inline cs_codes vector_push_back(vector *restrict vec, const void *restri
  * @return CS_EMPTY if the vector is empty, CS_POS if given an incorrect position or
  * CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_erase(vector *restrict vec, int pos);
+cs_codes vector_erase(vector *restrict vec, size_t pos);
 
 /*!
  * Pops the last element of the vector
@@ -126,7 +126,7 @@ static inline cs_codes vector_pop_back(vector *restrict vec) {
  * @return CS_EMPTY if the vector is empty, CS_POS if given an incorrect position or
  * CS_SUCCESS upon a successful deletion
  */
-cs_codes vector_replace(vector *restrict vec, const void *restrict el, int pos);
+cs_codes vector_replace(vector *restrict vec, const void *restrict el, size_t pos);
 
 /*!
  * Reserves the vector to have at least the capacity given
@@ -134,7 +134,7 @@ cs_codes vector_replace(vector *restrict vec, const void *restrict el, int pos);
  * @param[in]  new_cap  The new capacity for the vector
  * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful reservation
  */
-cs_codes vector_reserve(vector *restrict vec, int new_cap);
+cs_codes vector_reserve(vector *restrict vec, size_t new_cap);
 
 /*!
  * Shrinks the vector to fit its size
@@ -150,22 +150,22 @@ cs_codes vector_shrink_to_fit(vector *restrict vec);
  * @return The position of the element, CS_COMP if no compare function has been assigned
  * or CS_ELEM if it's not in the vector
  */
-static inline int vector_find(vector *restrict vec, const void *restrict el) {
+static inline size_t vector_find(vector *restrict vec, const void *restrict el) {
     CS_RETURN_IF(el == NULL || vec == NULL || vec->header.magic != CS_VECTOR_MAGIC, CS_NULL);
     
-    const int size = vec->size;
+    const size_t size = vec->size;
     const size_t elem_size = vec->attr.size;
     const void *base = vec->vec;
 
     if (vec->attr.comp) {
         comparer comp = vec->attr.comp;
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if (comp((char*)base + i * elem_size, el) == 0) return i;
         }
         return CS_ELEM;
     }
     else {
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if (memcmp((char*)base + i * elem_size, el, elem_size) == 0) return i;
         }
     }
@@ -178,9 +178,9 @@ static inline int vector_find(vector *restrict vec, const void *restrict el) {
  * @param[in] vec  Vector used to be given the reference
  * @param[in] pos  Position for the reference
  */
-static inline void *vector_at(vector *restrict vec, int pos) {
-    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC || pos < 0 || pos >= vec->size, NULL);
-    return (char *)vec->vec + ((size_t)pos * vec->attr.size);
+static inline void *vector_at(vector *restrict vec, size_t pos) {
+    CS_RETURN_IF(vec == NULL || vec->header.magic != CS_VECTOR_MAGIC || pos >= vec->size, NULL);
+    return (char *)vec->vec + (pos * vec->attr.size);
 }
 
 /*!
@@ -190,7 +190,7 @@ static inline void *vector_at(vector *restrict vec, int pos) {
  * @return The number of times the element appears in the vector, CS_COMP if no compare function
  * has been assigned
  */
-int vector_count(vector *restrict vec, const void *restrict el);
+size_t vector_count(vector *restrict vec, const void *restrict el);
 
 /*!
  * Sets the new attributes for the vector

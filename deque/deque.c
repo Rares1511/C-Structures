@@ -1,6 +1,6 @@
 #include <cs/deque.h>
 
-cs_codes _deque_grow_internal(deque *dq, int direction) {
+inline cs_codes _deque_grow_internal(deque *dq, int direction) {
     int active_blocks = dq->back - dq->front + 1;
 
     if (direction == __DEQUE_GROW_INTERNAL_BACK) {
