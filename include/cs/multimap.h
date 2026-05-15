@@ -11,6 +11,7 @@ typedef struct multimap {
     elem_attr_t* key_attr;
     elem_attr_t* value_attr;
     elem_attr_t* vec_attr;
+    char *buffer;
     int size;
 } multimap;
 
@@ -76,10 +77,9 @@ static inline void __multimap_node_copy(void *dest, const void *src) {
  * Initialize a multimap structure
  * @param[in] key_attr Attributes of the key datatype
  * @param[in] value_attr Attributes of the value datatype
- * @param[out] mm Pointer to the multimap to initialize
- * @return CS_SUCCESS on success, or an error code on failure
+ * @return Pointer to the initialized multimap, or NULL on failure
  */
-cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
+multimap* multimap_init(elem_attr_t key_attr,
                            elem_attr_t value_attr);
 
 /*!
@@ -92,17 +92,9 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
 static inline cs_codes multimap_insert(multimap *mm, const void *key, const void *value) {
     CS_RETURN_IF(mm == NULL || key == NULL || value == NULL, CS_NULL);
     int k_sz = mm->key_attr->size;
-    int v_sz = sizeof(vector);
     int rc;
-    char buffer[sizeof(pair) + k_sz + v_sz];
-    
-    memset(buffer, 0, sizeof(buffer));
 
-    pair *p_stack = (pair *)buffer;
-    p_stack->header.magic = CS_PAIR_MAGIC;
-    p_stack->first_attr = mm->key_attr;
-    p_stack->second_attr = mm->vec_attr;
-    p_stack->has_first = 1;
+    pair *p_stack = (pair *)mm->buffer;
     p_stack->has_second = 0;
     
     memcpy(p_stack->data, key, k_sz);
@@ -113,11 +105,12 @@ static inline cs_codes multimap_insert(multimap *mm, const void *key, const void
     vector *vec = (vector *)(p_tree->data + k_sz);
 
     if (p_tree->has_second == 0) {
-        vector_attr_t vec_attr = {
-            .min_cap = 2,
-            .shrink_factor = 1
-        };
-        vector_init(vec, *mm->value_attr, vec_attr);
+        vector *aux = vector_init(*mm->value_attr, (vector_attr_t){.min_cap = 2, .shrink_factor = 1});
+        if (aux == NULL) {
+            return CS_MEM;
+        }
+        memcpy(vec, aux, sizeof(vector));
+        free(aux);
         p_tree->has_second = 1;
     }
 

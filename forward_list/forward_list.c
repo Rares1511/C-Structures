@@ -61,9 +61,9 @@ static inline forward_list_node* merge_iterative(forward_list_node* a, forward_l
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes forward_list_init(forward_list *list, elem_attr_t attr) {
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(list == NULL, CS_NULL);
+forward_list* forward_list_init(elem_attr_t attr) {
+    forward_list* list = malloc(sizeof(forward_list));
+    CS_RETURN_IF(list == NULL || attr.size == 0 || attr.size > SIZE_TH, NULL);
 
     list->head = NULL;
     list->tail = NULL;
@@ -72,7 +72,7 @@ cs_codes forward_list_init(forward_list *list, elem_attr_t attr) {
 
     list->header.magic = CS_FORWARD_LIST_MAGIC;
     list->header.type = CS_FORWARD_LIST_TYPE;
-    return CS_SUCCESS;
+    return list;
 }
 
 int forward_list_find(forward_list *list, const void* data) {
@@ -211,4 +211,5 @@ void forward_list_free(void *v_l) {
     list->tail = NULL;
     list->size = 0;
     list->header.magic = 0; // Invalidate the list
+    free(list);
 }

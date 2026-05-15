@@ -103,11 +103,12 @@ inline cs_codes _vector_shrink_internal(vector *restrict vec) {
     return CS_SUCCESS;
 }
 
-cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr) {
-    CS_RETURN_IF(NULL == v, CS_NULL);
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(v_attr.min_cap > VECTOR_INIT_CAPACITY, CS_SIZE);
-    CS_RETURN_IF(v_attr.shrink_factor > VECTOR_INIT_CAPACITY, CS_SIZE);
+vector* vector_init(elem_attr_t attr, vector_attr_t v_attr) {
+    vector *vec = malloc(sizeof(vector));
+    CS_RETURN_IF(vec == NULL, NULL);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
+    CS_RETURN_IF(v_attr.min_cap > VECTOR_INIT_CAPACITY, NULL);
+    CS_RETURN_IF(v_attr.shrink_factor > VECTOR_INIT_CAPACITY, NULL);
 
     if (v_attr.min_cap == 0) {
         v_attr.min_cap = VECTOR_INIT_CAPACITY;
@@ -116,17 +117,17 @@ cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr)
         v_attr.shrink_factor = VECTOR_SHRINK_FACTOR;
     }
 
-    v->attr = attr;
-    v->v_attr = v_attr;
-    v->cap = v_attr.min_cap;
-    v->size = 0;
+    vec->attr = attr;
+    vec->v_attr = v_attr;
+    vec->cap = v_attr.min_cap;
+    vec->size = 0;
 
-    v->vec = malloc(v->cap * attr.size);
-    CS_RETURN_IF(v->vec == NULL, CS_MEM);
+    vec->vec = malloc(vec->cap * attr.size);
+    CS_RETURN_IF(vec->vec == NULL, NULL);
 
-    v->header.magic = CS_VECTOR_MAGIC;
-    v->header.type = CS_VECTOR_TYPE;
-    return CS_SUCCESS;
+    vec->header.magic = CS_VECTOR_MAGIC;
+    vec->header.type = CS_VECTOR_TYPE;
+    return vec;
 }
 
 cs_codes vector_insert_at(vector *restrict vec, const void *restrict el, size_t pos) {
@@ -304,14 +305,6 @@ void vector_free(void *restrict v_vec) {
     CS_RETURN_IF(v_vec == NULL);
     vector *vec = (vector *)v_vec;
     CS_RETURN_IF(vec->header.magic != CS_VECTOR_MAGIC);
-    size_t size = vector_size(vec);
-    freer free_func = vec->attr.fr;
-    if (free_func) {
-        for (size_t i = 0; i < size; i++) {
-            free_func(vec->vec + i * vec->attr.size);
-        }
-    }
-    vec->size = 0;
-    vec->header.magic = 0; // Invalidate the vector
-    free(vec->vec);
+    __vector_free_internal(vec);
+    free(vec);
 }

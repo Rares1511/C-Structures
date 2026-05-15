@@ -64,11 +64,12 @@ inline cs_codes _deque_grow_internal(deque *dq, int direction) {
     return CS_SUCCESS;
 }
 
-cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr) {
-    CS_RETURN_IF(NULL == dq, CS_NULL);
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(dq_attr.min_cap < 0 || dq_attr.min_cap > DEQUE_INIT_BLOCKS, CS_SIZE);
-    CS_RETURN_IF(dq_attr.block_size < 0 || dq_attr.block_size > DEQUE_BLOCK_SIZE, CS_SIZE);
+deque* deque_init(elem_attr_t attr, deque_attr_t dq_attr) {
+    deque *dq = malloc(sizeof(deque));
+    CS_RETURN_IF(NULL == dq, NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    CS_RETURN_IF(dq_attr.min_cap < 0 || dq_attr.min_cap > DEQUE_INIT_BLOCKS, NULL);
+    CS_RETURN_IF(dq_attr.block_size < 0 || dq_attr.block_size > DEQUE_BLOCK_SIZE, NULL);
 
     if (dq_attr.min_cap == 0) {
         dq_attr.min_cap = DEQUE_INIT_BLOCKS;
@@ -86,13 +87,15 @@ cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr) {
 
     dq->blocks = malloc(sizeof(deque_block_t) * dq->dq_attr.min_cap);
     if (NULL == dq->blocks) {
-        return CS_MEM;
+        free(dq);
+        return NULL;
     }
 
     dq->blocks[dq->front].data = malloc(attr.size * dq->dq_attr.block_size);
     if (NULL == dq->blocks[dq->front].data) {
         free(dq->blocks);
-        return CS_MEM;
+        free(dq);
+        return NULL;
     }
 
     dq->blocks[dq->front].front = dq->block_cap / 2;
@@ -100,7 +103,7 @@ cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr) {
 
     dq->header.type = CS_DEQUE_TYPE;
     dq->header.magic = CS_DEQUE_MAGIC;
-    return CS_SUCCESS;
+    return dq;
 }
 
 cs_codes deque_insert_at(deque *dq, const void *el, int index) {
@@ -271,4 +274,5 @@ void deque_free(void *v_dq) {
     }
     dq->header.magic = 0; // Invalidate the deque
     free(dq->blocks);
+    free(dq);
 }

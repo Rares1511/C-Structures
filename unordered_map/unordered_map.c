@@ -1,17 +1,33 @@
 #include <cs/unordered_map.h>
 
-cs_codes unordered_map_init(unordered_map *umap,
-                                 elem_attr_t key_attr,
+unordered_map* unordered_map_init(elem_attr_t key_attr,
                                  elem_attr_t value_attr,
                                  __hash_func_t hash_func) {
-    CS_RETURN_IF(NULL == umap, CS_NULL);
-    CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, NULL);
+    unordered_map *umap = malloc(sizeof(unordered_map));
+    CS_RETURN_IF(NULL == umap, NULL);
+
+    umap->ht = NULL;
+    umap->key_attr = NULL;
+    umap->value_attr = NULL;
+    umap->buffer = NULL;
    
-    umap->ht = malloc(sizeof(__hash_table));
     umap->key_attr = malloc(sizeof(elem_attr_t));
+    if (umap->key_attr == NULL) {
+        unordered_map_free(umap);
+        return NULL;
+    }
     umap->value_attr = malloc(sizeof(elem_attr_t));
+    if (umap->value_attr == NULL) {
+        unordered_map_free(umap);
+        return NULL;
+    }
     umap->buffer = malloc(sizeof(__unordered_map_entry) + sizeof(pair) + key_attr.size + value_attr.size);
-    CS_RETURN_IF(NULL == umap->ht || NULL == umap->key_attr || NULL == umap->value_attr || NULL == umap->buffer, CS_MEM);
+    if (umap->buffer == NULL) {
+        unordered_map_free(umap);
+        return NULL;
+    }
+    
     memcpy(umap->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(umap->value_attr, &value_attr, sizeof(elem_attr_t));
     
@@ -36,7 +52,12 @@ cs_codes unordered_map_init(unordered_map *umap,
         .size = sizeof(__unordered_map_entry) + sizeof(pair) + key_attr.size + value_attr.size,
     };
 
-    return __hash_table_init(umap->ht, entry_attr, __unordered_map_entry_hash);
+    umap->ht = __hash_table_init(entry_attr, __unordered_map_entry_hash);
+    if (umap->ht == NULL) {
+        unordered_map_free(umap);
+        return NULL;
+    }
+    return umap;
 }
 
 void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
@@ -71,8 +92,8 @@ void unordered_map_free(void *v_umap) {
     CS_RETURN_IF(NULL == v_umap);
     unordered_map *umap = (unordered_map *)v_umap;
     __hash_table_free(umap->ht);
-    free(umap->ht);
-    free(umap->key_attr);
-    free(umap->value_attr);
-    free(umap->buffer);
+    if (umap->key_attr) free(umap->key_attr);
+    if (umap->value_attr) free(umap->value_attr);
+    if (umap->buffer) free(umap->buffer);
+    free(umap);
 }

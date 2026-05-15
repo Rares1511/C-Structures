@@ -1,8 +1,15 @@
 #include <cs/multiset.h>
 
-cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
-    CS_RETURN_IF(NULL == ms, CS_NULL);
+multiset* multiset_init(elem_attr_t attr) {
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
+
+    multiset *ms = malloc(sizeof(multiset));
+    CS_RETURN_IF(NULL == ms, NULL);
+
+    ms->count_attr = NULL;
+    ms->el_attr = NULL;
+    ms->t = NULL;
+    ms->size = 0;
 
     elem_attr_t rbt_attr = {
         .comp = __multiset_node_comp,
@@ -20,16 +27,25 @@ cs_codes multiset_init(multiset *ms, elem_attr_t attr) {
         .comp = NULL
     };
 
-    ms->size = 0;
     ms->el_attr = malloc(sizeof(elem_attr_t));
+    if (ms->el_attr == NULL) {
+        multiset_free(ms);
+        return NULL;
+    }
     ms->count_attr = malloc(sizeof(elem_attr_t));
-    CS_RETURN_IF(NULL == ms->el_attr || NULL == ms->count_attr, CS_MEM);
+    if (ms->count_attr == NULL) {
+        multiset_free(ms);
+        return NULL;
+    }
     memcpy(ms->el_attr, &attr, sizeof(elem_attr_t));
     memcpy(ms->count_attr, &count_attr, sizeof(elem_attr_t));
 
-    ms->t = malloc(sizeof(__rbt));
-    CS_RETURN_IF(NULL == ms->t, CS_MEM);
-    return __rbt_init(ms->t, rbt_attr);
+    ms->t = __rbt_init(rbt_attr);
+    if (ms->t == NULL) {
+        multiset_free(ms);
+        return NULL;
+    }
+    return ms;
 }
 
 void multiset_clear(multiset *ms) {
@@ -65,7 +81,11 @@ void multiset_free(void *v_ms) {
     CS_RETURN_IF(v_ms == NULL);
     multiset *ms = (multiset *)v_ms;
     __rbt_free(ms->t);
-    free(ms->el_attr);
-    free(ms->count_attr);
-    free(ms->t);
+    if (ms->el_attr) {
+        free(ms->el_attr);
+    }
+    if (ms->count_attr) {
+        free(ms->count_attr);
+    }
+    free(ms);
 }

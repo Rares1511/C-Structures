@@ -117,9 +117,10 @@ static inline cs_codes __hash_table_rehash(__hash_table *ht) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __hash_func_t hash) {
-    CS_RETURN_IF(NULL == ht, CS_NULL);
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
+static inline __hash_table* __hash_table_init(elem_attr_t attr, __hash_func_t hash) {
+    __hash_table *ht = malloc(sizeof(__hash_table));
+    CS_RETURN_IF(NULL == ht, NULL);
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
 
     ht->cap = CS_HASH_TABLE_INIT_CAP;
     ht->mask = ht->cap - 1;
@@ -128,18 +129,22 @@ static inline cs_codes __hash_table_init(__hash_table *ht, elem_attr_t attr, __h
     ht->hash = hash;
 
     ht->occupied = calloc(ht->cap, sizeof(char));
-    CS_RETURN_IF(ht->occupied == NULL, CS_MEM);
+    if (ht->occupied == NULL) {
+        free(ht);
+        return NULL;
+    }
     
     ht->keys = malloc(ht->cap * ht->attr.size);
     if (ht->keys == NULL) {
         free(ht->occupied);
-        return CS_MEM;
+        free(ht);
+        return NULL;
     }
 
     ht->header.magic = CS_HASH_TABLE_MAGIC;
     ht->header.type = CS_HASH_TABLE_TYPE;
 
-    return CS_SUCCESS;
+    return ht;
 }
 
 static inline void *__hash_table_add_entry(__hash_table *ht, const void *el, cs_codes *rc) {
@@ -327,6 +332,7 @@ static inline void __hash_table_free(void *v_ht) {
     free(ht->keys);
     free(ht->occupied);
     ht->header.magic = 0;
+    free(ht);
 }
 
 #endif

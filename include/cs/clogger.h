@@ -62,7 +62,7 @@ typedef struct clogger {
  * @param options The clogger_options structure containing logging options.
  * @return CS_SUCCESS on success, CS_NULL if logger, filename, or modes is NULL, CS_MEM if file opening fails.
  */
-cs_codes clogger_init(clogger *logger, const char *filename, clogger_options options);
+clogger *clogger_init(const char *filename, clogger_options options);
 
 /*!
  * Prints the current stack trace to the logger's file.
@@ -70,7 +70,7 @@ cs_codes clogger_init(clogger *logger, const char *filename, clogger_options opt
  * @note This function is typically called automatically by clogger_log on ERROR level
  *       when CLOGGER_SHOW_STACKTRACE flag is enabled.
  */
-void clogger_print_stacktrace(clogger logger);
+void clogger_print_stacktrace(clogger *logger);
 
 /*!
  * Logs a formatted message to the file associated with the logger.
@@ -81,41 +81,41 @@ void clogger_print_stacktrace(clogger logger);
  */
 #define clogger_log(logger, level, fmt, ...) \
     do { \
-        if ((logger).fp != NULL && (logger).options.min_level <= (level)) { \
-            if ((logger).mutex != NULL) pthread_mutex_lock((logger).mutex); \
-            clogger_flags _clog_flags = (logger).options.flags; \
+        if ((logger)->fp != NULL && (logger)->options.min_level <= (level)) { \
+            if ((logger)->mutex != NULL) pthread_mutex_lock((logger)->mutex); \
+            clogger_flags _clog_flags = (logger)->options.flags; \
             if (_clog_flags & CLOGGER_SHOW_TIME) { \
                 time_t _clog_now = time(NULL); \
                 struct tm *_clog_tm = localtime(&_clog_now); \
-                fprintf((logger).fp, "%02d:%02d:%02d.%03ld ", \
+                fprintf((logger)->fp, "%02d:%02d:%02d.%03ld ", \
                     _clog_tm->tm_hour, _clog_tm->tm_min, _clog_tm->tm_sec, \
                     (long)(_clog_now % 1000)); \
             } \
             if (_clog_flags & CLOGGER_SHOW_LEVEL) { \
-                fprintf((logger).fp, "[%s] ", \
+                fprintf((logger)->fp, "[%s] ", \
                     (level) == CLOGGER_DEBUG ? "DEBUG" : \
                     (level) == CLOGGER_INFO ? "INFO" : \
                     (level) == CLOGGER_WARNING ? "WARNING" : "ERROR"); \
             } \
             if (_clog_flags & CLOGGER_SHOW_FILE) { \
-                fprintf((logger).fp, "%s:", __FILE__); \
+                fprintf((logger)->fp, "%s:", __FILE__); \
             } \
             if (_clog_flags & CLOGGER_SHOW_FUNC) { \
-                fprintf((logger).fp, "%s():", __func__); \
+                fprintf((logger)->fp, "%s():", __func__); \
             } \
             if (_clog_flags & CLOGGER_SHOW_LINE) { \
-                fprintf((logger).fp, "%d", __LINE__); \
+                fprintf((logger)->fp, "%d", __LINE__); \
             } \
             if (_clog_flags & (CLOGGER_SHOW_FILE | CLOGGER_SHOW_FUNC | CLOGGER_SHOW_LINE | CLOGGER_SHOW_LEVEL)) { \
-                fprintf((logger).fp, " "); \
+                fprintf((logger)->fp, " "); \
             } \
-            fprintf((logger).fp, fmt, ##__VA_ARGS__); \
+            fprintf((logger)->fp, fmt, ##__VA_ARGS__); \
             if ((level) == CLOGGER_ERROR && (_clog_flags & CLOGGER_SHOW_STACKTRACE)) { \
-                clogger _clog_tmp = (logger); \
+                clogger *_clog_tmp = (logger); \
                 clogger_print_stacktrace(_clog_tmp); \
             } \
-            fflush((logger).fp); \
-            if ((logger).mutex != NULL) pthread_mutex_unlock((logger).mutex); \
+            fflush((logger)->fp); \
+            if ((logger)->mutex != NULL) pthread_mutex_unlock((logger)->mutex); \
         } \
     } while(0)
 

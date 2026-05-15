@@ -1,10 +1,16 @@
 #include <cs/unordered_multiset.h>
 
-cs_codes unordered_multiset_init(unordered_multiset *restrict umset, 
-                            elem_attr_t attr, 
-                            __hash_func_t hash_func) {
-    CS_RETURN_IF(NULL == umset, CS_NULL);
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
+unordered_multiset* unordered_multiset_init(elem_attr_t attr, 
+                                __hash_func_t hash_func) {
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
+    unordered_multiset *umset = malloc(sizeof(unordered_multiset));
+    CS_RETURN_IF(umset == NULL, NULL);
+
+    umset->size = 0;
+    umset->attr = NULL;
+    umset->count_attr = NULL;
+    umset->buffer = NULL;
+    umset->ht = NULL;
 
     elem_attr_t entry_attr = {
         .size = sizeof(__unordered_multiset_entry) + sizeof(pair) + attr.size + sizeof(int), 
@@ -22,12 +28,21 @@ cs_codes unordered_multiset_init(unordered_multiset *restrict umset,
         .comp = NULL
     };                            
     
-    umset->size = 0;
-    umset->ht = malloc(sizeof(__hash_table));
     umset->attr = malloc(sizeof(elem_attr_t));
+    if (umset->attr == NULL) {
+        unordered_multiset_free(umset);
+        return NULL;
+    }
     umset->count_attr = malloc(sizeof(elem_attr_t));
+    if (umset->count_attr == NULL) {
+        unordered_multiset_free(umset);
+        return NULL;
+    }
     umset->buffer = malloc(sizeof(__unordered_multiset_entry) + sizeof(pair) + attr.size + sizeof(int));
-    CS_RETURN_IF(NULL == umset->ht || NULL == umset->attr || NULL == umset->count_attr || NULL == umset->buffer, CS_MEM);
+    if (umset->buffer == NULL) {
+        unordered_multiset_free(umset);
+        return NULL;
+    }
 
     memset(umset->buffer, 0, sizeof(__unordered_multiset_entry) + sizeof(pair) + attr.size + sizeof(int));
     memcpy(umset->attr, &attr, sizeof(elem_attr_t));
@@ -46,7 +61,12 @@ cs_codes unordered_multiset_init(unordered_multiset *restrict umset,
     buffer_pair->has_second = 1;
     *buffer_count = 0;
 
-    return __hash_table_init(umset->ht, entry_attr, __unordered_multiset_entry_hash);
+    umset->ht = __hash_table_init(entry_attr, __unordered_multiset_entry_hash);
+    if (umset->ht == NULL) {
+        unordered_multiset_free(umset);
+        return NULL;
+    }
+    return umset;
 }
 
 void unordered_multiset_clear(unordered_multiset *restrict umset) {
@@ -65,12 +85,8 @@ void unordered_multiset_free(void *restrict v_umset) {
     CS_RETURN_IF(v_umset == NULL);
     unordered_multiset *umset = (unordered_multiset *)v_umset;
     __hash_table_free(umset->ht);
-    free(umset->ht);
-    free(umset->buffer);
-    free(umset->attr);
-    free(umset->count_attr);
-    umset->ht = NULL;
-    umset->buffer = NULL;
-    umset->attr = NULL;
-    umset->count_attr = NULL;
+    if (umset->buffer) free(umset->buffer);
+    if (umset->attr) free(umset->attr);
+    if (umset->count_attr) free(umset->count_attr);
+    free(umset);
 }

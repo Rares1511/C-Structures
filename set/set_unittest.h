@@ -11,21 +11,20 @@
 // ============================================================================
 test_res test_set_init(test_arg *arg) {
     elem_attr_t attr = get_test_struct_attr();
-    set *s = (set *)arg->data_structure;
-    cs_codes init_result = set_init(s, attr);
+    set *s = set_init(attr);
 
-    if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
+    if (s == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
     if (set_size(s) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
     if (!set_empty(s)) return (test_res){(char*)__func__, "Set not empty after init", CS_UNKNOWN};
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set initialized with custom struct attribute.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set initialized with custom struct attribute.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated after init", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after init.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after init.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -35,8 +34,7 @@ test_res test_set_init(test_arg *arg) {
 // set_insert
 // ============================================================================
 test_res test_set_insert_single(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    set_init(s, get_test_struct_attr());
+    set *s = set_init(get_test_struct_attr());
     test_struct ts = create_test_struct(42, "InsertSingle", 42.0);
 
     cs_codes result = set_insert(s, &ts);
@@ -46,7 +44,7 @@ test_res test_set_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert returned error", CS_MEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted one element into set.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted one element into set.\n");
 
     if (set_size(s) != 1) {
         free_test_struct(&ts);
@@ -54,7 +52,7 @@ test_res test_set_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Size not 1 after insert", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after insert.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after insert.\n");
 
     if (!rbt_is_valid(s->t)) {
         free_test_struct(&ts);
@@ -62,7 +60,7 @@ test_res test_set_insert_single(test_arg *arg) {
         return (test_res){(char*)__func__, "RBT integrity violated after insert", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after insert.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after insert.\n");
 
     free_test_struct(&ts);
     set_free(s);
@@ -70,8 +68,7 @@ test_res test_set_insert_single(test_arg *arg) {
 }
 
 test_res test_set_insert_multiple(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    set_init(s, get_test_struct_attr());
+    set *s = set_init(get_test_struct_attr());
     int total = __TEST_SIZE;
 
     for (int i = 0; i < total; i++) {
@@ -91,22 +88,21 @@ test_res test_set_insert_multiple(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set.\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set.\n", total);
 
     if (set_size(s) != total) {
         set_free(s);
         return (test_res){(char*)__func__, "Size mismatch after inserts", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after multiple inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after multiple inserts.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_insert_duplicate(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    set_init(s, get_test_struct_attr());
+    set *s = set_init(get_test_struct_attr());
     test_struct ts = create_test_struct(42, "Duplicate", 42.0);
 
     if (set_insert(s, &ts) != CS_SUCCESS) {
@@ -115,7 +111,7 @@ test_res test_set_insert_duplicate(test_arg *arg) {
         return (test_res){(char*)__func__, "Initial insert failed", CS_MEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted element into set for duplicate test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted element into set for duplicate test.\n");
 
     if (set_insert(s, &ts) != CS_SUCCESS) {
         free_test_struct(&ts);
@@ -123,7 +119,7 @@ test_res test_set_insert_duplicate(test_arg *arg) {
         return (test_res){(char*)__func__, "Duplicate insert was successful", CS_MEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Duplicate insert correctly returned error.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Duplicate insert correctly returned error.\n");
 
     // Sets should not allow duplicates - size should still be 1
     if (set_size(s) != 1) {
@@ -132,7 +128,7 @@ test_res test_set_insert_duplicate(test_arg *arg) {
         return (test_res){(char*)__func__, "Duplicate was inserted", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after duplicate insert attempt.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after duplicate insert attempt.\n");
 
     if (!rbt_is_valid(s->t)) {
         free_test_struct(&ts);
@@ -140,7 +136,7 @@ test_res test_set_insert_duplicate(test_arg *arg) {
         return (test_res){(char*)__func__, "RBT integrity violated after duplicate", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after duplicate insert attempt.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after duplicate insert attempt.\n");
 
     free_test_struct(&ts);
     set_free(s);
@@ -148,8 +144,10 @@ test_res test_set_insert_duplicate(test_arg *arg) {
 }
 
 test_res test_set_insert_ascending(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    set_init(s, get_test_struct_attr());
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
+        return (test_res){(char*)__func__, "Set init failed", CS_MEM};
+    }
 
     // Insert in ascending order (worst case for unbalanced BST)
     for (int i = 0; i < 100; i++) {
@@ -162,29 +160,29 @@ test_res test_set_insert_ascending(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 100 elements in ascending order.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 100 elements in ascending order.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated after ascending inserts", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after ascending inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after ascending inserts.\n");
 
     if (set_size(s) != 100) {
         set_free(s);
         return (test_res){(char*)__func__, "Size mismatch", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after ascending inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after ascending inserts.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_insert_descending(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -199,21 +197,21 @@ test_res test_set_insert_descending(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 100 elements in descending order.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 100 elements in descending order.\n");
 
     if (set_size(s) != 100) {
         set_free(s);
         return (test_res){(char*)__func__, "Size mismatch", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after descending inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after descending inserts.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated after descending inserts", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after descending inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after descending inserts.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -223,10 +221,10 @@ test_res test_set_insert_descending(test_arg *arg) {
 // set_delete
 // ============================================================================
 test_res test_set_delete_single(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
+    set *s = set_init(get_test_struct_attr());
     test_struct ts = create_test_struct(42, "DeleteSingle", 42.0);
 
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     
@@ -237,7 +235,7 @@ test_res test_set_delete_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert failed", ins_result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted element into set for delete test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted element into set for delete test.\n");
 
     cs_codes del_result = set_delete(s, &ts);
     if (del_result != CS_SUCCESS) {
@@ -246,7 +244,7 @@ test_res test_set_delete_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Delete failed", del_result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted element from set.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted element from set.\n");
 
     if (!set_empty(s)) {
         free_test_struct(&ts);
@@ -254,7 +252,7 @@ test_res test_set_delete_single(test_arg *arg) {
         return (test_res){(char*)__func__, "Set not empty after delete", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is empty after delete.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is empty after delete.\n");
 
     if (!rbt_is_valid(s->t)) {
         free_test_struct(&ts);
@@ -262,7 +260,7 @@ test_res test_set_delete_single(test_arg *arg) {
         return (test_res){(char*)__func__, "RBT integrity violated after delete", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after delete.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after delete.\n");
 
     free_test_struct(&ts);
     set_free(s);
@@ -270,8 +268,8 @@ test_res test_set_delete_single(test_arg *arg) {
 }
 
 test_res test_set_delete_multiple(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     int total = 50;
@@ -287,7 +285,7 @@ test_res test_set_delete_multiple(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for delete test.\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for delete test.\n", total);
 
     // Delete all elements
     for (int i = 0; i < total; i++) {
@@ -307,22 +305,22 @@ test_res test_set_delete_multiple(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted all elements from set.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted all elements from set.\n");
 
     if (!set_empty(s)) {
         set_free(s);
         return (test_res){(char*)__func__, "Set not empty after all deletes", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is empty after all deletes.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is empty after all deletes.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_delete_nonexistent(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -332,7 +330,7 @@ test_res test_set_delete_nonexistent(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 10 elements into set for non-existent delete test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 10 elements into set for non-existent delete test.\n");
 
     test_struct ts_not_in = create_test_struct(999, "NotInSet", 999.0);
     if(set_delete(s, &ts_not_in) == CS_SUCCESS) {
@@ -342,7 +340,7 @@ test_res test_set_delete_nonexistent(test_arg *arg) {
     }
     free_test_struct(&ts_not_in);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Attempted to delete non-existent element, correctly returned error.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Attempted to delete non-existent element, correctly returned error.\n");
 
     // Delete of non-existent should return error or at least not crash
     if (set_size(s) != 10) {
@@ -350,22 +348,22 @@ test_res test_set_delete_nonexistent(test_arg *arg) {
         return (test_res){(char*)__func__, "Size changed after deleting non-existent", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after attempting to delete non-existent element.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after attempting to delete non-existent element.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after attempting to delete non-existent element.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after attempting to delete non-existent element.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_delete_random_order(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     int total = 100;
@@ -381,7 +379,7 @@ test_res test_set_delete_random_order(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for random delete test.\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for random delete test.\n", total);
 
     // Delete in "random" order (using a pattern)
     int order[] = {50, 25, 75, 10, 40, 60, 90, 5, 15, 30, 45, 55, 70, 80, 95};
@@ -400,15 +398,15 @@ test_res test_set_delete_random_order(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted 15 elements in random order from set.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted 15 elements in random order from set.\n");
 
     if (set_size(s) != total - 15) {
         set_free(s);
-        clogger_log(*arg->logger, CLOGGER_ERROR, "Expected size after deletes: %d, actual size: %d\n", total - 15, set_size(s));
+        clogger_log(arg->logger, CLOGGER_ERROR, "Expected size after deletes: %d, actual size: %d\n", total - 15, set_size(s));
         return (test_res){(char*)__func__, "Size mismatch after random deletes.", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after random deletes.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after random deletes.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -418,8 +416,8 @@ test_res test_set_delete_random_order(test_arg *arg) {
 // set_find
 // ============================================================================
 test_res test_set_find_existing(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -433,7 +431,7 @@ test_res test_set_find_existing(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 20 elements into set for find test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 20 elements into set for find test.\n");
 
     test_struct search = create_test_struct(10, "FindExisting", 10.0);
     void *found = set_find(s, &search);
@@ -444,7 +442,7 @@ test_res test_set_find_existing(test_arg *arg) {
         return (test_res){(char*)__func__, "Find returned NULL for existing element", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Find returned non-NULL for existing element.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Find returned non-NULL for existing element.\n");
 
     test_struct *found_ts = (test_struct*)found;
     if (found_ts->id != 10) {
@@ -452,15 +450,15 @@ test_res test_set_find_existing(test_arg *arg) {
         return (test_res){(char*)__func__, "Find returned wrong element", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Find returned correct element.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Find returned correct element.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_find_nonexistent(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -474,7 +472,7 @@ test_res test_set_find_nonexistent(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 20 elements into set for non-existent find test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 20 elements into set for non-existent find test.\n");
 
     test_struct search = create_test_struct(999, "NotInSet", 999.0);
     void *found = set_find(s, &search);
@@ -485,15 +483,15 @@ test_res test_set_find_nonexistent(test_arg *arg) {
         return (test_res){(char*)__func__, "Find should return NULL for non-existent", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Find correctly returned NULL for non-existent element.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Find correctly returned NULL for non-existent element.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_find_all(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     int total = 100;
@@ -508,7 +506,7 @@ test_res test_set_find_all(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for find all test.\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for find all test.\n", total);
 
     // Find all elements
     for (int i = 0; i < total; i++) {
@@ -522,7 +520,7 @@ test_res test_set_find_all(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Successfully found all existing elements.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Successfully found all existing elements.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -532,8 +530,8 @@ test_res test_set_find_all(test_arg *arg) {
 // set_empty
 // ============================================================================
 test_res test_set_empty_initial(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -542,15 +540,15 @@ test_res test_set_empty_initial(test_arg *arg) {
         return (test_res){(char*)__func__, "New set should be empty", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "New set is empty as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "New set is empty as expected.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_empty_after_ops(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     test_struct ts = create_test_struct(42, "EmptyOps", 42.0);
@@ -562,7 +560,7 @@ test_res test_set_empty_after_ops(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert failed", ins_result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted element into set for empty test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted element into set for empty test.\n");
 
     if (set_empty(s)) {
         free_test_struct(&ts);
@@ -570,7 +568,7 @@ test_res test_set_empty_after_ops(test_arg *arg) {
         return (test_res){(char*)__func__, "Set should not be empty after insert", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is not empty after insert as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is not empty after insert as expected.\n");
 
     cs_codes del_result = set_delete(s, &ts);
     if (del_result != CS_SUCCESS) {
@@ -579,7 +577,7 @@ test_res test_set_empty_after_ops(test_arg *arg) {
         return (test_res){(char*)__func__, "Delete failed", del_result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted element from set.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted element from set.\n");
 
     if (!set_empty(s)) {
         free_test_struct(&ts);
@@ -587,7 +585,7 @@ test_res test_set_empty_after_ops(test_arg *arg) {
         return (test_res){(char*)__func__, "Set should be empty after delete", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is empty after delete as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is empty after delete as expected.\n");
 
     free_test_struct(&ts);
     set_free(s);
@@ -598,8 +596,8 @@ test_res test_set_empty_after_ops(test_arg *arg) {
 // set_size
 // ============================================================================
 test_res test_set_size_initial(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -608,15 +606,15 @@ test_res test_set_size_initial(test_arg *arg) {
         return (test_res){(char*)__func__, "New set size should be 0", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "New set size is 0 as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "New set size is 0 as expected.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_size_after_ops(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -636,7 +634,7 @@ test_res test_set_size_after_ops(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 50 elements into set for size test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 50 elements into set for size test.\n");
 
     for (int i = 49; i >= 0; i--) {
         test_struct ts = create_test_struct(i, "SizeOps", (double)i);
@@ -654,14 +652,14 @@ test_res test_set_size_after_ops(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted all elements from set for size test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted all elements from set for size test.\n");
 
      if (set_size(s) != 0) {
         set_free(s);
         return (test_res){(char*)__func__, "Size should be 0 after deleting all", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is 0 after deleting all elements as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is 0 after deleting all elements as expected.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -671,14 +669,14 @@ test_res test_set_size_after_ops(test_arg *arg) {
 // set_swap
 // ============================================================================
 test_res test_set_swap(test_arg *arg) {
-    set *s1 = (set *)arg->data_structure;
-    set s2;
+    set *s1 = set_init(get_test_struct_attr());
+    set *s2 = set_init(get_test_struct_attr());
 
-    if (set_init(s1, get_test_struct_attr()) != CS_SUCCESS) {
+    if (s1 == NULL) {
         return (test_res){(char*)__func__, "Set s1 init failed", CS_MEM};
     }
-    if (set_init(&s2, get_test_struct_attr()) != CS_SUCCESS) {
-        set_free(&s1);
+    if (s2 == NULL) {
+        set_free(s1);
         return (test_res){(char*)__func__, "Set s2 init failed", CS_MEM};
     }
 
@@ -688,73 +686,73 @@ test_res test_set_swap(test_arg *arg) {
         free_test_struct(&ts);
         if (result != CS_SUCCESS) {
             set_free(s1);
-            set_free(&s2);
+            set_free(s2);
             return (test_res){(char*)__func__, "Insert to s1 failed", result};
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s1 for swap test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s1 for swap test.\n");
 
     for (int i = 10; i < 15; i++) {
         test_struct ts = create_test_struct(i, "Swap2", (double)i);
-        cs_codes result = set_insert(&s2, &ts);
+        cs_codes result = set_insert(s2, &ts);
         free_test_struct(&ts);
         if (result != CS_SUCCESS) {
             set_free(s1);
-            set_free(&s2);
+            set_free(s2);
             return (test_res){(char*)__func__, "Insert to s2 failed", result};
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s2 for swap test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s2 for swap test.\n");
 
-    set_swap(s1, &s2);
+    set_swap(s1, s2);
 
     // s1 should now have elements 10-14
     test_struct search1 = create_test_struct(10, "Swap2", 10.0);
     if (set_find(s1, &search1) == NULL) {
         free_test_struct(&search1);
         set_free(s1);
-        set_free(&s2);
+        set_free(s2);
         return (test_res){(char*)__func__, "Swap s1 content mismatch", CS_ELEM};
     }
     free_test_struct(&search1);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "s1 has correct content after swap.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "s1 has correct content after swap.\n");
 
     // s2 should now have elements 0-4
     test_struct search2 = create_test_struct(0, "Swap1", 0.0);
-    if (set_find(&s2, &search2) == NULL) {
+    if (set_find(s2, &search2) == NULL) {
         free_test_struct(&search2);
-        set_free(&s1);
-        set_free(&s2);
+        set_free(s1);
+        set_free(s2);
         return (test_res){(char*)__func__, "Swap s2 content mismatch", CS_ELEM};
     }
     free_test_struct(&search2);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "s2 has correct content after swap.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "s2 has correct content after swap.\n");
 
-    if (!rbt_is_valid(s1->t) || !rbt_is_valid(s2.t)) {
+    if (!rbt_is_valid(s1->t) || !rbt_is_valid(s2->t)) {
         set_free(s1);
-        set_free(&s2);
+        set_free(s2);
         return (test_res){(char*)__func__, "RBT integrity violated after swap", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after swap.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after swap.\n");
 
     set_free(s1);
-    set_free(&s2);
+    set_free(s2);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_swap_empty(test_arg *arg) {
-    set *s1 = (set *)arg->data_structure;
-    set s2;
+    set *s1 = set_init(get_test_struct_attr());
+    set *s2 = set_init(get_test_struct_attr());
 
-    if (set_init(s1, get_test_struct_attr()) != CS_SUCCESS) {
+    if (s1 == NULL) {
         return (test_res){(char*)__func__, "Set s1 init failed", CS_MEM};
     }
-    if (set_init(&s2, get_test_struct_attr()) != CS_SUCCESS) {
+    if (s2 == NULL) {
         set_free(s1);
         return (test_res){(char*)__func__, "Set s2 init failed", CS_MEM};
     }
@@ -765,33 +763,33 @@ test_res test_set_swap_empty(test_arg *arg) {
         free_test_struct(&ts);
         if (result != CS_SUCCESS) {
             set_free(s1);
-            set_free(&s2);
+            set_free(s2);
             return (test_res){(char*)__func__, "Insert failed", result};
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s1 for empty swap test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 5 elements into s1 for empty swap test.\n");
 
-    set_swap(s1, &s2);
+    set_swap(s1, s2);
 
     if (!set_empty(s1)) {
         set_free(s1);
-        set_free(&s2);
+        set_free(s2);
         return (test_res){(char*)__func__, "s1 should be empty after swap", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "s1 is empty after swap as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "s1 is empty after swap as expected.\n");
 
-    if (set_size(&s2) != 5) {
+    if (set_size(s2) != 5) {
         set_free(s1);
-        set_free(&s2);
+        set_free(s2);
         return (test_res){(char*)__func__, "s2 should have 5 elements", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "s2 has correct size after swap.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "s2 has correct size after swap.\n");
 
     set_free(s1);
-    set_free(&s2);
+    set_free(s2);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
@@ -799,9 +797,9 @@ test_res test_set_swap_empty(test_arg *arg) {
 // set_clear
 // ============================================================================
 test_res test_set_clear(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
+    set *s = set_init(get_test_struct_attr());
 
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -815,7 +813,7 @@ test_res test_set_clear(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 100 elements into set for clear test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 100 elements into set for clear test.\n");
 
     set_clear(s);
 
@@ -824,22 +822,22 @@ test_res test_set_clear(test_arg *arg) {
         return (test_res){(char*)__func__, "Clear did not reset set", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is empty and size is 0 after clear as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is empty and size is 0 after clear as expected.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated after clear", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after clear.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after clear.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_clear_reuse(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -853,7 +851,7 @@ test_res test_set_clear_reuse(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 50 elements into set for clear reuse test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 50 elements into set for clear reuse test.\n");
 
     set_clear(s);
 
@@ -868,21 +866,21 @@ test_res test_set_clear_reuse(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 50 new elements into set after clear.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 50 new elements into set after clear.\n");
 
     if (set_size(s) != 50) {
         set_free(s);
         return (test_res){(char*)__func__, "Reuse after clear failed", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after inserting new elements post-clear.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after inserting new elements post-clear.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT integrity violated after reuse", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after reuse post-clear.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after reuse post-clear.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -892,8 +890,8 @@ test_res test_set_clear_reuse(test_arg *arg) {
 // Complex struct integrity tests
 // ============================================================================
 test_res test_set_nested_data_integrity(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -907,7 +905,7 @@ test_res test_set_nested_data_integrity(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 50 complex elements into set for nested integrity test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 50 complex elements into set for nested integrity test.\n");
 
     // Find and verify nested structures
     for (int i = 0; i < 50; i++) {
@@ -941,15 +939,15 @@ test_res test_set_nested_data_integrity(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "All nested data verified successfully.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "All nested data verified successfully.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_deep_copy_verification(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -961,7 +959,7 @@ test_res test_set_deep_copy_verification(test_arg *arg) {
         return (test_res){(char*)__func__, "Insert failed", result};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted element into set for deep copy test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted element into set for deep copy test.\n");
 
     // Modify original after insert - should not affect set content
     original.id = 999;
@@ -980,7 +978,7 @@ test_res test_set_deep_copy_verification(test_arg *arg) {
         return (test_res){(char*)__func__, "Deep copy failed - id changed", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "ID is correct in set after modifying original.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "ID is correct in set after modifying original.\n");
 
     if (strcmp(stored->name, "DeepCopyTest") != 0) {
         free_test_struct(&original);
@@ -988,7 +986,7 @@ test_res test_set_deep_copy_verification(test_arg *arg) {
         return (test_res){(char*)__func__, "Deep copy failed - name changed", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Name is correct in set after modifying original.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Name is correct in set after modifying original.\n");
 
     if (stored->address->zip_code != 10042) {
         free_test_struct(&original);
@@ -996,7 +994,7 @@ test_res test_set_deep_copy_verification(test_arg *arg) {
         return (test_res){(char*)__func__, "Deep copy failed - address changed", CS_ELEM};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Address zip code is correct in set after modifying original.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Address zip code is correct in set after modifying original.\n");
 
     free_test_struct(&original);
     set_free(s);
@@ -1007,8 +1005,8 @@ test_res test_set_deep_copy_verification(test_arg *arg) {
 // Stress tests with RBT integrity
 // ============================================================================
 test_res test_set_insert_delete(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
     int total = __TEST_SIZE;
@@ -1024,14 +1022,14 @@ test_res test_set_insert_delete(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for stress test.\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into set for stress test.\n", total);
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT invalid after stress inserts", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after stress inserts.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after stress inserts.\n");
 
     // Delete half
     for (int i = 0; i < total / 2; i++) {
@@ -1044,29 +1042,29 @@ test_res test_set_insert_delete(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Deleted half of the elements from set for stress test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted half of the elements from set for stress test.\n");
 
     if (set_size(s) != total - total / 2) {
         set_free(s);
         return (test_res){(char*)__func__, "Size mismatch after stress test", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed successfully.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed successfully.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT invalid after stress deletes", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid after stress deletes.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid after stress deletes.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_set_interleaved_insert_delete(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -1096,14 +1094,14 @@ test_res test_set_interleaved_insert_delete(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Completed interleaved insert/delete operations.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Completed interleaved insert/delete operations.\n");
 
      if (set_size(s) != 67) { // 100 inserts - 33 deletes
         set_free(s);
         return (test_res){(char*)__func__, "Size mismatch after interleaved ops", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Size is correct after interleaved operations.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Size is correct after interleaved operations.\n");
 
      if (!rbt_is_valid(s->t)) {
         set_free(s);
@@ -1115,8 +1113,8 @@ test_res test_set_interleaved_insert_delete(test_arg *arg) {
 }
 
 test_res test_set_delete_all_verify_rbt(test_arg *arg) {
-    set *s = (set *)arg->data_structure;
-    if (set_init(s, get_test_struct_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_test_struct_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
 
@@ -1130,14 +1128,14 @@ test_res test_set_delete_all_verify_rbt(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Inserted 100 elements into set for delete all test.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted 100 elements into set for delete all test.\n");
 
     if (!rbt_is_valid(s->t)) {
         set_free(s);
         return (test_res){(char*)__func__, "RBT invalid before deletes", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "RBT properties valid before deletes.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT properties valid before deletes.\n");
 
     // Delete all, checking RBT after each
     for (int i = 0; i < 100; i++) {
@@ -1155,14 +1153,14 @@ test_res test_set_delete_all_verify_rbt(test_arg *arg) {
         }
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Completed sequential delete operations.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Completed sequential delete operations.\n");
 
     if (!set_empty(s)) {
         set_free(s);
         return (test_res){(char*)__func__, "Set not empty after deleting all", CS_UNKNOWN};
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Set is empty after deleting all elements as expected.\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Set is empty after deleting all elements as expected.\n");
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -1176,13 +1174,12 @@ test_res test_set_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
-    set *s = (set *)arg->data_structure;
-    struct timeval start, end;
-    double elapsed;
-
-    if (set_init(s, get_int_attr()) != CS_SUCCESS) {
+    set *s = set_init(get_int_attr());
+    if (s == NULL) {
         return (test_res){(char*)__func__, "Set init failed", CS_MEM};
     }
+    struct timeval start, end;
+    double elapsed;
     int total = __SET_STRESS_TEST_SIZE;
 
     /* INSERT timing */
@@ -1200,7 +1197,7 @@ test_res test_set_stress_time(test_arg *arg) {
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "insert", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
 
     /* FIND timing */
     gettimeofday(&start, NULL);
@@ -1223,7 +1220,7 @@ test_res test_set_stress_time(test_arg *arg) {
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "find", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     /* DELETE timing */
     gettimeofday(&start, NULL);
@@ -1240,7 +1237,7 @@ test_res test_set_stress_time(test_arg *arg) {
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "delete", elapsed);
 
-    clogger_log((*arg->logger), CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Delete Time = %.9f sec\n", elapsed);
 
     set_free(s);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

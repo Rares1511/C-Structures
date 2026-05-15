@@ -32,8 +32,7 @@ static void cleanup_test_log_file(void) {
 // ============================================================================
 
 test_res test_clogger_init_basic(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -41,48 +40,21 @@ test_res test_clogger_init_basic(test_arg *arg) {
         .thread_safe = 0
     };
     
-    cs_codes rc = clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
-    if (rc != CS_SUCCESS) {
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "Init failed", rc};
-    }
+    logger = UNITTEST_ASSERT(clogger_init(__CLOGGER_TEST_FILE, opts), !=, NULL, "Failed to initialize logger", 
+        arg->logger, "Successfully initialized logger");
     
-    if (logger.fp == NULL) {
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "File pointer is NULL after init", CS_NULL};
-    }
+    UNITTEST_ASSERT(logger->fp, !=, NULL, "File pointer is NULL after init", arg->logger, "File pointer is valid");
     
-    if (logger.mutex != NULL) {
-        clogger_close(&logger);
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "Mutex should be NULL when thread_safe=0", CS_UNKNOWN};
-    }
+    UNITTEST_ASSERT(logger->mutex, ==, NULL, "Mutex should be NULL when thread_safe=0", arg->logger, "Mutex is NULL as expected");
     
-    clogger_close(&logger);
+    clogger_close(logger);
     cleanup_test_log_file();
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
-test_res test_clogger_init_null_logger(test_arg *arg) {
-    (void)arg;
-    clogger_options opts = {
-        .min_level = CLOGGER_DEBUG,
-        .modes = "w",
-        .flags = CLOGGER_SHOW_LEVEL,
-        .thread_safe = 0
-    };
-    
-    cs_codes rc = clogger_init(NULL, __CLOGGER_TEST_FILE, opts);
-    if (rc != CS_NULL) {
-        return (test_res){(char*)__func__, "Should return CS_NULL for NULL logger", rc};
-    }
-    
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
 test_res test_clogger_init_null_filename(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -90,17 +62,19 @@ test_res test_clogger_init_null_filename(test_arg *arg) {
         .thread_safe = 0
     };
     
-    cs_codes rc = clogger_init(&logger, NULL, opts);
-    if (rc != CS_NULL) {
-        return (test_res){(char*)__func__, "Should return CS_NULL for NULL filename", rc};
+    logger = clogger_init(NULL, opts);
+    if (logger == NULL) {
+        return (test_res){(char*)__func__, "Should not return NULL for NULL filename", CS_NULL};
     }
+
+    clogger_close(logger);
     
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_clogger_init_null_modes(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = NULL,
@@ -108,17 +82,16 @@ test_res test_clogger_init_null_modes(test_arg *arg) {
         .thread_safe = 0
     };
     
-    cs_codes rc = clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
-    if (rc != CS_NULL) {
-        return (test_res){(char*)__func__, "Should return CS_NULL for NULL modes", rc};
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
+    if (logger != NULL) {
+        return (test_res){(char*)__func__, "Should return NULL for NULL modes", CS_NULL};
     }
     
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_clogger_init_thread_safe(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -126,19 +99,19 @@ test_res test_clogger_init_thread_safe(test_arg *arg) {
         .thread_safe = 1
     };
     
-    cs_codes rc = clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
-    if (rc != CS_SUCCESS) {
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
+    if (logger == NULL) {
         cleanup_test_log_file();
-        return (test_res){(char*)__func__, "Init with thread_safe failed", rc};
+        return (test_res){(char*)__func__, "Init with thread_safe failed", CS_NULL};
     }
     
-    if (logger.mutex == NULL) {
-        clogger_close(&logger);
+    if (logger->mutex == NULL) {
+        clogger_close(logger);
         cleanup_test_log_file();
         return (test_res){(char*)__func__, "Mutex should not be NULL when thread_safe=1", CS_NULL};
     }
     
-    clogger_close(&logger);
+    clogger_close(logger);
     cleanup_test_log_file();
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
@@ -148,8 +121,7 @@ test_res test_clogger_init_thread_safe(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_log_basic(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -157,9 +129,9 @@ test_res test_clogger_log_basic(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Test message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -185,8 +157,7 @@ test_res test_clogger_log_basic(test_arg *arg) {
 }
 
 test_res test_clogger_log_levels(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -194,12 +165,12 @@ test_res test_clogger_log_levels(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_DEBUG, "Debug msg\n");
     clogger_log(logger, CLOGGER_INFO, "Info msg\n");
     clogger_log(logger, CLOGGER_WARNING, "Warning msg\n");
     clogger_log(logger, CLOGGER_ERROR, "Error msg\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -237,8 +208,7 @@ test_res test_clogger_log_levels(test_arg *arg) {
 }
 
 test_res test_clogger_log_min_level_filter(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_WARNING,
         .modes = "w",
@@ -246,12 +216,12 @@ test_res test_clogger_log_min_level_filter(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_DEBUG, "Debug msg\n");
     clogger_log(logger, CLOGGER_INFO, "Info msg\n");
     clogger_log(logger, CLOGGER_WARNING, "Warning msg\n");
     clogger_log(logger, CLOGGER_ERROR, "Error msg\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -295,8 +265,7 @@ test_res test_clogger_log_min_level_filter(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_flags_none(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -304,9 +273,9 @@ test_res test_clogger_flags_none(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Simple message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -333,8 +302,7 @@ test_res test_clogger_flags_none(test_arg *arg) {
 }
 
 test_res test_clogger_flags_time(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -342,9 +310,9 @@ test_res test_clogger_flags_time(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Timed message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -365,8 +333,7 @@ test_res test_clogger_flags_time(test_arg *arg) {
 }
 
 test_res test_clogger_flags_func(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -374,9 +341,9 @@ test_res test_clogger_flags_func(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Func message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -397,8 +364,7 @@ test_res test_clogger_flags_func(test_arg *arg) {
 }
 
 test_res test_clogger_flags_line(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -406,10 +372,10 @@ test_res test_clogger_flags_line(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     int expected_line = __LINE__ + 1;
     clogger_log(logger, CLOGGER_INFO, "Line message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -432,8 +398,7 @@ test_res test_clogger_flags_line(test_arg *arg) {
 }
 
 test_res test_clogger_flags_all(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -441,9 +406,9 @@ test_res test_clogger_flags_all(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Full message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -480,8 +445,7 @@ test_res test_clogger_flags_all(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_stacktrace_on_error(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -489,9 +453,9 @@ test_res test_clogger_stacktrace_on_error(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_ERROR, "Error with trace\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -512,8 +476,8 @@ test_res test_clogger_stacktrace_on_error(test_arg *arg) {
 }
 
 test_res test_clogger_no_stacktrace_on_warning(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -521,9 +485,9 @@ test_res test_clogger_no_stacktrace_on_warning(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_WARNING, "Warning without trace\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -544,8 +508,8 @@ test_res test_clogger_no_stacktrace_on_warning(test_arg *arg) {
 }
 
 test_res test_clogger_no_stacktrace_without_flag(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -553,9 +517,9 @@ test_res test_clogger_no_stacktrace_without_flag(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_ERROR, "Error without trace flag\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -580,8 +544,8 @@ test_res test_clogger_no_stacktrace_without_flag(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_close_basic(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -589,47 +553,15 @@ test_res test_clogger_close_basic(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
-    clogger_close(&logger);
-    
-    if (logger.fp != NULL) {
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "File pointer should be NULL after close", CS_UNKNOWN};
-    }
-    
-    cleanup_test_log_file();
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_clogger_close_thread_safe(test_arg *arg) {
-    (void)arg;
-    clogger logger;
-    clogger_options opts = {
-        .min_level = CLOGGER_DEBUG,
-        .modes = "w",
-        .flags = CLOGGER_SHOW_LEVEL,
-        .thread_safe = 1
-    };
-    
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
-    clogger_close(&logger);
-    
-    if (logger.fp != NULL) {
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "File pointer should be NULL after close", CS_UNKNOWN};
-    }
-    
-    if (logger.mutex != NULL) {
-        cleanup_test_log_file();
-        return (test_res){(char*)__func__, "Mutex should be NULL after close", CS_UNKNOWN};
-    }
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
+    clogger_close(logger);
     
     cleanup_test_log_file();
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_clogger_close_null(test_arg *arg) {
-    (void)arg;
+    
     // Should not crash when closing NULL
     clogger_close(NULL);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
@@ -640,8 +572,8 @@ test_res test_clogger_close_null(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_assert_pass(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -649,9 +581,9 @@ test_res test_clogger_assert_pass(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_assert(logger, 1 == 1, "This should not appear");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -672,8 +604,8 @@ test_res test_clogger_assert_pass(test_arg *arg) {
 }
 
 test_res test_clogger_assert_fail(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -681,9 +613,9 @@ test_res test_clogger_assert_fail(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_assert(logger, 1 == 0, "Expected failure message");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -714,8 +646,7 @@ test_res test_clogger_assert_fail(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_append_mode(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -724,15 +655,15 @@ test_res test_clogger_append_mode(test_arg *arg) {
     };
     
     // First write
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "First message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     // Second write with append mode
     opts.modes = "a";
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Second message\n");
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -763,8 +694,8 @@ test_res test_clogger_append_mode(test_arg *arg) {
 // ============================================================================
 
 test_res test_clogger_formatted_output(test_arg *arg) {
-    (void)arg;
-    clogger logger;
+    
+    clogger *logger;
     clogger_options opts = {
         .min_level = CLOGGER_DEBUG,
         .modes = "w",
@@ -772,9 +703,9 @@ test_res test_clogger_formatted_output(test_arg *arg) {
         .thread_safe = 0
     };
     
-    clogger_init(&logger, __CLOGGER_TEST_FILE, opts);
+    logger = clogger_init(__CLOGGER_TEST_FILE, opts);
     clogger_log(logger, CLOGGER_INFO, "Int: %d, String: %s, Float: %.2f\n", 42, "test", 3.14);
-    clogger_close(&logger);
+    clogger_close(logger);
     
     char *content = read_test_log_file();
     if (!content) {
@@ -812,7 +743,6 @@ test_res test_clogger_formatted_output(test_arg *arg) {
 test clogger_tests[] = {
     // clogger_init tests
     test_clogger_init_basic,
-    test_clogger_init_null_logger,
     test_clogger_init_null_filename,
     test_clogger_init_null_modes,
     test_clogger_init_thread_safe,
@@ -836,7 +766,6 @@ test clogger_tests[] = {
     
     // clogger_close tests
     test_clogger_close_basic,
-    test_clogger_close_thread_safe,
     test_clogger_close_null,
     
     // clogger_assert tests

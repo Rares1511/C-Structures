@@ -102,13 +102,11 @@ static inline size_t __unordered_multiset_entry_hash(const void *restrict el) {
 
 /*!
  * @brief Initializes an unordered multiset with the given attributes, hash function, and initial capacity.
- * @param[out] umset Pointer to the unordered multiset to be initialized.
  * @param[in] attr The attributes of the unordered multiset (element size, copy, compare, free, print functions).
  * @param[in] hash_func The hash function to be used for hashing the elements.
  * @return A pointer to the initialized unordered multiset, or NULL on failure.
  */
-cs_codes unordered_multiset_init(unordered_multiset *restrict umset, 
-                                elem_attr_t attr, 
+unordered_multiset* unordered_multiset_init(elem_attr_t attr, 
                                 __hash_func_t hash_func);
 
 /*!

@@ -1,17 +1,35 @@
 #include <cs/unordered_multimap.h>
 
-cs_codes unordered_multimap_init(unordered_multimap *ummap,
-                                 elem_attr_t key_attr,
+unordered_multimap* unordered_multimap_init(elem_attr_t key_attr,
                                  elem_attr_t value_attr,
                                  __hash_func_t hash_func) {
-    CS_RETURN_IF(NULL == ummap, CS_NULL);
-    CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0, CS_SIZE);
-    CS_RETURN_IF(key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, CS_SIZE);
-    ummap->ht = malloc(sizeof(__hash_table));
+    
+    CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, NULL);
+    unordered_multimap *ummap = malloc(sizeof(unordered_multimap));
+    CS_RETURN_IF(NULL == ummap, NULL);
+
+    ummap->ht = NULL;
+    ummap->key_attr = NULL;
+    ummap->value_attr = NULL;
+    ummap->buffer = NULL;
+    ummap->hash_func = NULL;
+    ummap->size = 0;
+
     ummap->buffer = malloc(sizeof(__unordered_multimap_entry) + sizeof(pair) + key_attr.size + sizeof(vector));
+    if (ummap->buffer == NULL) {
+        unordered_multimap_free(ummap);
+        return NULL;
+    }
     ummap->key_attr = malloc(sizeof(elem_attr_t));
+    if (ummap->key_attr == NULL) {
+        unordered_multimap_free(ummap);
+        return NULL;
+    }
     ummap->value_attr = malloc(sizeof(elem_attr_t));
-    CS_RETURN_IF(NULL == ummap->ht || NULL == ummap->key_attr || NULL == ummap->value_attr || NULL == ummap->buffer, CS_MEM);
+    if (ummap->value_attr == NULL) {
+        unordered_multimap_free(ummap);
+        return NULL;
+    }
 
     elem_attr_t ht_attr = {
         .size = sizeof(__unordered_multimap_entry) + sizeof(pair) + key_attr.size + sizeof(vector),
@@ -24,13 +42,12 @@ cs_codes unordered_multimap_init(unordered_multimap *ummap,
     static elem_attr_t pair_val_attr = {
         .size = sizeof(vector),
         .print = vector_print,
-        .fr = vector_free,
+        .fr = __vector_free_internal,
         .comp = NULL,
         .copy = NULL,
     };
 
     ummap->hash_func = hash_func;
-    ummap->size = 0;
     memcpy(ummap->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(ummap->value_attr, &value_attr, sizeof(elem_attr_t));
     memset(ummap->buffer, 0, sizeof(__unordered_multimap_entry) + sizeof(pair) + key_attr.size + sizeof(vector));
@@ -58,7 +75,12 @@ cs_codes unordered_multimap_init(unordered_multimap *ummap,
     vec->v_attr = (vector_attr_t){.min_cap = 2, .shrink_factor = 1};
     vec->attr = value_attr;
 
-    return __hash_table_init(ummap->ht, ht_attr, __unordered_multimap_entry_hash);
+    ummap->ht = __hash_table_init(ht_attr, __unordered_multimap_entry_hash);
+    if (ummap->ht == NULL) {
+        unordered_multimap_free(ummap);
+        return NULL;
+    }
+    return ummap;
 }
 
 void unordered_multimap_swap(unordered_multimap *ummap1, unordered_multimap *ummap2) {
@@ -102,8 +124,8 @@ void unordered_multimap_free(void *v_ummap) {
     CS_RETURN_IF(NULL == v_ummap);
     unordered_multimap *ummap = (unordered_multimap *)v_ummap;
     __hash_table_free(ummap->ht);
-    free(ummap->ht);
-    free(ummap->buffer);
-    free(ummap->key_attr);
-    free(ummap->value_attr);
+    if (ummap->buffer) free(ummap->buffer);
+    if (ummap->key_attr) free(ummap->key_attr);
+    if (ummap->value_attr) free(ummap->value_attr);
+    free(ummap);
 }

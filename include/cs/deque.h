@@ -48,7 +48,7 @@ cs_codes _deque_grow_internal(deque *dq, int direction);
  * @param dq_attr User-controllable attributes for optimization.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-cs_codes deque_init(deque *dq, elem_attr_t attr, deque_attr_t dq_attr);
+deque* deque_init(elem_attr_t attr, deque_attr_t dq_attr);
 
 /*! 
  * Pushes an element to the back of the deque.

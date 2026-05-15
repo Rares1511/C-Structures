@@ -37,6 +37,42 @@
 #define __RESET_UNITTEST  "\033[0m"
 #define __BOLD_UNITTEST   "\033[1m"
 
+#define UNITTEST_ASSERT(expr, op, expected, error_msg, logger, fmt, ...) \
+    ({ \
+        /* 1. Automatically detect the type of the result (int, void*, etc.) */ \
+        typeof(expr) _result = (expr); \
+        \
+        /* 2. Check using the custom operator (e.g., _result != NULL) */ \
+        if (!(_result op (expected))) { \
+            return (test_res){ \
+                .test_name = (char*) __func__, \
+                .reason = error_msg, \
+                .return_code = CS_UNKNOWN \
+            }; \
+        } \
+        \
+        /* 3. Log success ONLY if a format string is provided */ \
+        if ((fmt) != (NULL)) { \
+            clogger_log(logger, CLOGGER_DEBUG, fmt, ##__VA_ARGS__); \
+        } \
+        \
+        /* 4. Return the result */ \
+        _result; \
+    })
+
+#define UNITTEST_ASSERT_SILENT(expr, op, expected, error_msg) \
+    ({ \
+        typeof(expr) _result = (expr); \
+        if (!(_result op (expected))) { \
+            return (test_res){ \
+                .test_name = (char*) __func__, \
+                .reason = error_msg, \
+                .return_code = CS_UNKNOWN \
+            }; \
+        } \
+        _result; \
+    })
+
 #pragma region RBT VALIDATION HELPERS
 // ============================================================================
 // RBT VALIDATION HELPERS
@@ -134,8 +170,14 @@ typedef struct test_res {
     int return_code;
 } test_res;
 
+#define SUCCESSFUL_TEST_RES \
+    (test_res){ \
+        .test_name = (char*) __func__, \
+        .reason = NULL, \
+        .return_code = CS_SUCCESS, \
+     }
+
 typedef struct test_arg {
-    void *data_structure; // Pointer to the data structure being tested
     clogger *logger;
     operation_time *op_time; // For benchmarks to report operation times
     int op_time_count;
@@ -522,6 +564,16 @@ static inline elem_attr_t get_string_attr() {
         .size = sizeof(char) * 25,
         .fr = NULL,
         .copy = copy_string,
+        .print = NULL,
+        .comp = NULL
+    };
+}
+
+static inline elem_attr_t get_double_attr() {
+    return (elem_attr_t){
+        .size = sizeof(double),
+        .fr = NULL,
+        .copy = NULL,
         .print = NULL,
         .comp = NULL
     };

@@ -1,13 +1,21 @@
 #include <cs/multimap.h>
 
-cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
+multimap* multimap_init(elem_attr_t key_attr,
                            elem_attr_t value_attr) {
-    CS_RETURN_IF(NULL == mm, CS_NULL);
-    CS_RETURN_IF(key_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size == 0 || value_attr.size > SIZE_TH, CS_SIZE);
+    CS_RETURN_IF(key_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size == 0 || value_attr.size > SIZE_TH, NULL);
+    multimap *mm = malloc(sizeof(multimap));
+    CS_RETURN_IF(mm == NULL, NULL);
+
+    mm->key_attr = NULL;
+    mm->value_attr = NULL;
+    mm->vec_attr = NULL;
+    mm->t = NULL;
+    mm->size = 0;
+    mm->buffer = NULL;
 
     elem_attr_t vec_attr = {
         .size = sizeof(vector),
-        .fr = vector_free,
+        .fr = __vector_free_internal,
         .print = vector_print,
         .comp = NULL,
         .copy = NULL,
@@ -22,17 +30,44 @@ cs_codes multimap_init(multimap *mm, elem_attr_t key_attr,
     };
 
     mm->key_attr = malloc(sizeof(elem_attr_t));
+    if (mm->key_attr == NULL) {
+        multimap_free(mm);
+        return NULL;
+    }
     mm->value_attr = malloc(sizeof(elem_attr_t));
+    if (mm->value_attr == NULL) {
+        multimap_free(mm);
+        return NULL;
+    }
     mm->vec_attr = malloc(sizeof(elem_attr_t));
-    CS_RETURN_IF(NULL == mm->key_attr || NULL == mm->value_attr || NULL == mm->vec_attr, CS_MEM);
+    if (mm->vec_attr == NULL) {
+        multimap_free(mm);
+        return NULL;
+    }
+    mm->buffer = malloc(sizeof(pair) + key_attr.size + vec_attr.size);
+    if (mm->buffer == NULL) {
+        multimap_free(mm);
+        return NULL;
+    }
+    
+    memset(mm->buffer, 0, sizeof(pair) + key_attr.size + vec_attr.size);
     memcpy(mm->key_attr, &key_attr, sizeof(elem_attr_t));
     memcpy(mm->value_attr, &value_attr, sizeof(elem_attr_t));
     memcpy(mm->vec_attr, &vec_attr, sizeof(elem_attr_t));
 
-    mm->t = malloc(sizeof(__rbt));
-    mm->size = 0;
-    CS_RETURN_IF(NULL == mm->t, CS_MEM);
-    return __rbt_init(mm->t, rbt_attr);
+    pair *p = (pair *)mm->buffer;
+    p->header.magic = CS_PAIR_MAGIC;
+    p->first_attr = mm->key_attr;
+    p->second_attr = mm->vec_attr;
+    p->has_first = 1;
+    p->has_second = 0;
+
+    mm->t = __rbt_init(rbt_attr);
+    if (mm->t == NULL) {
+        multimap_free(mm);
+        return NULL;
+    }
+    return mm;
 }
 
 void multimap_clear(multimap *mm) {
@@ -69,8 +104,9 @@ void multimap_free(void *v_mm) {
     CS_RETURN_IF(v_mm == NULL);
     multimap *mm = (multimap *)v_mm;
     __rbt_free(mm->t);
-    free(mm->key_attr);
-    free(mm->value_attr);
-    free(mm->vec_attr);
-    free(mm->t);
+    if (mm->key_attr) free(mm->key_attr);
+    if (mm->value_attr) free(mm->value_attr);
+    if (mm->vec_attr) free(mm->vec_attr);
+    if (mm->buffer) free(mm->buffer);
+    free(mm);
 }

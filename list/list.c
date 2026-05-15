@@ -55,16 +55,17 @@ list_node* merge_iterative(list_node* a, list_node* b, elem_attr_t attr) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-cs_codes list_init(list *l, elem_attr_t attr) {
-    CS_RETURN_IF(NULL == l, CS_NULL);
-    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, CS_SIZE);
+list* list_init(elem_attr_t attr) {
+    list *l = (list *)malloc(sizeof(list));
+    CS_RETURN_IF(NULL == l, NULL);
+    CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
     l->attr = attr;
     l->size = 0;
     l->front = NULL;
 
     l->header.magic = CS_LIST_MAGIC;
     l->header.type = CS_LIST_TYPE;
-    return CS_SUCCESS;
+    return l;
 }
 
 cs_codes list_erase(list *l, int pos) {
@@ -216,4 +217,5 @@ void list_free(void *l_p) {
             fr(l->front->data);
         free(l->front);
     }
+    free(l);
 }

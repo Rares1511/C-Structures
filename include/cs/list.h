@@ -40,7 +40,7 @@ static inline list_node* _list_node_init(const void *el, size_t elem_size, deepc
  * @param[out] l  Pointer to the list that will be initialized
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful initialization
  */
-cs_codes list_init(list *l, elem_attr_t attr);
+list* list_init(elem_attr_t attr);
 
 /*!
  * Pushes the element at the front of the list

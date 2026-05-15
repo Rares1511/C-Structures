@@ -457,9 +457,9 @@ static inline cs_codes __rbt_delete_internal(__rbt *t, __rbt_node *delete_node) 
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-static inline cs_codes __rbt_init(__rbt *t, elem_attr_t attr) {
-    CS_RETURN_IF(NULL == t, CS_NULL);
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
+static inline __rbt* __rbt_init(elem_attr_t attr) {
+    __rbt *t = malloc(sizeof(__rbt));
+    CS_RETURN_IF(NULL == t || attr.size == 0 || attr.size > SIZE_TH, NULL);
 
     t->root = NULL;
     t->size = 0;
@@ -467,7 +467,7 @@ static inline cs_codes __rbt_init(__rbt *t, elem_attr_t attr) {
 
     t->header.magic = CS_RBT_MAGIC;
     t->header.type = CS_RBT_TYPE;
-    return CS_SUCCESS;
+    return t;
 }
 
 static inline cs_codes __rbt_insert(__rbt *t, void *data) {
@@ -620,6 +620,7 @@ static inline void __rbt_free(void *v_t) {
 
     t->root = NULL;
     t->header.magic = 0;
+    free(t);
 }
 
 #endif

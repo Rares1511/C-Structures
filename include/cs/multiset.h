@@ -70,11 +70,10 @@ static inline void __multiset_node_print(FILE *stream, const void *node) {
 
 /*!
  * Initialize a multiset structure
- * @param[in] ms Pointer to the multiset structure to initialize
  * @param[in] attr Attributes of the multiset element datatype
- * @return CS_SUCCESS on success, or an error code on failure
+ * @return Pointer to the initialized multiset on success, or NULL on failure
  */
-cs_codes multiset_init(multiset *ms, elem_attr_t attr);
+multiset* multiset_init(elem_attr_t attr);
 
 /*! 
  * Insert an element into the multiset

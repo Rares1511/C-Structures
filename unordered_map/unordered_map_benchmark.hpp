@@ -5,8 +5,9 @@
 static void *test_unordered_map_insert(void *arg) {
     auto *m = static_cast<std::unordered_map<int, std::string>*>(arg);
     const int total = __UNORDERED_MAP_STRESS_TEST_SIZE;
+    std::string value = "StressValGeneric";
     for (int i = 0; i < total; i++) {
-        m->emplace(i, "StressVal_" + std::to_string(i));
+        m->emplace(i, value);
     }
     return m;
 }

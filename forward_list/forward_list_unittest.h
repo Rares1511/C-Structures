@@ -7,12 +7,11 @@
 
 test_res test_forward_list_init(test_arg *arg) {
     elem_attr_t attr = get_test_struct_attr();
-    forward_list *fl = (forward_list *)arg->data_structure;
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Initializing forward_list with element size: %zu\n", (size_t)attr.size);
-    cs_codes init_result = forward_list_init(fl, attr);
+    forward_list *fl = forward_list_init(attr);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Initializing forward_list with element size: %zu\n", (size_t)attr.size);
 
-    if (init_result != CS_SUCCESS) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Forward list initialized, size: %d, empty: %d\n", forward_list_size(fl), forward_list_empty(fl));
+    if (fl == NULL) return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Forward list initialized, size: %d, empty: %d\n", forward_list_size(fl), forward_list_empty(fl));
     if (forward_list_size(fl) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
     if (!forward_list_empty(fl)) return (test_res){(char*)__func__, "List not empty after init", CS_UNKNOWN};
     if (fl->head != NULL) return (test_res){(char*)__func__, "Head should be NULL", CS_UNKNOWN};
@@ -26,11 +25,10 @@ test_res test_forward_list_init(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_push_front_single(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
     test_struct ts = create_test_struct(42, "FrontItem", 42.0);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing front single element with id: %d\n", ts.id);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Pushing front single element with id: %d\n", ts.id);
     cs_codes result = forward_list_push_front(fl, &ts);
     if (result != CS_SUCCESS) {
         free_test_struct(&ts);
@@ -51,11 +49,10 @@ test_res test_forward_list_push_front_single(test_arg *arg) {
 }
 
 test_res test_forward_list_push_front_multiple(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
     int total = __TEST_SIZE;
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing front %d elements\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Pushing front %d elements\n", total);
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "FrontMultiple", (double)i);
         if (forward_list_push_front(fl, &ts) != CS_SUCCESS) {
@@ -73,7 +70,7 @@ test_res test_forward_list_push_front_multiple(test_arg *arg) {
 
     // Front should be the last pushed element
     test_struct *front = (test_struct*)forward_list_front(fl);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Front element after %d push_fronts: id=%d\n", total, front ? front->id : -1);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Front element after %d push_fronts: id=%d\n", total, front ? front->id : -1);
     if (!front || front->id != total - 1) {
         forward_list_free(fl);
         return (test_res){(char*)__func__, "Front element mismatch", CS_ELEM};
@@ -84,10 +81,9 @@ test_res test_forward_list_push_front_multiple(test_arg *arg) {
 }
 
 test_res test_forward_list_push_front_order(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Pushing 0-4 to front, expecting reverse order 4-0\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Pushing 0-4 to front, expecting reverse order 4-0\n");
     // Push 0, 1, 2, 3, 4 to front - should result in 4, 3, 2, 1, 0
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "OrderTest", (double)i);
@@ -115,13 +111,12 @@ test_res test_forward_list_push_front_order(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_pop_front_single(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
     test_struct ts = create_test_struct(42, "PopFrontTest", 42.0);
     forward_list_push_front(fl, &ts);
     free_test_struct(&ts);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping single element from front\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Popping single element from front\n");
     cs_codes result = forward_list_pop_front(fl);
     if (result != CS_SUCCESS) {
         forward_list_free(fl);
@@ -138,9 +133,11 @@ test_res test_forward_list_pop_front_single(test_arg *arg) {
 }
 
 test_res test_forward_list_pop_front_multiple(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
-    
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
+
     // Push in reverse order so we pop in ascending order
     for (int i = 9; i >= 0; i--) {
         test_struct ts = create_test_struct(i, "PopFrontMulti", (double)i);
@@ -148,7 +145,7 @@ test_res test_forward_list_pop_front_multiple(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping all 10 elements from front\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Popping all 10 elements from front\n");
     for (int i = 0; i < 10; i++) {
         test_struct *front = (test_struct*)forward_list_front(fl);
         if (!front || front->id != i) {
@@ -168,10 +165,12 @@ test_res test_forward_list_pop_front_multiple(test_arg *arg) {
 }
 
 test_res test_forward_list_pop_front_empty(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing pop_front on empty forward list (should fail)\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Testing pop_front on empty forward list (should fail)\n");
     cs_codes result = forward_list_pop_front(fl);
     if (result == CS_SUCCESS) {
         forward_list_free(fl);
@@ -187,10 +186,12 @@ test_res test_forward_list_pop_front_empty(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_front(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying forward_list_front after each of 10 push_fronts\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Verifying forward_list_front after each of 10 push_fronts\n");
     for (int i = 0; i < 10; i++) {
         test_struct ts = create_test_struct(i, "FrontTest", (double)i);
         forward_list_push_front(fl, &ts);
@@ -208,10 +209,12 @@ test_res test_forward_list_front(test_arg *arg) {
 }
 
 test_res test_forward_list_front_empty(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Testing front on empty forward list (should return NULL)\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Testing front on empty forward list (should return NULL)\n");
     void *front = forward_list_front(fl);
     if (front != NULL) {
         forward_list_free(fl);
@@ -227,10 +230,12 @@ test_res test_forward_list_front_empty(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_empty_initial(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking empty on freshly initialized forward list\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Checking empty on freshly initialized forward list\n");
     if (!forward_list_empty(fl)) {
         forward_list_free(fl);
         return (test_res){(char*)__func__, "New list should be empty", CS_UNKNOWN};
@@ -241,11 +246,13 @@ test_res test_forward_list_empty_initial(test_arg *arg) {
 }
 
 test_res test_forward_list_empty_after_ops(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
     test_struct ts = create_test_struct(42, "EmptyOpsTest", 42.0);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking empty transitions: push then pop\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Checking empty transitions: push then pop\n");
     forward_list_push_front(fl, &ts);
     if (forward_list_empty(fl)) {
         free_test_struct(&ts);
@@ -270,10 +277,12 @@ test_res test_forward_list_empty_after_ops(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_size_initial(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Checking size on freshly initialized forward list: %d\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Checking size on freshly initialized forward list: %d\n", forward_list_size(fl));
     if (forward_list_size(fl) != 0) {
         forward_list_free(fl);
         return (test_res){(char*)__func__, "New list size should be 0", CS_UNKNOWN};
@@ -284,10 +293,12 @@ test_res test_forward_list_size_initial(test_arg *arg) {
 }
 
 test_res test_forward_list_size_after_ops(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying size consistency during 100 pushes and 100 pops\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Verifying size consistency during 100 pushes and 100 pops\n");
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "SizeOpsTest", (double)i);
         forward_list_push_front(fl, &ts);
@@ -316,10 +327,15 @@ test_res test_forward_list_size_after_ops(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_swap(test_arg *arg) {
-    forward_list *fl1 = (forward_list *)arg->data_structure;
-    forward_list_init(fl1, get_test_struct_attr());
-    forward_list fl2;
-    forward_list_init(&fl2, get_test_struct_attr());
+    forward_list *fl1 = forward_list_init(get_test_struct_attr());
+    if (fl1 == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
+    forward_list *fl2 = forward_list_init(get_test_struct_attr());
+    if (fl2 == NULL) {
+        forward_list_free(fl1);
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
     // Push to fl1: 4, 3, 2, 1, 0 (front is 4)
     for (int i = 0; i < 5; i++) {
@@ -330,37 +346,42 @@ test_res test_forward_list_swap(test_arg *arg) {
     // Push to fl2: 14, 13, 12, 11, 10 (front is 14)
     for (int i = 10; i < 15; i++) {
         test_struct ts = create_test_struct(i, "Swap2", (double)i);
-        forward_list_push_front(&fl2, &ts);
+        forward_list_push_front(fl2, &ts);
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping fl1 (size=%d) with fl2 (size=%d)\n", forward_list_size(fl1), forward_list_size(&fl2));
-    forward_list_swap(fl1, &fl2);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Swapping fl1 (size=%d) with fl2 (size=%d)\n", forward_list_size(fl1), forward_list_size(fl2));
+    forward_list_swap(fl1, fl2);
 
     test_struct *front1 = (test_struct*)forward_list_front(fl1);
     if (!front1 || front1->id != 14) {
         forward_list_free(fl1);
-        forward_list_free(&fl2);
+        forward_list_free(fl2);
         return (test_res){(char*)__func__, "Swap fl1 front mismatch", CS_ELEM};
     }
 
-    test_struct *front2 = (test_struct*)forward_list_front(&fl2);
+    test_struct *front2 = (test_struct*)forward_list_front(fl2);
     if (!front2 || front2->id != 4) {
         forward_list_free(fl1);
-        forward_list_free(&fl2);
+        forward_list_free(fl2);
         return (test_res){(char*)__func__, "Swap fl2 front mismatch", CS_ELEM};
     }
 
     forward_list_free(fl1);
-    forward_list_free(&fl2);
+    forward_list_free(fl2);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
 test_res test_forward_list_swap_empty(test_arg *arg) {
-    forward_list *fl1 = (forward_list *)arg->data_structure;
-    forward_list_init(fl1, get_test_struct_attr());
-    forward_list fl2;
-    forward_list_init(&fl2, get_test_struct_attr());
+    forward_list *fl1 = forward_list_init(get_test_struct_attr());
+    if (fl1 == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
+    forward_list *fl2 = forward_list_init(get_test_struct_attr());
+    if (fl2 == NULL) {
+        forward_list_free(fl1);
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
     for (int i = 0; i < 5; i++) {
         test_struct ts = create_test_struct(i, "SwapEmpty", (double)i);
@@ -368,23 +389,23 @@ test_res test_forward_list_swap_empty(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Swapping populated fl1 (size=%d) with empty fl2\n", forward_list_size(fl1));
-    forward_list_swap(fl1, &fl2);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Swapping populated fl1 (size=%d) with empty fl2\n", forward_list_size(fl1));
+    forward_list_swap(fl1, fl2);
 
     if (!forward_list_empty(fl1)) {
         forward_list_free(fl1);
-        forward_list_free(&fl2);
+        forward_list_free(fl2);
         return (test_res){(char*)__func__, "fl1 should be empty after swap", CS_UNKNOWN};
     }
 
-    if (forward_list_size(&fl2) != 5) {
+    if (forward_list_size(fl2) != 5) {
         forward_list_free(fl1);
-        forward_list_free(&fl2);
+        forward_list_free(fl2);
         return (test_res){(char*)__func__, "fl2 should have 5 elements", CS_UNKNOWN};
     }
 
     forward_list_free(fl1);
-    forward_list_free(&fl2);
+    forward_list_free(fl2);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};
 }
 
@@ -393,15 +414,17 @@ test_res test_forward_list_swap_empty(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_clear(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "ClearTest", (double)i);
         forward_list_push_front(fl, &ts);
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Clearing forward list with %d elements\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Clearing forward list with %d elements\n", forward_list_size(fl));
     forward_list_clear(fl);
 
     if (forward_list_size(fl) != 0 || !forward_list_empty(fl)) {
@@ -419,15 +442,17 @@ test_res test_forward_list_clear(test_arg *arg) {
 }
 
 test_res test_forward_list_clear_reuse(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
     for (int i = 0; i < 50; i++) {
         test_struct ts = create_test_struct(i, "ClearReuse", (double)i);
         forward_list_push_front(fl, &ts);
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Clearing forward list with %d elements then reusing\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Clearing forward list with %d elements then reusing\n", forward_list_size(fl));
     forward_list_clear(fl);
 
     // Verify can reuse after clear
@@ -452,8 +477,10 @@ test_res test_forward_list_clear_reuse(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_traverse(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
     // Push in reverse so traversal gives ascending order
     for (int i = 9; i >= 0; i--) {
@@ -462,7 +489,7 @@ test_res test_forward_list_traverse(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Traversing forward through 10 elements\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Traversing forward through 10 elements\n");
     // Traverse forward
     forward_list_node *curr = fl->head;
     for (int i = 0; i < 10; i++) {
@@ -489,10 +516,12 @@ test_res test_forward_list_traverse(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_nested_data_integrity(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Verifying nested data integrity for 50 complex structs\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Verifying nested data integrity for 50 complex structs\n");
     for (int i = 0; i < 50; i++) {
         test_struct ts = create_test_struct(i, "NestedIntegrity", (double)i * 2.5);
         forward_list_push_front(fl, &ts);
@@ -510,7 +539,7 @@ test_res test_forward_list_nested_data_integrity(test_arg *arg) {
 
         // Check address
         if (!val->address || val->address->zip_code != 10000 + i) {
-            clogger_log(*arg->logger, CLOGGER_DEBUG, "Address corruption at index %d: addr=%p, zip=%d\n", i, (void*)val->address, val->address ? val->address->zip_code : -1);
+            clogger_log(arg->logger, CLOGGER_DEBUG, "Address corruption at index %d: addr=%p, zip=%d\n", i, (void*)val->address, val->address ? val->address->zip_code : -1);
             forward_list_free(fl);
             return (test_res){(char*)__func__, "Address data corrupted", CS_ELEM};
         }
@@ -547,13 +576,15 @@ test_res test_forward_list_nested_data_integrity(test_arg *arg) {
 }
 
 test_res test_forward_list_deep_copy_verification(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
     test_struct original = create_test_struct(42, "DeepCopyTest", 42.42);
     forward_list_push_front(fl, &original);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Modifying original after push to verify deep copy isolation\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Modifying original after push to verify deep copy isolation\n");
     // Modify original after push - should not affect list content
     original.id = 999;
     free(original.name);
@@ -561,7 +592,7 @@ test_res test_forward_list_deep_copy_verification(test_arg *arg) {
     original.address->zip_code = 99999;
 
     test_struct *stored = (test_struct*)forward_list_front(fl);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stored id=%d (expected 42), original id=%d (modified to 999)\n", stored ? stored->id : -1, original.id);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stored id=%d (expected 42), original id=%d (modified to 999)\n", stored ? stored->id : -1, original.id);
     if (!stored || stored->id != 42) {
         free_test_struct(&original);
         forward_list_free(fl);
@@ -590,11 +621,13 @@ test_res test_forward_list_deep_copy_verification(test_arg *arg) {
 // ============================================================================
 
 test_res test_forward_list_large_dataset(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
     int total = __TEST_SIZE;
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Large dataset test with %d elements\n", total);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Large dataset test with %d elements\n", total);
     for (int i = 0; i < total; i++) {
         test_struct ts = create_test_struct(i, "LargeDataset", (double)i);
         forward_list_push_front(fl, &ts);
@@ -618,10 +651,12 @@ test_res test_forward_list_large_dataset(test_arg *arg) {
 }
 
 test_res test_forward_list_push_pop_cycle(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Running 10 push/pop cycles (push 10, pop 5 each)\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Running 10 push/pop cycles (push 10, pop 5 each)\n");
     // Push and pop in cycles
     for (int cycle = 0; cycle < 10; cycle++) {
         // Push 10 elements
@@ -638,7 +673,7 @@ test_res test_forward_list_push_pop_cycle(test_arg *arg) {
     }
 
     // Should have 50 elements left (10 cycles * 5 remaining per cycle)
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "After cycles: size=%d (expected 50)\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "After cycles: size=%d (expected 50)\n", forward_list_size(fl));
     if (forward_list_size(fl) != 50) {
         forward_list_free(fl);
         return (test_res){(char*)__func__, "Push/pop cycle size mismatch", CS_UNKNOWN};
@@ -649,8 +684,10 @@ test_res test_forward_list_push_pop_cycle(test_arg *arg) {
 }
 
 test_res test_forward_list_pop_all(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
     for (int i = 0; i < 100; i++) {
         test_struct ts = create_test_struct(i, "PopAll", (double)i);
@@ -658,7 +695,7 @@ test_res test_forward_list_pop_all(test_arg *arg) {
         free_test_struct(&ts);
     }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Popping all %d elements from front\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Popping all %d elements from front\n", forward_list_size(fl));
     // Pop all elements
     while (!forward_list_empty(fl)) {
         forward_list_pop_front(fl);
@@ -674,10 +711,12 @@ test_res test_forward_list_pop_all(test_arg *arg) {
 }
 
 test_res test_forward_list_alternating_ops(test_arg *arg) {
-    forward_list *fl = (forward_list *)arg->data_structure;
-    forward_list_init(fl, get_test_struct_attr());
+    forward_list *fl = forward_list_init(get_test_struct_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Running alternating push/pop operations\n");
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Running alternating push/pop operations\n");
     // Alternating push and pop
     for (int i = 0; i < 50; i++) {
         test_struct ts1 = create_test_struct(i * 2, "Alt1", (double)i);
@@ -693,7 +732,7 @@ test_res test_forward_list_alternating_ops(test_arg *arg) {
     }
 
     // 100 pushes - 17 pops = 83 elements
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "After alternating ops: size=%d (expected 83)\n", forward_list_size(fl));
+    clogger_log(arg->logger, CLOGGER_DEBUG, "After alternating ops: size=%d (expected 83)\n", forward_list_size(fl));
     if (forward_list_size(fl) != 83) {
         forward_list_free(fl);
         return (test_res){(char*)__func__, "Alternating ops size mismatch", CS_UNKNOWN};
@@ -708,27 +747,24 @@ test_res test_forward_list_alternating_ops(test_arg *arg) {
 // ============================================================================
 test_res test_forward_list_stress_time(test_arg *arg) {
     if (RUNNING_ON_VALGRIND) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
+        clogger_log(arg->logger, CLOGGER_DEBUG, "Skipping time-based stress test on Valgrind\n");
         return (test_res){(char*)__func__, NULL, CS_SUCCESS};
     }
 
-    forward_list *fl = (forward_list *)arg->data_structure;
+    forward_list *fl = forward_list_init(get_int_attr());
+    if (fl == NULL) {
+        return (test_res){(char*)__func__, "Init returned NULL", CS_MEM};
+    }
     struct timeval start, end;
     int total = __FORWARD_LIST_STRESS_TEST_SIZE, rc;
     double elapsed;
-
-    rc = forward_list_init(fl, get_int_attr());
-    if (rc != CS_SUCCESS) {
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to initialize forward_list\n");
-        return (test_res){(char*)__func__, "Failed to initialize forward_list", CS_UNKNOWN};
-    }
     
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
         rc = forward_list_push_front(fl, &i);
         if (rc != CS_SUCCESS) {
             forward_list_free(fl);
-            clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to push element %d\n", i);
+            clogger_log(arg->logger, CLOGGER_DEBUG, "Failed to push element %d\n", i);
             return (test_res){(char*)__func__, "Failed to push element", CS_MEM};
         }
     }
@@ -736,13 +772,13 @@ test_res test_forward_list_stress_time(test_arg *arg) {
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "insert", elapsed);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Time taken to insert %d elements: %.6f seconds\n", total, elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Time taken to insert %d elements: %.6f seconds\n", total, elapsed);
 
     gettimeofday(&start, NULL);
     int search_target = total / 2;
     if (forward_list_find(fl, &search_target) == -1) {
         forward_list_free(fl);
-        clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to find element %d\n", search_target);
+        clogger_log(arg->logger, CLOGGER_DEBUG, "Failed to find element %d\n", search_target);
         return (test_res){(char*)__func__, "Failed to find element", CS_UNKNOWN};
     }
     gettimeofday(&end, NULL);
@@ -760,7 +796,7 @@ test_res test_forward_list_stress_time(test_arg *arg) {
         rc = forward_list_pop_front(fl);
         if (rc != CS_SUCCESS) {
             forward_list_free(fl);
-            clogger_log(*arg->logger, CLOGGER_DEBUG, "Failed to pop element at index %d\n", i);
+            clogger_log(arg->logger, CLOGGER_DEBUG, "Failed to pop element at index %d\n", i);
             return (test_res){(char*)__func__, "Failed to pop element", CS_UNKNOWN};
         }
     }
@@ -768,7 +804,7 @@ test_res test_forward_list_stress_time(test_arg *arg) {
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "delete", elapsed);
 
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Time taken to pop %d elements: %.6f seconds\n", total, elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Time taken to pop %d elements: %.6f seconds\n", total, elapsed);
 
     forward_list_free(fl);
     return (test_res){(char*)__func__, NULL, CS_SUCCESS};

@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 test_res test_unordered_set_init_basic(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -16,14 +16,13 @@ test_res test_unordered_set_init_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
+    unordered_set *uset = unordered_set_init(attr, hash_int);
 
-    if (rc != CS_SUCCESS) {
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize unordered set",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -36,35 +35,8 @@ test_res test_unordered_set_init_basic(test_arg *arg) {
     };
 }
 
-test_res test_unordered_set_init_null_pointer(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
-    elem_attr_t attr = {
-        .size = sizeof(int),
-        .comp = NULL,
-        .fr = NULL,
-        .copy = NULL,
-        .print = print_int
-    };
-
-    cs_codes rc = unordered_set_init(NULL, attr, hash_int);
-
-    if (rc != CS_NULL) {
-        return (test_res){
-            .test_name = (char*) __func__,
-            .reason = "Expected CS_NULL for NULL pointer",
-            .return_code = CS_UNKNOWN
-        };
-    }
-
-    return (test_res){
-        .test_name = (char*) __func__,
-        .reason = NULL,
-        .return_code = CS_SUCCESS
-    };
-}
-
 test_res test_unordered_set_init_invalid_size(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = 0,
         .comp = NULL,
@@ -73,13 +45,12 @@ test_res test_unordered_set_init_invalid_size(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
+    unordered_set *uset = unordered_set_init(attr, hash_int);
 
-    if (rc != CS_SIZE) {
+    if (uset != NULL) {
         return (test_res){
             .test_name = (char*) __func__,
-            .reason = "Expected CS_SIZE for zero element size",
+            .reason = "Expected NULL for zero element size",
             .return_code = CS_UNKNOWN
         };
     }
@@ -92,7 +63,7 @@ test_res test_unordered_set_init_invalid_size(test_arg *arg) {
 }
 
 test_res test_unordered_set_init_null_hash(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -101,12 +72,10 @@ test_res test_unordered_set_init_null_hash(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, NULL);
+    unordered_set *uset = unordered_set_init(attr, NULL);
 
     // Should succeed - hash_table likely has default hash
-    if (rc != CS_SUCCESS) {
-        unordered_set_free(uset);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Init with NULL hash should work or fail gracefully",
@@ -128,7 +97,7 @@ test_res test_unordered_set_init_null_hash(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_insert_basic(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -137,18 +106,17 @@ test_res test_unordered_set_insert_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     int val = 42;
-    rc = unordered_set_insert(uset, &val);
+    int rc = unordered_set_insert(uset, &val);
 
     if (rc != CS_SUCCESS) {
         unordered_set_free(uset);
@@ -169,7 +137,7 @@ test_res test_unordered_set_insert_basic(test_arg *arg) {
 }
 
 test_res test_unordered_set_insert_multiple(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -178,18 +146,17 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     for (int i = 0; i < 100; i++) {
-        rc = unordered_set_insert(uset, &i);
+        int rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -219,7 +186,7 @@ test_res test_unordered_set_insert_multiple(test_arg *arg) {
 }
 
 test_res test_unordered_set_insert_duplicate(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -228,18 +195,17 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     int val = 42;
-    rc = unordered_set_insert(uset, &val);
+    cs_codes rc = unordered_set_insert(uset, &val);
     if (rc != CS_SUCCESS) {
         unordered_set_free(uset);
         return (test_res){
@@ -280,7 +246,7 @@ test_res test_unordered_set_insert_duplicate(test_arg *arg) {
 }
 
 test_res test_unordered_set_insert_null_set(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     int val = 42;
     cs_codes rc = unordered_set_insert(NULL, &val);
 
@@ -300,7 +266,7 @@ test_res test_unordered_set_insert_null_set(test_arg *arg) {
 }
 
 test_res test_unordered_set_insert_null_key(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -309,17 +275,16 @@ test_res test_unordered_set_insert_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
-    rc = unordered_set_insert(uset, NULL);
+    cs_codes rc = unordered_set_insert(uset, NULL);
 
     if (rc != CS_NULL) {
         unordered_set_free(uset);
@@ -344,7 +309,7 @@ test_res test_unordered_set_insert_null_key(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_find_existing(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -353,13 +318,12 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -396,7 +360,7 @@ test_res test_unordered_set_find_existing(test_arg *arg) {
 }
 
 test_res test_unordered_set_find_nonexistent(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -405,13 +369,12 @@ test_res test_unordered_set_find_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -440,7 +403,7 @@ test_res test_unordered_set_find_nonexistent(test_arg *arg) {
 }
 
 test_res test_unordered_set_find_null_key(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -449,13 +412,12 @@ test_res test_unordered_set_find_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -480,7 +442,7 @@ test_res test_unordered_set_find_null_key(test_arg *arg) {
 }
 
 test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -489,13 +451,12 @@ test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -530,7 +491,7 @@ test_res test_unordered_set_find_after_many_inserts(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_erase_existing(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -539,27 +500,33 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     int val = 42;
-    unordered_set_insert(uset, &val);
+    if (unordered_set_insert(uset, &val) != CS_SUCCESS) {
+        unordered_set_free(uset);
+        return (test_res){
+            .test_name = (char*) __func__,
+            .reason = "Failed to insert element",
+            .return_code = CS_UNKNOWN
+        };
+    }
 
-    rc = unordered_set_erase(uset, &val);
+    cs_codes rc = unordered_set_erase(uset, &val);
 
     if (rc != CS_SUCCESS) {
         unordered_set_free(uset);
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to erase element",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -583,7 +550,7 @@ test_res test_unordered_set_erase_existing(test_arg *arg) {
 }
 
 test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -592,18 +559,17 @@ test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     int val = 42;
-    rc = unordered_set_erase(uset, &val);
+    cs_codes rc = unordered_set_erase(uset, &val);
 
     // Should fail or return error code for nonexistent element
     if (rc == CS_SUCCESS) {
@@ -625,7 +591,7 @@ test_res test_unordered_set_erase_nonexistent(test_arg *arg) {
 }
 
 test_res test_unordered_set_erase_null_set(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     int val = 42;
     cs_codes rc = unordered_set_erase(NULL, &val);
 
@@ -645,7 +611,7 @@ test_res test_unordered_set_erase_null_set(test_arg *arg) {
 }
 
 test_res test_unordered_set_erase_null_key(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -654,17 +620,16 @@ test_res test_unordered_set_erase_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
-    rc = unordered_set_erase(uset, NULL);
+    cs_codes rc = unordered_set_erase(uset, NULL);
 
     if (rc != CS_NULL) {
         unordered_set_free(uset);
@@ -685,7 +650,7 @@ test_res test_unordered_set_erase_null_key(test_arg *arg) {
 }
 
 test_res test_unordered_set_erase_all(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -694,23 +659,29 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     for (int i = 0; i < 50; i++) {
-        unordered_set_insert(uset, &i);
+        if (unordered_set_insert(uset, &i) != CS_SUCCESS) {
+            unordered_set_free(uset);
+            return (test_res){
+                .test_name = (char*) __func__,
+                .reason = "Failed to insert element",
+                .return_code = CS_UNKNOWN
+            };
+        }
     }
 
     // Erase all elements
     for (int i = 0; i < 50; i++) {
-        rc = unordered_set_erase(uset, &i);
+        cs_codes rc = unordered_set_erase(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -744,7 +715,7 @@ test_res test_unordered_set_erase_all(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_count_existing(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -753,13 +724,12 @@ test_res test_unordered_set_count_existing(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -787,7 +757,7 @@ test_res test_unordered_set_count_existing(test_arg *arg) {
 }
 
 test_res test_unordered_set_count_nonexistent(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -796,13 +766,12 @@ test_res test_unordered_set_count_nonexistent(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -828,7 +797,7 @@ test_res test_unordered_set_count_nonexistent(test_arg *arg) {
 }
 
 test_res test_unordered_set_count_null_key(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -837,13 +806,12 @@ test_res test_unordered_set_count_null_key(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -872,7 +840,7 @@ test_res test_unordered_set_count_null_key(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_size_empty(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -881,13 +849,12 @@ test_res test_unordered_set_size_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -910,7 +877,7 @@ test_res test_unordered_set_size_empty(test_arg *arg) {
 }
 
 test_res test_unordered_set_size_after_inserts(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -919,13 +886,12 @@ test_res test_unordered_set_size_after_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -952,7 +918,7 @@ test_res test_unordered_set_size_after_inserts(test_arg *arg) {
 }
 
 test_res test_unordered_set_size_after_erase(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -961,13 +927,12 @@ test_res test_unordered_set_size_after_erase(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -998,7 +963,7 @@ test_res test_unordered_set_size_after_erase(test_arg *arg) {
 }
 
 test_res test_unordered_set_empty_true(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "start\n");
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1007,13 +972,12 @@ test_res test_unordered_set_empty_true(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1036,7 +1000,7 @@ test_res test_unordered_set_empty_true(test_arg *arg) {
 }
 
 test_res test_unordered_set_empty_false(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1045,13 +1009,12 @@ test_res test_unordered_set_empty_false(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1077,7 +1040,7 @@ test_res test_unordered_set_empty_false(test_arg *arg) {
 }
 
 test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1086,13 +1049,12 @@ test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1127,7 +1089,7 @@ test_res test_unordered_set_empty_after_erase_all(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_clear_basic(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1136,13 +1098,12 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1180,7 +1141,7 @@ test_res test_unordered_set_clear_basic(test_arg *arg) {
 }
 
 test_res test_unordered_set_clear_empty(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1189,13 +1150,12 @@ test_res test_unordered_set_clear_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1220,7 +1180,7 @@ test_res test_unordered_set_clear_empty(test_arg *arg) {
 }
 
 test_res test_unordered_set_clear_then_insert(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1229,13 +1189,12 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1247,7 +1206,7 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
 
     // Insert after clear
     for (int i = 100; i < 110; i++) {
-        rc = unordered_set_insert(uset, &i);
+        int rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -1277,7 +1236,7 @@ test_res test_unordered_set_clear_then_insert(test_arg *arg) {
 }
 
 test_res test_unordered_set_clear_null(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     // Clear NULL should not crash
     unordered_set_clear(NULL);
 
@@ -1293,7 +1252,7 @@ test_res test_unordered_set_clear_null(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_free_null(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     // Free NULL should not crash
     unordered_set_free(NULL);
 
@@ -1305,7 +1264,7 @@ test_res test_unordered_set_free_null(test_arg *arg) {
 }
 
 test_res test_unordered_set_free_empty(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1314,13 +1273,12 @@ test_res test_unordered_set_free_empty(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1334,7 +1292,7 @@ test_res test_unordered_set_free_empty(test_arg *arg) {
 }
 
 test_res test_unordered_set_free_with_elements(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1343,13 +1301,12 @@ test_res test_unordered_set_free_with_elements(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1371,7 +1328,7 @@ test_res test_unordered_set_free_with_elements(test_arg *arg) {
 /******************************************************************************/
 
 test_res test_unordered_set_large_capacity(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1380,18 +1337,17 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize with large capacity",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     for (int i = 0; i < 5000; i++) {
-        rc = unordered_set_insert(uset, &i);
+        int rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -1421,7 +1377,7 @@ test_res test_unordered_set_large_capacity(test_arg *arg) {
 }
 
 test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1430,19 +1386,18 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize with small capacity",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     // Insert many more elements than initial capacity
     for (int i = 0; i < 100; i++) {
-        rc = unordered_set_insert(uset, &i);
+        int rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -1472,7 +1427,7 @@ test_res test_unordered_set_small_capacity_many_inserts(test_arg *arg) {
 }
 
 test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1481,13 +1436,12 @@ test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1520,7 +1474,7 @@ test_res test_unordered_set_insert_erase_cycle(test_arg *arg) {
 }
 
 test_res test_unordered_set_negative_values(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1529,18 +1483,17 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
     for (int i = -50; i < 50; i++) {
-        rc = unordered_set_insert(uset, &i);
+        int rc = unordered_set_insert(uset, &i);
         if (rc != CS_SUCCESS) {
             unordered_set_free(uset);
             return (test_res){
@@ -1581,7 +1534,7 @@ test_res test_unordered_set_negative_values(test_arg *arg) {
 }
 
 test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "[%s] start\n", __func__);
     elem_attr_t attr = {
         .size = sizeof(int),
         .comp = NULL,
@@ -1590,13 +1543,12 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
         .print = print_int
     };
 
-    unordered_set *uset = (unordered_set *)arg->data_structure;
-    cs_codes rc = unordered_set_init(uset, attr, hash_int);
-    if (rc != CS_SUCCESS) {
+    unordered_set *uset = unordered_set_init(attr, hash_int);
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
-            .return_code = rc
+            .return_code = CS_UNKNOWN
         };
     }
 
@@ -1605,7 +1557,7 @@ test_res test_unordered_set_reinsert_after_erase(test_arg *arg) {
     unordered_set_erase(uset, &val);
 
     // Re-insert the same value
-    rc = unordered_set_insert(uset, &val);
+    int rc = unordered_set_insert(uset, &val);
     if (rc != CS_SUCCESS) {
         unordered_set_free(uset);
         return (test_res){
@@ -1638,11 +1590,11 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
     
-    unordered_set *uset = (unordered_set *)arg->data_structure;
+    unordered_set *uset = unordered_set_init(get_int_attr(), hash_int);
     struct timeval start, end;
     double elapsed;
 
-    if (CS_SUCCESS != unordered_set_init(uset, get_int_attr(), hash_int)) {
+    if (uset == NULL) {
         return (test_res){
             .test_name = (char*) __func__,
             .reason = "Failed to initialize",
@@ -1666,7 +1618,7 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "insert", elapsed);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Insert Time = %.9f sec\n", elapsed);
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
@@ -1683,7 +1635,7 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "find", elapsed);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
@@ -1699,7 +1651,7 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
     post_operation_time(arg, "delete", elapsed);
-    clogger_log(*arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Erase Time = %.9f sec\n", elapsed);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Erase Time = %.9f sec\n", elapsed);
 
     return (test_res){
         .test_name = (char*) __func__,
@@ -1715,7 +1667,6 @@ test_res test_unordered_set_stress_time(test_arg *arg) {
 test unordered_set_tests[] = {
     // Init tests
     test_unordered_set_init_basic,
-    test_unordered_set_init_null_pointer,
     test_unordered_set_init_invalid_size,
     test_unordered_set_init_null_hash,
 

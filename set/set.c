@@ -1,11 +1,14 @@
 #include <cs/set.h>
 
-cs_codes set_init(set *s, elem_attr_t attr) {
-    CS_RETURN_IF(NULL == s, CS_NULL);
-    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, CS_SIZE);
-    s->t = malloc(sizeof(__rbt));
-    CS_RETURN_IF(NULL == s->t, CS_MEM);
-    return __rbt_init(s->t, attr);
+set* set_init(elem_attr_t attr) {
+    set *s = malloc(sizeof(set));
+    CS_RETURN_IF(NULL == s || attr.size == 0 || attr.size > SIZE_TH, NULL);
+    s->t = __rbt_init(attr);
+    if (s->t == NULL) {
+        free(s);
+        return NULL;
+    }
+    return s;
 }
 
 void set_swap(set *s1, set *s2) {
@@ -28,5 +31,5 @@ void set_free(void *v_s) {
     CS_RETURN_IF(v_s == NULL);
     set *s = (set *)v_s;
     __rbt_free(s->t);
-    free(s->t);
+    free(s);
 }

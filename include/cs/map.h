@@ -66,10 +66,9 @@ static inline int __map_node_comp(const void *a, const void *b) {
  * Initializes a new map
  * @param[in] key_attr - attributes of the key datatype
  * @param[in] val_attr - attributes of the value datatype
- * @param[out] m - pointer to the map to initialize
- * @return CS_SUCCESS on success, CS_MEM on memory allocation failure
+ * @return pointer to the initialized map on success, NULL on failure
  */
-cs_codes map_init(map *m, elem_attr_t key_attr, elem_attr_t val_attr);
+map* map_init(elem_attr_t key_attr, elem_attr_t val_attr);
 
 /*!
  * Inserts a new key-value pair into the map

@@ -30,6 +30,18 @@ typedef struct vector {
 cs_codes _vector_grow_internal(vector *restrict vec);
 cs_codes _vector_shrink_internal(vector *restrict vec);
 
+static inline void __vector_free_internal(void *v_vec) {
+    vector *vec = (vector *)v_vec;
+    freer free_func = vec->attr.fr;
+    if (free_func) {
+        for (size_t i = 0; i < vec->size; i++) {
+            free_func((char *)vec->vec + i * vec->attr.size);
+        }
+    }
+    free(vec->vec);
+    vec->header.magic = 0; // Invalidate magic to prevent double free
+}
+
 /*!
  * Checks if the vector is empty
  * @param[in] vec  The vector to be checked
@@ -51,10 +63,9 @@ static inline size_t vector_size(vector *restrict vec) { return vec->size; };
  *                        If v_attr.min_cap is 0, VECTOR_INIT_CAPACITY is used.
  *                        If v_attr.shrink_factor is 0, VECTOR_SHRINK_FACTOR is used.
  *                        If v_attr.shrink_factor is 1, the vector will never shrink.
- * @param[out] v          Pointer to the vector structure that will be initialized
- * @return CS_MEM if a memory problem ocurred or CS_SUCCESS upon a successful initalization
+ * @return Pointer to the initialized vector or NULL if a memory problem ocurred or if the attributes given are invalid
  */
-cs_codes vector_init(vector *restrict v, elem_attr_t attr, vector_attr_t v_attr);
+vector* vector_init(elem_attr_t attr, vector_attr_t v_attr);
 
 /*!
  * Inserts the element at the given position in the offered vector
