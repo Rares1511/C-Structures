@@ -55,10 +55,11 @@ static inline void __unordered_multimap_entry_copy(void *dest, const void *src) 
         memcpy(pd_first, ps_first, ps->first_attr->size);
     }
 
-    void *pd_second = pd->data + pd->first_attr->size;
-    void *ps_second = ps->data + ps->first_attr->size;
+    vector *pd_second = (vector *) (pd->data + pd->first_attr->size);
+    vector *ps_second = (vector *) (ps->data + ps->first_attr->size);
 
     memcpy(pd_second, ps_second, sizeof(vector));
+    pd_second->vec = malloc(pd_second->attr.size * pd_second->cap);
 }
 
 static inline void __unordered_multimap_entry_print(FILE *stream, const void *el) {
@@ -127,7 +128,6 @@ static inline cs_codes unordered_multimap_add_entry(unordered_multimap *ummap, c
     pair *p = (pair *)entry->data;
     int rc = CS_SUCCESS;
 
-    p->has_second = 0; // Mark second as not set until we add the value
     memcpy(p->data, key, ummap->key_attr->size);
 
     __unordered_multimap_entry *existing_entry = __hash_table_add_entry(ummap->ht, entry, &rc);
@@ -136,12 +136,6 @@ static inline cs_codes unordered_multimap_add_entry(unordered_multimap *ummap, c
     }
 
     p = (pair *)existing_entry->data;
-    if (p->has_second == 0) {
-        vector *aux = vector_init(*ummap->value_attr, (vector_attr_t){.min_cap = 2, .shrink_factor = 1});
-        p->has_second = 1;
-        memcpy(pair_second(p), aux, sizeof(vector));
-        free(aux);
-    }
     vector *vec = (vector *)pair_second(p);
     rc = vector_push_back(vec, value);
     if (rc != CS_SUCCESS) {

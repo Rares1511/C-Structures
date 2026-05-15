@@ -54,18 +54,22 @@ static inline void __multimap_node_copy(void *dest, const void *src) {
 
     if (!s->first_attr->copy && !s->second_attr->copy) {
         memcpy(d->data, s->data, s->first_attr->size + s->second_attr->size);
+        vector *dest_vec = (vector *)pair_second(d);
+        dest_vec->vec = malloc(dest_vec->attr.size * dest_vec->cap);
         return;
     }
 
     void *dest_key = d->data;
-    void *dest_vec = (char *)d->data + s->first_attr->size;
+    vector *dest_vec = (vector *)(d->data + s->first_attr->size);
+    vector *src_vec = (vector *)(s->data + s->first_attr->size);
 
     if (s->first_attr->copy) 
         s->first_attr->copy(dest_key, s->data);
     else 
         memcpy(dest_key, s->data, s->first_attr->size);
 
-    memcpy(dest_vec, (char *)s->data + s->first_attr->size, sizeof(vector));
+    memcpy(dest_vec, src_vec, sizeof(vector));
+    dest_vec->vec = malloc(dest_vec->attr.size * dest_vec->cap);
 }
 
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -95,7 +99,6 @@ static inline cs_codes multimap_insert(multimap *mm, const void *key, const void
     int rc;
 
     pair *p_stack = (pair *)mm->buffer;
-    p_stack->has_second = 0;
     
     memcpy(p_stack->data, key, k_sz);
 
@@ -103,17 +106,6 @@ static inline cs_codes multimap_insert(multimap *mm, const void *key, const void
     
     pair *p_tree = (pair *)node->data;
     vector *vec = (vector *)(p_tree->data + k_sz);
-
-    if (p_tree->has_second == 0) {
-        vector *aux = vector_init(*mm->value_attr, (vector_attr_t){.min_cap = 2, .shrink_factor = 1});
-        if (aux == NULL) {
-            return CS_MEM;
-        }
-        memcpy(vec, aux, sizeof(vector));
-        free(aux);
-        p_tree->has_second = 1;
-    }
-
     rc = vector_push_back(vec, value);
     if (rc != CS_SUCCESS) {
         return rc;

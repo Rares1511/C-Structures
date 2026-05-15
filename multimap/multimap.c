@@ -60,7 +60,15 @@ multimap* multimap_init(elem_attr_t key_attr,
     p->first_attr = mm->key_attr;
     p->second_attr = mm->vec_attr;
     p->has_first = 1;
-    p->has_second = 0;
+    p->has_second = 1;
+
+    vector* vec = (vector *)(p->data + key_attr.size);
+    vec->header.magic = CS_VECTOR_MAGIC;
+    vec->vec = NULL;
+    vec->cap = 2;
+    vec->size = 0;
+    vec->v_attr = (vector_attr_t){2, 1};
+    vec->attr = *mm->value_attr;
 
     mm->t = __rbt_init(rbt_attr);
     if (mm->t == NULL) {

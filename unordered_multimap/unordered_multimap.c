@@ -70,7 +70,7 @@ unordered_multimap* unordered_multimap_init(elem_attr_t key_attr,
     vec->header.magic = CS_VECTOR_MAGIC;
     vec->header.type = CS_VECTOR_TYPE;
     vec->vec = NULL;
-    vec->cap = 0;
+    vec->cap = 2;
     vec->size = 0;
     vec->v_attr = (vector_attr_t){.min_cap = 2, .shrink_factor = 1};
     vec->attr = value_attr;
