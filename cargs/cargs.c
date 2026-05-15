@@ -162,12 +162,14 @@ char* cargs_compute_short_name(const char* large_name) {
     return short_name;
 }
 
-void cargs_init(cparser* parser, int argc, char** argv) {
+cparser* cargs_init(int argc, char** argv) {
+    cparser* parser = malloc(sizeof(cparser));
     parser->argc = argc;
     parser->argv = argv;
     parser->parsed_args = NULL;
     parser->num_parsed = 0;
     cargs_add_arg(parser, "--help", "Display this help message", 0, CARG_TYPE_BOOL, NULL);
+    return parser;
 }
 
 void cargs_add_arg(cparser* parser, const char* name, const char* help, char required, carg_type type, void* default_value) {
@@ -312,4 +314,5 @@ void cargs_free(cparser* parser) {
     free(parser->parsed_args);
     parser->parsed_args = NULL;
     parser->num_parsed = 0;
+    free(parser);
 }
