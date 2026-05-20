@@ -63,7 +63,7 @@ jobs:
     - name: Install Build Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential lcov
+        sudo apt-get install -y build-essential lcov valgrind
 
     - name: Build and Generate Coverage
       run: |
