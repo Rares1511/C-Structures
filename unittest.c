@@ -132,7 +132,6 @@ void read_operation_time(test_arg *arg, const char *benchmark_file_name, const c
 
 int main(int argc, char **argv) {
     int seed = 0, total_success = 0, total_failed = 0, total_tests = 0;
-    cparser parser;
     clogger *debug_logger = NULL, *results_logger = NULL;
     clogger_options debug_options = { 
         .min_level = CLOGGER_DEBUG, 
@@ -157,21 +156,21 @@ int main(int argc, char **argv) {
 
     int seed_default = __UNITTEST_SEED_DEFAULT_VALUE;
 
-    cargs_init(&parser, argc, argv);
-    cargs_add_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, NULL);
-    cargs_add_arg(&parser, __UNITTEST_RESULTS_FILE_NAME, "Path to the results file", 0, CARG_TYPE_STRING, __UNITTEST_RESULTS_FILE_NAME_VALUE);
-    cargs_add_arg(&parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
-    cargs_add_arg(&parser, __UNITTEST_MODULE_ARG_NAME, "Module to test (if not specified, all modules are tested)", 0, CARG_TYPE_STRING, NULL);
-    cargs_add_arg(&parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME, "Path to the benchmark CSV file", 0, CARG_TYPE_STRING, __UNITTEST_BENCHMARK_FILE_NAME);
-    cargs_parse(&parser);
+    cparser *parser = cargs_init(argc, argv);
+    cargs_add_arg(parser, __UNITTEST_DEBUG_FILE_ARG_NAME, "Path to the debug log file", 0, CARG_TYPE_STRING, NULL);
+    cargs_add_arg(parser, __UNITTEST_RESULTS_FILE_NAME, "Path to the results file", 0, CARG_TYPE_STRING, __UNITTEST_RESULTS_FILE_NAME_VALUE);
+    cargs_add_arg(parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
+    cargs_add_arg(parser, __UNITTEST_MODULE_ARG_NAME, "Module to test (if not specified, all modules are tested)", 0, CARG_TYPE_STRING, NULL);
+    cargs_add_arg(parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME, "Path to the benchmark CSV file", 0, CARG_TYPE_STRING, __UNITTEST_BENCHMARK_FILE_NAME);
+    cargs_parse(parser);
 
-    const char *debug_file = cargs_get_arg(&parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
-    const char *results_file = cargs_get_arg(&parser, __UNITTEST_RESULTS_FILE_NAME);
-    const char *benchmark_file = cargs_get_arg(&parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME);
+    const char *debug_file = cargs_get_arg(parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
+    const char *results_file = cargs_get_arg(parser, __UNITTEST_RESULTS_FILE_NAME);
+    const char *benchmark_file = cargs_get_arg(parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME);
     debug_logger = clogger_init(debug_file, debug_options);
     if (debug_logger == NULL) {
         printf("Failed to initialize debug logger for file: %s\n", debug_file);
-        cargs_free(&parser);
+        cargs_free(parser);
         free(arg.op_time);
         return -1;
     }
@@ -180,14 +179,14 @@ int main(int argc, char **argv) {
     if (results_logger == NULL) {
         printf("Failed to initialize results logger for file: %s\n", results_file);
         clogger_close(debug_logger);
-        cargs_free(&parser);
+        cargs_free(parser);
         return -1;
     }
 
-    seed = *(int*)cargs_get_arg(&parser, __UNITTEST_SEED_ARG_NAME);
+    seed = *(int*)cargs_get_arg(parser, __UNITTEST_SEED_ARG_NAME);
     srand(seed);
 
-    const char *module_filter = (const char *)cargs_get_arg(&parser, __UNITTEST_MODULE_ARG_NAME);
+    const char *module_filter = (const char *)cargs_get_arg(parser, __UNITTEST_MODULE_ARG_NAME);
     if (module_filter) {
         // Filter modules based on the provided module name
         int found = 0;
@@ -203,7 +202,7 @@ int main(int argc, char **argv) {
             clogger_log(debug_logger, CLOGGER_WARNING, "Module '%s' not found.\n", module_filter);
             free(arg.op_time);
             clogger_close(debug_logger);
-            cargs_free(&parser);
+            cargs_free(parser);
             clogger_close(results_logger);
             return 0;
         }
@@ -302,7 +301,7 @@ int main(int argc, char **argv) {
 
     free(arg.op_time);
     clogger_close(debug_logger);
-    cargs_free(&parser);
+    cargs_free(parser);
     clogger_close(results_logger);
     return total_failed > 0 ? 1 : 0;
 }

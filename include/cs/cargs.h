@@ -35,11 +35,11 @@ typedef struct {
 
 /*!
  * Initializes the argument parser with the original command-line arguments.
- * @param parser Pointer to the cparser structure to initialize.
  * @param argc The original argument count from main().
  * @param argv The original argument vector from main().
+ * @return Pointer to the initialized cparser structure.
  */
-void cargs_init(cparser* parser, int argc, char** argv);
+cparser* cargs_init(int argc, char** argv);
 
 /*!
  * Adds an argument definition to the parser.
