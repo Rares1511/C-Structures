@@ -538,6 +538,7 @@ static inline size_t hash_test_struct(const void *el) {
 }
 
 static inline void print_int(FILE *stream, const void *el) { fprintf(stream, "%d", *(int *)el); }
+static inline void print_double(FILE *stream, const void *el) { fprintf(stream, "%.2f", *(double *)el); }
 
 static inline int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
 static inline int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
@@ -574,7 +575,7 @@ static inline elem_attr_t get_double_attr() {
         .size = sizeof(double),
         .fr = NULL,
         .copy = NULL,
-        .print = NULL,
+        .print = print_double,
         .comp = NULL
     };
 }

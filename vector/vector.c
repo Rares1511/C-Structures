@@ -90,7 +90,7 @@ inline cs_codes _vector_grow_internal(vector *restrict vec) {
  * @return The reference at the position given or NULL if the position is invalid
  */
 inline cs_codes _vector_shrink_internal(vector *restrict vec) {
-    size_t new_cap = vec->cap / 2;
+    size_t new_cap = vec->cap / vec->v_attr.shrink_factor;
     if (new_cap < vec->v_attr.min_cap) {
         new_cap = vec->v_attr.min_cap;
     }

@@ -173,7 +173,6 @@ static inline size_t vector_find(vector *restrict vec, const void *restrict el) 
         for (size_t i = 0; i < size; i++) {
             if (comp((char*)base + i * elem_size, el) == 0) return i;
         }
-        return CS_ELEM;
     }
     else {
         for (size_t i = 0; i < size; i++) {
@@ -181,7 +180,7 @@ static inline size_t vector_find(vector *restrict vec, const void *restrict el) 
         }
     }
 
-    return CS_ELEM;
+    return vec->size; // Not found, return size as an invalid index
 }
 
 /*!

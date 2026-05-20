@@ -87,7 +87,7 @@ LIBS := $(foreach m,$(INSTALL_LIBS),$(LIBOUTDIR)/lib$(m).so)
 # ---------------- Default Targets ----------------
 
 # 'all' builds everything locally and runs tests. No sudo required.
-all: libs unittest
+all: libs unittest coverage
 
 # 'libs' compiles all shared objects into the local /lib folder
 libs: $(LIBOUTDIR) $(LIBS)
@@ -196,6 +196,17 @@ benchmark: $(BENCHMARK_BIN)
 	@$(MKDIR_P) logs
 	@/usr/bin/time ./$(BENCHMARK_BIN)
 
+# ---------------- Code Coverage ----------------
+
+coverage: clean
+	$(MAKE) build_unittest CFLAGS="$(CFLAGS) --coverage -O0" LDFLAGS="$(LDFLAGS) --coverage"
+	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
+	./unittest
+	lcov --capture --directory . --output-file logs/coverage.info
+	lcov --remove logs/coverage.info '/usr/*' '*/tests/*' '*/unittest.c' --output-file logs/coverage.info
+	genhtml logs/coverage.info --output-directory logs/out_coverage
+	@echo "✅ Coverage generated! Open logs/out_coverage/index.html in your browser."
+
 # ---------------- Cleanup ----------------
 
 clean:
@@ -205,8 +216,13 @@ clean:
 	$(RM) logs/*.ansi
 	$(RM) $(LIBOUTDIR)/*.so
 	$(RM) $(BENCHMARK_BIN)
+	$(RM) logs/coverage.info
+	$(RM) -r logs/out_coverage
+	$(RM) unittest.gcda unittest.gcno
 	@for m in $(SUBDIRS); do \
 	    $(RM) $$m/$$m.o; \
+		$(RM) $$m/$$m.gcda; \
+		$(RM) $$m/$$m.gcno; \
 	done
 	@for o in $(CORE_OBJS); do \
 	    $(RM) $$o; \

@@ -870,7 +870,7 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(arg->logger, CLOGGER_INFO, "Inserted %d elements in %.4f seconds", total, elapsed);
+    clogger_log(arg->logger, CLOGGER_INFO, "Inserted %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "insert", elapsed);
 
     gettimeofday(&start, NULL);
@@ -882,7 +882,7 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(arg->logger, CLOGGER_INFO, "Found %d elements in %.4f seconds", total, elapsed);
+    clogger_log(arg->logger, CLOGGER_INFO, "Found %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "find", elapsed);
 
     gettimeofday(&start, NULL);
@@ -892,7 +892,7 @@ test_res test_unordered_multimap_stress_time(test_arg *arg) {
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
-    clogger_log(arg->logger, CLOGGER_INFO, "Erased %d elements in %.4f seconds", total, elapsed);
+    clogger_log(arg->logger, CLOGGER_INFO, "Erased %d elements in %.4f seconds\n", total, elapsed);
     post_operation_time(arg, "delete", elapsed);
 
     return SUCCESSFUL_TEST_RES;

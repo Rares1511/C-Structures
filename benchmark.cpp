@@ -1,28 +1,28 @@
 #include <benchmark.hpp>
 
 // Associative containers (Arrays)
-#include <vector/vector_benchmark.hpp>
-#include <deque/deque_benchmark.hpp>
-#include <list/list_benchmark.hpp>
-#include <forward_list/forward_list_benchmark.hpp>
+#include <benchmark/vector_benchmark.hpp>
+#include <benchmark/deque_benchmark.hpp>
+#include <benchmark/list_benchmark.hpp>
+#include <benchmark/forward_list_benchmark.hpp>
 
 // Associative containers (RBT)
-#include <set/set_benchmark.hpp>
-#include <map/map_benchmark.hpp>
-#include <multiset/multiset_benchmark.hpp>
-#include <multimap/multimap_benchmark.hpp>
+#include <benchmark/set_benchmark.hpp>
+#include <benchmark/map_benchmark.hpp>
+#include <benchmark/multiset_benchmark.hpp>
+#include <benchmark/multimap_benchmark.hpp>
 
 // Unordered associative containers (Hash Table)
-#include <unordered_set/unordered_set_benchmark.hpp>
-#include <unordered_map/unordered_map_benchmark.hpp>
-#include <unordered_multiset/unordered_multiset_benchmark.hpp>
-#include <unordered_multimap/unordered_multimap_benchmark.hpp>
+#include <benchmark/unordered_set_benchmark.hpp>
+#include <benchmark/unordered_map_benchmark.hpp>
+#include <benchmark/unordered_multiset_benchmark.hpp>
+#include <benchmark/unordered_multimap_benchmark.hpp>
 
 // Container adapters
-#include <stack/stack_benchmark.hpp>
-#include <queue/queue_benchmark.hpp>
-#include <priority_queue/priority_queue_benchmark.hpp>
-// #include <flat_set/flat_set_benchmark.hpp> // Not supported in C++17, only in C++23
+#include <benchmark/stack_benchmark.hpp>
+#include <benchmark/queue_benchmark.hpp>
+#include <benchmark/priority_queue_benchmark.hpp>
+// #include <benchmark/flat_set_benchmark.hpp> // Not supported in C++17, only in C++23
 
 int main() {
     // Run benchmarks and write results to CSV file only if CSV file doesn't exist

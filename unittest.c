@@ -7,25 +7,25 @@
 // Each header defines: <module>_tests[] array and <module>_tests_size
 // ============================================================================
 
-#include "pair/pair_unittest.h"
+#include "tests/pair_unittest.h"
 
 // Associative containers (Arrays)
-#include "vector/vector_unittest.h"
-#include "deque/deque_unittest.h"
-#include "list/list_unittest.h"
-#include "forward_list/forward_list_unittest.h"
+#include "tests/vector_unittest.h"
+#include "tests/deque_unittest.h"
+#include "tests/list_unittest.h"
+#include "tests/forward_list_unittest.h"
 
 // Associative containers (RBT)
-#include "set/set_unittest.h"
-#include "map/map_unittest.h"
-#include "multiset/multiset_unittest.h"
-#include "multimap/multimap_unittest.h"
+#include "tests/set_unittest.h"
+#include "tests/map_unittest.h"
+#include "tests/multiset_unittest.h"
+#include "tests/multimap_unittest.h"
 
 // Unordered associative containers (Hash Table)
-#include "unordered_set/unordered_set_unittest.h"
-#include "unordered_map/unordered_map_unittest.h"
-#include "unordered_multiset/unordered_multiset_unittest.h"
-#include "unordered_multimap/unordered_multimap_unittest.h"
+#include "tests/unordered_set_unittest.h"
+#include "tests/unordered_map_unittest.h"
+#include "tests/unordered_multiset_unittest.h"
+#include "tests/unordered_multimap_unittest.h"
 
 // Container adapters
 // #include "stack/stack_unittest.h"
@@ -34,10 +34,10 @@
 // #include "flat_set/flat_set_unittest.h"
 
 // Numeric types
-#include "large_number/large_number_unittest.h"
+#include "tests/large_number_unittest.h"
 
 // Utilities
-#include "clogger/clogger_unittest.h"
+#include "tests/clogger_unittest.h"
 
 // ============================================================================
 // Module registry - list all modules to test

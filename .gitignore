@@ -59,3 +59,5 @@ unittest
 *_benchmark
 benchmark_bin
 .vscode/*.json
+*.gcda
+*.gcno
