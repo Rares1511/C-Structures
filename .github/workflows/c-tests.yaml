@@ -68,6 +68,7 @@ jobs:
     - name: Build and Generate Coverage
       run: |
         # Run the coverage target we created in the Makefile
+        mkdir -p logs
         make coverage
 
     - name: Upload Coverage HTML Report
