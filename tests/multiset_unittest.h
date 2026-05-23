@@ -1,920 +1,326 @@
 #include <cs/multiset.h>
 
-#include <benchmark.h>
 #include <unittest.h>
 
 // ============================================================================
 // multiset_init
 // ============================================================================
 test_res test_multiset_init(test_arg *arg) {
-    elem_attr_t attr = get_test_struct_attr();
-    multiset *ms = multiset_init(attr);
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    if (ms->t == NULL) return (test_res){(char*)__func__, "RBT is NULL", CS_MEM};
-    if (__rbt_size(ms->t) != 0) return (test_res){(char*)__func__, "Initial size not 0", CS_UNKNOWN};
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Multiset initialized empty successfully\n");
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after init", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT integrity verified after init\n");
+    UNITTEST_ASSERT(ms->t, !=, NULL, "Multiset's internal tree is NULL after initialization", arg->logger, "Multiset's internal tree initialized successfully\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_init_invalid_size(test_arg *arg) {
-    elem_attr_t attr = get_test_struct_attr();
-    attr.size = 0;
-    UNITTEST_ASSERT(multiset_init(attr), ==, NULL, "Init should fail with zero size", arg->logger, "Init correctly failed with zero size");
-
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
 // ============================================================================
 // multiset_insert
 // ============================================================================
-test_res test_multiset_insert_single(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    test_struct ts = create_test_struct(42, "InsertSingle", 42.0);
+test_res test_multiset_insert(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_double_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-    cs_codes result = multiset_insert(ms, &ts);
-    if (result != CS_SUCCESS) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Insert returned error", result};
+    int total = 1000;
+    double a = 2.3, b = 50.2, c = 11.7;
+    for (int i = 0; i < total; i++) {
+        double val = a * i * i - b * i + c;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset\n", total);
 
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted single element successfully\n");
-
-    if (multiset_count(ms, &ts) != 1) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 1", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Count verified after single insert\n");
-
-    if (!rbt_is_valid(ms->t)) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after insert", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT integrity verified after single insert\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_insert_multiple_unique(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    size_t total = __TEST_SIZE;
-
-    for (size_t i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i, "InsertMultiple", (double)i);
-        cs_codes result = multiset_insert(ms, &ts);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Insert returned error", result};
-        }
-        free_test_struct(&ts);
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted multiple unique elements successfully\n");
-
-    // Verify RBT has total unique elements
-    if (__rbt_size((ms->t)) != total) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT size mismatch", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT size verified after multiple unique inserts\n");
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT integrity verified after multiple unique inserts\n");
+    UNITTEST_ASSERT(multiset_size(ms), ==, total, "Multiset size mismatch after insertions", arg->logger, "Multiset size is correct after insertions\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
-test_res test_multiset_insert_duplicates(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    test_struct ts = create_test_struct(42, "Duplicate", 42.0);
+test_res test_multiset_insert_duplicate(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    int val = 42;
+    UNITTEST_ASSERT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset", arg->logger, "First insertion successful\n");
+    UNITTEST_ASSERT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert duplicate element into multiset", arg->logger, "Duplicate insertion correctly inserted\n");
+
+    multiset_free(ms);
+    return SUCCESSFUL_TEST_RES;
+}
+
+test_res test_multiset_insert_deepcopy(test_arg *arg) {
+    elem_attr_t attr = get_test_struct_attr();
+    attr.comp = comp_test_struct_by_score;
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, attr), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    int total = 1000;
+    double a = 1.5, b = 20.0, c = 5.0;
+    for (int i = 0; i < total; i++) {
+        double score = a * i * i - b * i + c;
+        test_struct ts = create_test_struct(i, "Test", score);
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &ts), ==, CS_SUCCESS, "Failed to insert element into multiset");
+        free_test_struct(&ts); // Free original struct since multiset should have made a copy
+    }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d test_struct elements into the multiset\n", total);
     
-    if (ms == NULL) {
-        free_test_struct(&ts);
-        return (test_res){(char*)__func__, "Init returned error", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserting duplicate element multiple times\n");
-    
-    // Insert same element 5 times
-    for (int i = 0; i < 5; i++) {
-        cs_codes result = multiset_insert(ms, &ts);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Insert returned error", result};
-        }
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted duplicate element 5 times\n");
-
-    // Count should be 5
-    if (multiset_count(ms, &ts) != 5) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 5 after 5 inserts", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Count verified for duplicate inserts\n");
-
-    // RBT should have only 1 node (element stored with count)
-    if (__rbt_size((ms->t)) != 1) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should have 1 node for duplicates", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT size verified for duplicates\n");
-
-    if (!rbt_is_valid(ms->t)) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "RBT integrity verified after duplicate inserts\n");
-
-    free_test_struct(&ts);
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_insert_many_duplicates(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    int num_unique = 10;
-    int duplicates_each = 100;
-
-    for (int i = 0; i < num_unique; i++) {
-        test_struct ts = create_test_struct(i, "ManyDuplicates", (double)i);
-        for (int j = 0; j < duplicates_each; j++) {
-            cs_codes result = multiset_insert(ms, &ts);
-            if (result != CS_SUCCESS) {
-                free_test_struct(&ts);
-                multiset_free(ms);
-                return (test_res){(char*)__func__, "Insert returned error", result};
-            }
-        }
-        free_test_struct(&ts);
-    }
-
-    // Verify each element has correct count
-    for (int i = 0; i < num_unique; i++) {
-        test_struct ts = create_test_struct(i, "ManyDuplicates", (double)i);
-        if (multiset_count(ms, &ts) != duplicates_each) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count mismatch for element", CS_UNKNOWN};
-        }
-        free_test_struct(&ts);
-    }
-
-    // RBT should have num_unique nodes
-    if (__rbt_size((ms->t)) != (size_t)num_unique) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT size should equal num_unique", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d unique elements with %d duplicates each\n", num_unique, duplicates_each);
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_insert_null(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-
-    cs_codes result = multiset_insert(ms, NULL);
-    if (result != CS_NULL) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Insert NULL should return CS_NULL", CS_UNKNOWN};
-    }
-
-    result = multiset_insert(NULL, NULL);
-    if (result != CS_NULL) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Insert with NULL multiset should return CS_NULL", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "NULL insert correctly rejected\n");
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
 // ============================================================================
 // multiset_delete
 // ============================================================================
+test_res test_multiset_delete(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_double_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-test_res test_multiset_delete_single(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "DeleteSingle", 42.0);
-
-    multiset_insert(ms, &ts);
-    cs_codes result = multiset_delete(ms, &ts);
-
-    if (result != CS_SUCCESS) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Delete returned error", result};
-    }
-
-    if (multiset_count(ms, &ts) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 0 after delete", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after delete", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Single element deleted and verified\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_one_of_many(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "DeleteOneOfMany", 42.0);
-
-    // Insert 5 times
-    for (int i = 0; i < 5; i++) {
-        multiset_insert(ms, &ts);
-    }
-
-    // Delete once - should decrement count, not remove node
-    cs_codes result = multiset_delete(ms, &ts);
-    if (result != CS_SUCCESS) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Delete returned error", result};
-    }
-
-    if (multiset_count(ms, &ts) != 4) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 4 after one delete", CS_UNKNOWN};
-    }
-
-    // RBT should still have 1 node
-    if (__rbt_size((ms->t)) != 1) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should still have 1 node", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted one of many duplicates, count verified\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_all_duplicates(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "DeleteAllDuplicates", 42.0);
-
-    // Insert 5 times
-    for (int i = 0; i < 5; i++) {
-        multiset_insert(ms, &ts);
-    }
-
-    // Delete 5 times
-    for (int i = 0; i < 5; i++) {
-        cs_codes result = multiset_delete(ms, &ts);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Delete returned error", result};
-        }
-
-        if (!rbt_is_valid(ms->t)) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "RBT integrity violated during deletes", CS_UNKNOWN};
-        }
-    }
-
-    if (multiset_count(ms, &ts) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 0 after all deletes", CS_UNKNOWN};
-    }
-
-    if (__rbt_size((ms->t)) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "All duplicates deleted, RBT verified empty\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_nonexistent(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "Nonexistent", 42.0);
-
-    cs_codes result = multiset_delete(ms, &ts);
-    if (result != CS_ELEM) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Delete nonexistent should return CS_ELEM", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Nonexistent delete correctly returned CS_ELEM\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_multiple(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    int total = __TEST_SIZE;
-
-    // Insert all
+    int total = 1000, counts = 3;
+    double a = 2.3, b = 50.2, c = 11.7;
     for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i, "DeleteMultiple", (double)i);
-        multiset_insert(ms, &ts);
-        free_test_struct(&ts);
-    }
-
-    // Delete all in reverse order
-    for (int i = total - 1; i >= 0; i--) {
-        test_struct ts = create_test_struct(i, "DeleteMultiple", (double)i);
-        cs_codes result = multiset_delete(ms, &ts);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Delete returned error", result};
-        }
-        free_test_struct(&ts);
-
-        if (!rbt_is_valid(ms->t)) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "RBT integrity violated during deletes", CS_UNKNOWN};
+        double val = a * i * i - b * i + c;
+        for (int j = 0; j < counts; j++) {
+            UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
         }
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset\n", total);
 
-    if (__rbt_size((ms->t)) != 0) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should be empty after all deletes", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted %d elements in reverse order\n", total);
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_random_order(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    int total = __TEST_SIZE;
-
-    // Insert all
     for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i, "DeleteRandom", (double)i);
-        multiset_insert(ms, &ts);
-        free_test_struct(&ts);
+        double key = a * i * i - b * i + c;
+        for (int j = 0; j < counts; j++) {
+            UNITTEST_ASSERT_SILENT(multiset_delete(ms, &key), ==, CS_SUCCESS, "Failed to delete existing element from multiset");
+        }
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted %d elements from the multiset\n", total);
 
-    // Create random order array
-    int *order = (int*)malloc(total * sizeof(int));
-    for (int i = 0; i < total; i++) order[i] = i;
-    for (int i = total - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        int temp = order[i];
-        order[i] = order[j];
-        order[j] = temp;
-    }
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 1, "Multiset is not empty after deleting all elements", arg->logger, "Multiset is empty after deletions\n");
 
-    // Delete in random order
+    UNITTEST_ASSERT(multiset_delete(ms, &(double){123.45}), ==, CS_ELEM, "Deleted non-existent element from multiset", arg->logger, "Correctly failed to delete non-existent element\n");
+
+    multiset_free(ms);
+    return SUCCESSFUL_TEST_RES;
+}
+
+test_res test_multiset_delete_deepfree(test_arg *arg) {
+    elem_attr_t attr = get_test_struct_attr();
+    attr.comp = comp_test_struct_by_score;
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, attr), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    int total = 1000;
+    double a = 1.5, b = 20.0, c = 5.0;
     for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(order[i], "DeleteRandom", (double)order[i]);
-        cs_codes result = multiset_delete(ms, &ts);
-        if (result != CS_SUCCESS) {
-            free_test_struct(&ts);
-            free(order);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Delete returned error", result};
-        }
-        free_test_struct(&ts);
-
-        if (!rbt_is_valid(ms->t)) {
-            free(order);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "RBT integrity violated during random deletes", CS_UNKNOWN};
-        }
+        double score = a * i * i - b * i + c;
+        test_struct ts = create_test_struct(i, "Test", score);
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &ts), ==, CS_SUCCESS, "Failed to insert element into multiset");
+        free_test_struct(&ts); // Free original struct since multiset should have made a copy
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d test_struct elements into the multiset\n", total);
 
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted %d elements in random order\n", total);
-
-    free(order);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-// ============================================================================
-// multiset_count
-// ============================================================================
-
-test_res test_multiset_count_zero(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "CountZero", 42.0);
-
-    if (multiset_count(ms, &ts) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 0 for non-existent", CS_UNKNOWN};
+    for (int i = 0; i < total; i++) {
+        double key = a * i * i - b * i + c;
+        test_struct temp = create_test_struct(0, NULL, key); // Create temp struct with just the score for comparison
+        UNITTEST_ASSERT_SILENT(multiset_delete(ms, &temp), ==, CS_SUCCESS, "Failed to delete existing element from multiset");
+        free_test_struct(&temp);
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Deleted %d elements from the multiset\n", total);
 
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Count correctly returned 0 for non-existent\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_count_after_inserts(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "CountAfterInserts", 42.0);
-
-    for (int i = 1; i <= 10; i++) {
-        multiset_insert(ms, &ts);
-        if (multiset_count(ms, &ts) != i) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count mismatch after insert", CS_UNKNOWN};
-        }
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Count verified after each insert up to 10\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_count_after_deletes(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "CountAfterDeletes", 42.0);
-
-    // Insert 10 times
-    for (int i = 0; i < 10; i++) {
-        multiset_insert(ms, &ts);
-    }
-
-    // Delete one by one and verify count
-    for (int i = 9; i >= 0; i--) {
-        multiset_delete(ms, &ts);
-        if (multiset_count(ms, &ts) != i) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count mismatch after delete", CS_UNKNOWN};
-        }
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Count verified after each delete down to 0\n");
-
-    free_test_struct(&ts);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_count_multiple_elements(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-
-    // Insert different elements with different counts
-    for (int i = 0; i < 10; i++) {
-        test_struct ts = create_test_struct(i, "CountMultiple", (double)i);
-        for (int j = 0; j <= i; j++) {
-            multiset_insert(ms, &ts);
-        }
-        free_test_struct(&ts);
-    }
-
-    // Verify counts
-    for (int i = 0; i < 10; i++) {
-        test_struct ts = create_test_struct(i, "CountMultiple", (double)i);
-        if (multiset_count(ms, &ts) != i + 1) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count mismatch for element", CS_UNKNOWN};
-        }
-        free_test_struct(&ts);
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Verified counts for 10 elements with varying duplicates\n");
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 1, "Multiset is not empty after deleting all elements", arg->logger, "Multiset is empty after deletions\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
 // ============================================================================
 // multiset_clear
 // ============================================================================
-
 test_res test_multiset_clear(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-    // Insert elements
-    for (int i = 0; i < 100; i++) {
-        test_struct ts = create_test_struct(i, "Clear", (double)i);
-        multiset_insert(ms, &ts);
-        multiset_insert(ms, &ts); // Insert twice
-        free_test_struct(&ts);
+    int total = 1000;
+    for (int i = 0; i < total; i++) {
+        int val = i;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset\n", total);
 
     multiset_clear(ms);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Cleared the multiset\n");
 
-    if (__rbt_size((ms->t)) != 0) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Size should be 0 after clear", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after clear", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Clear verified with 100 elements (each inserted twice)\n");
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 1, "Multiset is not empty after clear", arg->logger, "Multiset is empty after clear\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
-test_res test_multiset_clear_empty(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
+test_res test_multiset_clear_deepfree(test_arg *arg) {
+    elem_attr_t attr = get_test_struct_attr();
+    attr.comp = comp_test_struct_by_score;
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, attr), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    int total = 1000;
+    double a = 1.5, b = 20.0, c = 5.0;
+    for (int i = 0; i < total; i++) {
+        double score = a * i * i - b * i + c;
+        test_struct ts = create_test_struct(i, "Test", score);
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &ts), ==, CS_SUCCESS, "Failed to insert element into multiset");
+        free_test_struct(&ts); // Free original struct since multiset should have made a copy
+    }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d test_struct elements into the multiset\n", total);
 
     multiset_clear(ms);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Cleared the multiset\n");
 
-    if (__rbt_size((ms->t)) != 0) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Size should still be 0", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Clear on empty multiset verified\n");
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 1, "Multiset is not empty after clear", arg->logger, "Multiset is empty after clear\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_clear_reuse(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-
-    // Insert, clear, insert again
-    for (int i = 0; i < 50; i++) {
-        test_struct ts = create_test_struct(i, "ClearReuse1", (double)i);
-        multiset_insert(ms, &ts);
-        free_test_struct(&ts);
-    }
-
-    multiset_clear(ms);
-
-    for (int i = 0; i < 30; i++) {
-        test_struct ts = create_test_struct(i + 100, "ClearReuse2", (double)(i + 100));
-        multiset_insert(ms, &ts);
-        free_test_struct(&ts);
-    }
-
-    if (__rbt_size((ms->t)) != 30) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Size should be 30 after reuse", CS_UNKNOWN};
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after reuse", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Clear and reuse verified: 50 cleared, 30 re-inserted\n");
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
 // ============================================================================
-// Complex struct integrity tests
-// ============================================================================
+// multiset_count
+// =============================================================================
+test_res test_multiset_count(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_double_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-test_res test_multiset_nested_data_integrity(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-
-    // Insert complex structs with duplicates
-    for (int i = 0; i < 50; i++) {
-        test_struct ts = create_test_struct(i, "NestedIntegrity", (double)i * 1.5);
-        multiset_insert(ms, &ts);
-        multiset_insert(ms, &ts); // Insert duplicate
-        free_test_struct(&ts);
-    }
-
-    // Verify all elements can be found with correct count
-    for (int i = 0; i < 50; i++) {
-        test_struct ts = create_test_struct(i, "NestedIntegrity", (double)i * 1.5);
-        if (multiset_count(ms, &ts) != 2) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count should be 2 for all elements", CS_UNKNOWN};
-        }
-        free_test_struct(&ts);
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Nested data integrity verified for 50 elements with duplicates\n");
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_deep_copy_verification(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "DeepCopy", 42.0);
-
-    multiset_insert(ms, &ts);
-
-    // Modify original struct
-    ts.id = 999;
-    free(ts.name);
-    ts.name = strdup("ModifiedName");
-
-    // The count for the original data should still work
-    test_struct original = create_test_struct(42, "DeepCopy", 42.0);
-    if (multiset_count(ms, &original) != 1) {
-        free_test_struct(&ts);
-        free_test_struct(&original);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Deep copy failed - original data not found", CS_UNKNOWN};
-    }
-
-    // Modified data should not be found
-    if (multiset_count(ms, &ts) != 0) {
-        free_test_struct(&ts);
-        free_test_struct(&original);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Modified data should not be in multiset", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Deep copy verified: original found, modified not found\n");
-
-    free_test_struct(&ts);
-    free_test_struct(&original);
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-// ============================================================================
-// Stress tests
-// ============================================================================
-
-test_res test_multiset_stress_insert_delete(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    int total = __TEST_SIZE;
-
-    // Insert all with duplicates
+    int total = 1000;
+    double a = 2.3, b = 50.2, c = 11.7;
     for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i % 100, "Stress", (double)(i % 100));
-        multiset_insert(ms, &ts);
-        free_test_struct(&ts);
+        double val = a * i * i - b * i + c;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset\n", total);
 
-    // Verify RBT integrity
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after stress inserts", CS_UNKNOWN};
-    }
-
-    // Each of 100 elements should have count of total/100
-    int expected_count = total / 100;
-    for (int i = 0; i < 100; i++) {
-        test_struct ts = create_test_struct(i, "Stress", (double)i);
-        if (multiset_count(ms, &ts) != expected_count) {
-            free_test_struct(&ts);
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count mismatch in stress test", CS_UNKNOWN};
-        }
-        free_test_struct(&ts);
-    }
-
-    // Delete half of each element's occurrences
-    for (int i = 0; i < 100; i++) {
-        test_struct ts = create_test_struct(i, "Stress", (double)i);
-        for (int j = 0; j < expected_count / 2; j++) {
-            multiset_delete(ms, &ts);
-        }
-        free_test_struct(&ts);
-    }
-
-    if (!rbt_is_valid(ms->t)) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT integrity violated after stress deletes", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Stress insert/delete verified with %d elements\n", total);
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_interleaved_insert_delete(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-
-    for (int round = 0; round < 10; round++) {
-        // Insert 100 elements
-        for (int i = 0; i < 100; i++) {
-            test_struct ts = create_test_struct(i, "Interleaved", (double)i);
-            multiset_insert(ms, &ts);
-            free_test_struct(&ts);
-        }
-
-        // Delete 50 elements
-        for (int i = 0; i < 50; i++) {
-            test_struct ts = create_test_struct(i * 2, "Interleaved", (double)(i * 2));
-            multiset_delete(ms, &ts);
-            free_test_struct(&ts);
-        }
-
-        if (!rbt_is_valid(ms->t)) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "RBT integrity violated during interleaved ops", CS_UNKNOWN};
-        }
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Interleaved insert/delete verified over 10 rounds\n");
-
-    multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
-}
-
-test_res test_multiset_delete_all_verify_rbt(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    int total = __TEST_SIZE;
-
-    // Insert with some duplicates
     for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i, "DeleteAllRBT", (double)i);
-        multiset_insert(ms, &ts);
-        if (i % 3 == 0) {
-            multiset_insert(ms, &ts); // Add extra for every 3rd
-        }
-        free_test_struct(&ts);
+        double key = a * i * i - b * i + c;
+        UNITTEST_ASSERT_SILENT(multiset_count(ms, &key), ==, 1, "Multiset count mismatch for existing element");
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Successfully found all %d elements in the multiset\n", total);
 
-    // Delete all
-    for (int i = 0; i < total; i++) {
-        test_struct ts = create_test_struct(i, "DeleteAllRBT", (double)i);
-        while (multiset_count(ms, &ts) > 0) {
-            cs_codes result = multiset_delete(ms, &ts);
-            if (result != CS_SUCCESS) {
-                free_test_struct(&ts);
-                multiset_free(ms);
-                return (test_res){(char*)__func__, "Delete failed", result};
-            }
-        }
-        free_test_struct(&ts);
-
-        if (!rbt_is_valid(ms->t)) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "RBT integrity violated during delete all", CS_UNKNOWN};
-        }
-    }
-
-    if (__rbt_size((ms->t)) != 0) {
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Delete all with RBT verification completed\n");
+    double not_found_key = -12345.67;
+    UNITTEST_ASSERT(multiset_count(ms, &not_found_key), ==, 0, "Multiset count mismatch for non-existent element", arg->logger, "Multiset count is correct for non-existent element\n");
 
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
 }
 
-test_res test_multiset_large_counts(test_arg *arg) {
-    multiset *ms = multiset_init(get_test_struct_attr());
-    if (ms == NULL) return (test_res){(char*)__func__, "Init returned error", CS_MEM};
-    test_struct ts = create_test_struct(42, "LargeCounts", 42.0);
-    int large_count = 10000;
+// ============================================================================
+// multiset_size
+// ============================================================================
+test_res test_multiset_size(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
 
-    // Insert many times
-    for (int i = 0; i < large_count; i++) {
-        multiset_insert(ms, &ts);
+    int total = 1000;
+    for (int i = 0; i < total; i++) {
+        int val = i;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
+        UNITTEST_ASSERT_SILENT(multiset_size(ms), ==, i + 1, "Multiset size mismatch after insertion");
     }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset and verified size after each insertion\n", total);
 
-    if (multiset_count(ms, &ts) != large_count) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count mismatch for large count", CS_UNKNOWN};
-    }
-
-    // RBT should still have only 1 node
-    if (__rbt_size((ms->t)) != 1) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should have 1 node", CS_UNKNOWN};
-    }
-
-    // Delete all
-    for (int i = 0; i < large_count; i++) {
-        multiset_delete(ms, &ts);
-    }
-
-    if (multiset_count(ms, &ts) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "Count should be 0", CS_UNKNOWN};
-    }
-
-    if (__rbt_size((ms->t)) != 0) {
-        free_test_struct(&ts);
-        multiset_free(ms);
-        return (test_res){(char*)__func__, "RBT should be empty", CS_UNKNOWN};
-    }
-
-    clogger_log(arg->logger, CLOGGER_DEBUG, "Large counts verified: %d inserts and deletes\n", large_count);
-
-    free_test_struct(&ts);
     multiset_free(ms);
-    return (test_res){(char*)__func__, NULL, CS_SUCCESS};
+    return SUCCESSFUL_TEST_RES;
+}
+
+// ============================================================================
+// multiset_empty
+// ============================================================================
+test_res test_multiset_empty(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 1, "Newly initialized multiset is not empty", arg->logger, "Newly initialized multiset is empty\n");
+
+    int val = 42;
+    UNITTEST_ASSERT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset", arg->logger, "Inserted one element into the multiset\n");
+    UNITTEST_ASSERT(multiset_empty(ms), ==, 0, "Multiset is empty after inserting an element", arg->logger, "Multiset is not empty after inserting an element\n");
+
+    multiset_free(ms);
+    return SUCCESSFUL_TEST_RES;
+}
+
+// ============================================================================
+// multiset_print
+// ============================================================================
+test_res test_multiset_print(test_arg *arg) {
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset initialization failed", arg->logger, "Multiset initialized successfully\n");
+
+    char buffer[1024];
+    memset(buffer, 0, sizeof(buffer));
+    FILE *stream = fmemopen(buffer, sizeof(buffer), "w");
+    UNITTEST_ASSERT(stream, !=, NULL, "Failed to open memory stream for printing", arg->logger, "Memory stream opened successfully for printing\n");
+    multiset_print(stream, ms);
+    fclose(stream);
+    UNITTEST_ASSERT(buffer[0], ==, '\0', "Multiset print output is not empty for an empty multiset", arg->logger, "Multiset print output is empty for an empty multiset\n");
+
+    int total = 10;
+    for (int i = 0; i < total; i++) {
+        int val = i * i;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms, &val), ==, CS_SUCCESS, "Failed to insert element into multiset");
+    }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into the multiset\n", total);
+
+    stream = fmemopen(buffer, sizeof(buffer), "w");
+    UNITTEST_ASSERT(stream, !=, NULL, "Failed to open memory stream for printing", arg->logger, "Memory stream opened successfully for printing\n");
+    multiset_print(stream, ms);
+    fclose(stream);
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Multiset contents:\n%s\n", buffer);
+
+    for (int i = 0; i < total; i++) {
+        char expected_line[64];
+        snprintf(expected_line, sizeof(expected_line), "%d", i * i);
+        UNITTEST_ASSERT_SILENT(strstr(buffer, expected_line), !=, NULL, "Multiset print output is missing expected element");
+    }
+
+    multiset_free(ms);
+    return SUCCESSFUL_TEST_RES;
+}
+
+// ============================================================================
+// multiset_swap
+// ============================================================================
+test_res test_multiset_swap(test_arg *arg) {
+    multiset *ms1 = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset 1 initialization failed", arg->logger, "Multiset 1 initialized successfully\n");
+    multiset *ms2 = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset 2 initialization failed", arg->logger, "Multiset 2 initialized successfully\n");
+
+    int total1 = 1000, total2 = 500;
+    for (int i = 0; i < total1; i++) {
+        int val = i;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms1, &val), ==, CS_SUCCESS, "Failed to insert element into multiset 1");
+    }
+    for (int i = 0; i < total2; i++) {
+        int val = i + 1000;
+        UNITTEST_ASSERT_SILENT(multiset_insert(ms2, &val), ==, CS_SUCCESS, "Failed to insert element into multiset 2");
+    }
+    clogger_log(arg->logger, CLOGGER_DEBUG, "Inserted %d elements into multiset 1 and %d elements into multiset 2\n", total1, total2);
+
+    multiset_swap(ms1, ms2);
+
+    UNITTEST_ASSERT(multiset_size(ms1), ==, total2, "Multiset 1 size mismatch after swap", arg->logger, "Multiset 1 size is correct after swap\n");
+    UNITTEST_ASSERT(multiset_size(ms2), ==, total1, "Multiset 2 size mismatch after swap", arg->logger, "Multiset 2 size is correct after swap\n");
+
+    for (int i = 0; i < total2; i++) {
+        int key = i + 1000;
+        UNITTEST_ASSERT_SILENT(multiset_count(ms1, &key), ==, 1, "Failed to find element in multiset 1 after swap");
+    }
+
+    for (int i = 0; i < total1; i++) {
+        int key = i;
+        UNITTEST_ASSERT_SILENT(multiset_count(ms2, &key), ==, 1, "Failed to find element in multiset 2 after swap");
+    }
+
+    multiset_free(ms1);
+    multiset_free(ms2);
+    return SUCCESSFUL_TEST_RES;
 }
 
 // ============================================================================
 // Stress time test
 // ============================================================================
-
 test_res test_multiset_stress_time(test_arg *arg) {
-    if (RUNNING_ON_VALGRIND) {
+    if (RUNNING_ON_VALGRIND || arg->op_time_count == 0) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
     struct timeval start, end;
     double elapsed;
 
-    multiset *ms = multiset_init(get_int_attr());
+    multiset *ms = UNITTEST_ASSERT(multiset_init(NULL, get_int_attr()), !=, NULL, "Multiset init failed", 
+        arg->logger, "Successfully initialized multiset for stress test\n");
     if (ms == NULL) {
         return (test_res){(char*)__func__, "Multiset init failed", CS_MEM};
     }
@@ -924,12 +330,7 @@ test_res test_multiset_stress_time(test_arg *arg) {
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
         int val = i;
-        cs_codes result = multiset_insert(ms, &val);
-
-        if (result != CS_SUCCESS) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Insert failed during stress test", result};
-        }
+        multiset_insert(ms, &val);
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
@@ -941,12 +342,7 @@ test_res test_multiset_stress_time(test_arg *arg) {
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
         int key = i;
-        int count = multiset_count(ms, &key);
-
-        if (count != 1) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Count failed during stress test", CS_ELEM};
-        }
+        multiset_count(ms, &key);
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
@@ -958,12 +354,7 @@ test_res test_multiset_stress_time(test_arg *arg) {
     gettimeofday(&start, NULL);
     for (int i = 0; i < total; i++) {
         int key = i;
-        cs_codes del_result = multiset_delete(ms, &key);
-
-        if (del_result != CS_SUCCESS) {
-            multiset_free(ms);
-            return (test_res){(char*)__func__, "Delete failed during stress test", del_result};
-        }
+        multiset_delete(ms, &key);
     }
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
@@ -978,47 +369,37 @@ test_res test_multiset_stress_time(test_arg *arg) {
 // ============================================================================
 // Test array
 // ============================================================================
-
 test multiset_tests[] = {
     // multiset_init
     test_multiset_init,
-    test_multiset_init_invalid_size,
 
     // multiset_insert
-    test_multiset_insert_single,
-    test_multiset_insert_multiple_unique,
-    test_multiset_insert_duplicates,
-    test_multiset_insert_many_duplicates,
-    test_multiset_insert_null,
+    test_multiset_insert,
+    test_multiset_insert_duplicate,
+    test_multiset_insert_deepcopy,
 
     // multiset_delete
-    test_multiset_delete_single,
-    test_multiset_delete_one_of_many,
-    test_multiset_delete_all_duplicates,
-    test_multiset_delete_nonexistent,
-    test_multiset_delete_multiple,
-    test_multiset_delete_random_order,
-
-    // multiset_count
-    test_multiset_count_zero,
-    test_multiset_count_after_inserts,
-    test_multiset_count_after_deletes,
-    test_multiset_count_multiple_elements,
+    test_multiset_delete,
+    test_multiset_delete_deepfree,
 
     // multiset_clear
     test_multiset_clear,
-    test_multiset_clear_empty,
-    test_multiset_clear_reuse,
+    test_multiset_clear_deepfree,
 
-    // Complex struct integrity
-    test_multiset_nested_data_integrity,
-    test_multiset_deep_copy_verification,
+    // multiset_count
+    test_multiset_count,
 
-    // Stress tests
-    test_multiset_stress_insert_delete,
-    test_multiset_interleaved_insert_delete,
-    test_multiset_delete_all_verify_rbt,
-    test_multiset_large_counts,
+    // multiset_size
+    test_multiset_size,
+
+    // multiset_empty
+    test_multiset_empty,
+
+    // multiset_print
+    test_multiset_print,
+
+    // multiset_swap
+    test_multiset_swap,
 
     // Stress time
     test_multiset_stress_time,

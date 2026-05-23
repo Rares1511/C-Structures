@@ -43,12 +43,12 @@ cs_codes _deque_grow_internal(deque *dq, int direction);
 
 /*!
  * Initializes a deque with the specified attributes.
- * @param dq Pointer to the deque to initialize.
+ * @param pool Pointer to a memory pool for allocation (can be NULL for default allocator).
  * @param attr Attributes for the deque.
  * @param dq_attr User-controllable attributes for optimization.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-deque* deque_init(elem_attr_t attr, deque_attr_t dq_attr);
+deque* deque_init(deque *pool, elem_attr_t attr, deque_attr_t dq_attr);
 
 /*! 
  * Pushes an element to the back of the deque.
@@ -62,9 +62,7 @@ static inline cs_codes deque_push_back(deque *dq, const void* el) {
 
     if (__builtin_expect(dq->blocks[dq->back].back >= dq->dq_attr.block_size, 0)) {
         cs_codes rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_BACK);
-        if (rc != CS_SUCCESS) {
-            return rc;
-        }
+        CS_RETURN_IF(rc != CS_SUCCESS, rc);
     }
 
     deque_block_t *block = &dq->blocks[dq->back];
@@ -93,9 +91,7 @@ static inline cs_codes deque_push_front(deque *dq, const void* el) {
 
     if (__builtin_expect(dq->blocks[dq->front].front <= 0, 0)) {
         cs_codes rc = _deque_grow_internal(dq, __DEQUE_GROW_INTERNAL_FRONT);
-        if (rc != CS_SUCCESS) {
-            return rc;
-        }
+        CS_RETURN_IF(rc != CS_SUCCESS, rc);
     }
 
     deque_block_t *block = &dq->blocks[dq->front];
@@ -150,9 +146,7 @@ static inline cs_codes deque_pop_back(deque *dq) {
             dq->front = dq->block_cap / 2;
             dq->back = dq->block_cap / 2;
             dq->blocks[dq->front].data = malloc(dq->dq_attr.block_size * dq->attr.size);
-            if (!dq->blocks[dq->front].data) {
-                return CS_MEM;
-            }
+            CS_RETURN_IF(dq->blocks[dq->front].data == NULL, CS_MEM);
             dq->blocks[dq->front].front = dq->dq_attr.block_size / 2;
             dq->blocks[dq->front].back = dq->dq_attr.block_size / 2;
         }

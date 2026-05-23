@@ -1,10 +1,13 @@
 #include <cs/multimap.h>
 
-multimap* multimap_init(elem_attr_t key_attr,
+multimap* multimap_init(multimap *pool, elem_attr_t key_attr,
                            elem_attr_t value_attr) {
     CS_RETURN_IF(key_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size == 0 || value_attr.size > SIZE_TH, NULL);
-    multimap *mm = malloc(sizeof(multimap));
-    CS_RETURN_IF(mm == NULL, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(multimap));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    multimap *mm = pool;
 
     mm->key_attr = NULL;
     mm->value_attr = NULL;
@@ -81,6 +84,7 @@ multimap* multimap_init(elem_attr_t key_attr,
 void multimap_clear(multimap *mm) {
     CS_RETURN_IF(mm == NULL);
     __rbt_clear(mm->t);
+    mm->size = 0;
 }
 
 void multimap_swap(multimap *mm1, multimap *mm2) {

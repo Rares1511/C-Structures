@@ -119,14 +119,13 @@ export LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH
 | **Stack** | LIFO (Last-In-First-Out) structure | [📖 README](stack/README.md) |
 | **Queue** | FIFO (First-In-First-Out) structure | [📖 README](queue/README.md) |
 | **Priority Queue** | Heap-based priority container | [📖 README](priority_queue/README.md) |
+| **Flat Set** | Sorted vector-based set | [📖 README](flat_set/README.md) |
 
 ### Specialized Containers
 > Containers for specific use cases
 
 | Container | Description | Documentation |
 |-----------|-------------|---------------|
-| **Flat Set** | Sorted vector-based set | [📖 README](flat_set/README.md) |
-| **Large Number** | Arbitrary precision arithmetic | [📖 README](large_number/README.md) |
 | **Pair** | Two-element tuple | [📖 README](pair/README.md) |
 
 ### Utilities

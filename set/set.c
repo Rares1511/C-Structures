@@ -1,7 +1,12 @@
 #include <cs/set.h>
 
-set* set_init(elem_attr_t attr) {
-    set *s = malloc(sizeof(set));
+set* set_init(set *pool, elem_attr_t attr) {
+    if (pool == NULL) {
+        pool = malloc(sizeof(set));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+
+    set *s = pool;
     CS_RETURN_IF(NULL == s || attr.size == 0 || attr.size > SIZE_TH, NULL);
     s->t = __rbt_init(attr);
     if (s->t == NULL) {

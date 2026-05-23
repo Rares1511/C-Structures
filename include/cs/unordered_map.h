@@ -109,12 +109,14 @@ static inline size_t __unordered_map_entry_hash(const void *el) {
 
 /*!
  * Initialize an unordered map with the specified attributes and hash function.
+ * @param[in] pool Optional memory pool for the unordered map (can be NULL).
  * @param[in] key_attr Attributes for the keys.
  * @param[in] value_attr Attributes for the values.
  * @param[in] hash_func Hash function for the keys.
  * @return Pointer to the initialized unordered map, or NULL on failure.
  */
-unordered_map* unordered_map_init(elem_attr_t key_attr,
+unordered_map* unordered_map_init(unordered_map *pool,
+                                elem_attr_t key_attr,
                                  elem_attr_t value_attr,
                                  __hash_func_t hash_func);
 

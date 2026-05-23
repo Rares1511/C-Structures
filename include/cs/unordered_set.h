@@ -10,11 +10,12 @@ typedef struct unordered_set {
 
 /*!
  * @brief Initializes an unordered set.
+ * @param[in] pool Pointer to the memory pool for the unordered set.
  * @param[in] attr Attributes for the unordered set.
  * @param[in] hash_func Hash function to use for the unordered set.
  * @return Pointer to the initialized unordered set, or NULL on failure.
  */
-unordered_set* unordered_set_init(elem_attr_t attr, __hash_func_t hash_func);
+unordered_set* unordered_set_init(unordered_set *pool, elem_attr_t attr, __hash_func_t hash_func);
 
 /*!
  * @brief Inserts a key into the unordered set.
@@ -22,7 +23,7 @@ unordered_set* unordered_set_init(elem_attr_t attr, __hash_func_t hash_func);
  * @param[in] key Pointer to the key to insert.
  * @return CS_OK on success, error code otherwise.
  */
-static inline cs_codes unordered_set_insert(unordered_set *uset, const void *key) {
+static inline cs_codes unordered_set_add_entry(unordered_set *uset, const void *key) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
     int rc;
     __hash_table_add_entry(uset->ht, key, &rc);
@@ -35,7 +36,7 @@ static inline cs_codes unordered_set_insert(unordered_set *uset, const void *key
  * @param[in] key Pointer to the key to erase.
  * @return CS_OK on success, error code otherwise.
  */
-static inline cs_codes unordered_set_erase(unordered_set *uset, const void *key) {
+static inline cs_codes unordered_set_remove_entry(unordered_set *uset, const void *key) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, CS_NULL);
     return __hash_table_remove_entry(uset->ht, key);
 }
@@ -46,7 +47,7 @@ static inline cs_codes unordered_set_erase(unordered_set *uset, const void *key)
  * @param[in] key Pointer to the key to find.
  * @return Pointer to the key if found, NULL otherwise.
  */
-static inline void* unordered_set_find(unordered_set *uset, const void *key) {
+static inline void* unordered_set_get_entry(unordered_set *uset, const void *key) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL || key == NULL, NULL);
     return __hash_table_get_entry(uset->ht, key);
 }
@@ -77,7 +78,7 @@ static inline int unordered_set_empty(unordered_set *uset) {
  * @param[in] uset The unordered set.
  * @return The number of elements in the unordered set.
  */
-static inline int unordered_set_size(unordered_set *uset) {
+static inline size_t unordered_set_size(unordered_set *uset) {
     CS_RETURN_IF(uset == NULL || uset->ht == NULL, 0);
     return __hash_table_size(uset->ht);
 }
@@ -87,6 +88,13 @@ static inline int unordered_set_size(unordered_set *uset) {
  * @param[in] uset Pointer to the unordered set to clear.
  */
 void unordered_set_clear(unordered_set *uset);
+
+/*!
+ * @brief Swaps the contents of two unordered sets.
+ * @param[in] uset1 Pointer to the first unordered set.
+ * @param[in] uset2 Pointer to the second unordered set.
+ */
+void unordered_set_swap(unordered_set *uset1, unordered_set *uset2);
 
 /*!
  * @brief Frees the unordered set.

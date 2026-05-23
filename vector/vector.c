@@ -103,12 +103,15 @@ inline cs_codes _vector_shrink_internal(vector *restrict vec) {
     return CS_SUCCESS;
 }
 
-vector* vector_init(elem_attr_t attr, vector_attr_t v_attr) {
-    vector *vec = malloc(sizeof(vector));
-    CS_RETURN_IF(vec == NULL, NULL);
+vector* vector_init(vector* pool, elem_attr_t attr, vector_attr_t v_attr) {
     CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
     CS_RETURN_IF(v_attr.min_cap > VECTOR_INIT_CAPACITY, NULL);
     CS_RETURN_IF(v_attr.shrink_factor > VECTOR_INIT_CAPACITY, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(vector));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    vector *vec = pool;
 
     if (v_attr.min_cap == 0) {
         v_attr.min_cap = VECTOR_INIT_CAPACITY;

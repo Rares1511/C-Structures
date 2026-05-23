@@ -15,15 +15,16 @@ typedef struct forward_list {
     forward_list_node* head; /*!< Pointer to the first node in the list */
     forward_list_node* tail; /*!< Pointer to the last node in the list */
     elem_attr_t attr;        /*!< Attributes for the elements stored in the list */
-    int size;                /*!< Number of elements currently in the list */
+    size_t size;                /*!< Number of elements currently in the list */
 } forward_list;
 
 /*!
  * Initializes a forward list with the given attributes.
+ * @param pool Pointer to a pre-allocated memory pool for the forward list.
  * @param attr Attributes for the forward list (e.g., element size).
  * @return Pointer to the initialized forward list on success, or NULL on failure.
  */
-forward_list* forward_list_init(elem_attr_t attr);
+forward_list* forward_list_init(forward_list *pool, elem_attr_t attr);
 
 /*! 
  * Checks if the forward list is empty.
@@ -37,7 +38,7 @@ static inline int forward_list_empty(forward_list *list) { return list->size == 
  * @param list The forward list.
  * @return The number of elements in the list.
  */
-static inline int forward_list_size(forward_list *list) { return list->size; }
+static inline size_t forward_list_size(forward_list *list) { return list->size; }
 
 /*! 
  * Inserts a new element at the front of the forward list.
@@ -102,9 +103,9 @@ cs_codes forward_list_pop_front(forward_list* list) {
  * Finds the index of the first occurrence of the specified data in the forward list.
  * @param list The forward list to search.
  * @param data Pointer to the data to find.
- * @return The index of the element if found, or -1 if not found or on error.
+ * @return The index of the element if found, or the size of the list if not found or on error.
  */
-int forward_list_find(forward_list *list, const void* data);
+size_t forward_list_find(forward_list *list, const void* data);
 
 /*! 
  * Retrieves the size of the forward list.
@@ -121,7 +122,7 @@ static inline void forward_list_set_attr(forward_list* list, elem_attr_t attr) {
  * @param list Pointer to the forward list.
  * @param size The new size to set.
  */
-static inline void forward_list_set_size(forward_list* list, int size) {
+static inline void forward_list_set_size(forward_list* list, size_t size) {
     CS_RETURN_IF(list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC);
     list->attr.size = size;
 }

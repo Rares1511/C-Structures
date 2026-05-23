@@ -1,11 +1,15 @@
 #include <cs/unordered_map.h>
 
-unordered_map* unordered_map_init(elem_attr_t key_attr,
+unordered_map* unordered_map_init(unordered_map *pool,
+                                elem_attr_t key_attr,
                                  elem_attr_t value_attr,
                                  __hash_func_t hash_func) {
     CS_RETURN_IF(key_attr.size == 0 || value_attr.size == 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, NULL);
-    unordered_map *umap = malloc(sizeof(unordered_map));
-    CS_RETURN_IF(NULL == umap, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(unordered_map));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    unordered_map *umap = pool;
 
     umap->ht = NULL;
     umap->key_attr = NULL;
@@ -62,8 +66,8 @@ unordered_map* unordered_map_init(elem_attr_t key_attr,
 
 void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
     CS_RETURN_IF(NULL == umap1 || NULL == umap2);
-    __hash_table_swap(umap1->ht, umap2->ht);
 
+    __hash_table *temp_ht = umap1->ht;
     elem_attr_t *temp_key_attr = umap1->key_attr;
     elem_attr_t *temp_value_attr = umap1->value_attr;
     __hash_func_t temp_hash_func = umap1->hash_func;
@@ -71,7 +75,9 @@ void unordered_map_swap(unordered_map *umap1, unordered_map *umap2) {
     umap1->key_attr = umap2->key_attr;
     umap1->value_attr = umap2->value_attr;
     umap1->hash_func = umap2->hash_func;
+    umap1->ht = umap2->ht;
 
+    umap2->ht = temp_ht;
     umap2->key_attr = temp_key_attr;
     umap2->value_attr = temp_value_attr;
     umap2->hash_func = temp_hash_func;

@@ -58,6 +58,7 @@ static inline size_t vector_size(vector *restrict vec) { return vec->size; };
 
 /*!
  * Initializes the given variable with the correct vector structure datatype
+ * @param[in]  pool  Pre-allocated block of memory for the vector
  * @param[in]  attr       Attributes decribing the elements that the vector will contain
  * @param[in]  v_attr     Attributes describing the vector itself.
  *                        If v_attr.min_cap is 0, VECTOR_INIT_CAPACITY is used.
@@ -65,7 +66,7 @@ static inline size_t vector_size(vector *restrict vec) { return vec->size; };
  *                        If v_attr.shrink_factor is 1, the vector will never shrink.
  * @return Pointer to the initialized vector or NULL if a memory problem ocurred or if the attributes given are invalid
  */
-vector* vector_init(elem_attr_t attr, vector_attr_t v_attr);
+vector* vector_init(vector* pool, elem_attr_t attr, vector_attr_t v_attr);
 
 /*!
  * Inserts the element at the given position in the offered vector

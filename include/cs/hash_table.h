@@ -77,10 +77,9 @@ static inline cs_codes __hash_table_rehash(__hash_table *ht) {
 
     void *new_keys = malloc(new_cap * ht->attr.size);
     char *new_occupied = calloc(new_cap, sizeof(char));
+    memset(new_occupied, 0, new_cap * sizeof(char)); // Ensure all slots start as EMPTY
     
-    if (!new_keys || !new_occupied) { 
-        return CS_MEM; 
-    }
+    CS_RETURN_IF(new_keys == NULL || new_occupied == NULL, CS_MEM);
 
     for (size_t i = 0; i < old_cap; i++) {
         if (old_occupied[i] == __HASH_TABLE_OCCUPIED) { // Only move VALID entries
@@ -251,34 +250,6 @@ static inline int __hash_table_empty(__hash_table *ht) { return ht->size == 0; }
 
 static inline size_t __hash_table_size(__hash_table *ht) { return ht->size; };
 
-static inline void __hash_table_swap(__hash_table *ht1, __hash_table *ht2) {
-    CS_RETURN_IF(ht1 == NULL || ht2 == NULL || ht1->header.magic != CS_HASH_TABLE_MAGIC || ht2->header.magic != CS_HASH_TABLE_MAGIC);
-
-    elem_attr_t attr = ht1->attr;
-    __hash_func_t hash = ht1->hash;
-    size_t cap = ht1->cap;
-    size_t size = ht1->size;
-    size_t mask = ht1->mask;
-    void *keys = ht1->keys;
-    char *occupied = ht1->occupied;
-
-    ht1->attr = ht2->attr;
-    ht1->hash = ht2->hash;
-    ht1->cap = ht2->cap;
-    ht1->size = ht2->size;
-    ht1->mask = ht2->mask;
-    ht1->keys = ht2->keys;
-    ht1->occupied = ht2->occupied;
-
-    ht2->attr = attr;
-    ht2->hash = hash;
-    ht2->cap = cap;
-    ht2->size = size;
-    ht2->mask = mask;
-    ht2->keys = keys;
-    ht2->occupied = occupied;
-}
-
 static inline void __hash_table_clear(__hash_table *ht) {
     CS_RETURN_IF(ht == NULL || ht->header.magic != CS_HASH_TABLE_MAGIC);
 
@@ -297,7 +268,7 @@ static inline void __hash_table_clear(__hash_table *ht) {
 static inline void __hash_table_print(FILE *stream, void *v_ht) {
     CS_RETURN_IF(stream == NULL || v_ht == NULL);
     __hash_table *ht = (__hash_table*)v_ht;
-    CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC);
+    CS_RETURN_IF(ht->header.magic != CS_HASH_TABLE_MAGIC || ht->attr.print == NULL);
 
     fprintf(stream, "--- Hash Table (Size: %ld, Cap: %ld) ---\n", ht->size, ht->cap);
 
@@ -307,9 +278,7 @@ static inline void __hash_table_print(FILE *stream, void *v_ht) {
         if (ht->occupied[i] == __HASH_TABLE_OCCUPIED) {
             unsigned char *ptr = (unsigned char *)ht->keys + (i * ht->attr.size);
             fprintf(stream, "OCCUPIED | Data: ");
-            for (size_t j = 0; j < (size_t) ht->attr.size; j++) {
-                fprintf(stream, "%02x ", ptr[j]);
-            }
+            ht->attr.print(stream, ptr);
         } 
         else if (ht->occupied[i] == __HASH_TABLE_TOMBSTONE) {
             fprintf(stream, "TOMBSTONE (Deleted)");

@@ -10,8 +10,8 @@ static const char* cargs_type_metavar(carg_type t) {
         case CARG_TYPE_INT:    return "INT";
         case CARG_TYPE_FLOAT:  return "FLOAT";
         case CARG_TYPE_STRING: return "STR";
-        case CARG_TYPE_BOOL:   return "";      // flags have no metavar
-        default:               return "VAL";
+        case CARG_TYPE_BOOL:   return "";    // flags have no metavar
+        default:               return "VAL"; // fallback for unknown types
     }
 }
 
@@ -189,33 +189,27 @@ void cargs_add_arg(cparser* parser, const char* name, const char* help, char req
         new_arg->metadata |= (1 << __CARGS_NO_DEFAULT_BIT);
         return;
     }
+    // Allocate and copy default value based on type
+    // Note: For strings, we assume default_value is a null-terminated string.
     switch (type) {
         case CARG_TYPE_INT:
             new_arg->value = malloc(sizeof(int));
-            if (default_value != NULL) {
-                *(int*)(new_arg->value) = *(int*)default_value;
-            }
+            *(int*)(new_arg->value) = *(int*)default_value;
             break;
         case CARG_TYPE_FLOAT:
             new_arg->value = malloc(sizeof(float));
-            if (default_value != NULL) {
-                *(float*)(new_arg->value) = *(float*)default_value;
-            }
+            *(float*)(new_arg->value) = *(float*)default_value;
             break;
         case CARG_TYPE_STRING:
             new_arg->value = malloc(__CARGS_STRING_MAX_LEN * sizeof(char));
-            if (default_value != NULL) {
-                strcpy((char*)(new_arg->value), (char*)default_value);
-            }
+            strcpy((char*)(new_arg->value), (char*)default_value);
             break;
         case CARG_TYPE_BOOL:
             new_arg->value = malloc(sizeof(char));
-            if (default_value != NULL) {
-                *(char*)(new_arg->value) = *(char*)default_value;
-            } else {
-                *(char*)(new_arg->value) = 0; // Default to false
-            }
+            *(char*)(new_arg->value) = *(char*)default_value;
             break;
+        // For unknown types, we won't allocate or copy a default value 
+        // Should never happen since carg_type is an enum, but we handle it gracefully
         default:
             new_arg->value = NULL;
             break;

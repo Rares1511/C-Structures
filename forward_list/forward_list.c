@@ -61,9 +61,13 @@ static inline forward_list_node* merge_iterative(forward_list_node* a, forward_l
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-forward_list* forward_list_init(elem_attr_t attr) {
-    forward_list* list = malloc(sizeof(forward_list));
-    CS_RETURN_IF(list == NULL || attr.size == 0 || attr.size > SIZE_TH, NULL);
+forward_list* forward_list_init(forward_list *pool, elem_attr_t attr) {
+    CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(forward_list));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    forward_list* list = pool;
 
     list->head = NULL;
     list->tail = NULL;
@@ -75,22 +79,18 @@ forward_list* forward_list_init(elem_attr_t attr) {
     return list;
 }
 
-int forward_list_find(forward_list *list, const void* data) {
-    CS_RETURN_IF(data == NULL, -1);
-    CS_RETURN_IF(list == NULL, -1);
-    CS_RETURN_IF(list->header.magic != CS_FORWARD_LIST_MAGIC, -1);
-    CS_RETURN_IF(list->size == 0, -1);
+size_t forward_list_find(forward_list *list, const void* data) {
+    CS_RETURN_IF(data == NULL || list == NULL || list->header.magic != CS_FORWARD_LIST_MAGIC || list->size == 0, list->size);
 
     forward_list_node* current = list->head;
     comparer comp = list->attr.comp;
-    for (int pos = 0; pos < list->size; pos++, current = current->next) {
-        if (comp && comp(current->data, data) == 0)
+    for (size_t pos = 0; pos < list->size; pos++, current = current->next) {
+        if (forward_list_compare(current->data, data, comp, list->attr.size) == 0) {
             return pos;
-        else if (!comp && memcmp(current->data, data, list->attr.size) == 0)
-            return pos;
+        }
     }
 
-    return -1;
+    return list->size; // Return the size to indicate not found
 }
 
 void forward_list_sort(forward_list *list) {

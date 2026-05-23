@@ -1,10 +1,14 @@
 #include <cs/unordered_multiset.h>
 
-unordered_multiset* unordered_multiset_init(elem_attr_t attr, 
+unordered_multiset* unordered_multiset_init(unordered_multiset *pool,
+                                elem_attr_t attr, 
                                 __hash_func_t hash_func) {
     CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
-    unordered_multiset *umset = malloc(sizeof(unordered_multiset));
-    CS_RETURN_IF(umset == NULL, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(unordered_multiset));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    unordered_multiset *umset = pool;
 
     umset->size = 0;
     umset->attr = NULL;
@@ -73,6 +77,27 @@ void unordered_multiset_clear(unordered_multiset *restrict umset) {
     CS_RETURN_IF(umset == NULL);
     __hash_table_clear(umset->ht);
     umset->size = 0;
+}
+
+void unordered_multiset_swap(unordered_multiset *umset1, unordered_multiset *umset2) {
+    CS_RETURN_IF(umset1 == NULL || umset2 == NULL);
+    __hash_table *temp_ht = umset1->ht;
+    elem_attr_t *temp_attr = umset1->attr;
+    elem_attr_t *temp_count_attr = umset1->count_attr;
+    char *temp_buffer = umset1->buffer;
+    size_t temp_size = umset1->size;
+
+    umset1->ht = umset2->ht;
+    umset1->attr = umset2->attr;
+    umset1->count_attr = umset2->count_attr;
+    umset1->buffer = umset2->buffer;
+    umset1->size = umset2->size;
+
+    umset2->ht = temp_ht;
+    umset2->attr = temp_attr;
+    umset2->count_attr = temp_count_attr;
+    umset2->buffer = temp_buffer;
+    umset2->size = temp_size;
 }
 
 void unordered_multiset_print(FILE *restrict stream, void *restrict v_umset) {

@@ -32,7 +32,7 @@ PATH_INCLUDEDIR  := /usr/local/include/cs
 
 # Flags
 # -I$(LOCAL_INCLUDEDIR) is key: it allows compilation without prior installation
-CFLAGS  := -Wall -Wextra -fPIC -O2 -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
+CFLAGS  := -Wall -Wextra -fPIC -Wno-unknown-pragmas -g -I$(LOCAL_INCLUDEDIR)
 LDLIBS  := -lm
 
 # Unittest Configuration
@@ -44,8 +44,8 @@ MEMCHECK_FILE ?= logs/memcheck.ansi
 UNITTEST_EXTRA_ARGS ?=
 
 UNITTEST_ARGS = --seed $(SEED) \
-	--debug-file $(DEBUG_FILE) \
-	--results-file $(RESULTS_FILE)
+    --debug-file $(DEBUG_FILE) \
+    --results-file $(RESULTS_FILE)
 
 ifneq ($(strip $(UNITTEST_EXTRA_ARGS)),)
 UNITTEST_ARGS += $(UNITTEST_EXTRA_ARGS)
@@ -54,7 +54,7 @@ endif
 # ---------------- Modules ----------------
 SUBDIRS := cargs pair vector deque list forward_list set map unordered_set \
             multiset multimap unordered_map unordered_multiset unordered_multimap \
-            large_number clogger
+            clogger
 
 INSTALL_LIBS := $(SUBDIRS)
 
@@ -106,9 +106,12 @@ objects: $(ALL_MOD_OBJS) $(CORE_OBJS)
 
 # ---------------- Linker Logic ----------------
 
+# Set default optimization flags, easily overridable by coverage target
+OPT_FLAGS ?= -O2
+
 define LINK_SO_RULE
 $(LIBOUTDIR)/lib$1.so: $(call MOD_OBJ,$1) $$(DEPS_$1) | $(LIBOUTDIR)
-	$$(CC) -shared -o $$@ $$^ $$(CFLAGS) $$(LDLIBS) $$(LDLIBS_$1)
+	$$(CC) -shared -o $$@ $$^ $$(CFLAGS) $$(OPT_FLAGS) $$(LDLIBS) $$(LDLIBS_$1)
 endef
 $(foreach m,$(INSTALL_LIBS),$(eval $(call LINK_SO_RULE,$(m))))
 
@@ -121,9 +124,9 @@ install_headers:
 	$(MKDIR_P) $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/cs/universal.h $(PATH_INCLUDEDIR)
 	@for h in $(INSTALL_LIBS); do \
-	    if [ -f $(LOCAL_INCLUDEDIR)/cs/$$h.h ]; then \
-	        cp $(LOCAL_INCLUDEDIR)/cs/$$h.h $(PATH_INCLUDEDIR); \
-	    fi \
+		if [ -f $(LOCAL_INCLUDEDIR)/cs/$$h.h ]; then \
+			cp $(LOCAL_INCLUDEDIR)/cs/$$h.h $(PATH_INCLUDEDIR); \
+		fi \
 	done
 	cp $(LOCAL_INCLUDEDIR)/cs/rbt.h $(PATH_INCLUDEDIR)
 	cp $(LOCAL_INCLUDEDIR)/cs/hash_table.h $(PATH_INCLUDEDIR)
@@ -132,7 +135,7 @@ install_libs:
 	@echo "Installing libraries to $(LIBDIR)..."
 	$(MKDIR_P) $(LIBDIR)
 	@for m in $(INSTALL_LIBS); do \
-	    cp $(LIBOUTDIR)/lib$$m.so $(LIBDIR); \
+		cp $(LIBOUTDIR)/lib$$m.so $(LIBDIR); \
 	done
 	ldconfig
 
@@ -154,7 +157,7 @@ UNITTEST_LIBS := $(foreach m,$(INSTALL_LIBS),-l$(m))
 
 build_unittest: libs
 	@$(CC) -o unittest unittest.c $(CFLAGS) \
-	    -L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
+		-L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
 ifeq ($(memcheck),true)
 RUN_UNITTEST_DEPS = build_unittest
@@ -199,9 +202,9 @@ benchmark: $(BENCHMARK_BIN)
 # ---------------- Code Coverage ----------------
 
 coverage: clean
-	$(MAKE) build_unittest CFLAGS="$(CFLAGS) --coverage -O0" LDFLAGS="$(LDFLAGS) --coverage"
+	$(MAKE) build_unittest CFLAGS="$(CFLAGS) --coverage -O0" LDFLAGS="$(LDFLAGS) --coverage" OPT_FLAGS="-O0"
 	@export LD_LIBRARY_PATH=$(CURDIR)/$(LIBOUTDIR):$$LD_LIBRARY_PATH; \
-	./unittest
+	./unittest --coverage
 	lcov --capture --directory . --output-file logs/coverage.info
 	lcov --remove logs/coverage.info '/usr/*' '*/tests/*' '*/unittest.c' --output-file logs/coverage.info
 	genhtml logs/coverage.info --output-directory logs/out_coverage
@@ -220,12 +223,12 @@ clean:
 	$(RM) -r logs/out_coverage
 	$(RM) unittest.gcda unittest.gcno
 	@for m in $(SUBDIRS); do \
-	    $(RM) $$m/$$m.o; \
+		$(RM) $$m/$$m.o; \
 		$(RM) $$m/$$m.gcda; \
 		$(RM) $$m/$$m.gcno; \
 	done
 	@for o in $(CORE_OBJS); do \
-	    $(RM) $$o; \
+		$(RM) $$o; \
 	done
 
 .PHONY: all libs objects install uninstall unittest benchmark clean

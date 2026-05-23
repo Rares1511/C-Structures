@@ -15,6 +15,8 @@
 #define __UNITTEST_BENCHMARK_FILE_NAME "logs/benchmark.csv"
 #define __UNITTEST_BENCHMARK_FILE_ARG_NAME "--benchmark-file"
 
+#define __UNITTEST_COVERAGE_ARG_NAME "--coverage"
+
 #define __UNITTEST_SEED_ARG_NAME "--seed"
 #define __UNITTEST_SEED_DEFAULT_VALUE 42
 
@@ -137,24 +139,6 @@ static inline int rbt_is_valid(__rbt *t) {
         return 0;
 
     return 1;
-}
-#pragma endregion
-
-#pragma region Hash Functions
-// Simple hash function for integers
-size_t hash_int(const void *key) {
-    return *(int *)key;
-}
-
-// Simple hash function for strings
-size_t hash_string(const void *key) {
-    const char *str = *(const char **)key;
-    size_t hash = 5381;
-    int c;
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
-    }
-    return hash;
 }
 #pragma endregion
 
@@ -524,6 +508,27 @@ static inline int test_struct_equals(const test_struct *a, const test_struct *b)
     return 1;
 }
 
+#pragma region Hash Functions
+// Simple hash function for integers
+size_t hash_int(const void *key) {
+    return *(int *)key;
+}
+
+size_t hash_int_mod(const void *key) {
+    return (*(int *)key) % 100;
+}
+
+// Simple hash function for strings
+size_t hash_string(const void *key) {
+    const char *str = *(const char **)key;
+    size_t hash = 5381;
+    int c;
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
+    return hash;
+}
+
 // Hash function for test_struct (for hash-based containers)
 static inline size_t hash_test_struct(const void *el) {
     const test_struct *e = (const test_struct *)el;
@@ -536,9 +541,11 @@ static inline size_t hash_test_struct(const void *el) {
     }
     return hash;
 }
+#pragma endregion
 
-static inline void print_int(FILE *stream, const void *el) { fprintf(stream, "%d", *(int *)el); }
-static inline void print_double(FILE *stream, const void *el) { fprintf(stream, "%.2f", *(double *)el); }
+static inline void print_int(FILE *stream, const void *el) { fprintf(stream, "%d ", *(int *)el); }
+static inline void print_double(FILE *stream, const void *el) { fprintf(stream, "%.2f ", *(double *)el); }
+static inline void print_string(FILE *stream, const void *el) { fprintf(stream, "\"%s\" ", (char *)el); }
 
 static inline int comp_int_min(const void *a, const void *b) { return *(int *)b - *(int *)a; }
 static inline int comp_int_max(const void *a, const void *b) { return *(int *)a - *(int *)b; }
@@ -565,7 +572,7 @@ static inline elem_attr_t get_string_attr() {
         .size = sizeof(char) * 25,
         .fr = NULL,
         .copy = copy_string,
-        .print = NULL,
+        .print = print_string,
         .comp = NULL
     };
 }

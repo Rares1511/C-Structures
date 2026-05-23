@@ -37,10 +37,10 @@ static inline list_node* _list_node_init(const void *el, size_t elem_size, deepc
 /*!
  * Initializes the list with th given attributes for the datatype inside
  * @param[in] attr Attributes for the datatype inside the list
- * @param[out] l  Pointer to the list that will be initialized
+ * @param[out] pool Optional pointer to a list that will be initialized, if NULL a new list will be allocated
  * @return CS_MEM if a memory problem occurred or CS_SUCCESS for a successful initialization
  */
-list* list_init(elem_attr_t attr);
+list* list_init(list *pool, elem_attr_t attr);
 
 /*!
  * Pushes the element at the front of the list

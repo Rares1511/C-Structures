@@ -29,4 +29,4 @@ Extra Modules:
     - Pair ✔ (Implemented + Unittest)
     - Cargs ✔ (Implemented + Unittest)
 
-Multimap and Unordered Multimap use vector_init for adding low performance, add static inline maybe/change and dont use init
+Work on hash table print and test

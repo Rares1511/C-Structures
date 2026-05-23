@@ -70,10 +70,11 @@ static inline void __multiset_node_print(FILE *stream, const void *node) {
 
 /*!
  * Initialize a multiset structure
+ * @param[in] pool Optional pointer to a multiset that will be initialized, if NULL a new multiset will be allocated
  * @param[in] attr Attributes of the multiset element datatype
  * @return Pointer to the initialized multiset on success, or NULL on failure
  */
-multiset* multiset_init(elem_attr_t attr);
+multiset* multiset_init(multiset *pool, elem_attr_t attr);
 
 /*! 
  * Insert an element into the multiset
@@ -84,6 +85,7 @@ multiset* multiset_init(elem_attr_t attr);
 static inline cs_codes multiset_insert(multiset *ms, const void *elem) {
     CS_RETURN_IF(ms == NULL || elem == NULL, CS_NULL);
     
+    int rc;
     size_t k_sz = ms->el_attr->size;
     size_t v_sz = sizeof(int);
     
@@ -100,16 +102,12 @@ static inline cs_codes multiset_insert(multiset *ms, const void *elem) {
     memcpy(p_stack->data, elem, k_sz);
     *(int *)(p_stack->data + k_sz) = 0;
 
-    __rbt_node *node = __rbt_insert_internal(ms->t, p_stack);
-    if (node == NULL) return CS_MEM;
+    __rbt_node *node = __rbt_insert(ms->t, p_stack, &rc);
+    CS_RETURN_IF(rc != CS_SUCCESS && rc != CS_ELEM, rc);
 
     pair *p_tree = (pair *)node->data;
     int *count = (int *)(p_tree->data + k_sz);
-    
     (*count)++;
-    if (*count == 1) {
-        
-    }
     
     ms->size++; 
     return CS_SUCCESS;

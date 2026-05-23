@@ -64,11 +64,12 @@ static inline int __map_node_comp(const void *a, const void *b) {
 
 /*!
  * Initializes a new map
+ * @param[in] pool - pointer to a pre-allocated map structure, or NULL to allocate a new one
  * @param[in] key_attr - attributes of the key datatype
  * @param[in] val_attr - attributes of the value datatype
  * @return pointer to the initialized map on success, NULL on failure
  */
-map* map_init(elem_attr_t key_attr, elem_attr_t val_attr);
+map* map_init(map *pool, elem_attr_t key_attr, elem_attr_t val_attr);
 
 /*!
  * Inserts a new key-value pair into the map
@@ -80,6 +81,7 @@ map* map_init(elem_attr_t key_attr, elem_attr_t val_attr);
 static inline cs_codes map_insert(map *m, void *key, void *val) {
     CS_RETURN_IF(m == NULL || key == NULL || val == NULL, CS_NULL);
 
+    int rc;
     int k_sz = m->key_attr->size;
     int v_sz = m->val_attr->size;
     pair *p = (pair *)m->buffer; // Use pre-allocated buffer for temporary storage
@@ -87,7 +89,8 @@ static inline cs_codes map_insert(map *m, void *key, void *val) {
     memcpy(p->data, key, k_sz);
     memcpy(p->data + k_sz, val, v_sz);
 
-    return __rbt_insert(m->t, p);
+    __rbt_insert(m->t, p, &rc);
+    return rc;
 }
 
 /*!

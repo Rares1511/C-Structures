@@ -55,10 +55,14 @@ list_node* merge_iterative(list_node* a, list_node* b, elem_attr_t attr) {
 // ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 #pragma endregion
 
-list* list_init(elem_attr_t attr) {
-    list *l = (list *)malloc(sizeof(list));
-    CS_RETURN_IF(NULL == l, NULL);
+list* list_init(list *pool, elem_attr_t attr) {
     CS_RETURN_IF(attr.size <= 0 || attr.size > SIZE_TH, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(list));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    list *l = pool;
+
     l->attr = attr;
     l->size = 0;
     l->front = NULL;

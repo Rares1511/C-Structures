@@ -1,8 +1,7 @@
 #include <cs/map.h>
 
-map* map_init(elem_attr_t key_attr, elem_attr_t val_attr) {
-    map *m = malloc(sizeof(map));
-    CS_RETURN_IF(NULL == m || key_attr.size <= 0 || key_attr.size > SIZE_TH || val_attr.size <= 0 || val_attr.size > SIZE_TH, NULL);
+map* map_init(map *pool, elem_attr_t key_attr, elem_attr_t val_attr) {
+    CS_RETURN_IF(key_attr.size <= 0 || key_attr.size > SIZE_TH || val_attr.size <= 0 || val_attr.size > SIZE_TH, NULL);
     elem_attr_t pair_attr = {
         .comp = __map_node_comp,
         .copy = __map_node_copy,
@@ -10,6 +9,12 @@ map* map_init(elem_attr_t key_attr, elem_attr_t val_attr) {
         .print = pair_print,
         .size = sizeof(pair) + key_attr.size + val_attr.size,
     };
+
+    if (pool == NULL) {
+        pool = malloc(sizeof(map));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    map *m = pool;
 
     m->key_attr = NULL;
     m->val_attr = NULL;

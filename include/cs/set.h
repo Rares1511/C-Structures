@@ -10,10 +10,11 @@ typedef struct set {
 
 /*!
  * Initializes a set with the given attributes.
+ * @param pool Optional pointer to a set that will be initialized, if NULL a new set will be allocated.
  * @param attr Attributes for the set.
  * @return Pointer to the initialized set, or NULL on failure.
  */
-set* set_init(elem_attr_t attr);
+set* set_init(set *pool, elem_attr_t attr);
 
 /*!
  * Inserts a new element into the set.
@@ -23,7 +24,9 @@ set* set_init(elem_attr_t attr);
  */
 static inline cs_codes set_insert(set *s, void *data) {
     CS_RETURN_IF(s == NULL, CS_NULL);
-    return __rbt_insert(s->t, data);
+    int rc;
+    __rbt_insert(s->t, data, &rc);
+    return rc;
 }
 
 /*!

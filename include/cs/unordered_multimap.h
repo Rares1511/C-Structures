@@ -111,7 +111,8 @@ static inline size_t __unordered_multimap_entry_hash(const void *el) {
  * @param[in] hash_func The hash function to be used for hashing keys.
  * @return A pointer to the initialized unordered multimap.
  */
-unordered_multimap* unordered_multimap_init(elem_attr_t key_attr,
+unordered_multimap* unordered_multimap_init(unordered_multimap *pool,
+                                elem_attr_t key_attr,
                                 elem_attr_t value_attr,
                                 __hash_func_t hash_func);
 

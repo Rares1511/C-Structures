@@ -52,7 +52,7 @@ static inline void __multimap_node_copy(void *dest, const void *src) {
 
     memcpy(d, s, sizeof(pair));
 
-    if (!s->first_attr->copy && !s->second_attr->copy) {
+    if (!s->first_attr->copy) {
         memcpy(d->data, s->data, s->first_attr->size + s->second_attr->size);
         vector *dest_vec = (vector *)pair_second(d);
         dest_vec->vec = malloc(dest_vec->attr.size * dest_vec->cap);
@@ -63,10 +63,7 @@ static inline void __multimap_node_copy(void *dest, const void *src) {
     vector *dest_vec = (vector *)(d->data + s->first_attr->size);
     vector *src_vec = (vector *)(s->data + s->first_attr->size);
 
-    if (s->first_attr->copy) 
-        s->first_attr->copy(dest_key, s->data);
-    else 
-        memcpy(dest_key, s->data, s->first_attr->size);
+    s->first_attr->copy(dest_key, s->data);
 
     memcpy(dest_vec, src_vec, sizeof(vector));
     dest_vec->vec = malloc(dest_vec->attr.size * dest_vec->cap);
@@ -83,7 +80,7 @@ static inline void __multimap_node_copy(void *dest, const void *src) {
  * @param[in] value_attr Attributes of the value datatype
  * @return Pointer to the initialized multimap, or NULL on failure
  */
-multimap* multimap_init(elem_attr_t key_attr,
+multimap* multimap_init(multimap *pool, elem_attr_t key_attr,
                            elem_attr_t value_attr);
 
 /*!
@@ -102,15 +99,13 @@ static inline cs_codes multimap_insert(multimap *mm, const void *key, const void
     
     memcpy(p_stack->data, key, k_sz);
 
-    __rbt_node *node = __rbt_insert_internal(mm->t, p_stack);
+    __rbt_node *node = __rbt_insert(mm->t, p_stack, &rc);
+    CS_RETURN_IF(rc != CS_SUCCESS && rc != CS_ELEM, rc);
     
     pair *p_tree = (pair *)node->data;
     vector *vec = (vector *)(p_tree->data + k_sz);
     rc = vector_push_back(vec, value);
-    if (rc != CS_SUCCESS) {
-        return rc;
-    }
-    
+    CS_RETURN_IF(rc != CS_SUCCESS, rc);
     mm->size++;
     return CS_SUCCESS;
 }

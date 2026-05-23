@@ -1,11 +1,14 @@
 #include <cs/multiset.h>
 
-multiset* multiset_init(elem_attr_t attr) {
+multiset* multiset_init(multiset *pool, elem_attr_t attr) {
     CS_RETURN_IF(attr.size == 0 || attr.size > SIZE_TH, NULL);
 
-    multiset *ms = malloc(sizeof(multiset));
-    CS_RETURN_IF(NULL == ms, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(multiset));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
 
+    multiset *ms = pool;
     ms->count_attr = NULL;
     ms->el_attr = NULL;
     ms->t = NULL;
@@ -51,6 +54,7 @@ multiset* multiset_init(elem_attr_t attr) {
 void multiset_clear(multiset *ms) {
     CS_RETURN_IF(ms == NULL);
     __rbt_clear(ms->t);
+    ms->size = 0;
 }
 
 void multiset_swap(multiset *ms1, multiset *ms2) {

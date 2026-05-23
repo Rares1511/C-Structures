@@ -24,21 +24,6 @@ typedef struct __rbt {
     elem_attr_t attr;
 } __rbt;
 
-#pragma region Helper Structs
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                      START OF HELPER STRUCT SECTION                                        ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-typedef struct {
-    __rbt_node *node;
-    int tab_size;
-} __rbt_print_stack_item;
-
-// ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-// ║                                       END OF HELPER STRUCT SECTION                                         ║
-// ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-#pragma endregion
-
 #pragma region Helper Functions
 // ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 // ║                                      START OF HELPER FUNCTIONS SECTION                                     ║
@@ -57,8 +42,11 @@ static inline __rbt_node* __rbt_node_init(const void *data, elem_attr_t attr) {
     node->color = __RBT_NODE_RED_COLOR;
 
     if (data != NULL) {
-        if (attr.copy) attr.copy(node->data, data);
-        else memcpy(node->data, data, attr.size);
+        if (attr.copy) {
+            attr.copy(node->data, data);
+        } else {
+            memcpy(node->data, data, attr.size);
+        }
     }
     
     return node;
@@ -254,55 +242,6 @@ static inline cs_codes __rbt_insert_fixup(__rbt *t, __rbt_node *node) {
     return CS_SUCCESS;
 }
 
-
-/*!
- * Inserts a new node into the rbt and fixes the tree properties
- * @param[in] t - pointer to the rbt
- * @param[in] new_node - pointer to the new node to be inserted
- * @return Pointer to the inserted node or the existing node if a duplicate is found
- */
-static inline __rbt_node* __rbt_insert_internal(__rbt *t, void *data) {
-    __rbt_node *node = t->root;
-    __rbt_node *prev = NULL;
-    int last_cmp = 0;
-
-    while (node != NULL) {
-        last_cmp = __rbt_node_compare(t, data, node->data);
-        prev = node;
-        
-        if (last_cmp == 0) {
-            return node;
-        } else if (last_cmp < 0) {
-            node = node->left;
-        } else {
-            node = node->right;
-        }
-    }
-
-    __rbt_node *new_node = __rbt_node_init(data, t->attr);
-    if (new_node == NULL) {
-        return NULL;
-    }
-
-    if (prev == NULL) {
-        t->root = new_node;
-    } else {
-        if (last_cmp < 0) {
-            prev->left = new_node;
-        } else {
-            prev->right = new_node;
-        }
-        new_node->father = prev;
-    }
-
-    if (__rbt_insert_fixup(t, new_node) != CS_SUCCESS) {
-        return NULL;
-    }
-
-    t->size++;
-    return new_node;
-}
-
 /*!
  * Fixes the red-black tree properties after deletion
  * @param[in] t - pointer to the rbt
@@ -440,9 +379,7 @@ static inline cs_codes __rbt_delete_internal(__rbt *t, __rbt_node *delete_node) 
 
     if (original_color == __RBT_NODE_BLACK_COLOR) {
         cs_codes rc = __rbt_delete_fixup(t, x, x_father);
-        if (rc != CS_SUCCESS) {
-            return rc;
-        }
+        CS_RETURN_IF(rc != CS_SUCCESS, rc);
     }
 
     __rbt_node_free(delete_node, t->attr);
@@ -470,17 +407,52 @@ static inline __rbt* __rbt_init(elem_attr_t attr) {
     return t;
 }
 
-static inline cs_codes __rbt_insert(__rbt *t, void *data) {
-    CS_RETURN_IF(t == NULL || data == NULL, CS_NULL);
-    CS_RETURN_IF(t->header.magic != CS_RBT_MAGIC, CS_UNINITIALIZED);
-    
-    __rbt_node *inserted_node = __rbt_insert_internal(t, data);
+static inline __rbt_node* __rbt_insert(__rbt *t, void *data, int *rc) {
+    CS_RETURN_IF(t == NULL || data == NULL || rc == NULL || t->header.magic != CS_RBT_MAGIC, NULL);
 
-    if (inserted_node == NULL) {
-        return CS_ELEM;
+    __rbt_node *node = t->root;
+    __rbt_node *prev = NULL;
+    int last_cmp = 0;
+
+    while (node != NULL) {
+        last_cmp = __rbt_node_compare(t, data, node->data);
+        prev = node;
+        
+        if (last_cmp == 0) {
+            *rc = CS_ELEM;
+            return node;
+        } else if (last_cmp < 0) {
+            node = node->left;
+        } else {
+            node = node->right;
+        }
     }
 
-    return CS_SUCCESS;
+    __rbt_node *new_node = __rbt_node_init(data, t->attr);
+    if (new_node == NULL) {
+        *rc = CS_MEM;
+        return NULL;
+    }
+
+    if (prev == NULL) {
+        t->root = new_node;
+    } else {
+        if (last_cmp < 0) {
+            prev->left = new_node;
+        } else {
+            prev->right = new_node;
+        }
+        new_node->father = prev;
+    }
+
+    *rc = __rbt_insert_fixup(t, new_node);
+    if (*rc != CS_SUCCESS) {
+        return NULL;
+    }
+
+    t->size++;
+    *rc = CS_SUCCESS;
+    return new_node;
 }
 
 static inline cs_codes __rbt_delete(__rbt *t, void *data) {
@@ -553,45 +525,87 @@ static inline void __rbt_clear(__rbt *t) {
 static inline void __rbt_print(FILE *stream, void *v_t) {
     CS_RETURN_IF(v_t == NULL || stream == NULL);
     __rbt *t = (__rbt *)v_t;
-    CS_RETURN_IF(t->header.magic != CS_RBT_MAGIC);
+    CS_RETURN_IF(t->header.magic != CS_RBT_MAGIC || t->attr.print == NULL || t->size == 0);
 
-    __rbt_print_stack_item *stack = malloc(sizeof(__rbt_print_stack_item) * (int)ceil(log2(t->size + 1)));
+    /* A Red-Black tree with 4 billion nodes has a theoretical max depth of ~64.
+       A stack size of 128 is virtually impossible to overflow and safely takes 
+       up barely any memory (4KB), completely eliminating the need for malloc. */
+    #define __RBT_MAX_PRINT_STACK 128
+
+    typedef struct {
+        __rbt_node *node;
+        unsigned long long prefix_mask; /* Bitmask tracking where to draw vertical lines '│' */
+        int depth;
+        int is_left;
+        int is_last;
+        int is_root;
+    } __rbt_print_state;
+
+    __rbt_print_state stack[__RBT_MAX_PRINT_STACK];
     int stack_size = 0;
 
-    stack[stack_size++] = (__rbt_print_stack_item){t->root, 0};
+    // Push the root node
+    stack[stack_size++] = (__rbt_print_state){t->root, 0, 1, 0, 0, 1};
 
     while (stack_size > 0) {
-        __rbt_print_stack_item item = stack[--stack_size];
-        __rbt_node *node = item.node;
-        int tab_size = item.tab_size;
+        // Pop the current node
+        __rbt_print_state current = stack[--stack_size];
+        __rbt_node *node = current.node;
 
-        for (int i = 0; i < tab_size; i++) {
-            fprintf(stream, "  ");
+        // Print the vertical lines for the current depth
+        for (int i = 0; i < current.depth - 1; i++) {
+            if ((current.prefix_mask >> i) & 1) {
+                fprintf(stream, "│   "); // Continuing vertical line
+            } else {
+                fprintf(stream, "    "); // Blank space
+            }
         }
-        if (node->father && node == node->father->left) {
-            fprintf(stream, "L-> ");
-        } else if (node->father && node == node->father->right) {
-            fprintf(stream, "R-> ");
+
+        // Print the branch connector
+        if (!current.is_root) {
+            fprintf(stream, "%s%s: ", current.is_last ? "└── " : "├── ", current.is_left ? "L" : "R");
         } else {
-            fprintf(stream, "Root-> ");
+            fprintf(stream, "Root: ");
         }
 
-        fprintf(stream, "Data: ");
-        if (t->attr.print) {
-            t->attr.print(stream, node->data);
-        }
+        // Print the actual data
+        t->attr.print(stream, node->data);
 
-        fprintf(stream, " -> Color: %s", node->color == __RBT_NODE_RED_COLOR ? "RED" : "BLACK");
-
+        // Print the color
+        // fprintf(stream, " (%s)\n", node->color == __RBT_NODE_RED_COLOR ? "RED" : "BLACK");
         fprintf(stream, "\n");
 
-        if (node->right != NULL)
-            stack[stack_size++] = (__rbt_print_stack_item){node->right, tab_size + 1};
-        if (node->left != NULL)
-            stack[stack_size++] = (__rbt_print_stack_item){node->left, tab_size + 1};
-    }
+        // Prepare the prefix mask for the children
+        unsigned long long child_mask = current.prefix_mask;
+        if (!current.is_root) {
+            if (!current.is_last) {
+                child_mask |= (1ULL << (current.depth - 1)); // We need a vertical line below us
+            } else {
+                child_mask &= ~(1ULL << (current.depth - 1)); // No vertical line needed below us
+            }
+        }
 
-    free(stack);
+        int has_left = (node->left != NULL);
+        int has_right = (node->right != NULL);
+
+        // 6. Push children to stack.
+        // Because a stack is LIFO (Last-In, First-Out), we push RIGHT first so LEFT is popped next.
+        if (has_right) {
+            if (stack_size < __RBT_MAX_PRINT_STACK) {
+                stack[stack_size++] = (__rbt_print_state){
+                    node->right, child_mask, current.depth + 1, 0, 1, 0
+                };
+            }
+        }
+        if (has_left) {
+            if (stack_size < __RBT_MAX_PRINT_STACK) {
+                // The left child is only the "last" branch if there is no right child after it
+                stack[stack_size++] = (__rbt_print_state){
+                    node->left, child_mask, current.depth + 1, 1, !has_right, 0
+                };
+            }
+        }
+    }
 }
 
 static inline void __rbt_free(void *v_t) {

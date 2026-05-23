@@ -33,11 +33,9 @@
 // #include "priority_queue/priority_queue_unittest.h"
 // #include "flat_set/flat_set_unittest.h"
 
-// Numeric types
-#include "tests/large_number_unittest.h"
-
 // Utilities
 #include "tests/clogger_unittest.h"
+#include "tests/cargs_unittest.h"
 
 // ============================================================================
 // Module registry - list all modules to test
@@ -78,11 +76,9 @@ static module_tests all_modules[] = {
     // { "priority_queue", priority_queue_tests, sizeof(priority_queue_tests) / sizeof(test), sizeof(priority_queue) },
     // { "flat_set", flat_set_tests, sizeof(flat_set_tests) / sizeof(test), sizeof(flat_set) },
 
-    // Numeric types
-    { "large_number", large_number_tests, sizeof(large_number_tests) / sizeof(test), sizeof(large_number) },
-
     // Utilities
     { "clogger", clogger_tests, sizeof(clogger_tests) / sizeof(test), sizeof(clogger) },
+    { "cargs", cargs_tests, sizeof(cargs_tests) / sizeof(test), sizeof(cparser) },
 };
 
 int num_modules = sizeof(all_modules) / sizeof(module_tests);
@@ -162,11 +158,13 @@ int main(int argc, char **argv) {
     cargs_add_arg(parser, __UNITTEST_SEED_ARG_NAME, "Random seed for the tests", 0, CARG_TYPE_INT, &seed_default);
     cargs_add_arg(parser, __UNITTEST_MODULE_ARG_NAME, "Module to test (if not specified, all modules are tested)", 0, CARG_TYPE_STRING, NULL);
     cargs_add_arg(parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME, "Path to the benchmark CSV file", 0, CARG_TYPE_STRING, __UNITTEST_BENCHMARK_FILE_NAME);
+    cargs_add_arg(parser, __UNITTEST_COVERAGE_ARG_NAME, "Generate code coverage report", 0, CARG_TYPE_BOOL, NULL);
     cargs_parse(parser);
 
     const char *debug_file = cargs_get_arg(parser, __UNITTEST_DEBUG_FILE_ARG_NAME);
     const char *results_file = cargs_get_arg(parser, __UNITTEST_RESULTS_FILE_NAME);
     const char *benchmark_file = cargs_get_arg(parser, __UNITTEST_BENCHMARK_FILE_ARG_NAME);
+    void *coverage_arg = cargs_get_arg(parser, __UNITTEST_COVERAGE_ARG_NAME);
     debug_logger = clogger_init(debug_file, debug_options);
     if (debug_logger == NULL) {
         printf("Failed to initialize debug logger for file: %s\n", debug_file);
@@ -230,8 +228,8 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < mod->size; i++) {
             arg.logger = debug_logger;
-            if (RUNNING_ON_VALGRIND) {
-                arg.op_time_count = 0; // Skip benchmark times when running under Valgrind
+            if (RUNNING_ON_VALGRIND || coverage_arg) {
+                arg.op_time_count = 0;
             } else {
                 read_operation_time(&arg, benchmark_file, mod->name);
             }

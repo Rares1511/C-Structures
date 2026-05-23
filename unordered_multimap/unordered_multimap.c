@@ -1,12 +1,16 @@
 #include <cs/unordered_multimap.h>
 
-unordered_multimap* unordered_multimap_init(elem_attr_t key_attr,
-                                 elem_attr_t value_attr,
-                                 __hash_func_t hash_func) {
+unordered_multimap* unordered_multimap_init(unordered_multimap *pool, 
+                                elem_attr_t key_attr,
+                                elem_attr_t value_attr,
+                                __hash_func_t hash_func) {
     
     CS_RETURN_IF(key_attr.size <= 0 || value_attr.size <= 0 || key_attr.size > SIZE_TH || value_attr.size > SIZE_TH, NULL);
-    unordered_multimap *ummap = malloc(sizeof(unordered_multimap));
-    CS_RETURN_IF(NULL == ummap, NULL);
+    if (pool == NULL) {
+        pool = malloc(sizeof(unordered_multimap));
+        CS_RETURN_IF(pool == NULL, NULL);
+    }
+    unordered_multimap *ummap = pool;
 
     ummap->ht = NULL;
     ummap->key_attr = NULL;

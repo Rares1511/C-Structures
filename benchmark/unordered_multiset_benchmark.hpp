@@ -11,12 +11,12 @@ static void *test_unordered_multiset_insert(void *arg) {
     return s;
 }
 
-static void *test_unordered_multiset_find(void *arg) {
+static void *test_unordered_multiset_count(void *arg) {
     auto *s = static_cast<std::unordered_multiset<int>*>(arg);
     const int total = __UNORDERED_MULTISET_STRESS_TEST_SIZE;
     for (int i = 0; i < total; i++) {
-        auto val = s->find(i);
-        if (val == s->end() || *val != i) {
+        auto val = s->count(i);
+        if (val == 0) {
             printf("Error: Value %d not found in unordered_multiset\n", i);
         }
     }
@@ -39,7 +39,7 @@ static BenchmarkModule unordered_multiset_benchmark() {
         &s,
         {
             Test("unordered_multiset", "insert", test_unordered_multiset_insert),
-            Test("unordered_multiset", "find",   test_unordered_multiset_find),
+            Test("unordered_multiset", "count",   test_unordered_multiset_count),
             Test("unordered_multiset", "delete", test_unordered_multiset_delete),
         }
     };

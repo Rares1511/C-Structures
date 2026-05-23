@@ -60,7 +60,14 @@ static inline void __unordered_multiset_entry_copy(void *dest, const void *src) 
 static inline void __unordered_multiset_entry_print(FILE *restrict stream, const void *restrict el) {
     CS_RETURN_IF(NULL == el || stream == NULL);
     const __unordered_multiset_entry *entry = (const __unordered_multiset_entry *)el;
-    pair_print(stream, (pair *)entry->data);
+    pair *p = (pair *)entry->data;
+    CS_RETURN_IF(p->header.magic != CS_PAIR_MAGIC || p->first_attr->print == NULL);
+
+    void *key = pair_first(p);
+    int *count = (int *)pair_second(p);
+    fprintf(stream, "Key: ");
+    p->first_attr->print(stream, key);
+    fprintf(stream, " | Count: %d", *count);
 }
 
 static inline void __unordered_multiset_entry_free(void *el) {
@@ -106,7 +113,8 @@ static inline size_t __unordered_multiset_entry_hash(const void *restrict el) {
  * @param[in] hash_func The hash function to be used for hashing the elements.
  * @return A pointer to the initialized unordered multiset, or NULL on failure.
  */
-unordered_multiset* unordered_multiset_init(elem_attr_t attr, 
+unordered_multiset* unordered_multiset_init(unordered_multiset *pool,
+                                elem_attr_t attr, 
                                 __hash_func_t hash_func);
 
 /*!
@@ -115,7 +123,7 @@ unordered_multiset* unordered_multiset_init(elem_attr_t attr,
  * @param[in] key Pointer to the element to be inserted.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-static inline cs_codes unordered_multiset_insert(unordered_multiset *restrict umset, const void *restrict key) {
+static inline cs_codes unordered_multiset_add_entry(unordered_multiset *restrict umset, const void *restrict key) {
     CS_RETURN_IF(umset == NULL || key == NULL || umset->ht == NULL, CS_NULL);
     int rc = CS_SUCCESS;
     __unordered_multiset_entry *entry = (__unordered_multiset_entry *)umset->buffer;
@@ -140,7 +148,7 @@ static inline cs_codes unordered_multiset_insert(unordered_multiset *restrict um
  * @param[in] key Pointer to the element to be erased.
  * @return CS_SUCCESS on success, or an error code on failure.
  */
-static inline cs_codes unordered_multiset_erase(unordered_multiset *restrict umset, const void *restrict key) {
+static inline cs_codes unordered_multiset_remove_entry(unordered_multiset *restrict umset, const void *restrict key) {
     CS_RETURN_IF(umset == NULL || key == NULL || umset->ht == NULL, CS_NULL);
     __unordered_multiset_entry *entry = (__unordered_multiset_entry *)umset->buffer;
     pair *p = (pair *)entry->data;
@@ -158,26 +166,6 @@ static inline cs_codes unordered_multiset_erase(unordered_multiset *restrict ums
         __hash_table_remove_at_index(umset->ht, idx);
     }
     return CS_SUCCESS;
-}
-
-/*!
- * @brief Finds an element in the unordered multiset.
- * @param[in] umset The unordered multiset.
- * @param[in] key Pointer to the element to be found.
- * @return Pointer to the found element, or NULL if not found.
- */
-static inline void *unordered_multiset_find(unordered_multiset *restrict umset, const void *restrict key) {
-    CS_RETURN_IF(umset == NULL || key == NULL || umset->ht == NULL, NULL);
-    __unordered_multiset_entry *entry = (__unordered_multiset_entry *)umset->buffer;
-    pair *p = (pair *)entry->data;
-
-    memcpy(p->data, key, umset->attr->size);
-    __unordered_multiset_entry *found_entry = __hash_table_get_entry(umset->ht, entry);
-    if (found_entry == NULL) {
-        return NULL;
-    }
-    p = (pair *)found_entry->data;
-    return pair_first(p);
 }
 
 /*!
@@ -226,6 +214,8 @@ static inline size_t unordered_multiset_size(unordered_multiset *restrict umset)
  * @param[in,out] umset Pointer to the unordered multiset.
  */
 void unordered_multiset_clear(unordered_multiset *restrict umset);
+
+void unordered_multiset_swap(unordered_multiset *umset1, unordered_multiset *umset2);
 
 /*!
  * @brief Prints the contents of the unordered multiset to the specified stream.
