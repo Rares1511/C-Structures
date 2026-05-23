@@ -156,7 +156,7 @@ uninstall:
 UNITTEST_LIBS := $(foreach m,$(INSTALL_LIBS),-l$(m))
 
 build_unittest: libs
-	@$(CC) -o unittest unittest.c $(CFLAGS) \
+	@$(CC) -o unittest unittest.c $(CFLAGS) $(OPT_FLAGS) \
 		-L$(LIBOUTDIR) $(UNITTEST_LIBS) $(LDLIBS)
 	
 ifeq ($(memcheck),true)

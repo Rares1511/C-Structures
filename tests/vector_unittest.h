@@ -744,7 +744,9 @@ test_res test_vector_stress_time(test_arg *arg) {
         return (test_res){(char*)__func__, "Valgrind active - skipping stress test", CS_SUCCESS};
     }
 
-    vector *v = UNITTEST_ASSERT(vector_init(NULL, get_int_attr(), (vector_attr_t){0, 1}), !=, NULL, "Vector initialization failed",
+    elem_attr_t attr = get_int_attr();
+    attr.comp = NULL;
+    vector *v = UNITTEST_ASSERT(vector_init(NULL, attr, (vector_attr_t){0, 1}), !=, NULL, "Vector initialization failed",
         arg->logger, "Successfully initialized vector with int attributes\n");
     struct timeval start, end;
     double elapsed;
@@ -776,7 +778,7 @@ test_res test_vector_stress_time(test_arg *arg) {
     clogger_log(arg->logger, CLOGGER_DEBUG, "Stress test completed: Total Find Time = %.9f sec\n", elapsed);
 
     gettimeofday(&start, NULL);
-    v->attr.comp = NULL; // Disable sorting for timing
+    vector_set_comp(v, comp_int_max); // Set the comparator for sorting
     vector_sort(v);
     gettimeofday(&end, NULL);
     elapsed = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
